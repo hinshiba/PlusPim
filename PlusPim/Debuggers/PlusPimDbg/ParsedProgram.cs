@@ -68,6 +68,11 @@ internal class ParsedProgram {
     }
 
     public int MnemonicCount => this._mnemonics.Length;
+
+    /// <summary>
+    /// シンボルテーブル
+    /// </summary>
+    public IReadOnlyDictionary<string, int> SymbolTable => this._symbolTable;
     public int? GetLabelAddress(string label) {
         return this._symbolTable.TryGetValue(label, out int addr) ? addr : null;
     }

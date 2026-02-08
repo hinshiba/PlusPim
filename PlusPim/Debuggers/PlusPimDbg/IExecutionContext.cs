@@ -74,6 +74,9 @@ internal sealed class ExecuteContext: IExecutionContext {
 
     public Stack<int> CallStack { get; } = new();
 
+    /// <summary>
+    /// 命令インデックスに対応するラベルテーブル
+    /// </summary>
     private IReadOnlyDictionary<string, int>? _symbolTable;
 
     public void SetSymbolTable(IReadOnlyDictionary<string, int> symbolTable) {
