@@ -25,9 +25,9 @@ internal abstract class JumpInstruction(string? targetLabel): IInstruction {
     /// ラベル名からExecutionIndexを解決してジャンプする
     /// </summary>
     protected void JumpTo(IExecutionContext context, string label) {
-        int? address = context.GetLabelAddress(label) ?? throw new InvalidOperationException($"Label '{label}' not found.");
+        int? executionIndex = context.GetLabelExecutionIndex(label) ?? throw new InvalidOperationException($"Label '{label}' not found.");
         this._previousExecutionIndices.Push(context.ExecutionIndex);
-        context.ExecutionIndex = address.Value;
+        context.ExecutionIndex = executionIndex.Value;
     }
 
     /// <summary>

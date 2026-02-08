@@ -43,7 +43,7 @@ internal interface IExecutionContext {
     /// </summary>
     /// <param name="label">ラベル文字列</param>
     /// <returns>ExecutionIndexの値</returns>
-    int? GetLabelAddress(string label);
+    int? GetLabelExecutionIndex(string label);
 
 
     byte ReadMemoryByte(int address);
@@ -75,16 +75,16 @@ internal sealed class ExecuteContext: IExecutionContext {
     public Stack<int> CallStack { get; } = new();
 
     /// <summary>
-    /// 命令インデックスに対応するラベルテーブル
+    /// 命令インデックスに対応するテキストセグメントのラベルテーブル
     /// </summary>
-    private IReadOnlyDictionary<string, int>? _symbolTable;
+    private IReadOnlyDictionary<string, int>? _textSymbolTable;
 
     public void SetSymbolTable(IReadOnlyDictionary<string, int> symbolTable) {
-        this._symbolTable = symbolTable;
+        this._textSymbolTable = symbolTable;
     }
 
-    public int? GetLabelAddress(string label) {
-        return this._symbolTable != null && this._symbolTable.TryGetValue(label, out int addr) ? addr : null;
+    public int? GetLabelExecutionIndex(string label) {
+        return this._textSymbolTable != null && this._textSymbolTable.TryGetValue(label, out int idx) ? idx : null;
     }
 
     /// <summary>

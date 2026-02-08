@@ -40,8 +40,8 @@ internal abstract partial class BranchInstruction: IInstruction {
         this._previousExecutionIndices.Push(context.ExecutionIndex);
 
         if(this.EvaluateCondition(context)) {
-            int? address = context.GetLabelAddress(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            context.ExecutionIndex = address.Value;
+            int? executionIndex = context.GetLabelExecutionIndex(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
+            context.ExecutionIndex = executionIndex.Value;
             context.Log($"{this.GetType().Name}: branch taken to {this.TargetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
