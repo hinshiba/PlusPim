@@ -6,9 +6,9 @@ internal sealed class JalInstruction(string targetLabel): JumpInstruction(target
     private readonly Stack<int> _previousRaValues = new();
 
     public override void Execute(IExecutionContext context) {
-        // $ra に戻りアドレスを保存 (PC アドレス形式: 次の命令のアドレス)
+        // $ra にPC アドレス形式で次の命令アドレスを保存
         this._previousRaValues.Push(context.Registers[(int)RegisterID.Ra]);
-        int returnAddress = (context.ExecutionIndex + 1) + ExecuteContext.TextSegmentBase;
+        int returnAddress = context.ExecutionIndex + 1 + ExecuteContext.TextSegmentBase;
         context.Registers[(int)RegisterID.Ra] = returnAddress;
 
         // コールスタックに push
@@ -24,7 +24,7 @@ internal sealed class JalInstruction(string targetLabel): JumpInstruction(target
         this.UndoJump(context);
 
         // コールスタックから pop
-        context.CallStack.Pop();
+        _ = context.CallStack.Pop();
 
         // $ra を復元
         if(this._previousRaValues.Count == 0) {
