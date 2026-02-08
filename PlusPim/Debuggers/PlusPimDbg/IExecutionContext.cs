@@ -35,6 +35,17 @@ internal interface IExecutionContext {
     /// LOレジスタ
     /// </summary>
     int LO { get; set; }
+
+    Stack<int> CallStack { get; }
+
+    /// <summary>
+    /// 命令ラベルアドレスの解決
+    /// </summary>
+    /// <param name="label">ラベル文字列</param>
+    /// <returns>ExecutionIndexの値</returns>
+    int? GetLabelAddress(string label);
+
+
     byte ReadMemoryByte(int address);
     void WriteMemoryByte(int address, byte value);
 
@@ -59,6 +70,19 @@ internal sealed class ExecuteContext: IExecutionContext {
 
     public int HI { get; set; }
     public int LO { get; set; }
+
+
+    public Stack<int> CallStack { get; } = new();
+
+    private IReadOnlyDictionary<string, int>? _symbolTable;
+
+    public void SetSymbolTable(IReadOnlyDictionary<string, int> symbolTable) {
+        this._symbolTable = symbolTable;
+    }
+
+    public int? GetLabelAddress(string label) {
+        return this._symbolTable != null && this._symbolTable.TryGetValue(label, out int addr) ? addr : null;
+    }
 
     /// <summary>
     /// メモリ空間の表現
