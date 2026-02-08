@@ -1,3 +1,5 @@
+using PlusPim.Debuggers.PlusPimDbg.Instructions.Branch;
+using PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 using PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
@@ -20,6 +22,16 @@ internal sealed partial class InstructionRegistry {
         Dictionary<string, IInstructionParser> parsers = new(StringComparer.OrdinalIgnoreCase);
         // ファイル名順
 
+        // ブランチ命令
+        RegisterParser(parsers, new BeqInstructionParser());
+        RegisterParser(parsers, new BneInstructionParser());
+
+        // ジャンプ命令
+        RegisterParser(parsers, new JInstructionParser());
+        RegisterParser(parsers, new JalInstructionParser());
+        RegisterParser(parsers, new JrInstructionParser());
+
+        // Rタイプ命令
         RegisterParser(parsers, new AddInstructionParser());
         RegisterParser(parsers, new AdduInstructionParser());
 
@@ -40,6 +52,12 @@ internal sealed partial class InstructionRegistry {
         parsers[parser.Mnemonic] = parser;
     }
 
+    /// <summary>
+    /// 指定された行を<see cref="IInstruction"/>への解析を試みる
+    /// </summary>
+    /// <param name="assemblyLine">行</param>
+    /// <param name="instruction">成功の場合は<see cref="IInstruction"/>が返却される</param>
+    /// <returns>成功なら<see langword="true"/></returns>
     public bool TryParse(string assemblyLine, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
 
