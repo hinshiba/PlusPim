@@ -16,9 +16,9 @@ internal interface IDebugger {
     bool StepBack();
 
     /// <summary>
-    /// 0から始まる現在実行前の行番号を取得する
+    /// 1から始まる現在実行前の行番号を取得する
     /// </summary>
-    /// <returns>行番号 ただし何かしらの問題で無効であった場合は-1</returns>
+    /// <returns>行番号．ただし何かしらの問題で無効であった場合は0</returns>
     int GetCurrentLine();
     string GetProgramPath();
     bool IsTerminated();

@@ -104,8 +104,7 @@ internal class DebugAdapter: DebugAdapterBase {
 
         return new StackTraceResponse {
             StackFrames = [
-                // 無効値は-1だが，DAPの仕様上1以上である必要があるため1に補正する
-                new StackFrame(1, "main", Math.Max(this._app.GetCurrentLine(), 1), 1) {
+                new StackFrame(1, "main", this._app.GetCurrentLine(), 1) {
                     Source = new Source { Path = this._app.GetProgramPath() }
                 }
             ],

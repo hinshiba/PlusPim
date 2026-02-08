@@ -48,7 +48,7 @@ internal class ParsedProgram {
             // ニーモニックをパース
             if(Mnemonic.TryParse(processed, null, out Mnemonic? mnemonic)) {
                 mnemonicList.Add(mnemonic);
-                sourceLineList.Add(lineIndex + 1); // 1-based行番号
+                sourceLineList.Add(lineIndex + 1); // 1-baseの行番号
                 log?.Invoke($"Parsed: {processed}");
             } else {
                 log?.Invoke($"Parse failed: {processed}");

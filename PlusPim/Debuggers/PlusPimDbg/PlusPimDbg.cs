@@ -102,8 +102,8 @@ internal class PlusPimDbg: IDebugger {
 
     public int GetCurrentLine() {
         return this._context == null || this._program == null
-            ? -1
-            : this._context.ExecutionIndex >= this._program.MnemonicCount ? -1 : this._program.GetSourceLine(this._context.ExecutionIndex);
+            ? 0
+            : this._context.ExecutionIndex >= this._program.MnemonicCount ? 0 : this._program.GetSourceLine(this._context.ExecutionIndex);
     }
 
     public string GetProgramPath() {
