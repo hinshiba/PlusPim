@@ -104,7 +104,8 @@ internal class DebugAdapter: DebugAdapterBase {
 
         return new StackTraceResponse {
             StackFrames = [
-                new StackFrame(1, "main", this._app.GetCurrentLine(), 1) {
+                // 利用できないリソースは0に設定することになっている
+                new StackFrame(1, "main", this._app.GetCurrentLine(), 0) {
                     Source = new Source { Path = this._app.GetProgramPath() }
                 }
             ],
