@@ -1,13 +1,47 @@
 namespace PlusPim.Debuggers.PlusPimDbg;
 
+/// <summary>
+/// 実行のためのすべてのコンテキスト
+/// </summary>
+/// <remarks>
+/// - レジスタファイル
+/// - 特殊レジスタ(PC, HI, LO)
+/// - 次の命令インデックス
+/// - コールスタック
+/// - メモリ空間
+/// </remarks>
 internal interface IExecutionContext {
+    /// <summary>
+    /// レジスタIDに対応するレジスタ値の配列
+    /// </summary>
     int[] Registers { get; }
+
+    /// <summary>
+    /// プログラムカウンタだが，ExecutionIndexから自動算出されるだけ
+    /// </summary>
     int PC { get; }
+
+    /// <summary>
+    /// プログラムカウンタの代わり
+    /// </summary>
     int ExecutionIndex { get; set; }
+
+    /// <summary>
+    /// HIレジスタ
+    /// </summary>
     int HI { get; set; }
+
+    /// <summary>
+    /// LOレジスタ
+    /// </summary>
     int LO { get; set; }
     byte ReadMemoryByte(int address);
     void WriteMemoryByte(int address, byte value);
+
+    /// <summary>
+    /// ログを返すためのメソッド
+    /// </summary>
+    /// <param name="message">送信文字列</param>
     void Log(string message);
 }
 
