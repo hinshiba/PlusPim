@@ -4,10 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg;
 
 internal sealed class Mnemonic: IParsable<Mnemonic> {
-    private readonly IInstruction _instruction;
+    internal IInstruction Instruction { get; }
 
     private Mnemonic(IInstruction instruction) {
-        this._instruction = instruction;
+        this.Instruction = instruction;
     }
 
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Mnemonic result) {
@@ -29,11 +29,11 @@ internal sealed class Mnemonic: IParsable<Mnemonic> {
     }
 
     public void Execute(ExecuteContext context) {
-        this._instruction.Execute(context);
+        this.Instruction.Execute(context);
     }
 
     public void Undo(ExecuteContext context) {
-        this._instruction.Undo(context);
+        this.Instruction.Undo(context);
     }
 }
 

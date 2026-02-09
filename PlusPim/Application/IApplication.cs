@@ -11,7 +11,18 @@ internal interface IApplication {
     /// </summary>
     /// <returns>巻き戻しに成功した場合は<see langword="true"/></returns>
     bool StepBack();
+
+    /// <summary>
+    /// 現在の実行前の行を取得する
+    /// </summary>
+    /// <returns>1から始まる行番号．取得できない場合は0を返す．</returns>
     int GetCurrentLine();
     string GetProgramPath();
     bool IsTerminated();
+
+    /// <summary>
+    /// コールスタックの情報を取得する
+    /// </summary>
+    /// <returns><see cref="StackFrameInfo"/>の配列</returns>
+    StackFrameInfo[] GetCallStack();
 }

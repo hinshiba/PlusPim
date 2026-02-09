@@ -4,6 +4,7 @@ internal class ParsedProgram {
     private readonly Mnemonic[] _mnemonics;
     private readonly int[] _sourceLines;
     private readonly Dictionary<string, int> _symbolTable;
+    private readonly Dictionary<int, string> _reverseSymbolTable;
 
     public string ProgramPath { get; }
 
@@ -48,7 +49,7 @@ internal class ParsedProgram {
             // ニーモニックをパース
             if(Mnemonic.TryParse(processed, null, out Mnemonic? mnemonic)) {
                 mnemonicList.Add(mnemonic);
-                sourceLineList.Add(lineIndex + 1); // 1-based行番号
+                sourceLineList.Add(lineIndex + 1); // 1-baseの行番号
                 log?.Invoke($"Parsed: {processed}");
             } else {
                 log?.Invoke($"Parse failed: {processed}");
@@ -57,6 +58,10 @@ internal class ParsedProgram {
 
         this._mnemonics = mnemonicList.ToArray();
         this._sourceLines = sourceLineList.ToArray();
+        this._reverseSymbolTable = [];
+        foreach(KeyValuePair<string, int> kvp in this._symbolTable) {
+            this._reverseSymbolTable[kvp.Value] = kvp.Key;
+        }
     }
 
     public Mnemonic GetMnemonic(int index) {
@@ -68,7 +73,27 @@ internal class ParsedProgram {
     }
 
     public int MnemonicCount => this._mnemonics.Length;
+
+    /// <summary>
+    /// シンボルテーブル
+    /// </summary>
+    public IReadOnlyDictionary<string, int> SymbolTable => this._symbolTable;
     public int? GetLabelAddress(string label) {
         return this._symbolTable.TryGetValue(label, out int addr) ? addr : null;
+    }
+
+    public string? GetLabelForExecutionIndex(int index) {
+        if(this._reverseSymbolTable.TryGetValue(index, out string? label))
+            return label;
+        // indexより前で最も近いラベルを返す
+        string? closest = null;
+        int closestIndex = -1;
+        foreach(KeyValuePair<int, string> kvp in this._reverseSymbolTable) {
+            if(kvp.Key <= index && kvp.Key > closestIndex) {
+                closestIndex = kvp.Key;
+                closest = kvp.Value;
+            }
+        }
+        return closest;
     }
 }

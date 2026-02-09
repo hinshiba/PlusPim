@@ -39,4 +39,8 @@ internal class Application: IApplication {
     public bool IsTerminated() {
         return this._debugger.IsTerminated();
     }
+
+    public StackFrameInfo[] GetCallStack() {
+        return this._debugger.GetCallStack();
+    }
 }

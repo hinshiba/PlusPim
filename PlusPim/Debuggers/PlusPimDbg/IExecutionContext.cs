@@ -1,13 +1,65 @@
 namespace PlusPim.Debuggers.PlusPimDbg;
 
+/// <summary>
+/// 実行のためのすべてのコンテキスト
+/// </summary>
+/// <remarks>
+/// - レジスタファイル
+/// - 特殊レジスタ(PC, HI, LO)
+/// - 次の命令インデックス
+/// - コールスタック
+/// - メモリ空間
+/// </remarks>
 internal interface IExecutionContext {
+    /// <summary>
+    /// レジスタIDに対応するレジスタ値の配列
+    /// </summary>
     int[] Registers { get; }
+
+    /// <summary>
+    /// プログラムカウンタだが，ExecutionIndexから自動算出されるだけ
+    /// </summary>
     int PC { get; }
+
+    /// <summary>
+    /// プログラムカウンタの代わり
+    /// </summary>
     int ExecutionIndex { get; set; }
+
+    /// <summary>
+    /// HIレジスタ
+    /// </summary>
     int HI { get; set; }
+
+    /// <summary>
+    /// LOレジスタ
+    /// </summary>
     int LO { get; set; }
+
+    Stack<CallStackFrame> CallStack { get; }
+
+    /// <summary>
+    /// 命令ラベルアドレスの解決
+    /// </summary>
+    /// <param name="label">ラベル文字列</param>
+    /// <returns>ExecutionIndexの値</returns>
+    int? GetLabelExecutionIndex(string label);
+
+    /// <summary>
+    /// ExecutionIndexからラベル名を逆引きする
+    /// </summary>
+    /// <param name="index">ExecutionIndex</param>
+    /// <returns>ラベル名．見つからない場合はnull</returns>
+    string? GetLabelForExecutionIndex(int index);
+
+
     byte ReadMemoryByte(int address);
     void WriteMemoryByte(int address, byte value);
+
+    /// <summary>
+    /// ログを返すためのメソッド
+    /// </summary>
+    /// <param name="message">送信文字列</param>
     void Log(string message);
 }
 
@@ -15,14 +67,59 @@ internal interface IExecutionContext {
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
 internal sealed class ExecuteContext: IExecutionContext {
+    public const int TextSegmentBase = 0x00400000;
+
     public int[] Registers { get; }
-    public int PC => this.ExecutionIndex + 0x00400000;
+    public int PC => this.ExecutionIndex + TextSegmentBase;
 
     /// PCの実装の代わり
     public int ExecutionIndex { get; set; }
 
     public int HI { get; set; }
     public int LO { get; set; }
+
+
+    public Stack<CallStackFrame> CallStack { get; } = new();
+
+    /// <summary>
+    /// 命令インデックスに対応するテキストセグメントのラベルテーブル
+    /// </summary>
+    private IReadOnlyDictionary<string, int>? _textSymbolTable;
+
+    /// <summary>
+    /// ExecutionIndexからラベル名への逆引きテーブル
+    /// </summary>
+    private Dictionary<int, string>? _reverseSymbolTable;
+
+    public void SetSymbolTable(IReadOnlyDictionary<string, int> symbolTable) {
+        this._textSymbolTable = symbolTable;
+        this._reverseSymbolTable = [];
+        foreach(KeyValuePair<string, int> kvp in symbolTable) {
+            this._reverseSymbolTable[kvp.Value] = kvp.Key;
+        }
+    }
+
+    public int? GetLabelExecutionIndex(string label) {
+        return this._textSymbolTable != null && this._textSymbolTable.TryGetValue(label, out int idx) ? idx : null;
+    }
+
+    public string? GetLabelForExecutionIndex(int index) {
+        if(this._reverseSymbolTable == null)
+            return null;
+        // 完全一致
+        if(this._reverseSymbolTable.TryGetValue(index, out string? label))
+            return label;
+        // indexより前で最も近いラベルを返す
+        string? closest = null;
+        int closestIndex = -1;
+        foreach(KeyValuePair<int, string> kvp in this._reverseSymbolTable) {
+            if(kvp.Key <= index && kvp.Key > closestIndex) {
+                closestIndex = kvp.Key;
+                closest = kvp.Value;
+            }
+        }
+        return closest;
+    }
 
     /// <summary>
     /// メモリ空間の表現

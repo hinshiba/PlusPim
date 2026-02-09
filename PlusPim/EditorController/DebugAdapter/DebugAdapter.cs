@@ -6,8 +6,8 @@ using PlusPim.Application;
 namespace PlusPim.EditorController.DebugAdapter;
 
 internal class DebugAdapter: DebugAdapterBase {
-    private const int REGISTERS_SCOPE_REF = 1000;
-    private const int SPECIAL_REGISTERS_SCOPE_REF = 1001;
+    private const int SCOPE_REGISTERS = 1;
+    private const int SCOPE_SPECIAL_REGISTERS = 2;
 
     private static readonly string[] RegisterNames = [
         "$zero ($0)", "$at ($1)", "$v0 ($2)", "$v1 ($3)",
@@ -102,14 +102,17 @@ internal class DebugAdapter: DebugAdapterBase {
             Category = OutputEvent.CategoryValue.Console
         });
 
+        StackFrameInfo[] callStack = this._app.GetCallStack();
+        List<StackFrame> dapFrames = [];
+        foreach(StackFrameInfo frame in callStack) {
+            dapFrames.Add(new StackFrame(frame.FrameId, frame.Name, frame.Line, 0) {
+                Source = new Source { Path = this._app.GetProgramPath() }
+            });
+        }
+
         return new StackTraceResponse {
-            StackFrames = [
-                // 無効値は-1だが，DAPの仕様上1以上である必要があるため1に補正する
-                new StackFrame(1, "main", Math.Max(this._app.GetCurrentLine(), 1), 1) {
-                    Source = new Source { Path = this._app.GetProgramPath() }
-                }
-            ],
-            TotalFrames = 1
+            StackFrames = dapFrames,
+            TotalFrames = dapFrames.Count
         };
     }
 
@@ -119,12 +122,17 @@ internal class DebugAdapter: DebugAdapterBase {
             Category = OutputEvent.CategoryValue.Console
         });
 
+        int frameId = args.FrameId;
+        // エンコード: frameId * 1000 + scopeType
+        int registersRef = (frameId * 1000) + SCOPE_REGISTERS;
+        int specialRegistersRef = (frameId * 1000) + SCOPE_SPECIAL_REGISTERS;
+
         return new ScopesResponse {
             Scopes = [
-                new Scope("Registers", REGISTERS_SCOPE_REF, false) {
+                new Scope("Registers", registersRef, false) {
                     PresentationHint = Scope.PresentationHintValue.Registers
                 },
-                new Scope("Special Registers", SPECIAL_REGISTERS_SCOPE_REF, false) {
+                new Scope("Special Registers", specialRegistersRef, false) {
                     PresentationHint = Scope.PresentationHintValue.Registers
                 }
             ]
@@ -138,16 +146,31 @@ internal class DebugAdapter: DebugAdapterBase {
         });
 
         List<Variable> variables = [];
-        (int[] registers, int pc, int hi, int lo) = this._app.GetRegisters();
 
-        if(args.VariablesReference == REGISTERS_SCOPE_REF) {
-            for(int i = 0; i < 32; i++) {
-                variables.Add(new Variable(RegisterNames[i], $"0x{registers[i]:X8}", 0));
+        // variablesReference をデコード: frameId * 1000 + scopeType
+        int frameId = args.VariablesReference / 1000;
+        int scopeType = args.VariablesReference % 1000;
+
+        // 該当フレームのレジスタを取得
+        StackFrameInfo[] callStack = this._app.GetCallStack();
+        StackFrameInfo? targetFrame = null;
+        foreach(StackFrameInfo frame in callStack) {
+            if(frame.FrameId == frameId) {
+                targetFrame = frame;
+                break;
             }
-        } else if(args.VariablesReference == SPECIAL_REGISTERS_SCOPE_REF) {
-            variables.Add(new Variable("PC", $"0x{pc:X8}", 0));
-            variables.Add(new Variable("HI", $"0x{hi:X8}", 0));
-            variables.Add(new Variable("LO", $"0x{lo:X8}", 0));
+        }
+
+        if(targetFrame != null) {
+            if(scopeType == SCOPE_REGISTERS) {
+                for(int i = 0; i < 32 && i < targetFrame.Registers.Length; i++) {
+                    variables.Add(new Variable(RegisterNames[i], $"0x{targetFrame.Registers[i]:X8}", 0));
+                }
+            } else if(scopeType == SCOPE_SPECIAL_REGISTERS) {
+                variables.Add(new Variable("PC", $"0x{targetFrame.PC:X8}", 0));
+                variables.Add(new Variable("HI", $"0x{targetFrame.HI:X8}", 0));
+                variables.Add(new Variable("LO", $"0x{targetFrame.LO:X8}", 0));
+            }
         }
 
         return new VariablesResponse {
