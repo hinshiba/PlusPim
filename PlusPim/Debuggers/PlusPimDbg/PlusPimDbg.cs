@@ -113,4 +113,47 @@ internal class PlusPimDbg: IDebugger {
     public bool IsTerminated() {
         return this._isTerminated;
     }
+
+    public StackFrameInfo[] GetCallStack() {
+        if(this._context == null || this._program == null) {
+            return [];
+        }
+
+        List<StackFrameInfo> frames = [];
+
+        // フレーム1: 現在のフレーム（ライブレジスタ）
+        string currentLabel = this._program.GetLabelForExecutionIndex(this._context.ExecutionIndex) ?? "<unknown>";
+        int currentLine = this._context.ExecutionIndex < this._program.MnemonicCount
+            ? this._program.GetSourceLine(this._context.ExecutionIndex)
+            : 0;
+        frames.Add(new StackFrameInfo {
+            FrameId = 1,
+            Name = currentLabel,
+            Line = currentLine,
+            Registers = (int[])this._context.Registers.Clone(),
+            PC = this._context.PC,
+            HI = this._context.HI,
+            LO = this._context.LO
+        });
+
+        // フレーム2以降: CallStackの各フレーム（上から順）
+        int frameId = 2;
+        foreach(CallStackFrame csFrame in this._context.CallStack) {
+            int line = csFrame.ExecutionIndex < this._program.MnemonicCount
+                ? this._program.GetSourceLine(csFrame.ExecutionIndex)
+                : 0;
+            frames.Add(new StackFrameInfo {
+                FrameId = frameId,
+                Name = csFrame.SubroutineLabel,
+                Line = line,
+                Registers = csFrame.RegisterSnapshot,
+                PC = csFrame.ExecutionIndex + ExecuteContext.TextSegmentBase,
+                HI = csFrame.HISnapshot,
+                LO = csFrame.LOSnapshot
+            });
+            frameId++;
+        }
+
+        return frames.ToArray();
+    }
 }

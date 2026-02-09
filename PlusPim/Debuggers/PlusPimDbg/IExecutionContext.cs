@@ -36,7 +36,7 @@ internal interface IExecutionContext {
     /// </summary>
     int LO { get; set; }
 
-    Stack<int> CallStack { get; }
+    Stack<CallStackFrame> CallStack { get; }
 
     /// <summary>
     /// 命令ラベルアドレスの解決
@@ -44,6 +44,13 @@ internal interface IExecutionContext {
     /// <param name="label">ラベル文字列</param>
     /// <returns>ExecutionIndexの値</returns>
     int? GetLabelExecutionIndex(string label);
+
+    /// <summary>
+    /// ExecutionIndexからラベル名を逆引きする
+    /// </summary>
+    /// <param name="index">ExecutionIndex</param>
+    /// <returns>ラベル名．見つからない場合はnull</returns>
+    string? GetLabelForExecutionIndex(int index);
 
 
     byte ReadMemoryByte(int address);
@@ -72,19 +79,44 @@ internal sealed class ExecuteContext: IExecutionContext {
     public int LO { get; set; }
 
 
-    public Stack<int> CallStack { get; } = new();
+    public Stack<CallStackFrame> CallStack { get; } = new();
 
     /// <summary>
     /// 命令インデックスに対応するテキストセグメントのラベルテーブル
     /// </summary>
     private IReadOnlyDictionary<string, int>? _textSymbolTable;
 
+    /// <summary>
+    /// ExecutionIndexからラベル名への逆引きテーブル
+    /// </summary>
+    private Dictionary<int, string>? _reverseSymbolTable;
+
     public void SetSymbolTable(IReadOnlyDictionary<string, int> symbolTable) {
         this._textSymbolTable = symbolTable;
+        this._reverseSymbolTable = [];
+        foreach(KeyValuePair<string, int> kvp in symbolTable) {
+            this._reverseSymbolTable[kvp.Value] = kvp.Key;
+        }
     }
 
     public int? GetLabelExecutionIndex(string label) {
         return this._textSymbolTable != null && this._textSymbolTable.TryGetValue(label, out int idx) ? idx : null;
+    }
+
+    public string? GetLabelForExecutionIndex(int index) {
+        if(this._reverseSymbolTable == null) return null;
+        // 完全一致
+        if(this._reverseSymbolTable.TryGetValue(index, out string? label)) return label;
+        // indexより前で最も近いラベルを返す
+        string? closest = null;
+        int closestIndex = -1;
+        foreach(KeyValuePair<int, string> kvp in this._reverseSymbolTable) {
+            if(kvp.Key <= index && kvp.Key > closestIndex) {
+                closestIndex = kvp.Key;
+                closest = kvp.Value;
+            }
+        }
+        return closest;
     }
 
     /// <summary>
