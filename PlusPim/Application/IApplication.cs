@@ -19,4 +19,10 @@ internal interface IApplication {
     int GetCurrentLine();
     string GetProgramPath();
     bool IsTerminated();
+
+    /// <summary>
+    /// コールスタックの情報を取得する
+    /// </summary>
+    /// <returns><see cref="StackFrameInfo"/>の配列</returns>
+    StackFrameInfo[] GetCallStack();
 }
