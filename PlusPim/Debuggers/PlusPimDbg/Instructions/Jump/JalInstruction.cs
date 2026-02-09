@@ -6,6 +6,10 @@ internal sealed class JalInstruction(string targetLabel): JumpInstruction(target
     private readonly Stack<int> _previousRaValues = new();
 
     public override void Execute(IExecutionContext context) {
+        // ラベル解決を先行して例外時の影響を最小化
+        int resolvedIndex = (context.GetLabelExecutionIndex(this.TargetLabel!)
+           ) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
+
         // レジスタスナップショット取得（$ra変更前）
         int[] snapshot = (int[])context.Registers.Clone();
         string callerLabel = context.GetLabelForExecutionIndex(context.ExecutionIndex) ?? "<unknown>";
@@ -20,7 +24,7 @@ internal sealed class JalInstruction(string targetLabel): JumpInstruction(target
         context.CallStack.Push(frame);
 
         // ジャンプ
-        this.JumpTo(context, this.TargetLabel!);
+        this.JumpTo(context, resolvedIndex);
         context.Log($"jal {this.TargetLabel}: $ra = 0x{returnAddress:X8}");
     }
 
