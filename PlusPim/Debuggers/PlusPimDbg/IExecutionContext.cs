@@ -104,9 +104,11 @@ internal sealed class ExecuteContext: IExecutionContext {
     }
 
     public string? GetLabelForExecutionIndex(int index) {
-        if(this._reverseSymbolTable == null) return null;
+        if(this._reverseSymbolTable == null)
+            return null;
         // 完全一致
-        if(this._reverseSymbolTable.TryGetValue(index, out string? label)) return label;
+        if(this._reverseSymbolTable.TryGetValue(index, out string? label))
+            return label;
         // indexより前で最も近いラベルを返す
         string? closest = null;
         int closestIndex = -1;

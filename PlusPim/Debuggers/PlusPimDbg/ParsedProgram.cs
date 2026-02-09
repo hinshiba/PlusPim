@@ -83,7 +83,8 @@ internal class ParsedProgram {
     }
 
     public string? GetLabelForExecutionIndex(int index) {
-        if(this._reverseSymbolTable.TryGetValue(index, out string? label)) return label;
+        if(this._reverseSymbolTable.TryGetValue(index, out string? label))
+            return label;
         // indexより前で最も近いラベルを返す
         string? closest = null;
         int closestIndex = -1;
