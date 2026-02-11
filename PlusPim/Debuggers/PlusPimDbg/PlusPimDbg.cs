@@ -13,7 +13,13 @@ internal class PlusPimDbg: IDebugger {
         this._program = new ParsedProgram(programPath, log);
         this._context = new ExecuteContext(log, this._program.SymbolTable);
         this._context.Registers[RegisterID.T1] = 0xcafe; // テスト用初期値
-        this._context.PC = ProgramCounter.FromIndex(this._program.SymbolTable.Resolve("main") ?? 0);
+
+        // mainがなければ暫定で0スタート
+        int? mainIndex = this._program.SymbolTable.Resolve("main");
+        if(mainIndex == null) {
+            log?.Invoke("Warning: 'main' label not found. Starting execution at index 0.");
+        }
+        this._context.PC = ProgramCounter.FromIndex(mainIndex ?? 0);
     }
 
     public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
