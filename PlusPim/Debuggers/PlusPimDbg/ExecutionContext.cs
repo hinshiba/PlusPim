@@ -41,7 +41,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// メモリ空間の表現
     /// アクセス前は未初期化(0扱い)
     /// </summary>
-    private readonly Dictionary<int, byte> Memory = [];
+    private readonly Dictionary<int, byte> _memory = [];
 
     /// <summary>
     /// Log出力用コールバック
@@ -49,11 +49,11 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     private readonly Action<string> _log = log;
 
     public byte ReadMemoryByte(int address) {
-        return this.Memory.TryGetValue(address, out byte value) ? value : (byte)0;
+        return this._memory.TryGetValue(address, out byte value) ? value : (byte)0;
     }
 
     public void WriteMemoryByte(int address, byte value) {
-        this.Memory[address] = value;
+        this._memory[address] = value;
     }
 
     /// <summary>
