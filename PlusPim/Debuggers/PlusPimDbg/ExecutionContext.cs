@@ -27,14 +27,14 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
 
     public Stack<CallStackFrame> CallStack { get; } = new();
 
-    private readonly SymbolTable? _symbolTable = symbolTable;
+    private readonly SymbolTable _symbolTable = symbolTable;
 
     public int? GetLabelExecutionIndex(string label) {
-        return this._symbolTable?.Resolve(label);
+        return this._symbolTable.Resolve(label);
     }
 
     public string? GetLabelForExecutionIndex(int index) {
-        return this._symbolTable?.FindByIndex(index);
+        return this._symbolTable.FindByIndex(index);
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// <summary>
     /// Log出力用コールバック
     /// </summary>
-    private readonly Action<string>? _log = log;
+    private readonly Action<string> _log = log;
 
     public byte ReadMemoryByte(int address) {
         return this.Memory.TryGetValue(address, out byte value) ? value : (byte)0;
@@ -60,6 +60,6 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// 最も基礎的なログ機能．EditorController経由で出力される
     /// </summary>
     public void Log(string message) {
-        this._log?.Invoke(message);
+        this._log.Invoke(message);
     }
 }
