@@ -123,6 +123,9 @@ internal class DebugAdapter: DebugAdapterBase {
         });
 
         int frameId = args.FrameId;
+        // 安全なエンコード範囲の確認
+        // これが発生するのはほぼないのでAssert
+        System.Diagnostics.Debug.Assert(frameId is >= 0 and < 0x8000, $"frameId {frameId} exceeds safe encoding range");
         // エンコード: (frameId << 16) | scopeType
         int registersRef = (frameId << 16) | SCOPE_REGISTERS;
         int specialRegistersRef = (frameId << 16) | SCOPE_SPECIAL_REGISTERS;
