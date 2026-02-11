@@ -15,7 +15,7 @@ internal readonly record struct ProgramCounter {
     /// <summary>
     /// MIPSアドレス空間上のPC値
     /// </summary>
-    public int Address => this.Index + TextSegmentBase;
+    public int Address => (this.Index * 4) + TextSegmentBase;
 
     private ProgramCounter(int index) {
         this.Index = index;
@@ -35,8 +35,9 @@ internal readonly record struct ProgramCounter {
     /// </summary>
     /// <param name="address">アドレス</param>
     /// <returns>作成された<see cref="ProgramCounter"/></returns>
+    /// <remarks>アドレスは4バイト境界にあるものとする</remarks>
     public static ProgramCounter FromAddress(int address) {
-        return new ProgramCounter(address - TextSegmentBase);
+        return new ProgramCounter((address - TextSegmentBase) / 4);
     }
 
     /// <summary>
