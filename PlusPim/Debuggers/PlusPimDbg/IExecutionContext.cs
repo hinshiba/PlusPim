@@ -1,124 +1,44 @@
 namespace PlusPim.Debuggers.PlusPimDbg;
 
 /// <summary>
-/// 実行のためのすべてのコンテキスト
+/// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-/// <remarks>
-/// - レジスタファイル
-/// - 特殊レジスタ(PC, HI, LO)
-/// - 次の命令インデックス
-/// - コールスタック
-/// - メモリ空間
-/// </remarks>
-internal interface IExecutionContext {
+internal sealed class ExecuteContext {
     /// <summary>
-    /// レジスタIDに対応するレジスタ値の配列
+    /// 汎用レジスタの表現
     /// </summary>
-    int[] Registers { get; }
+    public RegisterFile Registers { get; }
 
     /// <summary>
-    /// プログラムカウンタだが，ExecutionIndexから自動算出されるだけ
+    /// プログラムカウンタ
     /// </summary>
-    int PC { get; }
-
-    /// <summary>
-    /// プログラムカウンタの代わり
-    /// </summary>
-    int ExecutionIndex { get; set; }
+    public ProgramCounter PC { get; set; }
 
     /// <summary>
     /// HIレジスタ
     /// </summary>
-    int HI { get; set; }
+    public int HI { get; set; }
 
     /// <summary>
     /// LOレジスタ
     /// </summary>
-    int LO { get; set; }
-
-    Stack<CallStackFrame> CallStack { get; }
-
-    /// <summary>
-    /// 命令ラベルアドレスの解決
-    /// </summary>
-    /// <param name="label">ラベル文字列</param>
-    /// <returns>ExecutionIndexの値</returns>
-    int? GetLabelExecutionIndex(string label);
-
-    /// <summary>
-    /// ExecutionIndexからラベル名を逆引きする
-    /// </summary>
-    /// <param name="index">ExecutionIndex</param>
-    /// <returns>ラベル名．見つからない場合はnull</returns>
-    string? GetLabelForExecutionIndex(int index);
-
-
-    byte ReadMemoryByte(int address);
-    void WriteMemoryByte(int address, byte value);
-
-    /// <summary>
-    /// ログを返すためのメソッド
-    /// </summary>
-    /// <param name="message">送信文字列</param>
-    void Log(string message);
-}
-
-/// <summary>
-/// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
-/// </summary>
-internal sealed class ExecuteContext: IExecutionContext {
-    public const int TextSegmentBase = 0x00400000;
-
-    public int[] Registers { get; }
-    public int PC => this.ExecutionIndex + TextSegmentBase;
-
-    /// PCの実装の代わり
-    public int ExecutionIndex { get; set; }
-
-    public int HI { get; set; }
     public int LO { get; set; }
 
 
     public Stack<CallStackFrame> CallStack { get; } = new();
 
-    /// <summary>
-    /// 命令インデックスに対応するテキストセグメントのラベルテーブル
-    /// </summary>
-    private IReadOnlyDictionary<string, int>? _textSymbolTable;
+    private SymbolTable? _symbolTable;
 
-    /// <summary>
-    /// ExecutionIndexからラベル名への逆引きテーブル
-    /// </summary>
-    private Dictionary<int, string>? _reverseSymbolTable;
-
-    public void SetSymbolTable(IReadOnlyDictionary<string, int> symbolTable) {
-        this._textSymbolTable = symbolTable;
-        this._reverseSymbolTable = [];
-        foreach(KeyValuePair<string, int> kvp in symbolTable) {
-            this._reverseSymbolTable[kvp.Value] = kvp.Key;
-        }
+    public void SetSymbolTable(SymbolTable symbolTable) {
+        this._symbolTable = symbolTable;
     }
 
     public int? GetLabelExecutionIndex(string label) {
-        return this._textSymbolTable != null && this._textSymbolTable.TryGetValue(label, out int idx) ? idx : null;
+        return this._symbolTable?.Resolve(label);
     }
 
     public string? GetLabelForExecutionIndex(int index) {
-        if(this._reverseSymbolTable == null)
-            return null;
-        // 完全一致
-        if(this._reverseSymbolTable.TryGetValue(index, out string? label))
-            return label;
-        // indexより前で最も近いラベルを返す
-        string? closest = null;
-        int closestIndex = -1;
-        foreach(KeyValuePair<int, string> kvp in this._reverseSymbolTable) {
-            if(kvp.Key <= index && kvp.Key > closestIndex) {
-                closestIndex = kvp.Key;
-                closest = kvp.Value;
-            }
-        }
-        return closest;
+        return this._symbolTable?.FindByIndex(index);
     }
 
     /// <summary>
@@ -126,16 +46,16 @@ internal sealed class ExecuteContext: IExecutionContext {
     /// アクセス前は未初期化(0扱い)
     /// </summary>
     private readonly Dictionary<int, byte> Memory;
+
+    /// <summary>
+    /// Log出力用コールバック
+    /// </summary>
     private readonly Action<string>? _log;
     public ExecuteContext(Action<string>? log = null) {
         this._log = log;
-        this.Registers = new int[32];
-        // 未初期化のうほうが現実的
-        //Array.Clear(this.Registers, 0, 32);
-        // HI LO も同様
+        this.Registers = new RegisterFile();
 
-        // PCの代わりのExecutionIndexは初期化
-        this.ExecutionIndex = 0;
+        this.PC = ProgramCounter.FromIndex(0);
 
         // メモリは暗黙的には0扱い
         this.Memory = [];
@@ -149,6 +69,9 @@ internal sealed class ExecuteContext: IExecutionContext {
         this.Memory[address] = value;
     }
 
+    /// <summary>
+    /// 最も基礎的なログ機能．EditorController経由で出力される
+    /// </summary>
     public void Log(string message) {
         this._log?.Invoke(message);
     }
