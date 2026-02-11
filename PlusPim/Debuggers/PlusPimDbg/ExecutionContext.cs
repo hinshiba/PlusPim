@@ -3,16 +3,16 @@ namespace PlusPim.Debuggers.PlusPimDbg;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class ExecuteContext {
+internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
-    public RegisterFile Registers { get; }
+    public RegisterFile Registers { get; } = new RegisterFile();
 
     /// <summary>
     /// プログラムカウンタ
     /// </summary>
-    public ProgramCounter PC { get; set; }
+    public ProgramCounter PC { get; set; } = ProgramCounter.FromIndex(0);
 
     /// <summary>
     /// HIレジスタ
@@ -27,11 +27,7 @@ internal sealed class ExecuteContext {
 
     public Stack<CallStackFrame> CallStack { get; } = new();
 
-    private SymbolTable? _symbolTable;
-
-    public void SetSymbolTable(SymbolTable symbolTable) {
-        this._symbolTable = symbolTable;
-    }
+    private readonly SymbolTable? _symbolTable = symbolTable;
 
     public int? GetLabelExecutionIndex(string label) {
         return this._symbolTable?.Resolve(label);
@@ -45,21 +41,12 @@ internal sealed class ExecuteContext {
     /// メモリ空間の表現
     /// アクセス前は未初期化(0扱い)
     /// </summary>
-    private readonly Dictionary<int, byte> Memory;
+    private readonly Dictionary<int, byte> Memory = [];
 
     /// <summary>
     /// Log出力用コールバック
     /// </summary>
-    private readonly Action<string>? _log;
-    public ExecuteContext(Action<string>? log = null) {
-        this._log = log;
-        this.Registers = new RegisterFile();
-
-        this.PC = ProgramCounter.FromIndex(0);
-
-        // メモリは暗黙的には0扱い
-        this.Memory = [];
-    }
+    private readonly Action<string>? _log = log;
 
     public byte ReadMemoryByte(int address) {
         return this.Memory.TryGetValue(address, out byte value) ? value : (byte)0;
