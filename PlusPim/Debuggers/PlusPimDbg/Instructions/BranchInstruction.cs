@@ -16,7 +16,7 @@ internal abstract partial class BranchInstruction: IInstruction {
     protected string TargetLabel { get; }
 
     /// <summary>
-    /// Undo用に前のExecutionIndexをスタックで管理
+    /// Undo用に前のPCをスタックで管理
     /// </summary>
     private readonly Stack<ProgramCounter> _previousPCs = new();
 
