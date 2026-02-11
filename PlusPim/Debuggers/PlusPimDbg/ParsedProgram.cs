@@ -53,7 +53,7 @@ internal class ParsedProgram {
             if(processed.EndsWith(':') && !processed.Contains(' ')) {
                 string labelName = processed[..^1]; // 末尾の `:` を除去
                 this.SymbolTable.Add(new Label(labelName, instructionList.Count));
-                log?.Invoke($"Label: {labelName} at index {instructionList.Count}");
+                log.Invoke($"Label: {labelName} at index {instructionList.Count}");
                 continue;
             }
 
@@ -61,9 +61,9 @@ internal class ParsedProgram {
             if(InstructionRegistry.Default.TryParse(processed, out IInstruction? instruction)) {
                 instructionList.Add(instruction);
                 sourceLineList.Add(lineIndex + 1); // 1-baseの行番号
-                log?.Invoke($"Parsed: {processed}");
+                log.Invoke($"Parsed: {processed}");
             } else {
-                log?.Invoke($"Parse failed: {processed}");
+                log.Invoke($"Parse failed: {processed}");
             }
         }
 
