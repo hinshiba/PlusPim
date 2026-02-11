@@ -17,7 +17,7 @@ internal class PlusPimDbg: IDebugger {
         // mainがなければ暫定で0スタート
         int? mainIndex = this._program.SymbolTable.Resolve("main");
         if(mainIndex == null) {
-            log?.Invoke("Warning: 'main' label not found. Starting execution at index 0.");
+            log.Invoke("Warning: 'main' label not found. Starting execution at index 0.");
         }
         this._context.PC = ProgramCounter.FromIndex(mainIndex ?? 0);
     }
