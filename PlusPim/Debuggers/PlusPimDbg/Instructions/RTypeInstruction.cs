@@ -39,29 +39,24 @@ internal abstract partial class RTypeInstruction: IInstruction {
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
     private readonly Stack<int> _previousRdValues = new();
 
-    public abstract void Execute(IExecutionContext context);
+    public abstract void Execute(ExecuteContext context);
 
     /// <summary>
     /// 命令の逆操作だが，ほとんどのR形式命令ではRdに書き込んだ値を元に戻すだけで良い
     /// </summary>
-    public void Undo(IExecutionContext context) {
+    public void Undo(ExecuteContext context) {
         if(this.Rd == RegisterID.Zero) {
             return;
         }
         if(this._previousRdValues.Count == 0) {
             throw new InvalidOperationException("No previous value to undo.");
         }
-        context.Registers[(int)this.Rd] = this._previousRdValues.Pop();
+        context.Registers[this.Rd] = this._previousRdValues.Pop();
     }
 
     /// <summary>
     /// オペランドを3レジスタを指定している文字列から解析してRegisterIDに変換する
     /// </summary>
-    /// <param name="operands">対象の文字列</param>
-    /// <param name="rd"><see langword="true"/>ならばRegsiterIDが代入される．<see langword="false"/>のときの値は未定義．</param>
-    /// <param name="rs">rdと同様</param>
-    /// <param name="rt">rdと同様</param>
-    /// <returns><see langword="true"/>ならば解析成功</returns>
     internal static bool TryParse3RegOperands(
         string operands,
         [MaybeNullWhen(false)] out RegisterID rd,
@@ -92,11 +87,6 @@ internal abstract partial class RTypeInstruction: IInstruction {
     /// <summary>
     /// オペランドを2レジスタとシフト量を指定している文字列から解析してRegisterIDと即値に変換する
     /// </summary>
-    /// <param name="operands">対象の文字列</param>
-    /// <param name="rd"><see langword="true"/>ならばRegsiterIDが代入される．<see langword="false"/>のときの値は未定義．</param>
-    /// <param name="rt">rdと同様</param>
-    /// <param name="shamt">シフト量が代入される</param>
-    /// <returns><see langword="true"/>ならば解析成功</returns>
     internal static bool TryParse2RegShamtOperands(
         string operands,
         [MaybeNullWhen(false)] out RegisterID rd,
@@ -125,38 +115,16 @@ internal abstract partial class RTypeInstruction: IInstruction {
     }
 
     /// <summary>
-    /// Sourceレジスタの値をコンテキストから読み込む
-    /// </summary>
-    /// <param name="context">レジスタを読み込むコンテキスト</param>
-    /// <returns>Sourceレジスタの値</returns>
-    protected int ReadRs(IExecutionContext context) {
-        return context.Registers[(int)this.Rs];
-    }
-
-    /// <summary>
-    /// Targetレジスタの値をコンテキストから読み込む
-    /// </summary>
-    /// <param name="context">レジスタを読み込むコンテキスト</param>
-    /// <returns>Targetレジスタの値</returns>
-    protected int ReadRt(IExecutionContext context) {
-        return context.Registers[(int)this.Rt];
-    }
-
-    /// <summary>
     /// コンテキスト内のDestinationレジスタに値を書き込む
     /// </summary>
-    /// <remarks>書き込み先がゼロレジスタでも例外は発生しない．
+    /// <remarks>書き込み先がゼロレジスタでも例外は発生しない（RegisterFileが$zero保護を行う）．
     /// これを呼び出すと逆操作のためにDestinationレジスタの値は保存される</remarks>
-    /// <param name="context">レジスタを含むコンテキスト</param>
-    /// <param name="value">書き込む値</param>
-    protected void WriteRd(IExecutionContext context, int value) {
-        // $zero保護
+    protected void WriteRd(ExecuteContext context, int value) {
         if(this.Rd == RegisterID.Zero) {
-            // 現実でも$zeroに書き込んでも例外は発生しないのでこれでよい
             return;
         }
         // 逆操作のために保存
-        this._previousRdValues.Push(context.Registers[(int)this.Rd]);
-        context.Registers[(int)this.Rd] = value;
+        this._previousRdValues.Push(context.Registers[this.Rd]);
+        context.Registers[this.Rd] = value;
     }
 }

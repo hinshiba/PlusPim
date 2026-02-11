@@ -4,78 +4,49 @@ using PlusPim.Debuggers.PlusPimDbg.Instructions;
 namespace PlusPim.Debuggers.PlusPimDbg;
 
 internal class PlusPimDbg: IDebugger {
-    private ExecuteContext? _context;
-    private ParsedProgram? _program;
+    private readonly ExecuteContext _context;
+    private readonly ParsedProgram _program;
     private bool _isTerminated;
-    private Action<string>? _log;
-    private readonly Stack<(Mnemonic Mnemonic, bool WasTerminated)> _history = new();
+    private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
 
-    public void SetLogger(Action<string> log) {
-        this._log = log;
-    }
-
-    /// <summary>
-    /// プログラムの読み込みと各種初期化
-    /// </summary>
-    /// <param name="programPath">プログラムのパス</param>
-    /// <returns>成功したとき<see langword="true"/></returns>
-    public bool Load(string programPath) {
-        // プログラムの解析
-        this._program = new ParsedProgram(programPath, this._log);
-        // 実行コンテキストの初期化
-        this._context = new ExecuteContext(this._log);
+    internal PlusPimDbg(string programPath, Action<string>? log = null) {
+        this._program = new ParsedProgram(programPath, log);
+        this._context = new ExecuteContext(log);
         this._context.SetSymbolTable(this._program.SymbolTable);
-        this._context.Registers[(int)RegisterID.T1] = 0xcafe; // テスト用初期値
-        this._context.ExecutionIndex = this._program.GetLabelAddress("main") ?? 0;
-        this._isTerminated = false;
-        this._history.Clear();
-        return true;
+        this._context.Registers[RegisterID.T1] = 0xcafe; // テスト用初期値
+        this._context.PC = ProgramCounter.FromIndex(this._program.GetLabelAddress("main") ?? 0);
     }
 
-    public int GetPC() {
-
-        return this._context?.PC ?? -1;
-    }
-
-    public int[] GetRegisters() {
-        return this._context?.Registers ?? [];
-    }
-
-    public int GetHI() {
-        return this._context?.HI ?? -1;
-    }
-
-    public int GetLO() {
-        return this._context?.LO ?? -1;
+    public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
+        return (this._context.Registers.ToArray(), this._context.PC.Address, this._context.HI, this._context.LO);
     }
 
     /// <summary>
     /// 命令を1ステップ実行する
     /// </summary>
-    /// <remarks>初期化されていなかったり，終了状態である場合は何もしません</remarks>
+    /// <remarks>終了状態である場合は何もしません</remarks>
     public void Step() {
-        // プログラムの終了か未初期化チェック
-        if(this._isTerminated || this._program == null || this._context == null) {
+        if(this._isTerminated) {
             return;
         }
 
-        if(this._program.MnemonicCount <= this._context.ExecutionIndex) {
+        if(this._program.InstructionCount <= this._context.PC.Index) {
             this._isTerminated = true;
             return;
         }
 
         // 命令を取得
-        Mnemonic mnemonic = this._program.GetMnemonic(this._context.ExecutionIndex);
+        IInstruction instruction = this._program.GetInstruction(this._context.PC.Index);
         // ブランチやジャンプならPCの変更(条件未成立時の+1を含む)は命令側の責任
-        bool modifiesPC = mnemonic.Instruction is JumpInstruction or BranchInstruction;
+        bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
         // インスタンスを履歴に保存
-        this._history.Push((mnemonic, this._isTerminated));
-        mnemonic.Execute(this._context);
+        this._history.Push((instruction, this._isTerminated));
+        instruction.Execute(this._context);
         if(!modifiesPC) {
-            this._context.ExecutionIndex++;
+            this._context.PC = this._context.PC.Next;
         }
 
-        if(this._program.MnemonicCount <= this._context.ExecutionIndex) {
+        if(this._program.InstructionCount <= this._context.PC.Index) {
             this._isTerminated = true;
         }
     }
@@ -85,29 +56,27 @@ internal class PlusPimDbg: IDebugger {
     /// </summary>
     /// <returns>成功したとき<see langword="true"/></returns>
     public bool StepBack() {
-        if(this._history.Count == 0 || this._context == null) {
+        if(this._history.Count == 0) {
             return false;
         }
 
         // popして逆操作しているだけ
-        (Mnemonic? mnemonic, bool wasTerminated) = this._history.Pop();
-        bool modifiesPC = mnemonic.Instruction is JumpInstruction or BranchInstruction;
-        mnemonic.Undo(this._context);
+        (IInstruction instruction, bool wasTerminated) = this._history.Pop();
+        bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
+        instruction.Undo(this._context);
         if(!modifiesPC) {
-            this._context.ExecutionIndex--;
+            this._context.PC = this._context.PC.Previous;
         }
         this._isTerminated = wasTerminated;
         return true;
     }
 
     public int GetCurrentLine() {
-        return this._context == null || this._program == null
-            ? 0
-            : this._context.ExecutionIndex >= this._program.MnemonicCount ? 0 : this._program.GetSourceLine(this._context.ExecutionIndex);
+        return this._context.PC.Index >= this._program.InstructionCount ? 0 : this._program.GetSourceLine(this._context.PC.Index);
     }
 
     public string GetProgramPath() {
-        return this._program?.ProgramPath ?? "";
+        return this._program.ProgramPath;
     }
 
     public bool IsTerminated() {
@@ -115,23 +84,19 @@ internal class PlusPimDbg: IDebugger {
     }
 
     public StackFrameInfo[] GetCallStack() {
-        if(this._context == null || this._program == null) {
-            return [];
-        }
-
         List<StackFrameInfo> frames = [];
 
         // フレーム1: 現在のフレーム（ライブレジスタ）
-        string currentLabel = this._program.GetLabelForExecutionIndex(this._context.ExecutionIndex) ?? "<unknown>";
-        int currentLine = this._context.ExecutionIndex < this._program.MnemonicCount
-            ? this._program.GetSourceLine(this._context.ExecutionIndex)
+        string currentLabel = this._program.GetLabelForExecutionIndex(this._context.PC.Index) ?? "<unknown>";
+        int currentLine = this._context.PC.Index < this._program.InstructionCount
+            ? this._program.GetSourceLine(this._context.PC.Index)
             : 0;
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = currentLabel,
             Line = currentLine,
-            Registers = (int[])this._context.Registers.Clone(),
-            PC = this._context.PC,
+            Registers = this._context.Registers.ToArray(),
+            PC = this._context.PC.Address,
             HI = this._context.HI,
             LO = this._context.LO
         });
@@ -139,15 +104,15 @@ internal class PlusPimDbg: IDebugger {
         // フレーム2以降: CallStackの各フレーム（上から順）
         int frameId = 2;
         foreach(CallStackFrame csFrame in this._context.CallStack) {
-            int line = csFrame.ExecutionIndex < this._program.MnemonicCount
-                ? this._program.GetSourceLine(csFrame.ExecutionIndex)
+            int line = csFrame.ReturnPC.Index < this._program.InstructionCount
+                ? this._program.GetSourceLine(csFrame.ReturnPC.Index)
                 : 0;
             frames.Add(new StackFrameInfo {
                 FrameId = frameId,
                 Name = csFrame.SubroutineLabel,
                 Line = line,
-                Registers = csFrame.RegisterSnapshot,
-                PC = csFrame.ExecutionIndex + ExecuteContext.TextSegmentBase,
+                Registers = csFrame.RegisterSnapshot.ToArray(),
+                PC = csFrame.ReturnPC.Address,
                 HI = csFrame.HISnapshot,
                 LO = csFrame.LOSnapshot
             });

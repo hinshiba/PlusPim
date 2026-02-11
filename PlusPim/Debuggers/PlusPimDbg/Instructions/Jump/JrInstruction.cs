@@ -1,20 +1,15 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 
-internal sealed partial class JrInstruction(RegisterID rs): JumpInstruction(null) {
-    // 一時的にここに正規表現配置
-    [GeneratedRegex(@"^\$(?<rs>\w+)$")]
-    private static partial Regex SingleRegPattern();
-
+internal sealed class JrInstruction(RegisterID rs): JumpInstruction(null) {
     private RegisterID Rs { get; } = rs;
     private readonly Stack<CallStackFrame?> _poppedFrames = new();
 
-    public override void Execute(IExecutionContext context) {
-        int targetAddress = context.Registers[(int)this.Rs];
-        int executionIndex = targetAddress - ExecuteContext.TextSegmentBase;
-        this.JumpTo(context, executionIndex);
+    public override void Execute(ExecuteContext context) {
+        int targetAddress = context.Registers[this.Rs];
+        ProgramCounter target = ProgramCounter.FromAddress(targetAddress);
+        this.JumpTo(context, target);
 
         // コールスタックから pop
         if(context.CallStack.Count > 0) {
@@ -23,10 +18,10 @@ internal sealed partial class JrInstruction(RegisterID rs): JumpInstruction(null
             this._poppedFrames.Push(null);
         }
 
-        context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {executionIndex})");
+        context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Index})");
     }
 
-    public override void Undo(IExecutionContext context) {
+    public override void Undo(ExecuteContext context) {
         this.UndoJump(context);
 
         // popしたフレームを復元
@@ -37,12 +32,6 @@ internal sealed partial class JrInstruction(RegisterID rs): JumpInstruction(null
             }
         }
     }
-
-    internal static bool TryParseSingleRegOperand(string operands, [MaybeNullWhen(false)] out RegisterID rs) {
-        rs = default;
-        Match match = SingleRegPattern().Match(operands.Trim());
-        return match.Success && Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out rs);
-    }
 }
 
 internal sealed class JrInstructionParser: IInstructionParser {
@@ -50,7 +39,7 @@ internal sealed class JrInstructionParser: IInstructionParser {
 
     public bool TryParse(string operands, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
-        if(JrInstruction.TryParseSingleRegOperand(operands, out RegisterID rs)) {
+        if(OperandParser.TryParseSingleRegOperand(operands, out RegisterID rs)) {
             instruction = new JrInstruction(rs);
             return true;
         }

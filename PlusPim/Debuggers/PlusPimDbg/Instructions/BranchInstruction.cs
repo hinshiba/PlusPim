@@ -16,9 +16,9 @@ internal abstract partial class BranchInstruction: IInstruction {
     protected string TargetLabel { get; }
 
     /// <summary>
-    /// Undo用に前のExecutionIndexをスタックで管理
+    /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<int> _previousExecutionIndices = new();
+    private readonly Stack<ProgramCounter> _previousPCs = new();
 
     protected BranchInstruction(RegisterID rs, RegisterID rt, string targetLabel) {
         this.Rs = rs;
@@ -29,32 +29,32 @@ internal abstract partial class BranchInstruction: IInstruction {
     /// <summary>
     /// 分岐条件を評価する
     /// </summary>
-    protected abstract bool EvaluateCondition(IExecutionContext context);
+    protected abstract bool EvaluateCondition(ExecuteContext context);
 
     /// <summary>
     /// 分岐条件が真のときにラベル先にジャンプする
     /// </summary>
     /// <exception cref="InvalidOperationException">ラベルが解決できない場合</exception>
-    public void Execute(IExecutionContext context) {
-        // Undoのために現在のExecutionIndexを保存
-        this._previousExecutionIndices.Push(context.ExecutionIndex);
+    public void Execute(ExecuteContext context) {
+        // Undoのために現在のPCを保存
+        this._previousPCs.Push(context.PC);
 
         if(this.EvaluateCondition(context)) {
             int executionIndex = context.GetLabelExecutionIndex(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            context.ExecutionIndex = executionIndex;
+            context.PC = ProgramCounter.FromIndex(executionIndex);
             context.Log($"{this.GetType().Name}: branch taken to {this.TargetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
-            context.ExecutionIndex++;
+            context.PC = context.PC.Next;
             context.Log($"{this.GetType().Name}: branch not taken");
         }
     }
 
-    public void Undo(IExecutionContext context) {
-        if(this._previousExecutionIndices.Count == 0) {
-            throw new InvalidOperationException("No previous ExecutionIndex to undo.");
+    public void Undo(ExecuteContext context) {
+        if(this._previousPCs.Count == 0) {
+            throw new InvalidOperationException("No previous PC to undo.");
         }
-        context.ExecutionIndex = this._previousExecutionIndices.Pop();
+        context.PC = this._previousPCs.Pop();
     }
 
     /// <summary>
@@ -84,23 +84,5 @@ internal abstract partial class BranchInstruction: IInstruction {
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Sourceレジスタの値をコンテキストから読み込む
-    /// </summary>
-    /// <param name="context">レジスタを読み込むコンテキスト</param>
-    /// <returns>Sourceレジスタの値</returns>
-    protected int ReadRs(IExecutionContext context) {
-        return context.Registers[(int)this.Rs];
-    }
-
-    /// <summary>
-    /// Targetレジスタの値をコンテキストから読み込む
-    /// </summary>
-    /// <param name="context">レジスタを読み込むコンテキスト</param>
-    /// <returns>Targetレジスタの値</returns>
-    protected int ReadRt(IExecutionContext context) {
-        return context.Registers[(int)this.Rt];
     }
 }

@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 
 internal sealed class SllInstruction(RegisterID rd, RegisterID rt, Immediate shamt): RTypeInstruction(rd, rt, shamt) {
-    public override void Execute(IExecutionContext context) {
-        int rtVal = this.ReadRt(context);
+    public override void Execute(ExecuteContext context) {
+        int rtVal = context.Registers[this.Rt];
         int result = rtVal << this.Shamt;
         this.WriteRd(context, result);
         context.Log($"sll ${this.Rd}, ${this.Rt}, {this.Shamt.Value}: 0x{rtVal:X8} << {this.Shamt.Value} = 0x{result:X8}");
