@@ -20,6 +20,10 @@ internal sealed class SymbolTable {
     /// <param name="label">追加するラベル</param>
     /// <remarks>重複がある場合は上書きされる</remarks>
     public void Add(Label label) {
+        // 既存のエントリがある場合は逆引きテーブルからも削除する
+        if(this._forwardTable.TryGetValue(label.Name, out int oldIndex) && oldIndex != label.ExecutionIndex) {
+            _ = this._reverseTable.Remove(oldIndex);
+        }
         this._forwardTable[label.Name] = label.ExecutionIndex;
         this._reverseTable[label.ExecutionIndex] = label.Name;
     }
