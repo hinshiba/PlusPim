@@ -123,9 +123,9 @@ internal class DebugAdapter: DebugAdapterBase {
         });
 
         int frameId = args.FrameId;
-        // エンコード: (frameId << 16) | scopeType
-        int registersRef = (frameId << 16) | SCOPE_REGISTERS;
-        int specialRegistersRef = (frameId << 16) | SCOPE_SPECIAL_REGISTERS;
+        // エンコード: frameId * 1000 + scopeType
+        int registersRef = (frameId * 1000) + SCOPE_REGISTERS;
+        int specialRegistersRef = (frameId * 1000) + SCOPE_SPECIAL_REGISTERS;
 
         return new ScopesResponse {
             Scopes = [
@@ -147,12 +147,19 @@ internal class DebugAdapter: DebugAdapterBase {
 
         List<Variable> variables = [];
 
-        // variablesReference をデコード: (frameId << 16) | scopeType
-        int frameId = args.VariablesReference >> 16;
-        int scopeType = args.VariablesReference & 0xFFFF;
+        // variablesReference をデコード: frameId * 1000 + scopeType
+        int frameId = args.VariablesReference / 1000;
+        int scopeType = args.VariablesReference % 1000;
 
         // 該当フレームのレジスタを取得
-        StackFrameInfo? targetFrame = this._app.GetStackFrame(frameId);
+        StackFrameInfo[] callStack = this._app.GetCallStack();
+        StackFrameInfo? targetFrame = null;
+        foreach(StackFrameInfo frame in callStack) {
+            if(frame.FrameId == frameId) {
+                targetFrame = frame;
+                break;
+            }
+        }
 
         if(targetFrame != null) {
             if(scopeType == SCOPE_REGISTERS) {
@@ -178,7 +185,9 @@ internal class DebugAdapter: DebugAdapterBase {
             Category = OutputEvent.CategoryValue.Console
         });
 
-        this._app.Continue();
+        while(!this._app.IsTerminated()) {
+            this._app.Step();
+        }
         this.Protocol.SendEvent(new TerminatedEvent());
         return new ContinueResponse { AllThreadsContinued = true };
     }
@@ -240,7 +249,9 @@ internal class DebugAdapter: DebugAdapterBase {
             Category = OutputEvent.CategoryValue.Console
         });
 
-        this._app.ReverseContinue();
+        while(this._app.StepBack()) {
+            // 先頭まで巻き戻す
+        }
 
         this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
             ThreadId = 1,

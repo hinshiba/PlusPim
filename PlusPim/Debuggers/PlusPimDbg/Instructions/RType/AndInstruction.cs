@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 
 internal sealed class AndInstruction(RegisterID rd, RegisterID rs, RegisterID rt): RTypeInstruction(rd, rs, rt) {
-    public override void Execute(ExecuteContext context) {
-        int rsVal = context.Registers[this.Rs];
-        int rtVal = context.Registers[this.Rt];
+    public override void Execute(IExecutionContext context) {
+        int rsVal = this.ReadRs(context);
+        int rtVal = this.ReadRt(context);
         int result = rsVal & rtVal;
         this.WriteRd(context, result);
         context.Log($"and ${this.Rd}, ${this.Rs}, ${this.Rt}: 0x{rsVal:X8} & 0x{rtVal:X8} = 0x{result:X8}");

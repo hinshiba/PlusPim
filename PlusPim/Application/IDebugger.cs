@@ -1,7 +1,12 @@
 namespace PlusPim.Application;
 
 internal interface IDebugger {
-    (int[] Registers, int PC, int HI, int LO) GetRegisters();
+    void SetLogger(Action<string> log);
+    bool Load(string programPath);
+    int GetPC();
+    int[] GetRegisters();  // 32要素の配列
+    int GetHI();
+    int GetLO();
     void Step();
 
     /// <summary>
