@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 
 internal sealed class AddInstruction(RegisterID rd, RegisterID rs, RegisterID rt): RTypeInstruction(rd, rs, rt) {
-    public override void Execute(IExecutionContext context) {
-        int rsVal = this.ReadRs(context);
-        int rtVal = this.ReadRt(context);
+    public override void Execute(ExecuteContext context) {
+        int rsVal = context.Registers[this.Rs];
+        int rtVal = context.Registers[this.Rt];
         // TODO: オーバーフロー例外の発生の考慮
         int result = rsVal + rtVal;
         this.WriteRd(context, result);
