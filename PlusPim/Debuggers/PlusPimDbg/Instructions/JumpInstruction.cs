@@ -14,38 +14,38 @@ internal abstract class JumpInstruction(string? targetLabel): IInstruction {
     protected string? TargetLabel { get; } = targetLabel;
 
     /// <summary>
-    /// Undo用に前のPCをスタックで管理
+    /// Undo用に前のExecutionIndexをスタックで管理
     /// </summary>
-    private readonly Stack<ProgramCounter> _previousPCs = new();
+    private readonly Stack<int> _previousExecutionIndices = new();
 
-    public abstract void Execute(ExecuteContext context);
-    public abstract void Undo(ExecuteContext context);
+    public abstract void Execute(IExecutionContext context);
+    public abstract void Undo(IExecutionContext context);
 
     /// <summary>
     /// ラベル名からExecutionIndexを解決してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, string label) {
+    protected void JumpTo(IExecutionContext context, string label) {
         int executionIndex = context.GetLabelExecutionIndex(label) ?? throw new InvalidOperationException($"Label '{label}' not found.");
-        this._previousPCs.Push(context.PC);
-        context.PC = ProgramCounter.FromIndex(executionIndex);
+        this._previousExecutionIndices.Push(context.ExecutionIndex);
+        context.ExecutionIndex = executionIndex;
     }
 
     /// <summary>
-    /// ProgramCounterを直接指定してジャンプする
+    /// ExecutionIndexを直接指定してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, ProgramCounter target) {
-        this._previousPCs.Push(context.PC);
-        context.PC = target;
+    protected void JumpTo(IExecutionContext context, int executionIndex) {
+        this._previousExecutionIndices.Push(context.ExecutionIndex);
+        context.ExecutionIndex = executionIndex;
     }
 
     /// <summary>
     /// ジャンプを元に戻す
     /// </summary>
-    protected void UndoJump(ExecuteContext context) {
-        if(this._previousPCs.Count == 0) {
-            throw new InvalidOperationException("No previous PC to undo.");
+    protected void UndoJump(IExecutionContext context) {
+        if(this._previousExecutionIndices.Count == 0) {
+            throw new InvalidOperationException("No previous ExecutionIndex to undo.");
         }
-        context.PC = this._previousPCs.Pop();
+        context.ExecutionIndex = this._previousExecutionIndices.Pop();
     }
 
     /// <summary>
