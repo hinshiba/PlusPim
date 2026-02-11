@@ -1,6 +1,14 @@
 namespace PlusPim.Application;
 
+/// <summary>
+/// アプリケーションの抽象化
+/// </summary>
 internal interface IApplication {
+    /// <summary>
+    /// ログのコールバックを設定する
+    /// </summary>
+    /// <param name="log">ロガー</param>
+    /// <remarks>この機能はLoad前に設定することが必須です</remarks>
     void SetLogger(Action<string> log);
     bool Load(string programPath);
     (int[] Registers, int PC, int HI, int LO) GetRegisters();
@@ -21,8 +29,25 @@ internal interface IApplication {
     bool IsTerminated();
 
     /// <summary>
+    /// 終了まで実行する
+    /// </summary>
+    void Continue();
+
+    /// <summary>
+    /// 先頭まで巻き戻す
+    /// </summary>
+    void ReverseContinue();
+
+    /// <summary>
     /// コールスタックの情報を取得する
     /// </summary>
     /// <returns><see cref="StackFrameInfo"/>の配列</returns>
     StackFrameInfo[] GetCallStack();
+
+    /// <summary>
+    /// フレームIDからスタックフレーム情報を取得する
+    /// </summary>
+    /// <param name="frameId">フレームID</param>
+    /// <returns>見つかった場合は<see cref="StackFrameInfo"/>，見つからない場合はnull</returns>
+    StackFrameInfo? GetStackFrame(int frameId);
 }

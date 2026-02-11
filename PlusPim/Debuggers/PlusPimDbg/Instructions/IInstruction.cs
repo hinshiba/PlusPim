@@ -1,14 +1,17 @@
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
+/// <summary>
+/// 命令を意味するインターフェース
+/// </summary>
 internal interface IInstruction {
     /// <summary>
     /// 命令を実行し，コンテキストを変更する
     /// </summary>
     /// <param name="context">レジスタ，メモリ状態等を示す</param>
-    void Execute(IExecutionContext context);
+    void Execute(ExecuteContext context);
     /// <summary>
     /// 命令の逆操作を実行し，コンテキストを元に戻す
     /// </summary>
     /// <param name="context">レジスタ，メモリ状態等を示す</param>
-    void Undo(IExecutionContext context);
+    void Undo(ExecuteContext context);
 }

@@ -3,12 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 
 internal sealed class JInstruction(string targetLabel): JumpInstruction(targetLabel) {
-    public override void Execute(IExecutionContext context) {
+    public override void Execute(ExecuteContext context) {
         this.JumpTo(context, this.TargetLabel!);
         context.Log($"j {this.TargetLabel}");
     }
 
-    public override void Undo(IExecutionContext context) {
+    public override void Undo(ExecuteContext context) {
         this.UndoJump(context);
     }
 }

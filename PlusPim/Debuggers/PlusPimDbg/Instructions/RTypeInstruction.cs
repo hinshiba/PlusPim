@@ -39,19 +39,19 @@ internal abstract partial class RTypeInstruction: IInstruction {
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
     private readonly Stack<int> _previousRdValues = new();
 
-    public abstract void Execute(IExecutionContext context);
+    public abstract void Execute(ExecuteContext context);
 
     /// <summary>
     /// 命令の逆操作だが，ほとんどのR形式命令ではRdに書き込んだ値を元に戻すだけで良い
     /// </summary>
-    public void Undo(IExecutionContext context) {
+    public void Undo(ExecuteContext context) {
         if(this.Rd == RegisterID.Zero) {
             return;
         }
         if(this._previousRdValues.Count == 0) {
             throw new InvalidOperationException("No previous value to undo.");
         }
-        context.Registers[(int)this.Rd] = this._previousRdValues.Pop();
+        context.Registers[this.Rd] = this._previousRdValues.Pop();
     }
 
     /// <summary>
@@ -125,38 +125,20 @@ internal abstract partial class RTypeInstruction: IInstruction {
     }
 
     /// <summary>
-    /// Sourceレジスタの値をコンテキストから読み込む
+    /// コンテキスト内のDestinationレジスタに値を書き込むと同時に，逆操作のために以前の値を保存する
     /// </summary>
-    /// <param name="context">レジスタを読み込むコンテキスト</param>
-    /// <returns>Sourceレジスタの値</returns>
-    protected int ReadRs(IExecutionContext context) {
-        return context.Registers[(int)this.Rs];
-    }
-
-    /// <summary>
-    /// Targetレジスタの値をコンテキストから読み込む
-    /// </summary>
-    /// <param name="context">レジスタを読み込むコンテキスト</param>
-    /// <returns>Targetレジスタの値</returns>
-    protected int ReadRt(IExecutionContext context) {
-        return context.Registers[(int)this.Rt];
-    }
-
-    /// <summary>
-    /// コンテキスト内のDestinationレジスタに値を書き込む
-    /// </summary>
-    /// <remarks>書き込み先がゼロレジスタでも例外は発生しない．
-    /// これを呼び出すと逆操作のためにDestinationレジスタの値は保存される</remarks>
+    /// <remarks>
+    /// これを呼び出すと逆操作のためにDestinationレジスタの値は保存される
+    /// </remarks>
     /// <param name="context">レジスタを含むコンテキスト</param>
     /// <param name="value">書き込む値</param>
-    protected void WriteRd(IExecutionContext context, int value) {
+    protected void WriteRd(ExecuteContext context, int value) {
         // $zero保護
         if(this.Rd == RegisterID.Zero) {
-            // 現実でも$zeroに書き込んでも例外は発生しないのでこれでよい
             return;
         }
         // 逆操作のために保存
-        this._previousRdValues.Push(context.Registers[(int)this.Rd]);
-        context.Registers[(int)this.Rd] = value;
+        this._previousRdValues.Push(context.Registers[this.Rd]);
+        context.Registers[this.Rd] = value;
     }
 }

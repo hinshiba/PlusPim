@@ -1,19 +1,30 @@
+using PlusPim.Debuggers.PlusPimDbg.Instructions;
+
 namespace PlusPim.Debuggers.PlusPimDbg;
 
+/// <summary>
+/// 解析済みのプログラムファイルを表すクラス
+/// </summary>
 internal class ParsedProgram {
-    private readonly Mnemonic[] _mnemonics;
+    private readonly IInstruction[] _instructions;
     private readonly int[] _sourceLines;
-    private readonly Dictionary<string, int> _symbolTable;
-    private readonly Dictionary<int, string> _reverseSymbolTable;
 
+    /// <summary>
+    /// シンボルテーブル
+    /// </summary>
+    public SymbolTable SymbolTable { get; }
+
+    /// <summary>
+    /// パースしたプログラムのファイルパス
+    /// </summary>
     public string ProgramPath { get; }
 
-    public ParsedProgram(string programPath, Action<string>? log = null) {
+    public ParsedProgram(string programPath, Action<string> log) {
         this.ProgramPath = Path.GetFullPath(programPath);
         string[] lines = File.ReadAllLines(programPath);
-        List<Mnemonic> mnemonicList = [];
+        List<IInstruction> instructionList = [];
         List<int> sourceLineList = [];
-        this._symbolTable = [];
+        this.SymbolTable = new SymbolTable();
 
         for(int lineIndex = 0; lineIndex < lines.Length; lineIndex++) {
             string line = lines[lineIndex];
@@ -41,59 +52,46 @@ internal class ParsedProgram {
             // ラベル判定: `:` で終わり、空白を含まない
             if(processed.EndsWith(':') && !processed.Contains(' ')) {
                 string labelName = processed[..^1]; // 末尾の `:` を除去
-                this._symbolTable[labelName] = mnemonicList.Count;
-                log?.Invoke($"Label: {labelName} at index {mnemonicList.Count}");
+                this.SymbolTable.Add(new Label(labelName, instructionList.Count));
+                log.Invoke($"Label: {labelName} at index {instructionList.Count}");
                 continue;
             }
 
-            // ニーモニックをパース
-            if(Mnemonic.TryParse(processed, null, out Mnemonic? mnemonic)) {
-                mnemonicList.Add(mnemonic);
+            // 命令をパース
+            if(InstructionRegistry.Default.TryParse(processed, out IInstruction? instruction)) {
+                instructionList.Add(instruction);
                 sourceLineList.Add(lineIndex + 1); // 1-baseの行番号
-                log?.Invoke($"Parsed: {processed}");
+                log.Invoke($"Parsed: {processed}");
             } else {
-                log?.Invoke($"Parse failed: {processed}");
+                log.Invoke($"Parse failed: {processed}");
             }
         }
 
-        this._mnemonics = mnemonicList.ToArray();
+        this._instructions = instructionList.ToArray();
         this._sourceLines = sourceLineList.ToArray();
-        this._reverseSymbolTable = [];
-        foreach(KeyValuePair<string, int> kvp in this._symbolTable) {
-            this._reverseSymbolTable[kvp.Value] = kvp.Key;
-        }
     }
 
-    public Mnemonic GetMnemonic(int index) {
-        return this._mnemonics[index];
+    /// <summary>
+    /// その行の命令を取得する
+    /// </summary>
+    /// <param name="index">命令インデックス</param>
+    /// <returns>命令</returns>
+    public IInstruction GetInstruction(int index) {
+        return this._instructions[index];
     }
 
+    /// <summary>
+    /// 実行インデックスのソースコード上の行番号を取得する
+    /// </summary>
+    /// <param name="instructionIndex">実行インデックス</param>
+    /// <returns>行番号</returns>
     public int GetSourceLine(int instructionIndex) {
         return this._sourceLines[instructionIndex];
     }
 
-    public int MnemonicCount => this._mnemonics.Length;
-
     /// <summary>
-    /// シンボルテーブル
+    /// 命令数
     /// </summary>
-    public IReadOnlyDictionary<string, int> SymbolTable => this._symbolTable;
-    public int? GetLabelAddress(string label) {
-        return this._symbolTable.TryGetValue(label, out int addr) ? addr : null;
-    }
+    public int InstructionCount => this._instructions.Length;
 
-    public string? GetLabelForExecutionIndex(int index) {
-        if(this._reverseSymbolTable.TryGetValue(index, out string? label))
-            return label;
-        // indexより前で最も近いラベルを返す
-        string? closest = null;
-        int closestIndex = -1;
-        foreach(KeyValuePair<int, string> kvp in this._reverseSymbolTable) {
-            if(kvp.Key <= index && kvp.Key > closestIndex) {
-                closestIndex = kvp.Key;
-                closest = kvp.Value;
-            }
-        }
-        return closest;
-    }
 }
