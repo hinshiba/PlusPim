@@ -1,6 +1,3 @@
-using PlusPim.Debuggers.PlusPimDbg.Instructions.Branch;
-using PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
-using PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -20,36 +17,18 @@ internal sealed partial class InstructionRegistry {
 
     public static InstructionRegistry CreateDefault() {
         Dictionary<string, IInstructionParser> parsers = new(StringComparer.OrdinalIgnoreCase);
-        // ファイル名順
 
-        // ブランチ命令
-        RegisterParser(parsers, new BeqInstructionParser());
-        RegisterParser(parsers, new BneInstructionParser());
+        IEnumerable<Type> parserTypes = typeof(InstructionRegistry).Assembly
+            .GetTypes()
+            .Where(t => t is { IsAbstract: false, IsInterface: false }
+                && t.IsAssignableTo(typeof(IInstructionParser)));
 
-        // ジャンプ命令
-        RegisterParser(parsers, new JInstructionParser());
-        RegisterParser(parsers, new JalInstructionParser());
-        RegisterParser(parsers, new JrInstructionParser());
-
-        // Rタイプ命令
-        RegisterParser(parsers, new AddInstructionParser());
-        RegisterParser(parsers, new AdduInstructionParser());
-
-        RegisterParser(parsers, new AndInstructionParser());
-        RegisterParser(parsers, new OrInstructionParser());
-
-        RegisterParser(parsers, new SllInstructionParser());
-
-        RegisterParser(parsers, new SltInstructionParser());
-
-        RegisterParser(parsers, new SubInstructionParser());
-
+        foreach(Type type in parserTypes) {
+            IInstructionParser parser = (IInstructionParser)Activator.CreateInstance(type)!;
+            parsers[parser.Mnemonic] = parser;
+        }
 
         return new InstructionRegistry(parsers);
-    }
-
-    private static void RegisterParser(Dictionary<string, IInstructionParser> parsers, IInstructionParser parser) {
-        parsers[parser.Mnemonic] = parser;
     }
 
     /// <summary>
