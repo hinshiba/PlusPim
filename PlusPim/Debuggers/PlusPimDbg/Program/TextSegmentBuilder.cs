@@ -1,18 +1,15 @@
+using PlusPim.Debuggers.PlusPimDbg.Instructions;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
-internal sealed partial class TextSegment: IParsable<TextSegment> {
+internal sealed class TextSegmentBuilder(Action<string> log) {
+    private readonly List<IInstruction> _instructions = [];
+    private readonly List<int> _sourceLines = [];
+    private readonly SymbolTable _symbolTable = new();
+    public void AddLine(string Line) {
 
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TextSegment result) {
-        throw new NotImplementedException();
-    }
 
-    static TextSegment IParsable<TextSegment>.Parse(string s, IFormatProvider? provider) {
-        return TextSegment.TryParse(s, provider, out TextSegment? textSegment)
-            ? textSegment
-            : throw new FormatException($"'{s}' is not a valid TextSegment");
     }
 
 
