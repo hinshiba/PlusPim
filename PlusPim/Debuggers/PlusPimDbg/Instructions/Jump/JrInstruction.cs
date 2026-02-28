@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 
-internal sealed class JrInstruction(RegisterID rs, int LineIndex): JumpInstruction(null, LineIndex) {
+internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstruction(null, lineIndex) {
     private RegisterID Rs { get; } = rs;
     private readonly Stack<CallStackFrame?> _poppedFrames = new();
 
@@ -40,10 +40,10 @@ internal sealed class JrInstruction(RegisterID rs, int LineIndex): JumpInstructi
 internal sealed class JrInstructionParser: IInstructionParser {
     public string Mnemonic => "jr";
 
-    public bool TryParse(string operands, int LineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(OperandParser.TryParseSingleRegOperand(operands, out RegisterID rs)) {
-            instruction = new JrInstruction(rs, LineIndex);
+            instruction = new JrInstruction(rs, lineIndex);
             return true;
         }
         return false;
