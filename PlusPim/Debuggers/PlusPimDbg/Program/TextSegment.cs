@@ -10,5 +10,5 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 internal sealed class TextSegment(List<IInstruction> instructions) {
     public static readonly Address TextSegmentBase = new(0x400000);
 
-    public readonly IInstruction[] _instructions = [.. instructions];
+    public readonly IInstruction[] Instructions = [.. instructions];
 }

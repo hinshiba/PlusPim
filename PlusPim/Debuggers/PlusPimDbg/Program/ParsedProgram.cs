@@ -84,12 +84,12 @@ internal class ParsedProgram {
                     if(IsLabel(trimmed)) {
                         string labelName = trimmed[..^1]; // 末尾の `:` を除去
                         // 次の空いている領域のアドレスを設定
-                        Label label = new(labelName, );
+                        Label label = new(labelName, dataSegmentBuilder.NextDataAddres);
                         this.SymbolTable.Add(label);
                         log.Invoke($"Line{lineIndex} {label}");
                         continue;
                     }
-                    dataSegmentBuilder.ProcessLine(processed);
+                    dataSegmentBuilder.AddLine(processed);
                     break;
 
             }
@@ -132,22 +132,13 @@ internal class ParsedProgram {
     /// </summary>
     /// <param name="index">命令インデックス</param>
     /// <returns>命令</returns>
-    public IInstruction GetInstruction(int index) {
-        return this._instructions[index];
-    }
-
-    /// <summary>
-    /// 実行インデックスのソースコード上の行番号を取得する
-    /// </summary>
-    /// <param name="instructionIndex">実行インデックス</param>
-    /// <returns>行番号</returns>
-    public int GetSourceLine(int instructionIndex) {
-        return this._sourceLines[instructionIndex];
+    public IInstruction GetInstruction(InstructionIndex index) {
+        return this.TextSegment.Instructions[index.Idx];
     }
 
     /// <summary>
     /// 命令数
     /// </summary>
-    public int InstructionCount => this._instructions.Length;
+    public int InstructionCount => this.TextSegment.Instructions.Length;
 
 }

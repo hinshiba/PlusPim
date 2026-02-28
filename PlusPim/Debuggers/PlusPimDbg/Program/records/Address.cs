@@ -14,4 +14,13 @@ internal record struct Address(int Addr) {
         return lhs;
     }
 
+    public static Address operator ++(Address val) {
+        val.Addr++;
+        return val;
+    }
+
+    public static int operator %(Address lhs, int rhs) {
+        return lhs.Addr %= rhs;
+    }
+
 }
