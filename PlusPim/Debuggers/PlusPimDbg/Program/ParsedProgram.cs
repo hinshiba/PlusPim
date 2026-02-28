@@ -73,7 +73,7 @@ internal class ParsedProgram {
                         // 次の命令のインデックスのアドレスを設定
                         Label label = new(labelName, Address.FromInstructionIndex(textSegmentBuilder.CurrentInstructionIndex()));
                         this.SymbolTable.Add(label);
-                        log.Invoke($"Line{lineIndex} {label}");
+                        log.Invoke($"Line{lineIndex + 1} {label}");
                         continue;
                     }
                     // 命令だった場合
@@ -84,9 +84,9 @@ internal class ParsedProgram {
                     if(IsLabel(trimmed)) {
                         string labelName = trimmed[..^1]; // 末尾の `:` を除去
                         // 次の空いている領域のアドレスを設定
-                        Label label = new(labelName, dataSegmentBuilder.NextDataAddres);
+                        Label label = new(labelName, dataSegmentBuilder.NextDataAddress);
                         this.SymbolTable.Add(label);
-                        log.Invoke($"Line{lineIndex} {label}");
+                        log.Invoke($"Line{lineIndex + 1} {label}");
                         continue;
                     }
                     dataSegmentBuilder.AddLine(trimmed);
