@@ -37,17 +37,20 @@ internal sealed partial class InstructionRegistry {
     /// <param name="assemblyLine">行</param>
     /// <param name="instruction">成功の場合は<see cref="IInstruction"/>が返却される</param>
     /// <returns>成功なら<see langword="true"/></returns>
-    public bool TryParse(string assemblyLine, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string assemblyLine, int LineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
 
+        // アセンブリの行にマッチするか探索
         Match match = AssemblyLinePattern().Match(assemblyLine);
         if(!match.Success) {
             return false;
         }
 
+        // オペコードとオペランドを分割
         string op = match.Groups["op"].Value;
         string operands = match.Groups["operands"].Value;
 
-        return this._parsers.TryGetValue(op, out IInstructionParser? parser) && parser.TryParse(operands, out instruction);
+        // オペコードに対応するパーサーを探して，あればそれでオペランドを解析する
+        return this._parsers.TryGetValue(op, out IInstructionParser? parser) && parser.TryParse(operands, LineIndex, out instruction);
     }
 }
