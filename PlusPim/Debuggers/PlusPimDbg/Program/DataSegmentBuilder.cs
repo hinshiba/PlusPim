@@ -167,8 +167,8 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
     }
 
     private void WriteByte(byte value) {
-        this._memoryImage[this.NextDataAddres] = value;
-        this.NextDataAddres++;
+        this._memoryImage[this.NextDataAddress] = value;
+        this.NextDataAddress++;
     }
 
     private void WriteWord(int value) {
