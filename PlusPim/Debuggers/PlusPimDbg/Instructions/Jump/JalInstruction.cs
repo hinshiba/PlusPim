@@ -24,7 +24,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
         context.Registers[RegisterID.Ra] = Address.FromInstructionIndex(returnPC).Addr;
 
         // コールスタックに push
-        //context.CallStack.Push(frame);
+        // context.CallStack.Push(frame);
 
         // ジャンプ
         this.JumpTo(context, this.TargetLabel!);
@@ -36,7 +36,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
         this.UndoJump(context);
 
         // コールスタックから pop
-        _ = context.CallStack.Pop();
+        //_ = context.CallStack.Pop();
 
         // $ra を復元
         if(this._previousRaValues.Count == 0) {
