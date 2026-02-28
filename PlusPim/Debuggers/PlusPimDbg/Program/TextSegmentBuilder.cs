@@ -5,7 +5,6 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 internal sealed class TextSegmentBuilder(Action<string> log) {
     private readonly List<IInstruction> _instructions = [];
-    private readonly List<int> _sourceLines = [];
     private readonly SymbolTable _symbolTable = new();
 
     /// <summary>
@@ -21,9 +20,8 @@ internal sealed class TextSegmentBuilder(Action<string> log) {
         }
 
         // 命令をパース
-        if(InstructionRegistry.Default.TryParse(Line, out IInstruction? instruction)) {
+        if(InstructionRegistry.Default.TryParse(Line, LineIndex + 1, out IInstruction? instruction)) {
             this._instructions.Add(instruction);
-            this._sourceLines.Add(LineIndex + 1); // 1-baseの行番号に変換
             log.Invoke($"TextSegmentBuilder: Parsed: {Line}");
         } else {
             log.Invoke($"TextSegmentBuilder: Parse failed for Instruction: {Line}");
@@ -39,7 +37,7 @@ internal sealed class TextSegmentBuilder(Action<string> log) {
     }
 
     public TextSegment Build() {
-        return new TextSegment(this._instructions, this._sourceLines);
+        return new TextSegment(this._instructions);
     }
 
 

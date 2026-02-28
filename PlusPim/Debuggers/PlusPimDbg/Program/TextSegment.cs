@@ -3,14 +3,12 @@ using PlusPim.Debuggers.PlusPimDbg.Program.records;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
-internal sealed class TextSegment {
+/// <summary>
+/// テキストセグメントを表現する
+/// </summary>
+/// <param name="instructions">命令列</param>
+internal sealed class TextSegment(List<IInstruction> instructions) {
     public static readonly Address TextSegmentBase = new(0x400000);
 
-    private readonly IInstruction[] _instructions;
-    private readonly int[] _sourceLines;
-
-    public TextSegment(List<IInstruction> instructions, List<int> _sourceLines) {
-        this._instructions = instructions.ToArray();
-        this._sourceLines = _sourceLines.ToArray();
-    }
+    public readonly IInstruction[] _instructions = [.. instructions];
 }
