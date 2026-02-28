@@ -15,9 +15,9 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
 
         // レジスタスナップショット取得（$ra変更前）
         _ = context.Registers.Clone();
-        //string callerLabel = context.GetLabelForExecutionIndex(context.PC.Index) ?? "<unknown>";
-        InstructionIndex returnPC = context.PC;
-        //CallStackFrame frame = new(returnPC, callerLabel, snapshot, context.HI, context.LO);
+        // string callerLabel = context.GetLabelForExecutionIndex(context.PC.Index) ?? "<unknown>";
+        InstructionIndex returnPC = context.PC + 1;
+        // CallStackFrame frame = new(returnPC, callerLabel, snapshot, context.HI, context.LO);
 
         // $ra にPC アドレス形式で次の命令アドレスを保存
         this._previousRaValues.Push(context.Registers[RegisterID.Ra]);
