@@ -4,13 +4,14 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// アドレスを表す値型
 /// </summary>
 /// <param name="Addr">アドレスとなる<see langword="int"/></param>
-internal readonly record struct Address(int Addr) {
-
+internal record struct Address(int Addr) {
     public static Address FromInstructionIndex(InstructionIndex IIdx) {
         return new Address((IIdx.Idx * 4) + TextSegment.TextSegmentBase.Addr);
     }
 
     public static Address operator +(Address lhs, Address rhs) {
-        return new(lhs.Addr + rhs.Addr);
+        lhs.Addr += rhs.Addr;
+        return lhs;
     }
+
 }

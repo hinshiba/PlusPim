@@ -4,4 +4,9 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// 命令インデックスを表す値型
 /// </summary>
 /// <param name="Idx">命令インデックス</param>
-internal readonly record struct InstructionIndex(int Idx);
+internal record struct InstructionIndex(int Idx) {
+    public void Next() {
+        this.Idx++;
+    }
+
+}
