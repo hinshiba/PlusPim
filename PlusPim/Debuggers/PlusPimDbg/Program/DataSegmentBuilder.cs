@@ -13,7 +13,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
     /// <summary>
     /// 空き領域の先頭を示す
     /// </summary>
-    public Address NextDataAddres { get; private set; } = DataSegment.DataSegmentBase;
+    public Address NextDataAddress { get; private set; } = DataSegment.DataSegmentBase;
 
     /// <summary>
     /// データセグメントの1行を処理する
