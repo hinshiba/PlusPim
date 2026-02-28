@@ -9,11 +9,8 @@ internal sealed class TextSegment {
     private readonly IInstruction[] _instructions;
     private readonly int[] _sourceLines;
 
-    private readonly SymbolTable _symbolTable;
-
-    public TextSegment(List<IInstruction> instructions, List<int> _sourceLines, SymbolTable symbolTable) {
+    public TextSegment(List<IInstruction> instructions, List<int> _sourceLines) {
         this._instructions = instructions.ToArray();
         this._sourceLines = _sourceLines.ToArray();
-        this._symbolTable = symbolTable;
     }
 }
