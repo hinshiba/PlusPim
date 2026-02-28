@@ -121,7 +121,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
     private void ProcessAlign(string operands) {
         string trimmed = operands.Trim();
 
-        if(!int.TryParse(trimmed, out _)) {
+        if(!int.TryParse(trimmed, out int n)) {
             log.Invoke($"Warning: invalid .align value: {trimmed}");
             return;
         }
