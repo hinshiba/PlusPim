@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -42,8 +43,7 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
 
         if(this.EvaluateCondition(context)) {
             Label executionIndex = context.ResolveLabelName(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            // todo: アライメント例外の処理
-            context.PC = (InstructionIndex)InstructionIndex.FromAddress(executionIndex.Addr);
+            context.PC = InstructionIndex.FromAddress(executionIndex.Addr) ?? throw new AlignmentException($"Label '{this.TargetLabel}' not found.");
             context.Log($"{this.GetType().Name}: branch taken to {this.TargetLabel}");
         } else {
             // 分岐不成立時は次の命令へ

@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
@@ -11,7 +12,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
     public override void Execute(ExecuteContext context) {
         Address targetAddress = new(context.Registers[this.Rs]);
         // todo アライメント例外のチェック
-        InstructionIndex target = (InstructionIndex)InstructionIndex.FromAddress(targetAddress);
+        InstructionIndex target = InstructionIndex.FromAddress(targetAddress) ?? throw new AlignmentException($"Try jr to {context.Registers[this.Rs]} but not align");
         this.JumpTo(context, target);
 
         // コールスタックから pop
