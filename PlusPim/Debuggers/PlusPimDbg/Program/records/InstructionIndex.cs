@@ -5,8 +5,9 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// </summary>
 /// <param name="Idx">命令インデックス</param>
 internal record struct InstructionIndex(int Idx) {
-    public void Next() {
-        this.Idx++;
+    public static InstructionIndex operator +(InstructionIndex lhs, int rhs) {
+        lhs.Idx += rhs;
+        return lhs;
     }
 
 }
