@@ -20,7 +20,10 @@ internal record struct Address(int Addr) {
     }
 
     public static int operator %(Address lhs, int rhs) {
-        return lhs.Addr %= rhs;
+        return lhs.Addr % rhs;
     }
 
+    public override string ToString() {
+        return $"Addr: (0x{this.Addr:X})";
+    }
 }

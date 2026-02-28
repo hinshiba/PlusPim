@@ -7,7 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// <param name="Addr">ラベルのアドレス</param>
 internal readonly record struct Label(string Name, Address Addr) {
     public override string ToString() {
-        return $"{this.Name}: is (0x{this.Addr.Addr:X})";
+        return $"{this.Name}: @ 0x{this.Addr.Addr:X}";
     }
 }
 
