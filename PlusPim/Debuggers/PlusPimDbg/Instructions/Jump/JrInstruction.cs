@@ -11,7 +11,6 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
 
     public override void Execute(ExecuteContext context) {
         Address targetAddress = new(context.Registers[this.Rs]);
-        // todo アライメント例外のチェック
         InstructionIndex target = InstructionIndex.FromAddress(targetAddress) ?? throw new AlignmentException($"Try jr to {context.Registers[this.Rs]} but not align");
         this.JumpTo(context, target);
 
