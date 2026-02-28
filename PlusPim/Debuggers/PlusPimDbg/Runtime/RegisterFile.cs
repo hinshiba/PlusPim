@@ -1,4 +1,4 @@
-namespace PlusPim.Debuggers.PlusPimDbg;
+namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 
 /// <summary>
 /// 32本のMIPSの汎用レジスタを管理する

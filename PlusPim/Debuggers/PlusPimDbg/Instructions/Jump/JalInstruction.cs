@@ -1,3 +1,4 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,25 +9,26 @@ internal sealed class JalInstruction(string targetLabel, int LineIndex): JumpIns
 
     public override void Execute(ExecuteContext context) {
         // ラベル解決を先行して例外時の影響を最小化
-        int resolvedIndex = context.GetLabelExecutionIndex(this.TargetLabel!)
+        _ = context.ResolveLabelName(this.TargetLabel!)
             ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
 
+
         // レジスタスナップショット取得（$ra変更前）
-        RegisterFile snapshot = context.Registers.Clone();
-        string callerLabel = context.GetLabelForExecutionIndex(context.PC.Index) ?? "<unknown>";
-        ProgramCounter returnPC = context.PC.Next;
-        CallStackFrame frame = new(returnPC, callerLabel, snapshot, context.HI, context.LO);
+        _ = context.Registers.Clone();
+        //string callerLabel = context.GetLabelForExecutionIndex(context.PC.Index) ?? "<unknown>";
+        InstructionIndex returnPC = context.PC;
+        //CallStackFrame frame = new(returnPC, callerLabel, snapshot, context.HI, context.LO);
 
         // $ra にPC アドレス形式で次の命令アドレスを保存
         this._previousRaValues.Push(context.Registers[RegisterID.Ra]);
-        context.Registers[RegisterID.Ra] = returnPC.Address;
+        context.Registers[RegisterID.Ra] = Address.FromInstructionIndex(returnPC).Addr;
 
         // コールスタックに push
-        context.CallStack.Push(frame);
+        //context.CallStack.Push(frame);
 
         // ジャンプ
-        this.JumpTo(context, ProgramCounter.FromIndex(resolvedIndex));
-        context.Log($"jal {this.TargetLabel}: $ra = 0x{returnPC.Address:X8}");
+        this.JumpTo(context, this.TargetLabel!);
+        context.Log($"jal {this.TargetLabel}: $ra = 0x{Address.FromInstructionIndex(returnPC).Addr:X8}");
     }
 
     public override void Undo(ExecuteContext context) {
@@ -54,9 +56,5 @@ internal sealed class JalInstructionParser: IInstructionParser {
             return true;
         }
         return false;
-    }
-
-    public bool TryParse(string operands, int LineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
-        throw new NotImplementedException();
     }
 }

@@ -1,3 +1,4 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
@@ -22,7 +23,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// <summary>
     /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<ProgramCounter> _previousPCs = new();
+    private readonly Stack<InstructionIndex> _previousPCs = new();
 
     public abstract void Execute(ExecuteContext context);
     public abstract void Undo(ExecuteContext context);
@@ -30,16 +31,17 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// <summary>
     /// ラベル名からExecutionIndexを解決してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, string label) {
-        int executionIndex = context.GetLabelExecutionIndex(label) ?? throw new InvalidOperationException($"Label '{label}' not found.");
+    protected void JumpTo(ExecuteContext context, string name) {
+        Label label = context.ResolveLabelName(name) ?? throw new InvalidOperationException($"Label '{name}' not found.");
         this._previousPCs.Push(context.PC);
-        context.PC = ProgramCounter.FromIndex(executionIndex);
+        // todo アライメント例外の処理
+        context.PC = (InstructionIndex)InstructionIndex.FromAddress(label.Addr);
     }
 
     /// <summary>
     /// ProgramCounterを直接指定してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, ProgramCounter target) {
+    protected void JumpTo(ExecuteContext context, InstructionIndex target) {
         this._previousPCs.Push(context.PC);
         context.PC = target;
     }

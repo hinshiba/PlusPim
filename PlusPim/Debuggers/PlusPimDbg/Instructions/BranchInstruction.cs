@@ -1,3 +1,4 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
@@ -24,7 +25,7 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
     /// <summary>
     /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<ProgramCounter> _previousPCs = new();
+    private readonly Stack<InstructionIndex> _previousPCs = new();
 
     /// <summary>
     /// 分岐条件を評価する
@@ -40,12 +41,13 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
         this._previousPCs.Push(context.PC);
 
         if(this.EvaluateCondition(context)) {
-            int executionIndex = context.GetLabelExecutionIndex(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            context.PC = ProgramCounter.FromIndex(executionIndex);
+            Label executionIndex = context.ResolveLabelName(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
+            // todo: アライメント例外の処理
+            context.PC = (InstructionIndex)InstructionIndex.FromAddress(executionIndex.Addr);
             context.Log($"{this.GetType().Name}: branch taken to {this.TargetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
-            context.PC = context.PC.Next;
+            context.PC++;
             context.Log($"{this.GetType().Name}: branch not taken");
         }
     }

@@ -1,3 +1,4 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,8 +9,9 @@ internal sealed class JrInstruction(RegisterID rs, int LineIndex): JumpInstructi
     private readonly Stack<CallStackFrame?> _poppedFrames = new();
 
     public override void Execute(ExecuteContext context) {
-        int targetAddress = context.Registers[this.Rs];
-        ProgramCounter target = ProgramCounter.FromAddress(targetAddress);
+        Address targetAddress = new(context.Registers[this.Rs]);
+        // todo アライメント例外のチェック
+        InstructionIndex target = (InstructionIndex)InstructionIndex.FromAddress(targetAddress);
         this.JumpTo(context, target);
 
         // コールスタックから pop
@@ -19,7 +21,7 @@ internal sealed class JrInstruction(RegisterID rs, int LineIndex): JumpInstructi
             this._poppedFrames.Push(null);
         }
 
-        context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Index})");
+        context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Idx})");
     }
 
     public override void Undo(ExecuteContext context) {
