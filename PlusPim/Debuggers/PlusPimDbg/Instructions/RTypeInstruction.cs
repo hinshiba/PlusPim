@@ -1,3 +1,4 @@
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -21,18 +22,25 @@ internal abstract partial class RTypeInstruction: IInstruction {
     // シフト量の即値
     protected Immediate Shamt { get; }
 
-    protected RTypeInstruction(RegisterID rd, RegisterID rs, RegisterID rt) {
+    /// <summary>
+    /// 行番号
+    /// </summary>
+    public int SourceLine { get; }
+
+    protected RTypeInstruction(RegisterID rd, RegisterID rs, RegisterID rt, int sourceLine) {
         this.Rd = rd;
         this.Rs = rs;
         this.Rt = rt;
         this.Shamt = new Immediate(-1); // 使用しない
+        this.SourceLine = sourceLine;
     }
 
-    protected RTypeInstruction(RegisterID rd, RegisterID rt, Immediate shamt) {
+    protected RTypeInstruction(RegisterID rd, RegisterID rt, Immediate shamt, int sourceLine) {
         this.Rd = rd;
         this.Rs = RegisterID.Zero; // 使用しない
         this.Rt = rt;
         this.Shamt = shamt;
+        this.SourceLine = sourceLine;
     }
 
     // 逆操作のためのRdの以前の値

@@ -1,8 +1,9 @@
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Branch;
 
-internal sealed class BneInstruction(RegisterID rs, RegisterID rt, string targetLabel): BranchInstruction(rs, rt, targetLabel) {
+internal sealed class BneInstruction(RegisterID rs, RegisterID rt, string targetLabel, int LineIndex): BranchInstruction(rs, rt, targetLabel, LineIndex) {
     protected override bool EvaluateCondition(ExecuteContext context) {
         int rsVal = context.Registers[this.Rs];
         int rtVal = context.Registers[this.Rt];
@@ -14,10 +15,10 @@ internal sealed class BneInstruction(RegisterID rs, RegisterID rt, string target
 internal sealed class BneInstructionParser: IInstructionParser {
     public string Mnemonic => "bne";
 
-    public bool TryParse(string operands, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string operands, int LineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(BranchInstruction.TryParseBranchOperands(operands, out RegisterID rs, out RegisterID rt, out string? label)) {
-            instruction = new BneInstruction(rs, rt, label);
+            instruction = new BneInstruction(rs, rt, label, LineIndex);
             return true;
         }
         return false;
