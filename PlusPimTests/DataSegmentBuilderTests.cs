@@ -87,9 +87,9 @@ public class DataSegmentBuilderTests {
     [Fact]
     public void Align_AlreadyAligned_NoChange() {
         DataSegmentBuilder b = MakeBuilder(out _);
-        Address before = b.NextDataAddres;
+        Address before = b.NextDataAddress;
         b.AddLine(".align 2");
-        Assert.Equal(before, b.NextDataAddres);
+        Assert.Equal(before, b.NextDataAddress);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class DataSegmentBuilderTests {
         DataSegmentBuilder b = MakeBuilder(out _);
         b.AddLine(".byte 1");
         b.AddLine(".align 2");
-        Assert.Equal(0, b.NextDataAddres.Addr % 4);
+        Assert.Equal(0, b.NextDataAddress.Addr % 4);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class DataSegmentBuilderTests {
         b.AddLine(".byte 1");
         b.AddLine(".byte 2");
         b.AddLine(".align 2");
-        Assert.Equal(0, b.NextDataAddres.Addr % 4);
+        Assert.Equal(0, b.NextDataAddress.Addr % 4);
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public class DataSegmentBuilderTests {
         b.AddLine(".byte 2");
         b.AddLine(".byte 3");
         b.AddLine(".align 2");
-        Assert.Equal(0, b.NextDataAddres.Addr % 4);
+        Assert.Equal(0, b.NextDataAddress.Addr % 4);
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class DataSegmentBuilderTests {
     public void Byte_MultipleValues_AdvancesNextDataAddresCorrectly() {
         DataSegmentBuilder b = MakeBuilder(out _);
         b.AddLine(".byte 1, 2, 3");
-        Assert.Equal(DataSegment.DataSegmentBase.Addr + 3, b.NextDataAddres.Addr);
+        Assert.Equal(DataSegment.DataSegmentBase.Addr + 3, b.NextDataAddress.Addr);
     }
 
     [Fact]
@@ -212,13 +212,13 @@ public class DataSegmentBuilderTests {
     [Fact]
     public void SequentialWrites_AdvanceNextDataAddresMonotonically() {
         DataSegmentBuilder b = MakeBuilder(out _);
-        Address start = b.NextDataAddres;
+        Address start = b.NextDataAddress;
         b.AddLine(".byte 0x01");
-        Assert.Equal(start.Addr + 1, b.NextDataAddres.Addr);
+        Assert.Equal(start.Addr + 1, b.NextDataAddress.Addr);
         b.AddLine(".byte 0x02");
-        Assert.Equal(start.Addr + 2, b.NextDataAddres.Addr);
+        Assert.Equal(start.Addr + 2, b.NextDataAddress.Addr);
         b.AddLine(".byte 0x03");
-        Assert.Equal(start.Addr + 3, b.NextDataAddres.Addr);
+        Assert.Equal(start.Addr + 3, b.NextDataAddress.Addr);
     }
 
     [Fact]
@@ -230,6 +230,6 @@ public class DataSegmentBuilderTests {
     [Fact]
     public void EmptyBuilder_NextDataAddresIsBase() {
         DataSegmentBuilder b = MakeBuilder(out _);
-        Assert.Equal(DataSegment.DataSegmentBase, b.NextDataAddres);
+        Assert.Equal(DataSegment.DataSegmentBase, b.NextDataAddress);
     }
 }

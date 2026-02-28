@@ -8,14 +8,14 @@ public class TextSegmentBuilderTests {
     public void AddLine_ValidInstruction_AddsToSegment() {
         TextSegmentBuilder b = new(_ => { });
         b.AddLine("add $t0, $t1, $t2", 1);
-        _ = Assert.Single(b.Build().Instructions);
+        _ = Assert.Single(b.Build().Instructions.ToArray());
     }
 
     [Fact]
     public void AddLine_DotDirective_IsSkipped() {
         TextSegmentBuilder b = new(_ => { });
         b.AddLine(".globl main", 1);
-        Assert.Empty(b.Build().Instructions);
+        Assert.Empty(b.Build().Instructions.ToArray());
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class TextSegmentBuilderTests {
     [Fact]
     public void FreshBuilder_HasZeroInstructions() {
         TextSegmentBuilder b = new(_ => { });
-        Assert.Empty(b.Build().Instructions);
+        Assert.Empty(b.Build().Instructions.ToArray());
     }
 
     [Fact]
@@ -40,28 +40,28 @@ public class TextSegmentBuilderTests {
         b.AddLine("add $t0, $t1, $t2", 1);
         b.AddLine("sub $t0, $t1, $t2", 2);
         b.AddLine("add $t0, $t1, $t2", 3);
-        Assert.Equal(3, b.Build().Instructions.Count());
+        Assert.Equal(3, b.Build().Instructions.Length);
     }
 
     [Fact]
     public void AddLine_DataDirective_IsSkipped() {
         TextSegmentBuilder b = new(_ => { });
         b.AddLine(".data", 1);
-        Assert.Empty(b.Build().Instructions);
+        Assert.Empty(b.Build().Instructions.ToArray());
     }
 
     [Fact]
     public void AddLine_TextDirective_IsSkipped() {
         TextSegmentBuilder b = new(_ => { });
         b.AddLine(".text", 1);
-        Assert.Empty(b.Build().Instructions);
+        Assert.Empty(b.Build().Instructions.ToArray());
     }
 
     [Fact]
     public void AddLine_UnknownMnemonic_DoesNotAddInstruction() {
         TextSegmentBuilder b = new(_ => { });
         b.AddLine("notamnemonic $t0, $t1, $t2", 1);
-        Assert.Empty(b.Build().Instructions);
+        Assert.Empty(b.Build().Instructions.ToArray());
     }
 
     [Fact]
