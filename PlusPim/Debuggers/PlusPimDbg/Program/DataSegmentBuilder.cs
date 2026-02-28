@@ -125,11 +125,8 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
             log.Invoke($"Warning: invalid .align value: {trimmed}");
             return;
         }
-
-        int remainder = this.NextDataAddres.Addr & 3;
-        if(remainder != 0) {
-            this.NextDataAddres += new Address(4 - remainder);
-        }
+        // アライメント処理
+        this.NextDataAddress = new((this.NextDataAddress.Addr + 1) & ~((1 << n) - 1));
     }
 
     private byte[] ProcessEscapeSequences(string input) {
