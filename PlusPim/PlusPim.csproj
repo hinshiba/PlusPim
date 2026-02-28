@@ -11,4 +11,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Shared.VSCodeDebugProtocol" Version="18.0.10427.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>PlusPimTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

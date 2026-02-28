@@ -71,13 +71,13 @@ internal class ParsedProgram {
                     if(IsLabel(trimmed)) {
                         string labelName = trimmed[..^1]; // 末尾の `:` を除去
                         // 次の命令のインデックスのアドレスを設定
-                        Label label = new(labelName, Address.FromInstructionIndex(textSegmentBuilder.CurrentInstructionIndex() + 1));
+                        Label label = new(labelName, Address.FromInstructionIndex(textSegmentBuilder.CurrentInstructionIndex()));
                         this.SymbolTable.Add(label);
                         log.Invoke($"Line{lineIndex} {label}");
                         continue;
                     }
                     // 命令だった場合
-                    textSegmentBuilder.AddLine(processed, lineIndex + 1);
+                    textSegmentBuilder.AddLine(trimmed, lineIndex + 1);
                     break;
                 case SegmentType.Data:
                     // データセグメント内のラベルの場合
@@ -89,7 +89,7 @@ internal class ParsedProgram {
                         log.Invoke($"Line{lineIndex} {label}");
                         continue;
                     }
-                    dataSegmentBuilder.AddLine(processed);
+                    dataSegmentBuilder.AddLine(trimmed);
                     break;
 
             }

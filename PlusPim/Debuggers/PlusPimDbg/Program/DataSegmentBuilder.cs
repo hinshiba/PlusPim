@@ -126,8 +126,10 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
             return;
         }
 
-        int remainder = this.NextDataAddres.Addr & ~3;
-        this.NextDataAddres += new Address(4 - remainder);
+        int remainder = this.NextDataAddres.Addr & 3;
+        if(remainder != 0) {
+            this.NextDataAddres += new Address(4 - remainder);
+        }
     }
 
     private byte[] ProcessEscapeSequences(string input) {
