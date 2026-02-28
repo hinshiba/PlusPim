@@ -86,7 +86,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
         foreach(string val in values) {
             string trimmedVal = val.Trim();
             // 4バイトアラインメント
-            this.ProcessAlign(2.ToString());
+            this.ProcessAlign("2");
 
             if(int.TryParse(trimmedVal, out int intVal)) {
                 this.WriteWord(intVal);
