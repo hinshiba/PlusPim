@@ -153,7 +153,7 @@ public class DataSegmentBuilderTests {
     }
 
     [Fact]
-    public void Byte_MultipleValues_AdvancesNextDataAddresCorrectly() {
+    public void Byte_MultipleValues_AdvancesNextDataAddressCorrectly() {
         DataSegmentBuilder b = MakeBuilder(out _);
         b.AddLine(".byte 1, 2, 3");
         Assert.Equal(DataSegment.DataSegmentBase.Addr + 3, b.NextDataAddress.Addr);
@@ -210,7 +210,7 @@ public class DataSegmentBuilderTests {
     }
 
     [Fact]
-    public void SequentialWrites_AdvanceNextDataAddresMonotonically() {
+    public void SequentialWrites_AdvanceNextDataAddressMonotonically() {
         DataSegmentBuilder b = MakeBuilder(out _);
         Address start = b.NextDataAddress;
         b.AddLine(".byte 0x01");
@@ -228,7 +228,7 @@ public class DataSegmentBuilderTests {
     }
 
     [Fact]
-    public void EmptyBuilder_NextDataAddresIsBase() {
+    public void EmptyBuilder_NextDataAddressIsBase() {
         DataSegmentBuilder b = MakeBuilder(out _);
         Assert.Equal(DataSegment.DataSegmentBase, b.NextDataAddress);
     }
