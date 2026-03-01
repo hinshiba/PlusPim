@@ -43,7 +43,7 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
 
         if(this.EvaluateCondition(context)) {
             Label executionIndex = context.ResolveLabelName(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            context.PC = InstructionIndex.FromAddress(executionIndex.Addr) ?? throw new AlignmentException($"Label '{this.TargetLabel}' not found.");
+            context.PC = InstructionIndex.FromAddress(executionIndex.Addr) ?? throw new AlignmentException($"Try Branch to {executionIndex} but not align");
             context.Log($"{this.GetType().Name}: branch taken to {this.TargetLabel}");
         } else {
             // 分岐不成立時は次の命令へ

@@ -35,7 +35,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     protected void JumpTo(ExecuteContext context, string name) {
         Label label = context.ResolveLabelName(name) ?? throw new InvalidOperationException($"Label '{name}' not found.");
         this._previousPCs.Push(context.PC);
-        context.PC = InstructionIndex.FromAddress(label.Addr) ?? throw new AlignmentException($"Try jr to {label} but not align");
+        context.PC = InstructionIndex.FromAddress(label.Addr) ?? throw new AlignmentException($"Try Jump to {label} but not align");
     }
 
     /// <summary>
