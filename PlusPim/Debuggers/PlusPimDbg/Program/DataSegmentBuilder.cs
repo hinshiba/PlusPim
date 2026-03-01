@@ -125,8 +125,15 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
             log.Invoke($"Warning: invalid .align value: {trimmed}");
             return;
         }
+
+        if(n is < 0 or > 30) {
+            log.Invoke($"Warning: .align value out of range: {n}");
+            return;
+        }
+
         // アライメント処理
-        this.NextDataAddress = new((this.NextDataAddress.Addr + 1) & ~((1 << n) - 1));
+        int mask = (1 << n) - 1;
+        this.NextDataAddress = new((this.NextDataAddress.Addr + mask) & ~mask);
     }
 
     private byte[] ProcessEscapeSequences(string input) {
