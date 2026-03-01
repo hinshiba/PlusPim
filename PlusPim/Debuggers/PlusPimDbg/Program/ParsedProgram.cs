@@ -77,7 +77,7 @@ internal class ParsedProgram {
                         continue;
                     }
                     // 命令だった場合
-                    textSegmentBuilder.AddLine(trimmed, lineIndex + 1);
+                    textSegmentBuilder.AddLine(trimmed, lineIndex);
                     break;
                 case SegmentType.Data:
                     // データセグメント内のラベルの場合
