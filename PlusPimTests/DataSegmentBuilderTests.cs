@@ -95,28 +95,31 @@ public class DataSegmentBuilderTests {
     [Fact]
     public void Align_AfterOneByte_PadsTo4ByteBoundary() {
         DataSegmentBuilder b = MakeBuilder(out _);
+        Address start = b.NextDataAddress;
         b.AddLine(".byte 1");
         b.AddLine(".align 2");
-        Assert.Equal(0, b.NextDataAddress.Addr % 4);
+        Assert.Equal(start.Addr + 4, b.NextDataAddress.Addr);
     }
 
     [Fact]
     public void Align_AfterTwoBytes_PadsTo4ByteBoundary() {
         DataSegmentBuilder b = MakeBuilder(out _);
+        Address start = b.NextDataAddress;
         b.AddLine(".byte 1");
         b.AddLine(".byte 2");
         b.AddLine(".align 2");
-        Assert.Equal(0, b.NextDataAddress.Addr % 4);
+        Assert.Equal(start.Addr + 4, b.NextDataAddress.Addr);
     }
 
     [Fact]
     public void Align_AfterThreeBytes_PadsTo4ByteBoundary() {
         DataSegmentBuilder b = MakeBuilder(out _);
+        Address start = b.NextDataAddress;
         b.AddLine(".byte 1");
         b.AddLine(".byte 2");
         b.AddLine(".byte 3");
         b.AddLine(".align 2");
-        Assert.Equal(0, b.NextDataAddress.Addr % 4);
+        Assert.Equal(start.Addr + 4, b.NextDataAddress.Addr);
     }
 
     [Fact]
