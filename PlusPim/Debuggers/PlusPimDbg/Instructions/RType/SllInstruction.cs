@@ -1,8 +1,9 @@
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 
-internal sealed class SllInstruction(RegisterID rd, RegisterID rt, Immediate shamt): RTypeInstruction(rd, rt, shamt) {
+internal sealed class SllInstruction(RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex): RTypeInstruction(rd, rt, shamt, lineIndex) {
     public override void Execute(ExecuteContext context) {
         int rtVal = context.Registers[this.Rt];
         int result = rtVal << this.Shamt;
@@ -14,14 +15,14 @@ internal sealed class SllInstruction(RegisterID rd, RegisterID rt, Immediate sha
 internal sealed class SllInstructionParser: IInstructionParser {
     public string Mnemonic => "sll";
 
-    public bool TryParse(string operands, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(RTypeInstruction.TryParse2RegShamtOperands(operands, out RegisterID rd, out RegisterID rt, out Immediate? shamt)) {
             // シフト量は0から31の範囲
             if(31 < shamt) {
                 return false;
             }
-            instruction = new SllInstruction(rd, rt, shamt);
+            instruction = new SllInstruction(rd, rt, shamt, lineIndex);
             return true;
         }
         return false;

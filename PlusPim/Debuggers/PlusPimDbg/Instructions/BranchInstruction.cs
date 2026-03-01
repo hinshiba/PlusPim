@@ -1,3 +1,6 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -7,24 +10,23 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 /// MIPSにおいてブランチ命令を表す抽象基底クラス
 /// </summary>
 /// <remarks>この派生クラスはPCの自動インクリメントは行われない．条件失敗時のインクリメントはこのクラス側に責任がある</remarks>
-internal abstract partial class BranchInstruction: IInstruction {
+internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, string targetLabel, int sourceLine): IInstruction {
     [GeneratedRegex(@"^\$(?<rs>\w+),\s*\$(?<rt>\w+),\s*(?<label>\w+)$")]
     private static partial Regex BranchOperandsPattern();
 
-    protected RegisterID Rs { get; }
-    protected RegisterID Rt { get; }
-    protected string TargetLabel { get; }
+    protected RegisterID Rs { get; } = rs;
+    protected RegisterID Rt { get; } = rt;
+    protected string TargetLabel { get; } = targetLabel;
+
+    /// <summary>
+    /// 行番号
+    /// </summary>
+    public int SourceLine => sourceLine;
 
     /// <summary>
     /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<ProgramCounter> _previousPCs = new();
-
-    protected BranchInstruction(RegisterID rs, RegisterID rt, string targetLabel) {
-        this.Rs = rs;
-        this.Rt = rt;
-        this.TargetLabel = targetLabel;
-    }
+    private readonly Stack<InstructionIndex> _previousPCs = new();
 
     /// <summary>
     /// 分岐条件を評価する
@@ -40,12 +42,12 @@ internal abstract partial class BranchInstruction: IInstruction {
         this._previousPCs.Push(context.PC);
 
         if(this.EvaluateCondition(context)) {
-            int executionIndex = context.GetLabelExecutionIndex(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            context.PC = ProgramCounter.FromIndex(executionIndex);
+            Label executionIndex = context.ResolveLabelName(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
+            context.PC = InstructionIndex.FromAddress(executionIndex.Addr) ?? throw new AlignmentException($"Attempted branch to {executionIndex} but address is not aligned");
             context.Log($"{this.GetType().Name}: branch taken to {this.TargetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
-            context.PC = context.PC.Next;
+            context.PC++;
             context.Log($"{this.GetType().Name}: branch not taken");
         }
     }

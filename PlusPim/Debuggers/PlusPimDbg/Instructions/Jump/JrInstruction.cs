@@ -1,14 +1,17 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 
-internal sealed class JrInstruction(RegisterID rs): JumpInstruction(null) {
+internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstruction(null, lineIndex) {
     private RegisterID Rs { get; } = rs;
     private readonly Stack<CallStackFrame?> _poppedFrames = new();
 
     public override void Execute(ExecuteContext context) {
-        int targetAddress = context.Registers[this.Rs];
-        ProgramCounter target = ProgramCounter.FromAddress(targetAddress);
+        Address targetAddress = new(context.Registers[this.Rs]);
+        InstructionIndex target = InstructionIndex.FromAddress(targetAddress) ?? throw new AlignmentException($"Try jr to {context.Registers[this.Rs]} but not align");
         this.JumpTo(context, target);
 
         // コールスタックから pop
@@ -18,7 +21,7 @@ internal sealed class JrInstruction(RegisterID rs): JumpInstruction(null) {
             this._poppedFrames.Push(null);
         }
 
-        context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Index})");
+        context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Idx})");
     }
 
     public override void Undo(ExecuteContext context) {
@@ -37,10 +40,10 @@ internal sealed class JrInstruction(RegisterID rs): JumpInstruction(null) {
 internal sealed class JrInstructionParser: IInstructionParser {
     public string Mnemonic => "jr";
 
-    public bool TryParse(string operands, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(OperandParser.TryParseSingleRegOperand(operands, out RegisterID rs)) {
-            instruction = new JrInstruction(rs);
+            instruction = new JrInstruction(rs, lineIndex);
             return true;
         }
         return false;

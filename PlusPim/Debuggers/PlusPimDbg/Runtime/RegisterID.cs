@@ -1,4 +1,4 @@
-namespace PlusPim.Debuggers.PlusPimDbg;
+namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 
 /// <summary>
 /// MIPSの汎用レジスタを識別する列挙型

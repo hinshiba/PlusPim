@@ -1,3 +1,6 @@
+using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
@@ -6,7 +9,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 /// MIPSにおいてジャンプ命令を表す抽象基底クラス
 /// </summary>
 /// <remarks>すべて無条件ジャンプであることが前提であり，この派生クラスはPCの自動インクリメントは行われない</remarks>
-internal abstract class JumpInstruction(string? targetLabel): IInstruction {
+internal abstract class JumpInstruction(string? targetLabel, int sourceLine): IInstruction {
     /// <summary>
     /// ジャンプ先のラベル名
     /// jr等ラベルを使わない命令では null
@@ -14,9 +17,14 @@ internal abstract class JumpInstruction(string? targetLabel): IInstruction {
     protected string? TargetLabel { get; } = targetLabel;
 
     /// <summary>
+    /// 行番号
+    /// </summary>
+    public int SourceLine => sourceLine;
+
+    /// <summary>
     /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<ProgramCounter> _previousPCs = new();
+    private readonly Stack<InstructionIndex> _previousPCs = new();
 
     public abstract void Execute(ExecuteContext context);
     public abstract void Undo(ExecuteContext context);
@@ -24,16 +32,17 @@ internal abstract class JumpInstruction(string? targetLabel): IInstruction {
     /// <summary>
     /// ラベル名からExecutionIndexを解決してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, string label) {
-        int executionIndex = context.GetLabelExecutionIndex(label) ?? throw new InvalidOperationException($"Label '{label}' not found.");
+    protected void JumpTo(ExecuteContext context, string name) {
+        Label label = context.ResolveLabelName(name) ?? throw new InvalidOperationException($"Label '{name}' not found.");
+        InstructionIndex target = InstructionIndex.FromAddress(label.Addr) ?? throw new AlignmentException($"Try Jump to {label} but not aligned");
         this._previousPCs.Push(context.PC);
-        context.PC = ProgramCounter.FromIndex(executionIndex);
+        context.PC = target;
     }
 
     /// <summary>
     /// ProgramCounterを直接指定してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, ProgramCounter target) {
+    protected void JumpTo(ExecuteContext context, InstructionIndex target) {
         this._previousPCs.Push(context.PC);
         context.PC = target;
     }

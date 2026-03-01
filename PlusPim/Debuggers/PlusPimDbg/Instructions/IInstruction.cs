@@ -1,3 +1,5 @@
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
+
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
 /// <summary>
@@ -9,9 +11,15 @@ internal interface IInstruction {
     /// </summary>
     /// <param name="context">レジスタ，メモリ状態等を示す</param>
     void Execute(ExecuteContext context);
+
     /// <summary>
     /// 命令の逆操作を実行し，コンテキストを元に戻す
     /// </summary>
     /// <param name="context">レジスタ，メモリ状態等を示す</param>
     void Undo(ExecuteContext context);
+
+    /// <summary>
+    /// その命令のファイル上での行番号(1-index)
+    /// </summary>
+    int SourceLine { get; }
 }
