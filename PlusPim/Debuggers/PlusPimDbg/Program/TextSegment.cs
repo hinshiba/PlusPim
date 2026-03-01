@@ -11,5 +11,5 @@ internal sealed class TextSegment(List<IInstruction> instructions) {
     public static readonly Address TextSegmentBase = new(0x400000);
 
     public ReadOnlySpan<IInstruction> Instructions => this._instructions.AsSpan();
-    public readonly IInstruction[] _instructions = [.. instructions];
+    private readonly IInstruction[] _instructions = [.. instructions];
 }
