@@ -7,19 +7,16 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 
 internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstruction(null, lineIndex) {
     private RegisterID Rs { get; } = rs;
-    private readonly Stack<CallStackFrame?> _poppedFrames = new();
+    private readonly Stack<StackFrame?> _poppedFrames = new();
 
     public override void Execute(ExecuteContext context) {
         Address targetAddress = new(context.Registers[this.Rs]);
         InstructionIndex target = InstructionIndex.FromAddress(targetAddress) ?? throw new AlignmentException($"Try jr to {context.Registers[this.Rs]} but not align");
         this.JumpTo(context, target);
 
-        // コールスタックから pop
-        if(context.CallStack.Count > 0) {
-            this._poppedFrames.Push(context.CallStack.Pop());
-        } else {
-            this._poppedFrames.Push(null);
-        }
+        // コールスタックからpopを試み，Undo用にフレームを保存しておく
+        this._poppedFrames.Push(context.TryPopCallStack(target));
+
 
         context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Idx})");
     }
@@ -29,7 +26,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
 
         // popしたフレームを復元
         if(this._poppedFrames.Count > 0) {
-            CallStackFrame? frame = this._poppedFrames.Pop();
+            StackFrame? frame = this._poppedFrames.Pop();
             if(frame != null) {
                 context.CallStack.Push(frame);
             }

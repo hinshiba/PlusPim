@@ -9,25 +9,20 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
 
     public override void Execute(ExecuteContext context) {
         // ラベル解決を先行して例外時の影響を最小化
-        _ = context.ResolveLabelName(this.TargetLabel!)
+        Label label = context.ResolveLabelName(this.TargetLabel!)
             ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
 
+        // $ra変更前にレジスタスナップショット等を取得
+        context.PushCallStack(label);
 
-        // レジスタスナップショット取得（$ra変更前）
-        _ = context.Registers.Clone();
-        // string callerLabel = context.GetLabelForExecutionIndex(context.PC.Index) ?? "<unknown>";
         InstructionIndex returnPC = context.PC + 1;
-        // CallStackFrame frame = new(returnPC, callerLabel, snapshot, context.HI, context.LO);
 
-        // $ra にPC アドレス形式で次の命令アドレスを保存
+        // $raにアドレス形式で次の命令アドレスを保存
         this._previousRaValues.Push(context.Registers[RegisterID.Ra]);
         context.Registers[RegisterID.Ra] = Address.FromInstructionIndex(returnPC).Addr;
 
-        // コールスタックに push
-        // context.CallStack.Push(frame);
-
         // ジャンプ
-        this.JumpTo(context, this.TargetLabel!);
+        this.JumpTo(context, label);
         context.Log($"jal {this.TargetLabel}: $ra = 0x{Address.FromInstructionIndex(returnPC).Addr:X8}");
     }
 
