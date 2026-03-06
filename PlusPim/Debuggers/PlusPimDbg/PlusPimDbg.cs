@@ -20,13 +20,13 @@ internal class PlusPimDbg: IDebugger {
         Label? mainLabel = this._program.SymbolTable.Resolve("main");
         if(mainLabel is null) {
             log.Invoke("Warning: 'main' label not found. Starting execution at index 0.");
+            mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         } else {
             startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr) ?? new(0);
-            mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         }
 
         // コンテキスト設定
-        this._context = new ExecuteContext(log, this._program.SymbolTable, startIndex, (Label)mainLabel!);
+        this._context = new ExecuteContext(log, this._program.SymbolTable, startIndex, (Label)mainLabel);
         this._context.LoadDataSegment(this._program.DataSegment);
         this._context.Registers[RegisterID.T1] = 0xcafe; // テスト用初期値
     }
