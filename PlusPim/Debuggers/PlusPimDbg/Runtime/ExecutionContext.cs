@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex) {
+internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex, Label startLabel) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
@@ -33,9 +33,17 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// </summary>
     private readonly Dictionary<Address, byte> _memory = [];
 
+    // これより下のフィールドはデバッグのための追加情報
 
+    /// <summary>
+    /// 現在実行中の命令に属すると考えられるラベル
+    /// </summary>
+    public Label CurrentLabel { get; private set; } = startLabel;
 
-    public Stack<CallStackFrame> CallStack { get; } = new();
+    /// <summary>
+    /// コールスタックの表現
+    /// </summary>
+    public Stack<StackFrame> CallStack { get; } = new();
 
     /// <summary>
     /// ラベル名からラベルを解決する
