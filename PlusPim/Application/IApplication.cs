@@ -41,7 +41,7 @@ internal interface IApplication {
     /// <summary>
     /// コールスタックの情報を取得する
     /// </summary>
-    /// <returns><see cref="StackFrameInfo"/>の配列</returns>
+    /// <returns><see cref="StackFrameInfo"/>の配列．ライブフレームが先頭である</returns>
     StackFrameInfo[] GetCallStack();
 
     /// <summary>
