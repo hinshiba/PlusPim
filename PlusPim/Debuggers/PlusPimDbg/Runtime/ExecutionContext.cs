@@ -10,7 +10,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
-    public RegisterFile Registers { get; } = new RegisterFile();
+    public RegisterFile Registers { get; private set; } = new RegisterFile();
 
     /// <summary>
     /// プログラムカウンタ
