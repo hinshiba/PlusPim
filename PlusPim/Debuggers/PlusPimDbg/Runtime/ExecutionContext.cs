@@ -99,6 +99,22 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
         this.CallStack.Push(frame);
     }
 
+    /// <summary>
+    /// Undo等のための無条件のコールスタックからのポップ
+    /// </summary>
+    /// <param name="frame">スタックフレーム</param>
+    public void PopCallStack() {
+        _ = this.CallStack.Pop();
+    }
+
+    /// <summary>
+    /// Undo等のための無条件ラベル変更
+    /// </summary>
+    /// <param name="label"></param>
+    public void SetCurrentLabel(Label label) {
+        this.CurrentLabel = label;
+    }
+
 
     public byte ReadMemoryByte(Address address) {
         return this._memory.TryGetValue(address, out byte value) ? value : (byte)0;
