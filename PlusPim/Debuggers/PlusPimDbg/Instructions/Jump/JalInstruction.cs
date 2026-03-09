@@ -30,8 +30,8 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
         // ジャンプを戻す
         this.UndoJump(context);
 
-        // コールスタックから pop
-        //_ = context.CallStack.Pop();
+        // コールスタックを戻す
+        context.PopCallStack();
 
         // $ra を復元
         if(this._previousRaValues.Count == 0) {
