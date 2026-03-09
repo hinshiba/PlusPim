@@ -73,6 +73,14 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     }
 
     /// <summary>
+    /// Undo等のための無条件のコールスタックからのポップ
+    /// </summary>
+    /// <param name="frame">スタックフレーム</param>
+    public void PopCallStack() {
+        this.CurrentLabel = this.CallStack.Pop().Label;
+    }
+
+    /// <summary>
     /// コールスタックからpopを試みる
     /// </summary>
     /// <param name="jumpTo">ジャンプ先の命令インデックス</param>
@@ -97,14 +105,6 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// <param name="frame">スタックフレーム</param>
     public void PushCallStack(StackFrame frame) {
         this.CallStack.Push(frame);
-    }
-
-    /// <summary>
-    /// Undo等のための無条件のコールスタックからのポップ
-    /// </summary>
-    /// <param name="frame">スタックフレーム</param>
-    public void PopCallStack() {
-        _ = this.CallStack.Pop();
     }
 
     /// <summary>
