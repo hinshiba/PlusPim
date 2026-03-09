@@ -30,7 +30,6 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
             context.SetCurrentLabel(label);
             if(frame != null) {
                 context.CallStack.Push(frame);
-
             }
         }
     }
