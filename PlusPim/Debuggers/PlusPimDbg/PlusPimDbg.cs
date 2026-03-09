@@ -106,7 +106,7 @@ internal class PlusPimDbg: IDebugger {
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = this._context.CurrentLabel.Name,
-            Line = this._program.GetInstruction(this._context.PC).SourceLine,
+            Line = this.GetCurrentLine(),
             Registers = this._context.Registers.ToArray(),
             PC = Address.FromInstructionIndex(this._context.PC).Addr,
             HI = this._context.HI,
