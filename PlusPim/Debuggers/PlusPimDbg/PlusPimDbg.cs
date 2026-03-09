@@ -121,7 +121,7 @@ internal class PlusPimDbg: IDebugger {
                 Name = frame.Label.Name,
                 Line = this._program.GetInstruction(frame.CurrentPC).SourceLine,
                 Registers = frame.Registers.ToArray(),
-                PC = Address.FromInstructionIndex(this._context.PC).Addr,
+                PC = Address.FromInstructionIndex(frame.CurrentPC).Addr,
                 HI = frame.HISnapshot,
                 LO = frame.LOSnapshot
             });
