@@ -75,8 +75,12 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// <summary>
     /// Undo等のための無条件のコールスタックからのポップ
     /// </summary>
-    /// <param name="frame">スタックフレーム</param>
+    /// <exception cref="InvalidOperationException">コールスタックが空のとき．
+    /// これはjal命令のUndoが主目的であり，そのような状況どこかで誤ってpopしている以外で空となるのはありえないため例外</exception>
     public void PopCallStack() {
+        if(this.CallStack.Count == 0) {
+            throw new InvalidOperationException("Cannot pop from an empty call stack.");
+        }
         this.CurrentLabel = this.CallStack.Pop().Label;
     }
 
