@@ -8,6 +8,31 @@ namespace PlusPim.Application;
 internal class Application: IApplication {
     private IDebugger? _debugger;
     private Action<string>? _log;
+    private readonly bool _isDebug;
+
+    /// <summary>
+    /// アプリケーションのコンストラクタ
+    /// </summary>
+    /// <param name="isDebug">デバッグ起動かどうか</param>
+    /// <param name="files">すべての実行するファイル</param>
+    public Application(bool isDebug, FileInfo[] files) {
+        this._isDebug = isDebug;
+
+        // 複数ファイルへの対応はtodo
+        //foreach(FileInfo file in files) {
+        //    _ = this.Load(file.FullName);
+        //}
+
+        _ = this.Load(files[0].FullName);
+
+
+        if(!this._isDebug) {
+            // デバッグモードでない場合はすぐに実行する
+            this.Continue();
+        }
+        // デバッグモードではメソッドで操作されるのを待つ
+    }
+
 
     public void SetLogger(Action<string> log) {
         this._log = log;
