@@ -1,6 +1,5 @@
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using Newtonsoft.Json.Linq;
 using PlusPim.Application;
 
 namespace PlusPim.EditorController.DebugAdapter;
@@ -43,32 +42,18 @@ internal class DebugAdapter: DebugAdapterBase {
             Category = OutputEvent.CategoryValue.Console
         });
 
+        // ロガーの設定
         this._app.SetLogger(msg => this.Protocol.SendEvent(new OutputEvent {
             Output = msg + "\n",
             Category = OutputEvent.CategoryValue.Console
         }));
 
-        if(args.ConfigurationProperties.TryGetValue("program", out JToken? program)) {
-            // エラーハンドリングはtodo
-            _ = this._app.Load(program.Value<string>() ?? throw new InvalidOperationException("Program value is missing or null."));
 
-            // StoppedEventを送信してVariablesペインを有効化
-            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
-                ThreadId = 1,
-                AllThreadsStopped = true
-            });
-        } else {
-            this.Protocol.SendEvent(new OutputEvent {
-                Output = "program field not found in JSON\n",
-                Category = OutputEvent.CategoryValue.Console
-            });
-            // プログラムが指定されていない場合はterminatedイベントを送信
-            //this.Protocol.SendEvent(new TerminatedEvent());
-        }
-
-
-        // 即座にterminatedイベントを送信
-        //this.Protocol.SendEvent(new TerminatedEvent());
+        // StoppedEventを送信してVariablesペインを有効化
+        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
+            ThreadId = 1,
+            AllThreadsStopped = true
+        });
 
         return new LaunchResponse();
     }

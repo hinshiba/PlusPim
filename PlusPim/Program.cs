@@ -18,8 +18,17 @@ internal class Program {
             Description = "Path to the MIPS ASM File"
         };
 
-        // 指定されている場合はデバッグモードで起動する
         // 位置引数でないものはOption
+        Option<bool> verboseArg = new(
+            name: "--verbose",
+            aliases: ["-v"]
+            ) {
+            Required = false,
+            Description = "Start in verbose mode (default: false)",
+            DefaultValueFactory = (_) => false
+        };
+
+        // 指定されている場合はデバッグモードで起動する
         Option<bool> debugArg = new(
             name: "--debug",
             aliases: ["-d"]
@@ -38,6 +47,7 @@ internal class Program {
         };
 
         cmd.Arguments.Add(fileArg);
+        cmd.Options.Add(verboseArg);
         cmd.Options.Add(debugArg);
         cmd.Options.Add(portArg);
 
@@ -52,8 +62,16 @@ internal class Program {
             return 1;
         }
 
+        if(parseResult.GetValue(verboseArg)) {
+            Console.WriteLine("PlusPim: Verbose mode enabled");
+            Console.WriteLine("PlusPim: PlusPim version 0.1.0");
+        }
+
         if(parseResult.GetValue(debugArg)) {
             // デバッグモードで起動する
+            if(parseResult.GetValue(verboseArg)) {
+                Console.WriteLine("PlusPim: Debug Launch");
+            }
 
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
             Application.Application app = new(true, files);
@@ -61,9 +79,16 @@ internal class Program {
             Socket dapSocket = new(SocketType.Stream, ProtocolType.Tcp);
             dapSocket.Bind(new IPEndPoint(IPAddress.Loopback, parseResult.GetValue(portArg)));
             dapSocket.Listen();
+            if(parseResult.GetValue(verboseArg)) {
+                Console.WriteLine("PlusPim: Socket created");
+            }
 
             using Socket clientSocket = await dapSocket.AcceptAsync();
             await using NetworkStream stream = new(clientSocket, ownsSocket: true);
+
+            if(parseResult.GetValue(verboseArg)) {
+                Console.WriteLine("PlusPim: Socket connected");
+            }
 
             _ = new DebugAdapter(stream, stream, app);
         } else {

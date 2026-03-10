@@ -22,9 +22,11 @@
       {
         "type": "pluspim",
         "label": "PlusPim Debugger",
-        "program": "C:\\Users\\haruh\\Dev\\_class\\g2t4\\AvaloniaApplication1\\PlusPim\\bin\\Debug\\net10.0\\PlusPim.exe",
         "configurationAttributes": {
           "launch": {
+            "required": [
+              "program"
+            ],
             "properties": {
               "program": {
                 "type": "string",
@@ -38,7 +40,8 @@
           {
             "type": "pluspim",
             "request": "launch",
-            "name": "Minimal Launch"
+            "name": "Minimal Launch",
+            "program": "${file}"
           }
         ]
       }
