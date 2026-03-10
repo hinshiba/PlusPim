@@ -26,11 +26,8 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
 
         // popしたフレームを復元
         if(this._poppedFrames.Count > 0) {
-            (Label label, StackFrame? frame) = this._poppedFrames.Pop();
-            context.SetCurrentLabel(label);
-            if(frame != null) {
-                context.CallStack.Push(frame);
-            }
+            (Label prevLabel, StackFrame? frame) = this._poppedFrames.Pop();
+            context.UndoTryPopCallStack(prevLabel, frame);
         }
     }
 }

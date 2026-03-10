@@ -40,10 +40,12 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;
 
+    private readonly Stack<StackFrame> _callStack = new();
+
     /// <summary>
     /// コールスタックの表現
     /// </summary>
-    public Stack<StackFrame> CallStack { get; } = new();
+    public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
     /// <summary>
     /// ラベル名からラベルを解決する
@@ -68,7 +70,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// </summary>
     /// <param name="label">次に実行することになるラベル</param>
     public void PushCallStack(Label label) {
-        this.CallStack.Push(new StackFrame(this.PC, this.CurrentLabel, this.Registers.Clone(), this.HI, this.LO));
+        this._callStack.Push(new StackFrame(this.PC, this.CurrentLabel, this.Registers.Clone(), this.HI, this.LO));
         this.CurrentLabel = label;
     }
 
@@ -81,7 +83,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
         if(this.CallStack.Count == 0) {
             throw new InvalidOperationException("Cannot pop from an empty call stack.");
         }
-        this.CurrentLabel = this.CallStack.Pop().Label;
+        this.CurrentLabel = this._callStack.Pop().Label;
     }
 
     /// <summary>
@@ -92,31 +94,27 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// <remarks>ジャンプ先がスタックフレームのPC+1と一致する場合にのみpopする</remarks>
     public StackFrame? TryPopCallStack(InstructionIndex jumpTo) {
         if(this.CallStack.Count > 0) {
-            StackFrame frame = this.CallStack.Peek();
+            StackFrame frame = this._callStack.Peek();
             // ジャンプ先がスタックフレームのPC+1と一致するか確認
             if(frame.CurrentPC + 1 == jumpTo) {
                 // 実行中のサブルーチンのラベルをスタックフレームのものに戻す
                 this.CurrentLabel = frame.Label;
-                return this.CallStack.Pop();
+                return this._callStack.Pop();
             }
         }
         return null;
     }
 
     /// <summary>
-    /// Undo等のための無条件のコールスタックへのプッシュ
+    /// <see cref="TryPopCallStack"/> のUndoのためのプッシュ
     /// </summary>
-    /// <param name="frame">スタックフレーム</param>
-    public void PushCallStack(StackFrame frame) {
-        this.CallStack.Push(frame);
-    }
-
-    /// <summary>
-    /// Undo等のための無条件ラベル変更
-    /// </summary>
-    /// <param name="label"></param>
-    public void SetCurrentLabel(Label label) {
+    /// <param name="label">順方向実行前のラベル</param>
+    /// <param name="frame">復元したいスタックフレーム</param>
+    public void UndoTryPopCallStack(Label label, StackFrame? frame) {
         this.CurrentLabel = label;
+        if(frame != null) {
+            this._callStack.Push(frame);
+        }
     }
 
 
