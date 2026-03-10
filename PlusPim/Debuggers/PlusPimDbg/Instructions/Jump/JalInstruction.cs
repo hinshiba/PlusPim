@@ -31,7 +31,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
         this.UndoJump(context);
 
         // コールスタックを戻す
-        context.PopCallStack();
+        context.UndoPushCallStack();
 
         // $ra を復元
         if(this._previousRaValues.Count == 0) {
