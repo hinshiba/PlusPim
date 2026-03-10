@@ -6,11 +6,11 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex) {
+internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex, Label startLabel) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
-    public RegisterFile Registers { get; } = new RegisterFile();
+    public RegisterFile Registers { get; private set; } = new RegisterFile();
 
     /// <summary>
     /// プログラムカウンタ
@@ -33,9 +33,19 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// </summary>
     private readonly Dictionary<Address, byte> _memory = [];
 
+    // これより下のフィールドはデバッグのための追加情報
 
+    /// <summary>
+    /// 現在実行中の命令に属すると考えられるラベル
+    /// </summary>
+    public Label CurrentLabel { get; private set; } = startLabel;
 
-    public Stack<CallStackFrame> CallStack { get; } = new();
+    private readonly Stack<StackFrame> _callStack = new();
+
+    /// <summary>
+    /// コールスタックの表現
+    /// </summary>
+    public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
     /// <summary>
     /// ラベル名からラベルを解決する
@@ -55,6 +65,57 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
         }
     }
 
+    /// <summary>
+    /// コールスタックにスタックフレームを追加する
+    /// </summary>
+    /// <param name="label">次に実行することになるラベル</param>
+    public void PushCallStack(Label label) {
+        this._callStack.Push(new StackFrame(this.PC, this.CurrentLabel, this.Registers.Clone(), this.HI, this.LO));
+        this.CurrentLabel = label;
+    }
+
+    /// <summary>
+    /// Undo等のための無条件のコールスタックからのポップ
+    /// </summary>
+    /// <exception cref="InvalidOperationException">コールスタックが空のとき．
+    /// これはjal命令のUndoが主目的であり，そのような状況どこかで誤ってpopしている以外で空となるのはありえないため例外</exception>
+    public void UndoPushCallStack() {
+        if(this.CallStack.Count == 0) {
+            throw new InvalidOperationException("Cannot pop from an empty call stack.");
+        }
+        this.CurrentLabel = this._callStack.Pop().Label;
+    }
+
+    /// <summary>
+    /// コールスタックからpopを試みる
+    /// </summary>
+    /// <param name="jumpTo">ジャンプ先の命令インデックス</param>
+    /// <returns>popされたスタックフレーム．ジャンプ先がスタックフレームのPC+1と一致しない場合はnull</returns>
+    /// <remarks>ジャンプ先がスタックフレームのPC+1と一致する場合にのみpopする</remarks>
+    public StackFrame? TryPopCallStack(InstructionIndex jumpTo) {
+        if(this.CallStack.Count > 0) {
+            StackFrame frame = this._callStack.Peek();
+            // ジャンプ先がスタックフレームのPC+1と一致するか確認
+            if(frame.CurrentPC + 1 == jumpTo) {
+                // 実行中のサブルーチンのラベルをスタックフレームのものに戻す
+                this.CurrentLabel = frame.Label;
+                return this._callStack.Pop();
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// <see cref="TryPopCallStack"/> のUndoのためのプッシュ
+    /// </summary>
+    /// <param name="label">順方向実行前のラベル</param>
+    /// <param name="frame">復元したいスタックフレーム</param>
+    public void UndoTryPopCallStack(Label label, StackFrame? frame) {
+        this.CurrentLabel = label;
+        if(frame != null) {
+            this._callStack.Push(frame);
+        }
+    }
 
 
     public byte ReadMemoryByte(Address address) {

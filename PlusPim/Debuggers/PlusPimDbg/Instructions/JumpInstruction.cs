@@ -2,6 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using System.Diagnostics.CodeAnalysis;
+using Label = PlusPim.Debuggers.PlusPimDbg.Program.records.Label;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
@@ -34,9 +35,14 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// </summary>
     protected void JumpTo(ExecuteContext context, string name) {
         Label label = context.ResolveLabelName(name) ?? throw new InvalidOperationException($"Label '{name}' not found.");
-        InstructionIndex target = InstructionIndex.FromAddress(label.Addr) ?? throw new AlignmentException($"Try Jump to {label} but not aligned");
-        this._previousPCs.Push(context.PC);
-        context.PC = target;
+        this.JumpTo(context, label);
+    }
+
+    /// <summary>
+    /// ラベルを指定してジャンプする
+    /// </summary>
+    protected void JumpTo(ExecuteContext context, Label target) {
+        this.JumpTo(context, InstructionIndex.FromAddress(target.Addr) ?? throw new AlignmentException($"Try Jump to {target} but not aligned"));
     }
 
     /// <summary>

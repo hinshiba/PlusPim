@@ -20,12 +20,13 @@ internal class PlusPimDbg: IDebugger {
         Label? mainLabel = this._program.SymbolTable.Resolve("main");
         if(mainLabel is null) {
             log.Invoke("Warning: 'main' label not found. Starting execution at index 0.");
+            mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         } else {
             startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr) ?? new(0);
         }
 
         // コンテキスト設定
-        this._context = new ExecuteContext(log, this._program.SymbolTable, startIndex);
+        this._context = new ExecuteContext(log, this._program.SymbolTable, startIndex, (Label)mainLabel);
         this._context.LoadDataSegment(this._program.DataSegment);
         this._context.Registers[RegisterID.T1] = 0xcafe; // テスト用初期値
     }
@@ -96,46 +97,37 @@ internal class PlusPimDbg: IDebugger {
         return this._isTerminated;
     }
 
+    /// <summary>
+    /// コールスタックの状態を返す
+    /// </summary>
     public StackFrameInfo[] GetCallStack() {
-        throw new NotImplementedException();
+        List<StackFrameInfo> frames = [];
+
+        frames.Add(new StackFrameInfo {
+            FrameId = 1,
+            Name = this._context.CurrentLabel.Name,
+            Line = this.GetCurrentLine(),
+            Registers = this._context.Registers.ToArray(),
+            PC = Address.FromInstructionIndex(this._context.PC).Addr,
+            HI = this._context.HI,
+            LO = this._context.LO
+        });
+
+        // CallStackの各フレーム
+        int frameId = 2;
+        foreach(StackFrame frame in this._context.CallStack) {
+            frames.Add(new StackFrameInfo {
+                FrameId = frameId,
+                Name = frame.Label.Name,
+                Line = this._program.GetInstruction(frame.CurrentPC).SourceLine,
+                Registers = frame.Registers.ToArray(),
+                PC = Address.FromInstructionIndex(frame.CurrentPC).Addr,
+                HI = frame.HISnapshot,
+                LO = frame.LOSnapshot
+            });
+            frameId++;
+        }
+
+        return [.. frames];
     }
-
-    //public StackFrameInfo[] GetCallStack() {
-    //    List<StackFrameInfo> frames = [];
-
-    //    // フレーム1: 現在のフレーム（ライブレジスタ）
-    //    string currentLabel = this._program.SymbolTable.FindByIndex(this._context.PC.Index) ?? "<unknown>";
-    //    int currentLine = this._context.PC.Index < this._program.InstructionCount
-    //        ? this._program.GetSourceLine(this._context.PC.Index)
-    //        : 0;
-    //    frames.Add(new StackFrameInfo {
-    //        FrameId = 1,
-    //        Name = currentLabel,
-    //        Line = currentLine,
-    //        Registers = this._context.Registers.ToArray(),
-    //        PC = this._context.PC.Address,
-    //        HI = this._context.HI,
-    //        LO = this._context.LO
-    //    });
-
-    //    // フレーム2以降: CallStackの各フレーム（上から順）
-    //    int frameId = 2;
-    //    foreach(CallStackFrame csFrame in this._context.CallStack) {
-    //        int line = csFrame.ReturnPC.Index < this._program.InstructionCount
-    //            ? this._program.GetSourceLine(csFrame.ReturnPC.Index)
-    //            : 0;
-    //        frames.Add(new StackFrameInfo {
-    //            FrameId = frameId,
-    //            Name = csFrame.SubroutineLabel,
-    //            Line = line,
-    //            Registers = csFrame.RegisterSnapshot.ToArray(),
-    //            PC = csFrame.ReturnPC.Address,
-    //            HI = csFrame.HISnapshot,
-    //            LO = csFrame.LOSnapshot
-    //        });
-    //        frameId++;
-    //    }
-
-    //    return frames.ToArray();
-    //}
 }
