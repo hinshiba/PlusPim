@@ -18,14 +18,12 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
                 context.Log($"Syscall: print_string at address 0x{context.Registers[RegisterID.A0]:X8}");
 
                 Address readAddr = new(context.Registers[RegisterID.A0]);
-                while(true) {
-                    byte b = context.ReadMemoryByte(readAddr);
-                    if(b == 0) {
-                        break;
-                    }
-                    Console.Write((char)b);
-                    readAddr++;
+                List<byte> bytes = [];
+
+                for(byte b; (b = context.ReadMemoryByte(readAddr++)) != 0;) {
+                    bytes.Add(b);
                 }
+                Console.WriteLine(System.Text.Encoding.UTF8.GetString([.. bytes]));
                 break;
 
             case (int)SyscallCode.ReadInt:
