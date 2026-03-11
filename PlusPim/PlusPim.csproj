@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Shared.VSCodeDebugProtocol" Version="18.0.10427.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>

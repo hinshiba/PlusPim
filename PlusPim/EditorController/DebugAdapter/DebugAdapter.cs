@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using Newtonsoft.Json.Linq;
 using PlusPim.Application;
+using PlusPim.Logging;
 
 namespace PlusPim.EditorController.DebugAdapter;
 
@@ -21,14 +21,40 @@ internal class DebugAdapter: DebugAdapterBase {
     ];
 
     private readonly IApplication _app;
+    private readonly ILogger _logger;
+    private readonly TaskCompletionSource _sessionEnded = new();
+    private bool _isInit = false;
 
-    internal DebugAdapter(Stream input, Stream output, IApplication app) {
+    internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
+        this._logger = logger;
         this.InitializeProtocolClient(input, output);
         this.Protocol.Run();
+        this._logger.Debug("DebugAdapter", "Protocol client initialized and running.");
+        // エラー時の終了処理の登録
+        this.Protocol.DispatcherError += (_, _) => {
+            _ = this._sessionEnded.TrySetResult();
+            this._isInit = false;
+        };
+
+        this._logger.AddSink((LogLevel level, string source, string msg) => {
+            if(!this._isInit) {
+                // 初期化前や終了後に送信しない
+                return;
+            }
+            this.Protocol.SendEvent(new OutputEvent {
+                Output = $"[{level}][{source}] {msg}\n",
+                Category = OutputEvent.CategoryValue.Console
+            });
+        });
+    }
+
+    internal Task WaitForSessionEnd() {
+        return this._sessionEnded.Task;
     }
 
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
+        this._logger.Debug("DebugAdapter", "InitializeRequest.");
         // InitializeRequestに対してResponseを返す前は，イベントを送信してはならない
         // 返さないといけないレスポンスに，戻り値の型が設定されているので便利
         return new InitializeResponse {
@@ -37,70 +63,38 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments args) {
+        this._isInit = true;
+        this._logger.Debug("DebugAdapter", "LaunchRequest.");
 
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: LaunchRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
+        _ = this._app.Load();
+
+        // StoppedEventを送信してVariablesペインを有効化
+        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
+            ThreadId = 1,
+            AllThreadsStopped = true
         });
-
-        this._app.SetLogger(msg => this.Protocol.SendEvent(new OutputEvent {
-            Output = msg + "\n",
-            Category = OutputEvent.CategoryValue.Console
-        }));
-
-        if(args.ConfigurationProperties.TryGetValue("program", out JToken? program)) {
-            // エラーハンドリングはtodo
-            _ = this._app.Load(program.Value<string>() ?? throw new InvalidOperationException("Program value is missing or null."));
-
-            // StoppedEventを送信してVariablesペインを有効化
-            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
-                ThreadId = 1,
-                AllThreadsStopped = true
-            });
-        } else {
-            this.Protocol.SendEvent(new OutputEvent {
-                Output = "program field not found in JSON\n",
-                Category = OutputEvent.CategoryValue.Console
-            });
-            // プログラムが指定されていない場合はterminatedイベントを送信
-            //this.Protocol.SendEvent(new TerminatedEvent());
-        }
-
-
-        // 即座にterminatedイベントを送信
-        //this.Protocol.SendEvent(new TerminatedEvent());
 
         return new LaunchResponse();
     }
 
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments args) {
+        this._logger.Debug("DebugAdapter", "DisconnectRequest.");
+        _ = this._sessionEnded.TrySetResult();
 
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: DisconnectRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
+        this._isInit = false;
 
         return new DisconnectResponse();
     }
 
     protected override ThreadsResponse HandleThreadsRequest(ThreadsArguments args) {
-
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: ThreadsRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
-
+        this._logger.Debug("DebugAdapter", "ThreadsRequest.");
         return new ThreadsResponse {
             Threads = [new Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.Thread(1, "Main Thread")]
         };
     }
 
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments args) {
-
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: StackTraceRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
+        this._logger.Debug("DebugAdapter", "StackTraceRequest.");
 
         StackFrameInfo[] callStack = this._app.GetCallStack();
         List<StackFrame> dapFrames = [];
@@ -117,10 +111,7 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override ScopesResponse HandleScopesRequest(ScopesArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: ScopesRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
+        this._logger.Debug("DebugAdapter", "ScopesRequest.");
 
         int frameId = args.FrameId;
         // 安全なエンコード範囲の確認
@@ -143,10 +134,7 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override VariablesResponse HandleVariablesRequest(VariablesArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: VariablesRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
+        this._logger.Debug("DebugAdapter", "VariablesRequest.");
 
         List<Variable> variables = [];
 
@@ -175,52 +163,32 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
-
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: ContinueRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
-
+        this._logger.Debug("DebugAdapter", "ContinueRequest.");
         this._app.Continue();
         this.Protocol.SendEvent(new TerminatedEvent());
         return new ContinueResponse { AllThreadsContinued = true };
     }
 
     protected override NextResponse HandleNextRequest(NextArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: NextRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
-
+        this._logger.Debug("DebugAdapter", "NextRequest.");
         this.ExecuteSingleStep();
         return new NextResponse();
     }
 
     protected override StepInResponse HandleStepInRequest(StepInArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: StepInRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
-
+        this._logger.Debug("DebugAdapter", "StepInRequest.");
         this.ExecuteSingleStep();
         return new StepInResponse();
     }
 
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: StepOutRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
-
+        this._logger.Debug("DebugAdapter", "StepOutRequest.");
         this.ExecuteSingleStep();
         return new StepOutResponse();
     }
 
     protected override StepBackResponse HandleStepBackRequest(StepBackArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: StepBackRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
+        this._logger.Debug("DebugAdapter", "StepBackRequest.");
 
         if(!this._app.StepBack()) {
             this.Protocol.SendEvent(new OutputEvent {
@@ -238,10 +206,7 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override ReverseContinueResponse HandleReverseContinueRequest(ReverseContinueArguments args) {
-        this.Protocol.SendEvent(new OutputEvent {
-            Output = "Handler: ReverseContinueRequest.\n",
-            Category = OutputEvent.CategoryValue.Console
-        });
+        this._logger.Debug("DebugAdapter", "ReverseContinueRequest.");
 
         this._app.ReverseContinue();
 

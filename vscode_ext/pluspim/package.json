@@ -9,7 +9,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onDebug"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -22,14 +24,26 @@
       {
         "type": "pluspim",
         "label": "PlusPim Debugger",
-        "program": "C:\\Users\\haruh\\Dev\\_class\\g2t4\\AvaloniaApplication1\\PlusPim\\bin\\Debug\\net10.0\\PlusPim.exe",
         "configurationAttributes": {
           "launch": {
+            "required": [
+              "program"
+            ],
             "properties": {
               "program": {
                 "type": "string",
                 "description": "ファイルへのパス",
                 "default": "${file}"
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "通信トレースの有効化",
+                "default": false
+              },
+              "port": {
+                "type": "number",
+                "description": "DAP TCP port",
+                "default": 4711
               }
             }
           }
@@ -38,7 +52,8 @@
           {
             "type": "pluspim",
             "request": "launch",
-            "name": "Minimal Launch"
+            "name": "Minimal Launch",
+            "program": "${file}"
           }
         ]
       }

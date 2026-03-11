@@ -5,12 +5,10 @@ namespace PlusPim.Application;
 /// </summary>
 internal interface IApplication {
     /// <summary>
-    /// ログのコールバックを設定する
+    /// プログラムを読み込んで起動する
     /// </summary>
-    /// <param name="log">ロガー</param>
-    /// <remarks>この機能はLoad前に設定することが必須です</remarks>
-    void SetLogger(Action<string> log);
-    bool Load(string programPath);
+    /// <returns>成功した場合は<see langword="true"/></returns>
+    bool Load();
     (int[] Registers, int PC, int HI, int LO) GetRegisters();
     void Step();
 

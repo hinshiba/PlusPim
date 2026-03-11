@@ -1,4 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg;
+using PlusPim.Logging;
 
 namespace PlusPim.Application;
 
@@ -7,17 +8,36 @@ namespace PlusPim.Application;
 /// </summary>
 internal class Application: IApplication {
     private IDebugger? _debugger;
-    private Action<string>? _log;
+    private readonly ILogger _logger;
+    private readonly bool _isDebug;
+    private readonly FileInfo[] _files;
 
-    public void SetLogger(Action<string> log) {
-        this._log = log;
+    /// <summary>
+    /// アプリケーションのコンストラクタ
+    /// </summary>
+    /// <param name="isDebug">デバッグ起動かどうか</param>
+    /// <param name="files">すべての実行するファイル</param>
+    /// <param name="logger">ロガー</param>
+    public Application(bool isDebug, FileInfo[] files, ILogger logger) {
+        this._isDebug = isDebug;
+        this._files = files;
+        this._logger = logger;
     }
 
-    public bool Load(string programPath) {
-        if(this._log == null) {
-            return false;
+    /// <summary>
+    /// プログラムをロードする．ランタイムモードの場合はContinue()する．
+    /// </summary>
+    /// <returns>成功した場合<see langword="true"/></returns>
+    public bool Load() {
+        this._debugger = new PlusPimDbg(this._files[0].FullName, this._logger);
+
+        if(!this._isDebug) {
+            // デバッガモードでない場合はすぐに実行する
+            // ここで無限ループする可能性がある
+            this.Continue();
         }
-        this._debugger = new PlusPimDbg(programPath, this._log);
+        // デバッガモードではメソッドで操作されるのを待つ
+        this._logger.Info("Application", "Load success");
         return true;
     }
 
