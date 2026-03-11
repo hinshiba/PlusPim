@@ -27,13 +27,13 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
                 break;
 
             case (int)SyscallCode.ReadInt:
-                context.Log("Syscall: read_int to $a0");
+                context.Log("Syscall: read_int to $v0");
 
                 if(int.TryParse(Console.ReadLine(), out int value)) {
-                    context.Registers[RegisterID.A0] = value;
+                    context.Registers[RegisterID.V0] = value;
                 } else {
                     context.Log("Syscall: Invalid input for read_int, so set 0");
-                    context.Registers[RegisterID.A0] = 0;
+                    context.Registers[RegisterID.V0] = 0;
                 }
                 break;
 
