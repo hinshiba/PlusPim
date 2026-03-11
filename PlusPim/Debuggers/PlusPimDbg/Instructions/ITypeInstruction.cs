@@ -21,9 +21,9 @@ internal abstract partial class ITypeInstruction: IInstruction {
     /// </summary>
     public int SourceLine { get; }
 
-    protected ITypeInstruction(RegisterID rs, RegisterID rt, Immediate imm, int sourceLine) {
-        this.Rs = rs;
+    protected ITypeInstruction(RegisterID rt, RegisterID rs, Immediate imm, int sourceLine) {
         this.Rt = rt;
+        this.Rs = rs;
         this.Imm = imm;
         this.SourceLine = sourceLine;
     }
