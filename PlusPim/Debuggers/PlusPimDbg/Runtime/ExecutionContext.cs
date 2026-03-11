@@ -136,7 +136,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// 1バイトのメモリ書き込み
     /// </summary>
     /// <param name="address">アドレス</param>
-    /// <returns>そのアドレスの値</returns>
+    /// <param name="value">書き込む値</param>
     public void WriteMemoryByte(Address address, byte value) {
         this._memory[address] = value;
     }
