@@ -6,9 +6,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// console.log
 	// console.error
-	console.log("PlsuPim Extension was loaded.");
-	// わかりやすいように追加
-	vscode.window.showInformationMessage("Hello World from pluspim!");
+	console.log("PlusPim Extension was loaded.");
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
