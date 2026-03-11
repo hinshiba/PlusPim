@@ -23,22 +23,30 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly IApplication _app;
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
+    private bool _isInit = false;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
         this._logger = logger;
         this.InitializeProtocolClient(input, output);
         this.Protocol.Run();
+        this._logger.Debug("DebugAdapter", "Protocol client initialized and running.");
+        // エラー時の終了処理の登録
+        this.Protocol.DispatcherError += (_, _) => {
+            _ = this._sessionEnded.TrySetResult();
+            this._isInit = false;
+        };
 
         this._logger.AddSink((LogLevel level, string source, string msg) => {
+            if(!this._isInit) {
+                // 初期化前や終了後に送信しない
+                return;
+            }
             this.Protocol.SendEvent(new OutputEvent {
                 Output = $"[{level}][{source}] {msg}\n",
                 Category = OutputEvent.CategoryValue.Console
             });
         });
-
-        this._logger.Debug("DebugAdapter", "Protocol client initialized and running.");
-        this.Protocol.DispatcherError += (_, _) => this._sessionEnded.TrySetResult();
     }
 
     internal Task WaitForSessionEnd() {
@@ -55,6 +63,7 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments args) {
+        this._isInit = true;
         this._logger.Debug("DebugAdapter", "LaunchRequest.");
 
         _ = this._app.Load();
@@ -71,6 +80,9 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments args) {
         this._logger.Debug("DebugAdapter", "DisconnectRequest.");
         _ = this._sessionEnded.TrySetResult();
+
+        this._isInit = false;
+
         return new DisconnectResponse();
     }
 
