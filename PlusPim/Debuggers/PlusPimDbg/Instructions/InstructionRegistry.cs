@@ -43,6 +43,11 @@ internal sealed partial class InstructionRegistry {
         // アセンブリの行にマッチするか探索
         Match match = AssemblyLinePattern().Match(assemblyLine);
         if(!match.Success) {
+            // syscallの場合がある
+            if(SyscallInstructionParser.Mnemonic.Equals(assemblyLine)) {
+                instruction = new SyscallInstruction(lineIndex);
+                return true;
+            }
             return false;
         }
 
