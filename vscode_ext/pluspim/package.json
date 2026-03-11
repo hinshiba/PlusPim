@@ -32,6 +32,11 @@
                 "type": "string",
                 "description": "ファイルへのパス",
                 "default": "${file}"
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "通信トレースの有効化",
+                "default": false
               }
             }
           }

@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Instructions;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
@@ -29,15 +30,15 @@ internal class ParsedProgram {
     /// </summary>
     public string ProgramPath { get; }
 
-    public ParsedProgram(string programPath, Action<string> log) {
+    public ParsedProgram(string programPath, ILogger logger) {
         this.ProgramPath = Path.GetFullPath(programPath);
 
         string[] lines = File.ReadAllLines(programPath);
         // 現在のセグメント
         SegmentType currentSegment = SegmentType.Text;
 
-        TextSegmentBuilder textSegmentBuilder = new(log);
-        DataSegmentBuilder dataSegmentBuilder = new(log);
+        TextSegmentBuilder textSegmentBuilder = new(logger);
+        DataSegmentBuilder dataSegmentBuilder = new(logger);
 
         this.SymbolTable = new SymbolTable();
 
@@ -73,7 +74,7 @@ internal class ParsedProgram {
                         // 次の命令のインデックスのアドレスを設定
                         Label label = new(labelName, Address.FromInstructionIndex(textSegmentBuilder.CurrentInstructionIndex()));
                         this.SymbolTable.Add(label);
-                        log.Invoke($"Line{lineIndex + 1} {label}");
+                        logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
                         continue;
                     }
                     // 命令だった場合
@@ -86,7 +87,7 @@ internal class ParsedProgram {
                         // 次の空いている領域のアドレスを設定
                         Label label = new(labelName, dataSegmentBuilder.NextDataAddress);
                         this.SymbolTable.Add(label);
-                        log.Invoke($"Line{lineIndex + 1} {label}");
+                        logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
                         continue;
                     }
                     dataSegmentBuilder.AddLine(trimmed);

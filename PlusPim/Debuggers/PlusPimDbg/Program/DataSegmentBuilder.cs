@@ -1,11 +1,12 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 /// <summary>
 /// .dataセグメントの行を処理し、メモリイメージを構築する
 /// </summary>
-internal sealed class DataSegmentBuilder(Action<string> log) {
+internal sealed class DataSegmentBuilder(ILogger logger) {
 
 
     private readonly Dictionary<Address, byte> _memoryImage = [];
@@ -22,7 +23,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
     public void AddLine(string line) {
         // ディレクティブ処理
         if(!line.StartsWith('.')) {
-            log.Invoke($"Warning: unexpected data segment content: {line}");
+            logger.Warning("DataSegmentBuilder", $"Unexpected data segment content: {line}");
             return;
         }
 
@@ -55,7 +56,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
                 this.ProcessAlign(operands);
                 break;
             default:
-                log.Invoke($"Warning: unknown data directive: {directive}");
+                logger.Warning("DataSegmentBuilder", $"Unknown data directive: {directive}");
                 break;
         }
     }
@@ -76,7 +77,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
             } else if(this.TryParseHex(trimmedVal, out int hexVal)) {
                 this.WriteByte((byte)(hexVal & 0xFF));
             } else {
-                log.Invoke($"Warning: invalid .byte value: {trimmedVal}");
+                logger.Warning("DataSegmentBuilder", $"Invalid .byte value: {trimmedVal}");
             }
         }
     }
@@ -93,7 +94,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
             } else if(this.TryParseHex(trimmedVal, out int hexVal)) {
                 this.WriteWord(hexVal);
             } else {
-                log.Invoke($"Warning: invalid .word value: {trimmedVal}");
+                logger.Warning("DataSegmentBuilder", $"Invalid .word value: {trimmedVal}");
             }
         }
     }
@@ -103,7 +104,7 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
         int firstQuote = operands.IndexOf('"');
         int lastQuote = operands.LastIndexOf('"');
         if(firstQuote < 0 || lastQuote <= firstQuote) {
-            log.Invoke($"Warning: invalid string literal: {operands}");
+            logger.Warning("DataSegmentBuilder", $"Invalid string literal: {operands}");
             return;
         }
 
@@ -122,12 +123,12 @@ internal sealed class DataSegmentBuilder(Action<string> log) {
         string trimmed = operands.Trim();
 
         if(!int.TryParse(trimmed, out int n)) {
-            log.Invoke($"Warning: invalid .align value: {trimmed}");
+            logger.Warning("DataSegmentBuilder", $"Invalid .align value: {trimmed}");
             return;
         }
 
         if(n is < 0 or > 30) {
-            log.Invoke($"Warning: .align value out of range: {n}");
+            logger.Warning("DataSegmentBuilder", $".align value out of range: {n}");
             return;
         }
 

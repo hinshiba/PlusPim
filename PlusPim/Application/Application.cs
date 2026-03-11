@@ -1,4 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg;
+using PlusPim.Logging;
 
 namespace PlusPim.Application;
 
@@ -7,7 +8,7 @@ namespace PlusPim.Application;
 /// </summary>
 internal class Application: IApplication {
     private IDebugger? _debugger;
-    private Action<string>? _log;
+    private readonly ILogger _logger;
     private readonly bool _isDebug;
     private readonly FileInfo[] _files;
 
@@ -16,14 +17,11 @@ internal class Application: IApplication {
     /// </summary>
     /// <param name="isDebug">デバッグ起動かどうか</param>
     /// <param name="files">すべての実行するファイル</param>
-    public Application(bool isDebug, FileInfo[] files) {
+    /// <param name="logger">ロガー</param>
+    public Application(bool isDebug, FileInfo[] files, ILogger logger) {
         this._isDebug = isDebug;
         this._files = files;
-    }
-
-
-    public void SetLogger(Action<string> log) {
-        this._log = log;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -31,12 +29,7 @@ internal class Application: IApplication {
     /// </summary>
     /// <returns>成功した場合<see langword="true"/></returns>
     public bool Load() {
-
-        if(this._log == null) {
-            Console.WriteLine("Load not success");
-            throw new InvalidOperationException("Logger is not set. Please call SetLogger before Load.");
-        }
-        this._debugger = new PlusPimDbg(this._files[0].FullName, this._log);
+        this._debugger = new PlusPimDbg(this._files[0].FullName, this._logger);
 
         if(!this._isDebug) {
             // デバッガモードでない場合はすぐに実行する
@@ -44,7 +37,7 @@ internal class Application: IApplication {
             this.Continue();
         }
         // デバッガモードではメソッドで操作されるのを待つ
-        Console.WriteLine("Load success");
+        this._logger.Info("Application", "Load success");
         return true;
     }
 

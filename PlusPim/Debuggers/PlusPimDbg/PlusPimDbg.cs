@@ -3,6 +3,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instructions;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg;
 
@@ -12,21 +13,21 @@ internal class PlusPimDbg: IDebugger {
     private bool _isTerminated;
     private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
 
-    internal PlusPimDbg(string programPath, Action<string> log) {
-        this._program = new ParsedProgram(programPath, log);
+    internal PlusPimDbg(string programPath, ILogger logger) {
+        this._program = new ParsedProgram(programPath, logger);
 
         // mainがなければ暫定で0スタート
         InstructionIndex startIndex = new(0);
         Label? mainLabel = this._program.SymbolTable.Resolve("main");
         if(mainLabel is null) {
-            log.Invoke("Warning: 'main' label not found. Starting execution at index 0.");
+            logger.Warning("PlusPimDbg", "'main' label not found. Starting execution at index 0.");
             mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         } else {
             startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr) ?? new(0);
         }
 
         // コンテキスト設定
-        this._context = new ExecuteContext(log, this._program.SymbolTable, startIndex, (Label)mainLabel);
+        this._context = new ExecuteContext(logger.ToAction("Instruction"), this._program.SymbolTable, startIndex, (Label)mainLabel);
         this._context.LoadDataSegment(this._program.DataSegment);
         this._context.Registers[RegisterID.T1] = 0xcafe; // テスト用初期値
     }

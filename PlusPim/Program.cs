@@ -1,4 +1,5 @@
 using PlusPim.EditorController.DebugAdapter;
+using PlusPim.Logging;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Net;
@@ -6,7 +7,6 @@ using System.Net.Sockets;
 namespace PlusPim;
 
 internal class Program {
-
 
     private static async Task<int> Main(string[] args) {
         // コマンドライン引数処理
@@ -62,26 +62,26 @@ internal class Program {
             return 1;
         }
 
+        LogLevel minLevel = parseResult.GetValue(verboseArg) ? LogLevel.Debug : LogLevel.Info;
+        Logger logger = new(minLevel);
+        // stderrはデバッギーのものなので，verboseモードのときだけログを出す
         if(parseResult.GetValue(verboseArg)) {
-            Console.WriteLine("PlusPim: Verbose mode enabled");
-            Console.WriteLine("PlusPim: PlusPim version 0.1.1");
+            logger.AddSink((LogLevel level, string source, string msg) => Console.Error.WriteLine($"[{level}][{source}] {msg}"));
         }
+        logger.Debug("Program", "Verbose mode enabled");
+        logger.Info("Program", "PlusPim version 0.1.1");
 
         if(parseResult.GetValue(debugArg)) {
             // デバッガモードで起動する
-            if(parseResult.GetValue(verboseArg)) {
-                Console.WriteLine("PlusPim: Debug Launch");
-            }
+            logger.Debug("Program", "Debug Launch");
 
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(true, files);
+            Application.Application app = new(true, files, logger);
 
             Socket dapSocket = new(SocketType.Stream, ProtocolType.Tcp);
             dapSocket.Bind(new IPEndPoint(IPAddress.Loopback, parseResult.GetValue(portArg)));
             dapSocket.Listen();
-            if(parseResult.GetValue(verboseArg)) {
-                Console.WriteLine("PlusPim: Socket created");
-            }
+            logger.Debug("Program", "Socket created");
 
             // プローブ接続（waitForPort）を読み飛ばし，本番DAP接続を待つ
             Socket clientSocket;
@@ -90,9 +90,7 @@ internal class Program {
                 await Task.Delay(50);
                 if(clientSocket.Poll(0, SelectMode.SelectRead) && clientSocket.Available == 0) {
                     clientSocket.Dispose();
-                    if(parseResult.GetValue(verboseArg)) {
-                        Console.WriteLine("PlusPim: Probe connection discarded");
-                    }
+                    logger.Debug("Program", "Probe connection discarded");
                     continue;
                 }
                 break;
@@ -101,19 +99,17 @@ internal class Program {
             using Socket _ = clientSocket;
             await using NetworkStream stream = new(clientSocket, ownsSocket: true);
 
-            if(parseResult.GetValue(verboseArg)) {
-                Console.WriteLine("PlusPim: Socket connected");
-            }
+            logger.Debug("Program", "Socket connected");
 
-            DebugAdapter adapter = new(stream, stream, app);
+            DebugAdapter adapter = new(stream, stream, app, logger);
             await adapter.WaitForSessionEnd();
         } else {
             // 実行するだけ
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(false, files);
+            Application.Application app = new(false, files, logger);
         }
 
-        Console.WriteLine("PlusPim: Exit.");
+        logger.Info("Program", "Exit.");
         return 0;
     }
 }

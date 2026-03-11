@@ -1,9 +1,10 @@
 using PlusPim.Debuggers.PlusPimDbg.Instructions;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
-internal sealed class TextSegmentBuilder(Action<string> log) {
+internal sealed class TextSegmentBuilder(ILogger logger) {
     private readonly List<IInstruction> _instructions = [];
 
     /// <summary>
@@ -20,9 +21,9 @@ internal sealed class TextSegmentBuilder(Action<string> log) {
         // 命令をパース
         if(InstructionRegistry.Default.TryParse(line, lineIndex + 1, out IInstruction? instruction)) {
             this._instructions.Add(instruction);
-            log.Invoke($"TextSegmentBuilder: Parsed: {line}");
+            logger.Debug("TextSegmentBuilder", $"Parsed: {line}");
         } else {
-            log.Invoke($"TextSegmentBuilder: Parse failed for Instruction: {line}");
+            logger.Warning("TextSegmentBuilder", $"Parse failed for Instruction: {line}");
         }
     }
 

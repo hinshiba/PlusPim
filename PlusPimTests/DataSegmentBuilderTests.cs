@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Logging;
 using Xunit;
 
 namespace PlusPimTests;
@@ -7,8 +8,10 @@ namespace PlusPimTests;
 public class DataSegmentBuilderTests {
     private static DataSegmentBuilder MakeBuilder(out List<string> logs) {
         List<string> l = [];
+        Logger logger = new(LogLevel.Debug);
+        logger.AddSink((LogLevel level, string source, string msg) => l.Add($"[{level}] {msg}"));
         logs = l;
-        return new DataSegmentBuilder(l.Add);
+        return new DataSegmentBuilder(logger);
     }
 
     [Fact]
@@ -126,14 +129,14 @@ public class DataSegmentBuilderTests {
     public void Byte_InvalidValue_LogsWarning() {
         DataSegmentBuilder b = MakeBuilder(out List<string> logs);
         b.AddLine(".byte notanumber");
-        Assert.Contains(logs, l => l.Contains("invalid .byte value"));
+        Assert.Contains(logs, l => l.Contains("Invalid .byte value"));
     }
 
     [Fact]
     public void UnknownDirective_LogsWarning() {
         DataSegmentBuilder b = MakeBuilder(out List<string> logs);
         b.AddLine(".unknown 123");
-        Assert.Contains(logs, l => l.Contains("unknown data directive"));
+        Assert.Contains(logs, l => l.Contains("Unknown data directive"));
     }
 
     [Fact]
@@ -190,7 +193,7 @@ public class DataSegmentBuilderTests {
     public void Word_InvalidValue_LogsWarning() {
         DataSegmentBuilder b = MakeBuilder(out List<string> logs);
         b.AddLine(".word notanumber");
-        Assert.Contains(logs, l => l.Contains("invalid .word value"));
+        Assert.Contains(logs, l => l.Contains("Invalid .word value"));
     }
 
     [Fact]
