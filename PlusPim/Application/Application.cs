@@ -9,6 +9,7 @@ internal class Application: IApplication {
     private IDebugger? _debugger;
     private Action<string>? _log;
     private readonly bool _isDebug;
+    private readonly FileInfo[] _files;
 
     /// <summary>
     /// アプリケーションのコンストラクタ
@@ -17,20 +18,7 @@ internal class Application: IApplication {
     /// <param name="files">すべての実行するファイル</param>
     public Application(bool isDebug, FileInfo[] files) {
         this._isDebug = isDebug;
-
-        // 複数ファイルへの対応はtodo
-        //foreach(FileInfo file in files) {
-        //    _ = this.Load(file.FullName);
-        //}
-
-        _ = this.Load(files[0].FullName);
-
-
-        if(!this._isDebug) {
-            // デバッグモードでない場合はすぐに実行する
-            this.Continue();
-        }
-        // デバッグモードではメソッドで操作されるのを待つ
+        this._files = files;
     }
 
 
@@ -38,11 +26,25 @@ internal class Application: IApplication {
         this._log = log;
     }
 
-    public bool Load(string programPath) {
+    /// <summary>
+    /// プログラムをロードする．ランタイムモードの場合はContinue()する．
+    /// </summary>
+    /// <returns>成功した場合<see langword="true"/></returns>
+    public bool Load() {
+
         if(this._log == null) {
-            return false;
+            Console.WriteLine("Load not success");
+            throw new InvalidOperationException("Logger is not set. Please call SetLogger before Load.");
         }
-        this._debugger = new PlusPimDbg(programPath, this._log);
+        this._debugger = new PlusPimDbg(this._files[0].FullName, this._log);
+
+        if(!this._isDebug) {
+            // デバッガモードでない場合はすぐに実行する
+            // ここで無限ループする可能性がある
+            this.Continue();
+        }
+        // デバッガモードではメソッドで操作されるのを待つ
+        Console.WriteLine("Load success");
         return true;
     }
 

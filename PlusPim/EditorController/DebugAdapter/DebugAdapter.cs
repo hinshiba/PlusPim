@@ -20,14 +20,22 @@ internal class DebugAdapter: DebugAdapterBase {
     ];
 
     private readonly IApplication _app;
+    private readonly TaskCompletionSource _sessionEnded = new();
 
     internal DebugAdapter(Stream input, Stream output, IApplication app) {
         this._app = app;
         this.InitializeProtocolClient(input, output);
         this.Protocol.Run();
+        Console.WriteLine("DebugAdapter: Protocol client initialized and running.");
+        this.Protocol.DispatcherError += (_, _) => this._sessionEnded.TrySetResult();
+    }
+
+    internal Task WaitForSessionEnd() {
+        return this._sessionEnded.Task;
     }
 
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
+        Console.WriteLine("Handler: InitializeRequest.");
         // InitializeRequestに対してResponseを返す前は，イベントを送信してはならない
         // 返さないといけないレスポンスに，戻り値の型が設定されているので便利
         return new InitializeResponse {
@@ -36,7 +44,7 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments args) {
-
+        Console.WriteLine("Handler: LaunchRequest.");
         this.Protocol.SendEvent(new OutputEvent {
             Output = "Handler: LaunchRequest.\n",
             Category = OutputEvent.CategoryValue.Console
@@ -47,6 +55,9 @@ internal class DebugAdapter: DebugAdapterBase {
             Output = msg + "\n",
             Category = OutputEvent.CategoryValue.Console
         }));
+
+        // ロガーより後にしなければならない
+        _ = this._app.Load();
 
 
         // StoppedEventを送信してVariablesペインを有効化
@@ -65,6 +76,7 @@ internal class DebugAdapter: DebugAdapterBase {
             Category = OutputEvent.CategoryValue.Console
         });
 
+        _ = this._sessionEnded.TrySetResult();
         return new DisconnectResponse();
     }
 

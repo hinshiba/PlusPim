@@ -8,9 +8,14 @@ internal interface IApplication {
     /// ログのコールバックを設定する
     /// </summary>
     /// <param name="log">ロガー</param>
-    /// <remarks>この機能はLoad前に設定することが必須です</remarks>
     void SetLogger(Action<string> log);
-    bool Load(string programPath);
+
+    /// <summary>
+    /// プログラムを読み込んで起動する
+    /// </summary>
+    /// <returns>成功した場合は<see langword="true"/></returns>
+    /// <remarks>この機能は<see cref="SetLogger"/>より後に呼ぶこと</remarks>
+    bool Load();
     (int[] Registers, int PC, int HI, int LO) GetRegisters();
     void Step();
 

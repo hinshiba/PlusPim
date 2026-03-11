@@ -7,13 +7,13 @@ export function activate(context: vscode.ExtensionContext) {
 	// console.log
 	// console.error
 	console.log("PlsuPim Extension was loaded.");
+	// わかりやすいように追加
+	vscode.window.showInformationMessage("Hello World from pluspim!");
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand("pluspim.helloWorld", () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		vscode.window.showInformationMessage("Hello World from pluspim!");
 	});
 	context.subscriptions.push(disposable);
@@ -24,6 +24,21 @@ export function activate(context: vscode.ExtensionContext) {
 			"pluspim",
 			new PlusPimDescriptorFactory()
 		));
+
+
+	const output = vscode.window.createOutputChannel("PlusPim DAP Trace");
+
+	context.subscriptions.push(
+		vscode.debug.registerDebugAdapterTrackerFactory("PlusPim Trace", {
+			createDebugAdapterTracker(session) {
+				// trace有効時のみ
+				if (session.configuration.trace) {
+					output.show(true);
+					return new PlusPimTracker(output);
+				}
+				return undefined; // トラッキングしない
+			}
+		}))
 }
 
 export function deactivate() { }
@@ -73,4 +88,34 @@ function waitForPort(port: number, timeoutMs: number): Promise<void> {
 		}
 		tryConnect();
 	});
+}
+
+class PlusPimTracker implements vscode.DebugAdapterTracker {
+	private output: vscode.OutputChannel;
+
+	constructor(output: vscode.OutputChannel) {
+		this.output = output;
+	}
+
+	// VSCode → DA
+	onWillReceiveMessage(message: any): void {
+		this.output.appendLine(`>>> ${message.type}/${message.command ?? message.event ?? ""}`);
+		this.output.appendLine(JSON.stringify(message, null, 2));
+		this.output.appendLine("");
+	}
+
+	// DA → VSCode
+	onDidSendMessage(message: any): void {
+		this.output.appendLine(`<<< ${message.type}/${message.command ?? message.event ?? ""}`);
+		this.output.appendLine(JSON.stringify(message, null, 2));
+		this.output.appendLine("");
+	}
+
+	onError(error: Error): void {
+		this.output.appendLine(`!!! Error: ${error.message}`);
+	}
+
+	onExit(code: number | undefined, signal: string | undefined): void {
+		this.output.appendLine(`--- DA exited (code=${code}, signal=${signal})`);
+	}
 }
