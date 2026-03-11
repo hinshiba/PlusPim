@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	const output = vscode.window.createOutputChannel("PlusPim DAP Trace");
-
+	context.subscriptions.push(output);
 	context.subscriptions.push(
 		vscode.debug.registerDebugAdapterTrackerFactory("pluspim", {
 			createDebugAdapterTracker(session) {
