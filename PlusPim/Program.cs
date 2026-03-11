@@ -55,9 +55,8 @@ internal class Program {
         // 実際に解析
         ParseResult parseResult = cmd.Parse(args);
         if(parseResult.Errors.Count != 0) {
-            StreamWriter logWritter = new("error.log");
             foreach(ParseError parseError in parseResult.Errors) {
-                logWritter.WriteLine(parseError.Message);
+                Console.Error.WriteLine(parseError.Message);
             }
             return 1;
         }
@@ -105,6 +104,7 @@ internal class Program {
             await adapter.WaitForSessionEnd();
         } else {
             // 実行するだけ
+            throw new NotImplementedException("Non-debug mode is not implemented yet");
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
             Application.Application app = new(false, files, logger);
         }
