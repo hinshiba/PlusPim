@@ -5,8 +5,9 @@ using System.Text.RegularExpressions;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
 /// <summary>
-/// MIPSにおいてR形式の命令を表す抽象基底クラス
+/// MIPSにおいてR形式の命令のほとんどを表す抽象基底クラス
 /// </summary>
+/// <remarks>ジャンプ命令, syscall, break, トラップ命令, HiLoレジスタ関連を含まない</remarks>
 internal abstract partial class RTypeInstruction: IInstruction {
     [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rs>\w+),\s*\$(?<rt>\w+)$")]
     private static partial Regex Operands3RegPattern();
