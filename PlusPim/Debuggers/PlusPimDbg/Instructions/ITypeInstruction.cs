@@ -55,7 +55,7 @@ internal abstract partial class ITypeInstruction: IInstruction {
     /// <param name="rs">rtと同様</param>
     /// <param name="imm">即値が代入される</param>
     /// <returns><see langword="true"/>ならば解析成功</returns>
-    internal static bool TryParse2RegShamtOperands(
+    internal static bool TryParseITypeOperands(
         string operands,
         [MaybeNullWhen(false)] out RegisterID rt,
         [MaybeNullWhen(false)] out RegisterID rs,
@@ -90,7 +90,7 @@ internal abstract partial class ITypeInstruction: IInstruction {
     /// </remarks>
     /// <param name="context">レジスタを含むコンテキスト</param>
     /// <param name="value">書き込む値</param>
-    protected void WriteRd(ExecuteContext context, int value) {
+    protected void WriteRt(ExecuteContext context, int value) {
         // $zero保護
         if(this.Rt == RegisterID.Zero) {
             return;
