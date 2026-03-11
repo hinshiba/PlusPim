@@ -55,7 +55,7 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 		// ターミナルで呼んでもらう
 		const terminal = vscode.window.createTerminal({
 			name: `Debug: ${path.basename(program)}`,
-			shellPath: "D:\\dev\\_univ\\g2t4\\OOP10\\PlusPim\\bin\\Debug\\net10.0\\PlusPim.exe",
+			shellPath: path.resolve(__dirname, "../../../PlusPim/bin/Debug/net10.0/PlusPim.exe"),
 			shellArgs: ["-v", "-d", "--port", String(port), program],
 		})
 		terminal.show()
