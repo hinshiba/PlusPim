@@ -8,7 +8,7 @@ internal sealed class AddiuInstruction(RegisterID rt, RegisterID rs, Immediate i
         int rsVal = context.Registers[this.Rs];
         int result = rsVal + this.Imm;
         this.WriteRt(context, result);
-        context.Log($"addiu ${this.Rt}, ${this.Rs}, {this.Imm}: 0x{rsVal:X8} + 0x{this.Imm:X8} = 0x{result:X8}");
+        context.Log($"addiu ${this.Rt}, ${this.Rs}, {this.Imm}: 0x{rsVal:X8} + {this.Imm} = 0x{result:X8}");
     }
 }
 
