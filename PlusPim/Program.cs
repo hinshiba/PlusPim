@@ -95,7 +95,6 @@ internal class Program {
                 break;
             }
 
-            using Socket _ = clientSocket;
             await using NetworkStream stream = new(clientSocket, ownsSocket: true);
 
             logger.Debug("Program", "Socket connected");
