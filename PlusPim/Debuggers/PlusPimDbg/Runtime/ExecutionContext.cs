@@ -118,13 +118,49 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     }
 
 
+    /// <summary>
+    /// 1バイトのメモリ読み込み
+    /// </summary>
+    /// <param name="address">アドレス</param>
+    /// <returns>そのアドレスの値</returns>
     public byte ReadMemoryByte(Address address) {
         return this._memory.TryGetValue(address, out byte value) ? value : (byte)0;
     }
 
+    /// <summary>
+    /// 1バイトのメモリ書き込み
+    /// </summary>
+    /// <param name="address">アドレス</param>
+    /// <returns>そのアドレスの値</returns>
     public void WriteMemoryByte(Address address, byte value) {
         this._memory[address] = value;
     }
+
+    /// <summary>
+    /// 4バイトのメモリ読み込み
+    /// </summary>
+    /// <param name="address">アドレス</param>
+    /// <returns>そのアドレスから4バイトの値</returns>
+    public uint ReadMemoryWord(Address address) {
+        byte b0 = this._memory.TryGetValue(address, out byte v0) ? v0 : (byte)0;
+        byte b1 = this._memory.TryGetValue(address + 1, out byte v1) ? v1 : (byte)0;
+        byte b2 = this._memory.TryGetValue(address + 2, out byte v2) ? v2 : (byte)0;
+        byte b3 = this._memory.TryGetValue(address + 3, out byte v3) ? v3 : (byte)0;
+        return (uint)(b0 | (b1 << 8) | (b2 << 16) | (b3 << 24));
+    }
+
+    /// <summary>
+    /// 4バイトのメモリ書き込み
+    /// </summary>
+    /// <param name="address">アドレス</param>
+    /// <returns>そのアドレスから4バイトの値</returns>
+    public void WriteMemoryWord(Address address, uint value) {
+        this._memory[address] = (byte)(value & 0xFF);
+        this._memory[address + 1] = (byte)((value >> 8) & 0xFF);
+        this._memory[address + 2] = (byte)((value >> 16) & 0xFF);
+        this._memory[address + 3] = (byte)((value >> 24) & 0xFF);
+    }
+
 
     /// <summary>
     /// 最も基礎的なログ機能．EditorController経由で出力される
