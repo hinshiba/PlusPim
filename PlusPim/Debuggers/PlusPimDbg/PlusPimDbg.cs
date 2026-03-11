@@ -10,7 +10,6 @@ namespace PlusPim.Debuggers.PlusPimDbg;
 internal class PlusPimDbg: IDebugger {
     private readonly ExecuteContext _context;
     private readonly ParsedProgram _program;
-    private bool _isTerminated;
     private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
 
     internal PlusPimDbg(string programPath, ILogger logger) {
@@ -41,12 +40,12 @@ internal class PlusPimDbg: IDebugger {
     /// </summary>
     /// <remarks>終了状態である場合は何もしません</remarks>
     public void Step() {
-        if(this._isTerminated) {
+        if(this._context.IsTerminated) {
             return;
         }
 
         if(this._program.InstructionCount <= this._context.PC.Idx) {
-            this._isTerminated = true;
+            this._context.IsTerminated = true;
             return;
         }
 
@@ -55,14 +54,14 @@ internal class PlusPimDbg: IDebugger {
         // ブランチやジャンプならPCの変更(条件未成立時の+1を含む)は命令側の責任
         bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
         // インスタンスを履歴に保存
-        this._history.Push((instruction, this._isTerminated));
+        this._history.Push((instruction, this._context.IsTerminated));
         instruction.Execute(this._context);
         if(!modifiesPC) {
             this._context.PC++;
         }
 
         if(this._program.InstructionCount <= this._context.PC.Idx) {
-            this._isTerminated = true;
+            this._context.IsTerminated = true;
         }
     }
 
@@ -82,7 +81,7 @@ internal class PlusPimDbg: IDebugger {
         if(!modifiesPC) {
             this._context.PC--;
         }
-        this._isTerminated = wasTerminated;
+        this._context.IsTerminated = wasTerminated;
         return true;
     }
 
@@ -95,7 +94,7 @@ internal class PlusPimDbg: IDebugger {
     }
 
     public bool IsTerminated() {
-        return this._isTerminated;
+        return this._context.IsTerminated;
     }
 
     /// <summary>

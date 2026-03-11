@@ -36,6 +36,11 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     // これより下のフィールドはデバッグのための追加情報
 
     /// <summary>
+    /// プログラムの終了の有無
+    /// </summary>
+    public bool IsTerminated { get; set; } = false;
+
+    /// <summary>
     /// 現在実行中の命令に属すると考えられるラベル
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;

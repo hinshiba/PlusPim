@@ -53,7 +53,7 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
 
             case (int)SyscallCode.Exit:
                 context.Log("Syscall: exit");
-                // TODO
+                context.IsTerminated = true;
                 break;
 
             default:
