@@ -41,14 +41,14 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
                 context.Log($"Syscall: read_string to address 0x{context.Registers[RegisterID.A0]:X8}");
 
                 string input = Console.ReadLine() ?? "";
-                byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
+                byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(input)[0..context.Registers[RegisterID.A1]];
 
                 Address writeAddr = new(context.Registers[RegisterID.A0]);
                 foreach(byte b in inputBytes) {
                     context.WriteMemoryByte(writeAddr, b);
                     writeAddr++;
                 }
-                context.Registers[RegisterID.A1] = inputBytes.Length; // $a1に入力したバイト数をセット
+                context.WriteMemoryByte(writeAddr, 0); // null terminator
                 break;
 
             case (int)SyscallCode.Exit:
