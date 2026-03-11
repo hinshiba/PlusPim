@@ -48,7 +48,7 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	async createDebugAdapterDescriptor(
 		session: vscode.DebugSession
 	): Promise<vscode.DebugAdapterDescriptor> {
-		const port = 4711;
+		const port = session.configuration.port ?? 4711;
 		// vscode.DebugConfigurationの[key: string]: any
 		const program = session.configuration.program;
 

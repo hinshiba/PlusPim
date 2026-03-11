@@ -37,6 +37,11 @@
                 "type": "boolean",
                 "description": "通信トレースの有効化",
                 "default": false
+              },
+              "port": {
+                "type": "number",
+                "description": "DAP TCP port",
+                "default": 4711
               }
             }
           }
