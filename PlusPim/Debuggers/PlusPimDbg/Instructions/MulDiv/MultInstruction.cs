@@ -6,8 +6,8 @@ internal sealed class MultInstruction(RegisterID rs, RegisterID rt, int lineInde
     public override void Execute(ExecuteContext context) {
         int rsVal = context.Registers[this.Rs];
         int rtVal = context.Registers[this.Rt];
-        long result = rsVal * rtVal;
-        this.WriteHiLo(context, (int)(result >> 32), (int)(result & 0xFFFF));
+        long result = (long)rsVal * rtVal;
+        this.WriteHiLo(context, (int)(result >> 32), (int)(result & 0xFFFFFFFF));
     }
 }
 
