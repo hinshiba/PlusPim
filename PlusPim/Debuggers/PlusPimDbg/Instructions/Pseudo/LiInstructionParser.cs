@@ -51,7 +51,7 @@ internal sealed partial class LiInstructionParser: IPseudoInstructionParser {
             return false;
         }
 
-        ushort upper = (ushort)((uint)imm >>> 16);
+        ushort upper = (ushort)((uint)imm >> 16);
         ushort lower = (ushort)(imm & 0xFFFF);
 
         instructions =
