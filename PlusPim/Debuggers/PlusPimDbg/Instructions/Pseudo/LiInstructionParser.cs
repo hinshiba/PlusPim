@@ -17,7 +17,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Pseudo;
 /// </code>
 /// or
 /// <code>
-/// ori $rt, $rt, lower16(imm)
+/// ori $rt, $zero, lower16(imm)
 /// </code>
 /// </remarks>
 internal sealed partial class LiInstructionParser: IPseudoInstructionParser {
