@@ -14,7 +14,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Pseudo;
 /// sll $zero, $zero, 0
 /// </code>
 /// </remarks>
-internal sealed partial class NopInstructionParser: IPseudoInstructionParser {
+internal sealed class NopInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "nop";
 
     public int GetExpansionSize(string operands) {
