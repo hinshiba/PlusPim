@@ -76,7 +76,7 @@ internal abstract partial class ITypeInstruction: IInstruction {
             rt = rtParsed;
             rs = rsParsed;
             imm = immParsed;
-            return rt != RegisterID.Zero;
+            return true;
         }
 
         return false;
