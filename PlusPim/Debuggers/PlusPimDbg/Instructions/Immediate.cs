@@ -69,7 +69,8 @@ internal class Immediate(int value): IParsable<Immediate> {
     }
 
     public override string ToString() {
-        return $"Imm: (0x{this.Value:X})";
+        // 2バイト即値なので4桁
+        return $"0x{this.Value:X4}";
     }
 
 }
