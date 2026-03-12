@@ -49,6 +49,7 @@ internal sealed partial class LaInstructionParser: IPseudoInstructionParser {
         ushort lower = (ushort)(addr & 0xFFFF);
 
         instructions = [
+            // lui命令は下位ビットを0にするため先行する必要がある
             new LuiInstruction(rt, new Immediate(upper), lineIndex),
             new OriInstruction(rt, rt, new Immediate(lower), lineIndex),
         ];
