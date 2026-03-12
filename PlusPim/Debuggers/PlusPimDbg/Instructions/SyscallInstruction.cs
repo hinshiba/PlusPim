@@ -125,9 +125,6 @@ internal enum SyscallCode {
     Exit = 10,
 }
 
-/// <summary>
-/// Syscallのパーサー．他の命令と違いオペランドを取らないため，<see cref="InstructionRegistry"/>で特別扱いされる"/>
-/// </summary>
 internal class SyscallInstructionParser: IInstructionParser {
     public string Mnemonic => "syscall";
 
