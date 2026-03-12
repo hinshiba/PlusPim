@@ -127,7 +127,7 @@ internal abstract partial class RTypeInstruction: IInstruction {
             rd = rdParsed;
             rt = rtParsed;
             shamt = shamtParsed;
-            return rd != RegisterID.Zero;
+            return true;
         }
 
         return false;
