@@ -28,7 +28,6 @@ internal class PlusPimDbg: IDebugger {
         // コンテキスト設定
         this._context = new ExecuteContext(logger.ToAction("Instruction"), this._program.SymbolTable, startIndex, (Label)mainLabel);
         this._context.LoadDataSegment(this._program.DataSegment);
-        this._context.Registers[RegisterID.T1] = 0xcafe; // テスト用初期値
     }
 
     public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
