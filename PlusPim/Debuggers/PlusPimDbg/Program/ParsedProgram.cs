@@ -77,7 +77,6 @@ internal class ParsedProgram {
             } else if(!trimmed.StartsWith('.')) {
                 instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
             }
-            break;
         }
         // この時点でデータセグメントは構築できる
         DataSegmentBuilder dataSegmentBuilder = new(logger);
