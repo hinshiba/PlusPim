@@ -8,20 +8,21 @@ internal sealed class TextSegmentBuilder(ILogger logger) {
     private readonly List<IInstruction> _instructions = [];
 
     /// <summary>
-    /// テキストセグメントの1行を処理する
+    /// テキストセグメントの1行を解析・展開する
     /// </summary>
     /// <param name="line">トリム済みの文字列</param>
     /// <param name="lineIndex">0-baseの行番号</param>
-    public void AddLine(string line, int lineIndex) {
+    /// <param name="symbolTable">解決済みのシンボルテーブル</param>
+    public void AddLine(string line, int lineIndex, SymbolTable symbolTable) {
         // アセンブラ指令を無視
         if(line.StartsWith('.')) {
             return;
         }
 
         // 命令をパース
-        if(InstructionRegistry.Default.TryParse(line, lineIndex + 1, out IInstruction? instruction)) {
-            this._instructions.Add(instruction);
-            logger.Debug("TextSegmentBuilder", $"Parsed: {line}");
+        if(InstructionRegistry.Default.TryParseAll(line, lineIndex + 1, symbolTable, out IInstruction[]? instructions)) {
+            this._instructions.AddRange(instructions);
+            logger.Debug("TextSegmentBuilder", $"Parsed: {line} ({instructions.Length} instruction(s))");
         } else {
             logger.Warning("TextSegmentBuilder", $"Parse failed for Instruction: {line}");
         }
