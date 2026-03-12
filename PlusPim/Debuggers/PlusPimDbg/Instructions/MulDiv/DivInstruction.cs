@@ -16,7 +16,7 @@ internal sealed class DivInstructionParser: IInstructionParser {
     public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(MulDivInstruction.TryParseMulDivOperands(operands, out RegisterID rs, out RegisterID rt)) {
-            instruction = new MultInstruction(rs, rt, lineIndex);
+            instruction = new DivInstruction(rs, rt, lineIndex);
             return true;
         }
         return false;
