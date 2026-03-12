@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.IType;
 internal sealed class SltiuInstruction(RegisterID rt, RegisterID rs, Immediate imm, int lineIndex): ITypeInstruction(rt, rs, imm, lineIndex) {
     public override void Execute(ExecuteContext context) {
         int rsVal = context.Registers[this.Rs];
-        int result = (uint)rsVal < (uint)(int)this.Imm ? 1 : 0;
+        int result = (uint)rsVal < this.Imm.ToUInt() ? 1 : 0;
         this.WriteRt(context, result);
         context.Log($"sltiu ${this.Rt}, ${this.Rs}, {this.Imm}: 0x{rsVal:X8} < {this.Imm} = {result}");
     }

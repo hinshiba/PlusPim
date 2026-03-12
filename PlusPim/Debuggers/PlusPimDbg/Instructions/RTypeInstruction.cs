@@ -32,7 +32,7 @@ internal abstract partial class RTypeInstruction: IInstruction {
         this.Rd = rd;
         this.Rs = rs;
         this.Rt = rt;
-        this.Shamt = new Immediate(-1); // 使用しない
+        this.Shamt = new Immediate(0); // 使用しない
         this.SourceLine = sourceLine;
     }
 
