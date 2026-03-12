@@ -4,7 +4,7 @@ using PlusPim.Logging;
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 /// <summary>
-/// .dataセグメントの行を処理し、メモリイメージを構築する
+/// .dataセグメントの行を処理し，メモリイメージを構築する
 /// </summary>
 internal sealed class DataSegmentBuilder(ILogger logger) {
 
