@@ -54,10 +54,6 @@ internal sealed partial class InstructionRegistry {
     /// <param name="assemblyLine">アセンブリ行</param>
     /// <returns>命令数．解析不能な場合は0</returns>
     public int GetInstructionCount(string assemblyLine) {
-        if(SyscallInstructionParser.Mnemonic.Equals(assemblyLine, StringComparison.OrdinalIgnoreCase)) {
-            return 1;
-        }
-
         Match match = AssemblyLinePattern().Match(assemblyLine);
         if(!match.Success) {
             return 0;
@@ -83,11 +79,6 @@ internal sealed partial class InstructionRegistry {
         // アセンブリの行にマッチするか探索
         Match match = AssemblyLinePattern().Match(assemblyLine);
         if(!match.Success) {
-            // syscallの場合がある
-            if(SyscallInstructionParser.Mnemonic.Equals(assemblyLine)) {
-                instruction = new SyscallInstruction(lineIndex);
-                return true;
-            }
             return false;
         }
 
@@ -113,11 +104,6 @@ internal sealed partial class InstructionRegistry {
 
         Match match = AssemblyLinePattern().Match(assemblyLine);
         if(!match.Success) {
-            if(SyscallInstructionParser.Mnemonic.Equals(assemblyLine, StringComparison.OrdinalIgnoreCase)) {
-                instructions = [new SyscallInstruction(lineIndex)];
-                return true;
-            }
-
             return false;
         }
 

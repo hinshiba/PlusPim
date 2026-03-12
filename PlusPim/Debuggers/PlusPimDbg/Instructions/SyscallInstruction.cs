@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
@@ -127,6 +128,11 @@ internal enum SyscallCode {
 /// <summary>
 /// Syscallのパーサー．他の命令と違いオペランドを取らないため，<see cref="InstructionRegistry"/>で特別扱いされる"/>
 /// </summary>
-internal static class SyscallInstructionParser {
-    public static string Mnemonic => "syscall";
+internal class SyscallInstructionParser: IInstructionParser {
+    public string Mnemonic => "syscall";
+
+    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
+        instruction = new SyscallInstruction(lineIndex);
+        return true; // オペランドはないので常に成功
+    }
 }
