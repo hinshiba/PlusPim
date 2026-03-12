@@ -1,5 +1,12 @@
+.data
+msg:
+    .asciiz "Hello PlusPim!"
+
+
+.text
 main:
-    addiu $a0, $zero, 120
-    addiu $v0, $zero, 1
+    move $a0, $a0
+    la $a0, msg
+    li $v0, 4
     syscall
-    add $t0, $zero, $zero
+    nop

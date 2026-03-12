@@ -34,67 +34,75 @@ internal class ParsedProgram {
         this.ProgramPath = Path.GetFullPath(programPath);
 
         string[] lines = File.ReadAllLines(programPath);
-        // 現在のセグメント
-        SegmentType currentSegment = SegmentType.Text;
-
-        TextSegmentBuilder textSegmentBuilder = new(logger);
-        DataSegmentBuilder dataSegmentBuilder = new(logger);
-
         this.SymbolTable = new SymbolTable();
 
+
+        // 前処理: 各行をトリムして，セグメントごとに分割する
+        List<(string Trimmed, int LineIndex)> textLines = [];
+        List<(string Trimmed, int LineIndex)> dataLines = [];
+        SegmentType currentSegment = SegmentType.Text;
+
         for(int lineIndex = 0; lineIndex < lines.Length; lineIndex++) {
-            string line = lines[lineIndex];
-            // コメント除去
-            string processed = RemoveComment(line);
-
-            // 前後の空白を除去
-            string trimmed = processed.Trim();
-
-            // 空行はスキップ
-            if(string.IsNullOrEmpty(trimmed)) {
+            string processed = RemoveComment(lines[lineIndex]).Trim();
+            if(string.IsNullOrEmpty(processed)) {
                 continue;
             }
 
             // セグメント切替判定
-            if(trimmed.Equals(".data", StringComparison.OrdinalIgnoreCase)) {
+            if(processed.Equals(".data", StringComparison.OrdinalIgnoreCase)) {
                 currentSegment = SegmentType.Data;
                 continue;
             }
-            if(trimmed.Equals(".text", StringComparison.OrdinalIgnoreCase)) {
+            if(processed.Equals(".text", StringComparison.OrdinalIgnoreCase)) {
                 currentSegment = SegmentType.Text;
                 continue;
             }
 
-            // セグメント固有の処理
-            switch(currentSegment) {
-                case SegmentType.Text:
-                    // テキストセグメント内のラベルの場合
-                    if(IsLabel(trimmed)) {
-                        string labelName = trimmed[..^1]; // 末尾の `:` を除去
-                        // 次の命令のインデックスのアドレスを設定
-                        Label label = new(labelName, Address.FromInstructionIndex(textSegmentBuilder.CurrentInstructionIndex()));
-                        this.SymbolTable.Add(label);
-                        logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
-                        continue;
-                    }
-                    // 命令だった場合
-                    textSegmentBuilder.AddLine(trimmed, lineIndex);
-                    break;
-                case SegmentType.Data:
-                    // データセグメント内のラベルの場合
-                    if(IsLabel(trimmed)) {
-                        string labelName = trimmed[..^1]; // 末尾の `:` を除去
-                        // 次の空いている領域のアドレスを設定
-                        Label label = new(labelName, dataSegmentBuilder.NextDataAddress);
-                        this.SymbolTable.Add(label);
-                        logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
-                        continue;
-                    }
-                    dataSegmentBuilder.AddLine(trimmed);
-                    break;
-
+            if(currentSegment == SegmentType.Text) {
+                textLines.Add((processed, lineIndex));
+            } else {
+                dataLines.Add((processed, lineIndex));
             }
+        }
 
+        // パス1: シンボルテーブルの構築
+        // 疑似命令の展開後命令数を考慮してラベルアドレスを計算する
+        int instructionCount = 0;
+        foreach((string trimmed, int lineIndex) in textLines) {
+            if(IsLabel(trimmed)) {
+                string labelName = trimmed[..^1];
+                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount)));
+                if(this.SymbolTable.Add(label)) {
+                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
+                }
+                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
+            } else if(!trimmed.StartsWith('.')) {
+                instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
+            }
+        }
+        // この時点でデータセグメントは構築できる
+        DataSegmentBuilder dataSegmentBuilder = new(logger);
+
+        foreach((string trimmed, int lineIndex) in dataLines) {
+            if(IsLabel(trimmed)) {
+                string labelName = trimmed[..^1];
+                Label label = new(labelName, dataSegmentBuilder.NextDataAddress);
+                if(this.SymbolTable.Add(label)) {
+                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
+                }
+                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
+            } else {
+                dataSegmentBuilder.AddLine(trimmed);
+            }
+        }
+
+
+        // パス2: 完成したシンボルテーブルを使って命令をパース
+        TextSegmentBuilder textSegmentBuilder = new(logger);
+        foreach((string trimmed, int lineIndex) in textLines) {
+            if(!IsLabel(trimmed)) {
+                textSegmentBuilder.AddLine(trimmed, lineIndex, this.SymbolTable);
+            }
         }
 
         this.TextSegment = textSegmentBuilder.Build();

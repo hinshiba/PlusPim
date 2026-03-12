@@ -13,9 +13,12 @@ internal sealed class SymbolTable {
     /// ラベルを追加する
     /// </summary>
     /// <param name="label">追加するラベル</param>
+    /// <returns>同名のラベルがすでに存在していた場合は<see langword="true"/>．そうでない場合は<see langword="false"/></returns>
     /// <remarks>重複がある場合は上書きされる</remarks>
-    public void Add(Label label) {
+    public bool Add(Label label) {
+        bool isExists = this._forwardTable.ContainsKey(label.Name);
         this._forwardTable[label.Name] = label;
+        return isExists;
     }
 
     /// <summary>
