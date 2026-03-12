@@ -9,7 +9,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 /// </summary>
 /// <remarks>メモリアクセス命令, ブランチ命令, トラップ命令を含まない</remarks>
 internal abstract partial class ITypeInstruction: IInstruction {
-    [GeneratedRegex(@"^\$(?<rt>\w+),\s*\$(?<rs>\w+),\s*(?<imm>\d+)$")]
+    [GeneratedRegex(@"^\$(?<rt>\w+),\s*\$(?<rs>\w+),\s*(?<imm>\S+)$")]
     private static partial Regex OperandsItypePattern();
 
     protected RegisterID Rs { get; }

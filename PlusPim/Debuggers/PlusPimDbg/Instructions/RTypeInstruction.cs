@@ -12,7 +12,7 @@ internal abstract partial class RTypeInstruction: IInstruction {
     [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rs>\w+),\s*\$(?<rt>\w+)$")]
     private static partial Regex Operands3RegPattern();
 
-    [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rt>\w+),\s*(?<shamt>\d+)$")]
+    [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rt>\w+),\s*(?<shamt>\S+)$")]
     private static partial Regex Operands2RegShamtPattern();
 
     // オペランドのレジスタID
