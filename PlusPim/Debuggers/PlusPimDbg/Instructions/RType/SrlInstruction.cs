@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 internal sealed class SrlInstruction(RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex): RTypeInstruction(rd, rt, shamt, lineIndex) {
     public override void Execute(ExecuteContext context) {
         int rtVal = context.Registers[this.Rt];
-        int result = (int)((uint)rtVal >>> this.Shamt.ToSInt());
+        int result = (int)((uint)rtVal >> this.Shamt.ToSInt());
         this.WriteRd(context, result);
         context.Log($"srl ${this.Rd}, ${this.Rt}, {this.Shamt}: 0x{rtVal:X8} >>> {this.Shamt} = 0x{result:X8}");
     }
