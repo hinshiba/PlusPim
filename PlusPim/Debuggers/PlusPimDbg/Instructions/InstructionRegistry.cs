@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
 internal sealed partial class InstructionRegistry {
-    [GeneratedRegex(@"^(?<op>\w+)\s+(?<operands>.+)$")]
+    [GeneratedRegex(@"^(?<op>\w+)(\s+(?<operands>.+))?$")]
     private static partial Regex AssemblyLinePattern();
 
     public static InstructionRegistry Default => field ??= CreateDefault();
@@ -117,6 +117,7 @@ internal sealed partial class InstructionRegistry {
                 instructions = [new SyscallInstruction(lineIndex)];
                 return true;
             }
+
             return false;
         }
 
