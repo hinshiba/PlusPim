@@ -5,13 +5,14 @@ using System.Text.RegularExpressions;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
 /// <summary>
-/// MIPSにおいてR形式の命令を表す抽象基底クラス
+/// MIPSにおいてR形式の命令のほとんどを表す抽象基底クラス
 /// </summary>
+/// <remarks>ジャンプ命令, syscall, break, トラップ命令, HiLoレジスタ関連を含まない</remarks>
 internal abstract partial class RTypeInstruction: IInstruction {
     [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rs>\w+),\s*\$(?<rt>\w+)$")]
     private static partial Regex Operands3RegPattern();
 
-    [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rt>\w+),\s*(?<shamt>\d+)$")]
+    [GeneratedRegex(@"^\$(?<rd>\w+),\s*\$(?<rt>\w+),\s*(?<shamt>\S+)$")]
     private static partial Regex Operands2RegShamtPattern();
 
     // オペランドのレジスタID
@@ -31,7 +32,7 @@ internal abstract partial class RTypeInstruction: IInstruction {
         this.Rd = rd;
         this.Rs = rs;
         this.Rt = rt;
-        this.Shamt = new Immediate(-1); // 使用しない
+        this.Shamt = new Immediate(0); // 使用しない
         this.SourceLine = sourceLine;
     }
 
@@ -91,7 +92,7 @@ internal abstract partial class RTypeInstruction: IInstruction {
             rd = rdParsed;
             rs = rsParsed;
             rt = rtParsed;
-            return rd != RegisterID.Zero;
+            return true;
         }
 
         return false;
@@ -126,7 +127,7 @@ internal abstract partial class RTypeInstruction: IInstruction {
             rd = rdParsed;
             rt = rtParsed;
             shamt = shamtParsed;
-            return rd != RegisterID.Zero;
+            return true;
         }
 
         return false;
