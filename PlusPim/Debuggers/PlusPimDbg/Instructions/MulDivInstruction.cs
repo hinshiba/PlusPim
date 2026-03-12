@@ -62,10 +62,10 @@ internal abstract partial class MulDivInstruction: IInstruction {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rtParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rsParsed)) {
-            rt = rtParsed;
+        if(Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)
+            && Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)) {
             rs = rsParsed;
+            rt = rtParsed;
             return true;
         }
 
