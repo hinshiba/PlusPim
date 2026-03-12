@@ -4,20 +4,22 @@ using System.Globalization;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 
 /// <summary>
-/// 即値を表すクラス
+/// 2バイト即値を表すクラス
 /// </summary>
-internal class Immediate(int value): IParsable<Immediate> {
+internal class Immediate: IParsable<Immediate> {
 
-    /// <summary>
-    /// プライマリコンストラクタで初期化される即値の値
-    /// </summary>
-    public int Value { get; } = value;
+    private readonly ushort _value;
 
-    /// <summary>
-    /// intへの暗黙的型変換を提供
-    /// </summary>
-    public static implicit operator int(Immediate imm) {
-        return imm.Value;
+    public Immediate(ushort value) {
+        this._value = value;
+    }
+
+    public int ToSInt() {
+        return (short)this._value;
+    }
+
+    public uint ToUInt() {
+        return this._value;
     }
 
     public static Immediate Parse(string s, IFormatProvider? provider) {
@@ -32,45 +34,54 @@ internal class Immediate(int value): IParsable<Immediate> {
     /// 正規表現によってマッチした値を処理する前提であるので，前後の空白は取り除かれていることを想定している
     /// </remarks>
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Immediate result) {
+        result = null;
         // null または 空文字のチェック
         if(string.IsNullOrWhiteSpace(s)) {
-            result = null;
             return false;
         }
 
-        int parseResult;
-        bool parseIsSuccess;
+        ushort parseResult;
+        bool isSuccess;
         // 0x で始まる場合は16進数として処理
         if(s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
-            result = null;
             // 2文字目以降を渡す
-            // NumberStyles.HexNumber を指定
-            parseIsSuccess = int.TryParse(
+            // NumberStyles.HexNumberは空白を許可するが，trimしている前提なのでAllowHexSpecifierを使用
+            isSuccess = ushort.TryParse(
                 s[2..],
-                NumberStyles.HexNumber,
-                CultureInfo.InvariantCulture,
+                NumberStyles.AllowHexSpecifier,
+                provider,
                 out parseResult
             );
-        } else {
-            result = null;
-            // それ以外は通常の10進数として処理
-            parseIsSuccess = int.TryParse(
+        } else if(s.StartsWith('-')) {
+            // 符号あり
+            isSuccess = short.TryParse(
                 s,
                 NumberStyles.Integer,
-                CultureInfo.InvariantCulture,
+                provider,
+                out short signedResult
+            );
+            // 符号ありで成功した場合は，符号なしの値に変換して格納
+            // フラグに依存させないために，uncheckedを用いる
+            parseResult = unchecked((ushort)signedResult);
+        } else {
+            // それ以外は通常の10進数として処理
+            isSuccess = ushort.TryParse(
+                s,
+                NumberStyles.Integer,
+                provider,
                 out parseResult
             );
         }
-        if(parseIsSuccess) {
+
+        if(isSuccess) {
             result = new Immediate(parseResult);
         }
-        return parseIsSuccess;
-
+        return isSuccess;
     }
 
     public override string ToString() {
         // 2バイト即値なので4桁
-        return $"0x{this.Value:X4}";
+        return $"0x{this._value:X4}";
     }
 
 }
