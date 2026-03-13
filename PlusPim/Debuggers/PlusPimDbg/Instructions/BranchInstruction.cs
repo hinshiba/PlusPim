@@ -11,7 +11,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions;
 /// </summary>
 /// <remarks>この派生クラスはPCの自動インクリメントは行われない．条件失敗時のインクリメントはこのクラス側に責任がある</remarks>
 internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, string targetLabel, int sourceLine): IInstruction {
-    [GeneratedRegex(@"^\$(?<rs>\w+),\s*\$(?<rt>\w+),\s*(?<label>\w+)$")]
+    [GeneratedRegex(@"^\$(?<rs>\w+),\s*\$(?<rt>\w+),\s*(?<label>(\w|\$)+)$")]
     private static partial Regex BranchOperandsPattern();
 
     protected RegisterID Rs { get; } = rs;
@@ -74,6 +74,7 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
 
         Match match = BranchOperandsPattern().Match(operands);
         if(!match.Success) {
+            Console.WriteLine("not match");
             return false;
         }
 
@@ -84,7 +85,6 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
             label = match.Groups["label"].Value;
             return true;
         }
-
         return false;
     }
 }
