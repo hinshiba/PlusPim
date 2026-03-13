@@ -53,7 +53,7 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 		const program = session.configuration.program;
 		const extraArgs: string[] = session.configuration.args ?? [];
 
-		const rid = process.platform === "win32" ? "win-x64" : `linux-${process.arch}`;
+		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
 		const binPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
 
