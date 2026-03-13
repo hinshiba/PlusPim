@@ -40,6 +40,9 @@ internal sealed class DataSegmentBuilder(ILogger logger) {
         }
 
         switch(directive) {
+            case ".space":
+                this.ProcessSpace(operands);
+                break;
             case ".byte":
                 this.ProcessByte(operands);
                 break;
@@ -66,6 +69,20 @@ internal sealed class DataSegmentBuilder(ILogger logger) {
     /// </summary>
     public DataSegment Build() {
         return new DataSegment(this._memoryImage);
+    }
+
+
+    private void ProcessSpace(string operands) {
+        string trimmed = operands.Trim();
+        if(int.TryParse(trimmed, out int n)) {
+            if(n <= 0) {
+                logger.Warning("DataSegmentBuilder", $".space value cannot be negative or zero: {n}");
+                return;
+            }
+            this.NextDataAddress += n;
+        } else {
+            logger.Warning("DataSegmentBuilder", $"Invalid .space value: {trimmed}");
+        }
     }
 
     private void ProcessByte(string operands) {

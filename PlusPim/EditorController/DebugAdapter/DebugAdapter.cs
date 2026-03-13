@@ -17,7 +17,7 @@ internal class DebugAdapter: DebugAdapterBase {
         "$s0 ($16)", "$s1 ($17)", "$s2 ($18)", "$s3 ($19)",
         "$s4 ($20)", "$s5 ($21)", "$s6 ($22)", "$s7 ($23)",
         "$t8 ($24)", "$t9 ($25)", "$k0 ($26)", "$k1 ($27)",
-        "$gp ($28)", "$sp ($29)", "$s8 ($30)", "$ra ($31)"
+        "$gp ($28)", "$sp ($29)", "$fp ($30)", "$ra ($31)"
     ];
 
     private readonly IApplication _app;

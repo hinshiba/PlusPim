@@ -20,7 +20,7 @@ _fact:
     # -- 実装 --
     # n == 0 then return acc
     slti    $t0,            $a0,        1
-    bnez    $t0,            $ret__fact
+    bne     $t0,            $zero,      $ret__fact
     # n != 0
     mult    $a0,            $a1
     mflo    $a1
