@@ -174,7 +174,7 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// <param name="address">アドレス</param>
     /// <param name="val">書き込む値</param>
     /// <param name="num">書き込むバイト数</param>
-    /// <remarks><param name="val">の下位<param name="num">バイト書き込む</remarks>
+    /// <remarks><paramref name="val"/>の下位<paramref name="num"/>バイトを書き込む</remarks>
     public void WriteMemoryBytes(Address address, uint val, int num) {
         if(num is < 1 or > 4) {
             throw new ArgumentOutOfRangeException(nameof(num), "num must be between 1 and 4.");
