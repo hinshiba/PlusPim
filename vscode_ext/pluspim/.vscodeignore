@@ -6,8 +6,12 @@ src/**
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
-**/*.map
 **/*.ts
 node_modules/**
-!out/**
-!bin/**
+pnpm-lock.yaml
+testfolder/**
+scripts/**
+out/**
+!out/extension.js
+bin/win-x64/**
+bin/linux-x64/*.pdb
