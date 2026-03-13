@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using System.Buffers.Binary;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 
@@ -142,28 +143,48 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     }
 
     /// <summary>
-    /// 4バイトのメモリ読み込み
+    /// 任意のバイト数のメモリ読み込み
     /// </summary>
     /// <param name="address">アドレス</param>
-    /// <returns>そのアドレスから4バイトの値</returns>
-    public uint ReadMemoryWord(Address address) {
-        byte b0 = this._memory.TryGetValue(address, out byte v0) ? v0 : (byte)0;
-        byte b1 = this._memory.TryGetValue(address + 1, out byte v1) ? v1 : (byte)0;
-        byte b2 = this._memory.TryGetValue(address + 2, out byte v2) ? v2 : (byte)0;
-        byte b3 = this._memory.TryGetValue(address + 3, out byte v3) ? v3 : (byte)0;
-        return (uint)(b0 | (b1 << 8) | (b2 << 16) | (b3 << 24));
+    /// <param name="isSign">符号拡張をするかどうか．<see langword="false"/>ならゼロ拡張</param>
+    /// <returns>そのアドレスから任意のバイト数を読み込んで拡張した値</returns>
+    public uint ReadMemoryBytes(Address address, int num, bool isSign) {
+        if(num is < 1 or > 4) {
+            throw new ArgumentOutOfRangeException(nameof(num), "num must be between 1 and 4.");
+        }
+        Span<byte> bytes = stackalloc byte[4];
+        for(int i = 0; i < num; i++) {
+            bytes[i] = this.ReadMemoryByte(address++);
+        }
+
+        if(isSign) {
+            // 符号拡張
+            bytes[num..].Fill(
+                ((bytes[num - 1] & 0x80) != 0) // 最上位ビットが1かどうか
+                    ? (byte)0xFF
+                    : (byte)0x00
+                ); // 符号拡張
+        }
+        return BinaryPrimitives.ReadUInt32LittleEndian(bytes); // リトルエンディアンにしてくれるので逆順にする必要なし
     }
 
     /// <summary>
-    /// 4バイトのメモリ書き込み
+    /// 任意のバイト数のメモリ書き込み
     /// </summary>
     /// <param name="address">アドレス</param>
-    /// <returns>そのアドレスから4バイトの値</returns>
-    public void WriteMemoryWord(Address address, uint value) {
-        this._memory[address] = (byte)(value & 0xFF);
-        this._memory[address + 1] = (byte)((value >> 8) & 0xFF);
-        this._memory[address + 2] = (byte)((value >> 16) & 0xFF);
-        this._memory[address + 3] = (byte)((value >> 24) & 0xFF);
+    /// <param name="val">書き込む値</param>
+    /// <param name="num">書き込むバイト数</param>
+    /// <remarks><param name="val">の下位<param name="num">バイト書き込む</remarks>
+    public void WriteMemoryBytes(Address address, uint val, int num) {
+        if(num is < 1 or > 4) {
+            throw new ArgumentOutOfRangeException(nameof(num), "num must be between 1 and 4.");
+        }
+        Span<byte> bytes = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(bytes, val);
+        // リトルエンディアンにしてくれるので逆順にする必要なし
+        foreach(byte b in bytes[..num]) {
+            this._memory[address++] = b;
+        }
     }
 
 
