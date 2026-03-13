@@ -9,7 +9,10 @@
             "request": "launch",
             "name": "Minimal Launch",
             "program": "${file}",
-            "trace": true
+            "args": [
+                "-v"
+            ],
+            "trace": false
         }
     ]
 }

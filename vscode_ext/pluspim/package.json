@@ -14,12 +14,6 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "pluspim.helloWorld",
-        "title": "Hello World"
-      }
-    ],
     "debuggers": [
       {
         "type": "pluspim",
@@ -44,6 +38,14 @@
                 "type": "number",
                 "description": "DAP TCP port",
                 "default": 4711
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "追加オプション(例: [\"--verbose\"])",
+                "default": []
               }
             }
           }
@@ -60,7 +62,9 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
+    "vscode:prepublish": "pnpm run dotnet:publish:win && pnpm run dotnet:publish:linux && pnpm run compile",
+    "dotnet:publish:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Release -r win-x64 --self-contained -o ./bin/win-x64",
+    "dotnet:publish:linux": "dotnet publish ../../PlusPim/PlusPim.csproj -c Release -r linux-x64 --self-contained -o ./bin/linux-x64",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",
