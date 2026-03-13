@@ -74,7 +74,6 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
 
         Match match = BranchOperandsPattern().Match(operands);
         if(!match.Success) {
-            Console.WriteLine("not match");
             return false;
         }
 
