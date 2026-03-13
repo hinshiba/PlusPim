@@ -29,6 +29,6 @@ internal record struct Address(int Addr) {
     }
 
     public override string ToString() {
-        return $"Addr: (0x{this.Addr:X})";
+        return $"0x{this.Addr:X}";
     }
 }
