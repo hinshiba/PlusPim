@@ -75,6 +75,10 @@ internal sealed class DataSegmentBuilder(ILogger logger) {
     private void ProcessSpace(string operands) {
         string trimmed = operands.Trim();
         if(int.TryParse(trimmed, out int n)) {
+            if(n <= 0) {
+                logger.Warning("DataSegmentBuilder", $".space value cannot be negative or zero: {n}");
+                return;
+            }
             this.NextDataAddress += n;
         } else {
             logger.Warning("DataSegmentBuilder", $"Invalid .space value: {trimmed}");
