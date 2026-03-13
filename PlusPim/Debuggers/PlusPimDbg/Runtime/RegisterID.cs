@@ -6,12 +6,15 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 internal enum RegisterID {
     Zero,
     At,
+    // $v
     V0,
     V1,
+    // $a
     A0,
     A1,
     A2,
     A3,
+    // $t
     T0,
     T1,
     T2,
@@ -20,6 +23,7 @@ internal enum RegisterID {
     T5,
     T6,
     T7,
+    // $s
     S0,
     S1,
     S2,
@@ -28,12 +32,15 @@ internal enum RegisterID {
     S5,
     S6,
     S7,
+    // $t8 ~
     T8,
     T9,
+    // $k
     K0,
     K1,
+    // other
     Gp,
     Sp,
-    S8,
+    Fp,
     Ra
 }
