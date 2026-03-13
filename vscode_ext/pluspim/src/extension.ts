@@ -8,20 +8,18 @@ export function activate(context: vscode.ExtensionContext) {
 	// console.error
 	console.log("PlusPim Extension was loaded.");
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand("pluspim.helloWorld", () => {
-		vscode.window.showInformationMessage("Hello World from pluspim!");
-	});
-	context.subscriptions.push(disposable);
-
 	// 情報を設定
+	const factory = new PlusPimDescriptorFactory(context);
 	context.subscriptions.push(
-		vscode.debug.registerDebugAdapterDescriptorFactory(
-			"pluspim",
-			new PlusPimDescriptorFactory()
-		));
+		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory)
+	);
+	context.subscriptions.push(
+		vscode.debug.onDidTerminateDebugSession((session) => {
+			if (session.type === "pluspim") {
+				factory.dispose();
+			}
+		})
+	);
 
 
 	const output = vscode.window.createOutputChannel("PlusPim DAP Trace");
@@ -43,25 +41,40 @@ export function deactivate() { }
 
 
 class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
+	private terminal: vscode.Terminal | undefined;
+
+	constructor(private readonly context: vscode.ExtensionContext) {}
+
 	async createDebugAdapterDescriptor(
 		session: vscode.DebugSession
 	): Promise<vscode.DebugAdapterDescriptor> {
 		const port = session.configuration.port ?? 4711;
 		// vscode.DebugConfigurationの[key: string]: any
 		const program = session.configuration.program;
+		const extraArgs: string[] = session.configuration.args ?? [];
+
+		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
+		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
+		const binPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
 
 		// ターミナルで呼んでもらう
-		const terminal = vscode.window.createTerminal({
+		const args = ["-d", "--port", String(port), ...extraArgs, program];
+		this.terminal = vscode.window.createTerminal({
 			name: `Debug: ${path.basename(program)}`,
-			shellPath: path.resolve(__dirname, "../../../PlusPim/bin/Debug/net10.0/PlusPim.exe"),
-			shellArgs: ["-v", "-d", "--port", String(port), program],
-		})
-		terminal.show()
+			shellPath: binPath,
+			shellArgs: args,
+		});
+		this.terminal.show();
 
 		await waitForPort(port, 5000);
 
 		// TCPであることも設定
 		return new vscode.DebugAdapterServer(port);
+	}
+
+	dispose(): void {
+		this.terminal?.dispose();
+		this.terminal = undefined;
 	}
 }
 
@@ -77,7 +90,7 @@ function waitForPort(port: number, timeoutMs: number): Promise<void> {
 				resolve();
 			});
 			socket.on("error", () => {
-				if (deadline < Date.now()) {
+				if (deadline <= Date.now()) {
 					reject(new Error(`DA did not listen on port ${port} within ${timeoutMs}ms`));
 				} else {
 					setTimeout(tryConnect, 100);

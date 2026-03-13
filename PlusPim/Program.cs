@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 namespace PlusPim;
 
 internal class Program {
@@ -68,7 +69,10 @@ internal class Program {
             logger.AddSink((LogLevel level, string source, string msg) => Console.Error.WriteLine($"[{level}][{source}] {msg}"));
         }
         logger.Debug("Program", "Verbose mode enabled");
-        logger.Info("Program", "PlusPim version 0.1.1");
+        string version = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
+            .InformationalVersion;
+        logger.Info("Program", $"PlusPim version {version}");
 
         if(parseResult.GetValue(debugArg)) {
             // デバッガモードで起動する

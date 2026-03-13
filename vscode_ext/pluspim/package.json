@@ -1,25 +1,26 @@
 {
   "name": "pluspim",
-  "displayName": "pluspim",
-  "description": "",
-  "version": "0.0.1",
+  "displayName": "PlusPim",
+  "publisher": "hinshiba",
+  "description": "MIPS assembly time-travel debugger",
+  "version": "0.1.0",
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hinshiba/PlusPim"
+  },
   "engines": {
     "vscode": "^1.108.0"
   },
   "categories": [
-    "Other"
+    "Debuggers"
   ],
   "activationEvents": [
     "onDebug"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "pluspim.helloWorld",
-        "title": "Hello World"
-      }
-    ],
     "debuggers": [
       {
         "type": "pluspim",
@@ -32,18 +33,26 @@
             "properties": {
               "program": {
                 "type": "string",
-                "description": "ファイルへのパス",
+                "description": "Path to the MIPS assembly file",
                 "default": "${file}"
               },
               "trace": {
                 "type": "boolean",
-                "description": "通信トレースの有効化",
+                "description": "Enable DAP communication trace",
                 "default": false
               },
               "port": {
                 "type": "number",
                 "description": "DAP TCP port",
                 "default": 4711
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Extra arguments (e.g. [\"--verbose\"])",
+                "default": []
               }
             }
           }
@@ -61,6 +70,10 @@
   },
   "scripts": {
     "vscode:prepublish": "pnpm run compile",
+    "package:win32-x64": "node scripts/vsix.mjs win32-x64",
+    "package:linux-x64": "node scripts/vsix.mjs linux-x64",
+    "dotnet:publish:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Release -r win-x64 --self-contained -o ./bin/win-x64 -p:DebugType=none -p:DebugSymbols=false",
+    "dotnet:publish:linux": "dotnet publish ../../PlusPim/PlusPim.csproj -c Release -r linux-x64 --self-contained -o ./bin/linux-x64 -p:DebugType=none -p:DebugSymbols=false",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",
