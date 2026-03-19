@@ -4,9 +4,9 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// アドレスを表す値型
 /// </summary>
 /// <param name="Addr">アドレスとなる<see langword="int"/></param>
-internal record struct Address(int Addr) {
-    public static Address FromInstructionIndex(InstructionIndex IIdx) {
-        return new Address((IIdx.Idx * 4) + TextSegment.TextSegmentBase.Addr);
+internal record struct Address(uint Addr) {
+    public static Address FromInstructionIndex(InstructionIndex iIdx, Address baseAddr) {
+        return new Address((uint)iIdx.Idx * 4) + baseAddr;
     }
 
     public static Address operator +(Address lhs, Address rhs) {
@@ -15,7 +15,7 @@ internal record struct Address(int Addr) {
     }
 
     public static Address operator +(Address lhs, int rhs) {
-        lhs.Addr += rhs;
+        lhs.Addr += (uint)rhs;
         return lhs;
     }
 
@@ -25,7 +25,7 @@ internal record struct Address(int Addr) {
     }
 
     public static int operator %(Address lhs, int rhs) {
-        return lhs.Addr % rhs;
+        return (int)(lhs.Addr % rhs);
     }
 
     public override string ToString() {
