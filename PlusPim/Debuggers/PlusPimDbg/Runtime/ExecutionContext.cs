@@ -53,6 +53,10 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// </summary>
     public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
+    // 例外処理のためのフィールド
+
+    private CP0RegisterFile _cp0Regs = new();
+
     /// <summary>
     /// ラベル名からラベルを解決する
     /// </summary>
@@ -193,5 +197,24 @@ internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable
     /// </summary>
     public void Log(string message) {
         log.Invoke(message);
+    }
+
+
+
+    public void RaiseException(ExcCode reason, Address? badVAddr = null) {
+        this.Log($"Exception raised: {reason}");
+
+        this._cp0Regs = new CP0RegisterFile {
+            BadVAddr = badVAddr,
+            Exl = true,
+            Exc = reason,
+            Epc = this.PC
+        };
+
+
+    }
+
+    public bool IsException() {
+        return this._cp0Regs.Exl;
     }
 }

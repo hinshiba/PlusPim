@@ -55,7 +55,14 @@ internal class PlusPimDbg: IDebugger {
         // インスタンスを履歴に保存
         this._history.Push((instruction, this._context.IsTerminated));
         instruction.Execute(this._context);
-        if(!modifiesPC) {
+
+        // PC変更
+        if(this._context.IsException()) {
+            // 例外検知
+            // カーネルセグメントの0番目の命令に飛ばす
+            this._context.PC = new(0);
+        } else if(!modifiesPC) {
+            // JumpやBranchでないならPCを次に進める
             this._context.PC++;
         }
 
