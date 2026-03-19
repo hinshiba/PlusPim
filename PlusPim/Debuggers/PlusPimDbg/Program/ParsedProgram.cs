@@ -88,36 +88,8 @@ internal class ParsedProgram {
 
         // パス1: シンボルテーブルの構築
         // 疑似命令の展開後命令数を考慮してラベルアドレスを計算する
-        // テキストセグメント
-        int instructionCount = 0;
-        foreach((string trimmed, int lineIndex) in textLines) {
-            if(IsLabel(trimmed)) {
-                // ラベルをシンボルテーブルに追加
-                string labelName = trimmed[..^1];
-                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount), textSegmentBase));
-                if(this.SymbolTable.Add(label)) {
-                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
-                }
-                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
-            } else if(!trimmed.StartsWith('.')) {
-                instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
-            }
-        }
-
-        // カーネルテキストセグメント
-        int kernelInstructionCount = 0;
-        foreach((string trimmed, int lineIndex) in kernelTextLines) {
-            if(IsLabel(trimmed)) {
-                string labelName = trimmed[..^1];
-                Label label = new(labelName, Address.FromInstructionIndex(new(kernelInstructionCount), kernelTextSegmentBase));
-                if(this.SymbolTable.Add(label)) {
-                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
-                }
-                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
-            } else if(!trimmed.StartsWith('.')) {
-                kernelInstructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
-            }
-        }
+        BuildTextSegmentSymbols(textLines, textSegmentBase, logger);
+        BuildTextSegmentSymbols(kernelTextLines, kernelTextSegmentBase, logger);
 
         // データセグメント
         DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
@@ -172,6 +144,25 @@ internal class ParsedProgram {
             }
         }
         return line;
+    }
+
+    /// <summary>
+    /// テキスト系セグメントのシンボルテーブルを構築する
+    /// </summary>
+    private void BuildTextSegmentSymbols(List<(string Trimmed, int LineIndex)> lines, Address segmentBase, ILogger logger) {
+        int instructionCount = 0;
+        foreach((string trimmed, int lineIndex) in lines) {
+            if(IsLabel(trimmed)) {
+                string labelName = trimmed[..^1];
+                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount), segmentBase));
+                if(this.SymbolTable.Add(label)) {
+                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
+                }
+                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
+            } else if(!trimmed.StartsWith('.')) {
+                instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
+            }
+        }
     }
 
     /// <summary>
