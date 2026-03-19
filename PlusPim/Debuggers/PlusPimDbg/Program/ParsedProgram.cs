@@ -21,6 +21,11 @@ internal class ParsedProgram {
     public DataSegment DataSegment { get; }
 
     /// <summary>
+    /// .ktextセグメント
+    /// </summary>
+    public TextSegment KernelTextSegment { get; }
+
+    /// <summary>
     /// シンボルテーブル
     /// </summary>
     public SymbolTable SymbolTable { get; }
@@ -30,7 +35,7 @@ internal class ParsedProgram {
     /// </summary>
     public string ProgramPath { get; }
 
-    public ParsedProgram(string programPath, ILogger logger) {
+    public ParsedProgram(string programPath, Address textSegmentBase, Address dataSegmentBase, Address kernelTextSegmentBase, ILogger logger) {
         this.ProgramPath = Path.GetFullPath(programPath);
 
         string[] lines = File.ReadAllLines(programPath);
@@ -38,8 +43,12 @@ internal class ParsedProgram {
 
 
         // 前処理: 各行をトリムして，セグメントごとに分割する
+        // 現在のファイルでの
         List<(string Trimmed, int LineIndex)> textLines = [];
         List<(string Trimmed, int LineIndex)> dataLines = [];
+
+        List<(string Trimmed, int LineIndex)> kernelTextLines = [];
+
         SegmentType currentSegment = SegmentType.Text;
 
         for(int lineIndex = 0; lineIndex < lines.Length; lineIndex++) {
@@ -57,22 +66,35 @@ internal class ParsedProgram {
                 currentSegment = SegmentType.Text;
                 continue;
             }
+            if(processed.Equals(".ktext", StringComparison.OrdinalIgnoreCase)) {
+                currentSegment = SegmentType.KernelText;
+                continue;
+            }
 
-
-            if(currentSegment == SegmentType.Text) {
-                textLines.Add((processed, lineIndex));
-            } else {
-                dataLines.Add((processed, lineIndex));
+            switch(currentSegment) {
+                case SegmentType.Text:
+                    textLines.Add((processed, lineIndex));
+                    break;
+                case SegmentType.Data:
+                    dataLines.Add((processed, lineIndex));
+                    break;
+                case SegmentType.KernelText:
+                    kernelTextLines.Add((processed, lineIndex));
+                    break;
+                default:
+                    throw new Exception("cant reach here");
             }
         }
 
         // パス1: シンボルテーブルの構築
         // 疑似命令の展開後命令数を考慮してラベルアドレスを計算する
+        // テキストセグメント
         int instructionCount = 0;
         foreach((string trimmed, int lineIndex) in textLines) {
             if(IsLabel(trimmed)) {
+                // ラベルをシンボルテーブルに追加
                 string labelName = trimmed[..^1];
-                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount)));
+                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount), textSegmentBase));
                 if(this.SymbolTable.Add(label)) {
                     logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
                 }
@@ -81,9 +103,24 @@ internal class ParsedProgram {
                 instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
             }
         }
-        // この時点でデータセグメントは構築できる
-        DataSegmentBuilder dataSegmentBuilder = new(logger);
 
+        // カーネルテキストセグメント
+        int kernelInstructionCount = 0;
+        foreach((string trimmed, int lineIndex) in kernelTextLines) {
+            if(IsLabel(trimmed)) {
+                string labelName = trimmed[..^1];
+                Label label = new(labelName, Address.FromInstructionIndex(new(kernelInstructionCount), kernelTextSegmentBase));
+                if(this.SymbolTable.Add(label)) {
+                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
+                }
+                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
+            } else if(!trimmed.StartsWith('.')) {
+                kernelInstructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
+            }
+        }
+
+        // データセグメント
+        DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
         foreach((string trimmed, int lineIndex) in dataLines) {
             if(IsLabel(trimmed)) {
                 string labelName = trimmed[..^1];
@@ -99,15 +136,25 @@ internal class ParsedProgram {
 
 
         // パス2: 完成したシンボルテーブルを使って命令をパース
-        TextSegmentBuilder textSegmentBuilder = new(logger);
+        // テキストセグメント
+        TextSegmentBuilder textSegmentBuilder = new(textSegmentBase, logger);
         foreach((string trimmed, int lineIndex) in textLines) {
             if(!IsLabel(trimmed)) {
                 textSegmentBuilder.AddLine(trimmed, lineIndex, this.SymbolTable);
             }
         }
 
+        // カーネルテキストセグメント
+        TextSegmentBuilder kernelTextSegmentBuilder = new(kernelTextSegmentBase, logger);
+        foreach((string trimmed, int lineIndex) in kernelTextLines) {
+            if(!IsLabel(trimmed)) {
+                kernelTextSegmentBuilder.AddLine(trimmed, lineIndex, this.SymbolTable);
+            }
+        }
+
         this.TextSegment = textSegmentBuilder.Build();
         this.DataSegment = dataSegmentBuilder.Build();
+        this.KernelTextSegment = kernelTextSegmentBuilder.Build();
     }
 
     /// <summary>

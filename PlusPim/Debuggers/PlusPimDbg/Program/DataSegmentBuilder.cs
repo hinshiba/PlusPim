@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// <summary>
 /// .dataセグメントの行を処理し，メモリイメージを構築する
 /// </summary>
-internal sealed class DataSegmentBuilder(ILogger logger) {
+internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
 
 
     private readonly Dictionary<Address, byte> _memoryImage = [];
