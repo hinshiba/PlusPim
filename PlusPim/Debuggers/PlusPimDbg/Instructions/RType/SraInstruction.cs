@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 
 internal sealed class SraInstruction(RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex): RTypeInstruction(rd, rt, shamt, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         int rtVal = context.Registers[this.Rt];
         // シフト量が符号に影響するような値になることはないので，Shamtは符号付整数として扱う
         int result = rtVal >> this.Shamt.ToSInt();

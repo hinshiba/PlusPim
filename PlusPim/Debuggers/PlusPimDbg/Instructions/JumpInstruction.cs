@@ -27,13 +27,13 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// </summary>
     private readonly Stack<InstructionIndex> _previousPCs = new();
 
-    public abstract void Execute(ExecuteContext context);
-    public abstract void Undo(ExecuteContext context);
+    public abstract void Execute(RuntimeContext context);
+    public abstract void Undo(RuntimeContext context);
 
     /// <summary>
     /// ラベル名からExecutionIndexを解決してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, string name) {
+    protected void JumpTo(RuntimeContext context, string name) {
         Label label = context.ResolveLabelName(name) ?? throw new InvalidOperationException($"Label '{name}' not found.");
         this.JumpTo(context, label);
     }
@@ -41,14 +41,14 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// <summary>
     /// ラベルを指定してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, Label target) {
+    protected void JumpTo(RuntimeContext context, Label target) {
         this.JumpTo(context, InstructionIndex.FromAddress(target.Addr) ?? throw new AlignmentException($"Try Jump to {target} but not aligned"));
     }
 
     /// <summary>
     /// ProgramCounterを直接指定してジャンプする
     /// </summary>
-    protected void JumpTo(ExecuteContext context, InstructionIndex target) {
+    protected void JumpTo(RuntimeContext context, InstructionIndex target) {
         this._previousPCs.Push(context.PC);
         context.PC = target;
     }
@@ -56,7 +56,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// <summary>
     /// ジャンプを元に戻す
     /// </summary>
-    protected void UndoJump(ExecuteContext context) {
+    protected void UndoJump(RuntimeContext context) {
         if(this._previousPCs.Count == 0) {
             throw new InvalidOperationException("No previous PC to undo.");
         }

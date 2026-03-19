@@ -28,12 +28,12 @@ internal abstract partial class LoHiRegisterInstruction: IInstruction {
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
     protected readonly Stack<int> _prevRegValues = new();
 
-    public abstract void Execute(ExecuteContext context);
+    public abstract void Execute(RuntimeContext context);
 
     /// <summary>
     /// 命令の逆操作．Hi, Loへの書き込みか読み込みかなので，派生クラスが実装する
     /// </summary>
-    public abstract void Undo(ExecuteContext context);
+    public abstract void Undo(RuntimeContext context);
 
     /// <summary>
     /// オペランドのレジスタを指定している文字列からRegisterIDを得る

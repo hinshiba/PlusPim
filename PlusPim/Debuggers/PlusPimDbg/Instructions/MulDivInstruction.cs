@@ -31,12 +31,12 @@ internal abstract partial class MulDivInstruction: IInstruction {
     // (Hi, Lo)である．
     private readonly Stack<(int, int)> _prevHiLoValues = new();
 
-    public abstract void Execute(ExecuteContext context);
+    public abstract void Execute(RuntimeContext context);
 
     /// <summary>
     /// 命令の逆操作だが，乗除算命令ではHi Loに書き込んだ値を元に戻すだけで良い
     /// </summary>
-    public void Undo(ExecuteContext context) {
+    public void Undo(RuntimeContext context) {
         (int prevHi, int prevLo) = this._prevHiLoValues.Pop();
         context.HI = prevHi;
         context.LO = prevLo;
@@ -80,7 +80,7 @@ internal abstract partial class MulDivInstruction: IInstruction {
     /// </remarks>
     /// <param name="context">レジスタを含むコンテキスト</param>
     /// <param name="value">書き込む値</param>
-    protected void WriteHiLo(ExecuteContext context, int hi, int lo) {
+    protected void WriteHiLo(RuntimeContext context, int hi, int lo) {
         // 逆操作のために保存
         this._prevHiLoValues.Push((context.HI, context.LO));
         context.HI = hi;

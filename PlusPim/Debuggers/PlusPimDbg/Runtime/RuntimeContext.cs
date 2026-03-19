@@ -7,7 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class ExecuteContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex, Label startLabel) {
+internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex, Label startLabel) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>

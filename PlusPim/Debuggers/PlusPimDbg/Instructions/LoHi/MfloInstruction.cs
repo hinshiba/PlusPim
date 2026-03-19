@@ -4,13 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.LoHi;
 
 internal class MfloInstruction(RegisterID reg, int lineIndex): LoHiRegisterInstruction(reg, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         // undoのために保存
         this._prevRegValues.Push(context.Registers[this.Reg]);
         context.Registers[this.Reg] = context.LO;
     }
 
-    public override void Undo(ExecuteContext context) {
+    public override void Undo(RuntimeContext context) {
         context.Registers[this.Reg] = this._prevRegValues.Pop();
     }
 }

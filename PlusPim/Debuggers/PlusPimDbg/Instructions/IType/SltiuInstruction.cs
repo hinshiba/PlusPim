@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.IType;
 
 internal sealed class SltiuInstruction(RegisterID rt, RegisterID rs, Immediate imm, int lineIndex): ITypeInstruction(rt, rs, imm, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         int rsVal = context.Registers[this.Rs];
         // 符号拡張した後，符号なしで比較する
         int result = (uint)rsVal < (uint)this.Imm.ToSInt() ? 1 : 0;

@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Branch;
 
 internal sealed class BeqInstruction(RegisterID rs, RegisterID rt, string targetLabel, int lineIndex): BranchInstruction(rs, rt, targetLabel, lineIndex) {
-    protected override bool EvaluateCondition(ExecuteContext context) {
+    protected override bool EvaluateCondition(RuntimeContext context) {
         int rsVal = context.Registers[this.Rs];
         int rtVal = context.Registers[this.Rt];
         context.Log($"beq ${this.Rs}, ${this.Rt}, {this.TargetLabel}: 0x{rsVal:X8} == 0x{rtVal:X8} ? {rsVal == rtVal}");

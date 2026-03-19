@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.RType;
 
 internal sealed class SllvInstruction(RegisterID rd, RegisterID rs, RegisterID rt, int lineIndex): RTypeInstruction(rd, rs, rt, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         int rsVal = context.Registers[this.Rs];
         int rtVal = context.Registers[this.Rt];
         int result = rtVal << (rsVal & 0x1F);

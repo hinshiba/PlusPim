@@ -9,7 +9,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
     private RegisterID Rs { get; } = rs;
     private readonly Stack<(Label, StackFrame?)> _poppedFrames = new();
 
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         Label prevLabel = context.CurrentLabel;
         Address targetAddress = new(context.Registers[this.Rs]);
         InstructionIndex target = InstructionIndex.FromAddress(targetAddress) ?? throw new AlignmentException($"Try jr to {context.Registers[this.Rs]} but not align");
@@ -21,7 +21,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
         context.Log($"jr ${this.Rs}: jump to 0x{targetAddress:X8} (index {target.Idx})");
     }
 
-    public override void Undo(ExecuteContext context) {
+    public override void Undo(RuntimeContext context) {
         this.UndoJump(context);
 
         // popしたフレームを復元

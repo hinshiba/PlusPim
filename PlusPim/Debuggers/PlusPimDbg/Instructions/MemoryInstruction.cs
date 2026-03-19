@@ -50,11 +50,11 @@ internal abstract partial class MemoryInstruction: IInstruction {
     /// <summary>
     /// 実効アドレスを計算する
     /// </summary>
-    private Address ComputeAddress(ExecuteContext context) {
+    private Address ComputeAddress(RuntimeContext context) {
         return new Address(context.Registers[this.Rs] + this.Offset.ToSInt());
     }
 
-    public void Execute(ExecuteContext context) {
+    public void Execute(RuntimeContext context) {
         Address addr = this.ComputeAddress(context);
 
         // アライメントの確認
@@ -70,7 +70,7 @@ internal abstract partial class MemoryInstruction: IInstruction {
         }
     }
 
-    private void ExecuteWrite(ExecuteContext context, Address addr) {
+    private void ExecuteWrite(RuntimeContext context, Address addr) {
         context.Log($"Memory Write: {addr} <= {context.Registers[this.Rt]} (ByteNum: {this.ByteNum})");
 
         // Undoのために保存
@@ -80,7 +80,7 @@ internal abstract partial class MemoryInstruction: IInstruction {
         context.WriteMemoryBytes(addr, (uint)context.Registers[this.Rt], this.ByteNum);
     }
 
-    private void ExecuteRead(ExecuteContext context, Address addr) {
+    private void ExecuteRead(RuntimeContext context, Address addr) {
         context.Log($"Memory Read: {addr} => {this.Rt} (ByteNum: {this.ByteNum}, IsSign: {this.IsSign})");
 
         // Undoのために保存
@@ -90,7 +90,7 @@ internal abstract partial class MemoryInstruction: IInstruction {
         context.Registers[this.Rt] = (int)context.ReadMemoryBytes(addr, this.ByteNum, this.IsSign);
     }
 
-    public void Undo(ExecuteContext context) {
+    public void Undo(RuntimeContext context) {
         Address addr = this.ComputeAddress(context);
         if(this.IsWrite) {
             context.WriteMemoryBytes(addr, this._prevVal.Pop(), this.ByteNum);

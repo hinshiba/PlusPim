@@ -7,7 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.IType;
 // rt = imm << 16
 
 internal class LuiInstruction(RegisterID rt, Immediate imm, int lineIndex): ITypeInstruction(rt, RegisterID.Zero, imm, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         this.WriteRt(context, unchecked((int)(this.Imm.ToUInt() << 16)));
     }
 }

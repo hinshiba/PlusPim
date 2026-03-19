@@ -3,7 +3,7 @@ using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
 internal sealed class DivInstruction(RegisterID rs, RegisterID rt, int lineIndex): MulDivInstruction(rs, rt, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         int rsVal = context.Registers[this.Rs];
         int rtVal = context.Registers[this.Rt];
         this.WriteHiLo(context, rsVal % rtVal, rsVal / rtVal);

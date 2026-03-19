@@ -7,7 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instructions.Jump;
 internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpInstruction(targetLabel, lineIndex) {
     private readonly Stack<int> _previousRaValues = new();
 
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         // ラベル解決を先行して例外時の影響を最小化
         Label label = context.ResolveLabelName(this.TargetLabel!)
             ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
@@ -26,7 +26,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
         context.Log($"jal {this.TargetLabel}: $ra = 0x{Address.FromInstructionIndex(returnPC).Addr:X8}");
     }
 
-    public override void Undo(ExecuteContext context) {
+    public override void Undo(RuntimeContext context) {
         // ジャンプを戻す
         this.UndoJump(context);
 

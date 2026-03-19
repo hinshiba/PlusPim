@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instructions.IType;
 
 internal sealed class XoriInstruction(RegisterID rt, RegisterID rs, Immediate imm, int lineIndex): ITypeInstruction(rt, rs, imm, lineIndex) {
-    public override void Execute(ExecuteContext context) {
+    public override void Execute(RuntimeContext context) {
         int rsVal = context.Registers[this.Rs];
         int result = (int)((uint)rsVal ^ this.Imm.ToUInt());
         this.WriteRt(context, result);

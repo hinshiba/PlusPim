@@ -13,7 +13,7 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
     private readonly Stack<(Address, byte[])> _prevReadString = new();
 
 
-    public void Execute(ExecuteContext context) {
+    public void Execute(RuntimeContext context) {
         SyscallCode code = (SyscallCode)context.Registers[RegisterID.V0];
         switch(code) {
             case SyscallCode.PrintInt:
@@ -85,7 +85,7 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
         }
         this._history.Push(code);
     }
-    public void Undo(ExecuteContext context) {
+    public void Undo(RuntimeContext context) {
         switch(this._history.Pop()) {
             case SyscallCode.PrintInt:
             case SyscallCode.PrintString:

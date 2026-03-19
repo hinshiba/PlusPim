@@ -31,13 +31,13 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
     /// <summary>
     /// 分岐条件を評価する
     /// </summary>
-    protected abstract bool EvaluateCondition(ExecuteContext context);
+    protected abstract bool EvaluateCondition(RuntimeContext context);
 
     /// <summary>
     /// 分岐条件が真のときにラベル先にジャンプする
     /// </summary>
     /// <exception cref="InvalidOperationException">ラベルが解決できない場合</exception>
-    public void Execute(ExecuteContext context) {
+    public void Execute(RuntimeContext context) {
         // Undoのために現在のPCを保存
         this._previousPCs.Push(context.PC);
 
@@ -52,7 +52,7 @@ internal abstract partial class BranchInstruction(RegisterID rs, RegisterID rt, 
         }
     }
 
-    public void Undo(ExecuteContext context) {
+    public void Undo(RuntimeContext context) {
         if(this._previousPCs.Count == 0) {
             throw new InvalidOperationException("No previous PC to undo.");
         }

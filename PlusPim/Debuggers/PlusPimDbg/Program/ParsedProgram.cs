@@ -58,6 +58,7 @@ internal class ParsedProgram {
                 continue;
             }
 
+
             if(currentSegment == SegmentType.Text) {
                 textLines.Add((processed, lineIndex));
             } else {

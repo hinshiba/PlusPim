@@ -32,12 +32,12 @@ internal abstract partial class ITypeInstruction: IInstruction {
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
     private readonly Stack<int> _prevRtValues = new();
 
-    public abstract void Execute(ExecuteContext context);
+    public abstract void Execute(RuntimeContext context);
 
     /// <summary>
     /// 命令の逆操作だが，ほとんどのI形式命令ではRtに書き込んだ値を元に戻すだけで良い
     /// </summary>
-    public void Undo(ExecuteContext context) {
+    public void Undo(RuntimeContext context) {
         if(this.Rt == RegisterID.Zero) {
             return;
         }
@@ -90,7 +90,7 @@ internal abstract partial class ITypeInstruction: IInstruction {
     /// </remarks>
     /// <param name="context">レジスタを含むコンテキスト</param>
     /// <param name="value">書き込む値</param>
-    protected void WriteRt(ExecuteContext context, int value) {
+    protected void WriteRt(RuntimeContext context, int value) {
         // $zero保護
         if(this.Rt == RegisterID.Zero) {
             return;

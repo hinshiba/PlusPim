@@ -8,7 +8,7 @@ using PlusPim.Logging;
 namespace PlusPim.Debuggers.PlusPimDbg;
 
 internal class PlusPimDbg: IDebugger {
-    private readonly ExecuteContext _context;
+    private readonly RuntimeContext _context;
     private readonly ParsedProgram _program;
     private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
 
@@ -26,7 +26,7 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // コンテキスト設定
-        this._context = new ExecuteContext(logger.ToAction("Instruction"), this._program.SymbolTable, startIndex, (Label)mainLabel);
+        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._program.SymbolTable, startIndex, (Label)mainLabel);
         this._context.LoadDataSegment(this._program.DataSegment);
     }
 
