@@ -9,7 +9,7 @@ internal interface IApplication {
     /// </summary>
     /// <returns>成功した場合は<see langword="true"/></returns>
     bool Load();
-    (int[] Registers, int PC, int HI, int LO) GetRegisters();
+    (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters();
     void Step();
 
     /// <summary>

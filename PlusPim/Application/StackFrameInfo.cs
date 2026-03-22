@@ -22,7 +22,7 @@ internal sealed class StackFrameInfo {
     /// <summary>
     /// レジスタのスナップショットまたは実行中の値
     /// </summary>
-    public required int[] Registers { get; init; }
+    public required uint[] Registers { get; init; }
 
     /// <summary>
     /// プログラムカウンタの値
@@ -32,10 +32,10 @@ internal sealed class StackFrameInfo {
     /// <summary>
     /// HIレジスタの値
     /// </summary>
-    public required int HI { get; init; }
+    public required uint HI { get; init; }
 
     /// <summary>
     /// LOレジスタの値
     /// </summary>
-    public required int LO { get; init; }
+    public required uint LO { get; init; }
 }

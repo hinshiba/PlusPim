@@ -20,12 +20,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// <summary>
     /// HIレジスタ
     /// </summary>
-    public int HI { get; set; }
+    public uint HI { get; set; }
 
     /// <summary>
     /// LOレジスタ
     /// </summary>
-    public int LO { get; set; }
+    public uint LO { get; set; }
 
     /// <summary>
     /// メモリ空間の表現

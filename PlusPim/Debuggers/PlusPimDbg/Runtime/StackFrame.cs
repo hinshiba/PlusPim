@@ -5,7 +5,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 内部向けスタックフレームの情報
 /// </summary>
-internal sealed class StackFrame(InstructionIndex currentPC, Label label, RegisterFile registers, int hi, int lo) {
+internal sealed class StackFrame(InstructionIndex currentPC, Label label, RegisterFile registers, uint hi, uint lo) {
     /// <summary>
     /// 現時点でのライブPCか，jalによって凍結されたPC
     /// </summary>
@@ -24,10 +24,10 @@ internal sealed class StackFrame(InstructionIndex currentPC, Label label, Regist
     /// <summary>
     /// 上記PCに対応する時点でのHIレジスタのスナップショット
     /// </summary>
-    public int HISnapshot { get; } = hi;
+    public uint HISnapshot { get; } = hi;
 
     /// <summary>
     /// 上記PCに対応する時点でのLOレジスタのスナップショット
     /// </summary>
-    public int LOSnapshot { get; } = lo;
+    public uint LOSnapshot { get; } = lo;
 }

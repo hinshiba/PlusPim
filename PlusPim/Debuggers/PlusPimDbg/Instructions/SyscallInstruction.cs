@@ -9,7 +9,7 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
 
 
     private readonly Stack<SyscallCode> _history = new();
-    private readonly Stack<int> _prevReadInt = new();
+    private readonly Stack<uint> _prevReadInt = new();
     private readonly Stack<(Address, byte[])> _prevReadString = new();
 
 
@@ -42,7 +42,7 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
 
                 // ユーザーからの入力を整数として読み取る
                 if(int.TryParse(Console.ReadLine(), out int value)) {
-                    context.Registers[RegisterID.V0] = value;
+                    context.Registers[RegisterID.V0] = (uint)value;
                 } else {
                     context.Log("Syscall: Invalid input for read_int, so set 0");
                     context.Registers[RegisterID.V0] = 0;
@@ -53,7 +53,7 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
                 context.Log($"Syscall: read_string to address 0x{context.Registers[RegisterID.A0]:X8}");
 
                 Address writeAddr = new(context.Registers[RegisterID.A0]);
-                int maxLength = context.Registers[RegisterID.A1];
+                int maxLength = (int)context.Registers[RegisterID.A1];
 
                 // Undoのためにメモリの内容を保存
                 List<byte> prevBytes = [];

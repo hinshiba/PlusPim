@@ -30,7 +30,7 @@ internal class PlusPimDbg: IDebugger {
         this._context.LoadMemoryImage(this._programs.MemoryImage);
     }
 
-    public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
+    public (uint[] Registers, int PC, uint HI, uint LO) GetRegisters() {
         return (this._context.Registers.ToArray(), this._context.PC.Idx, this._context.HI, this._context.LO);
     }
 
