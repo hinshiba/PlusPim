@@ -54,7 +54,6 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
     // 例外処理のためのフィールド
-
     private CP0RegisterFile _cp0Regs = new();
 
     /// <summary>
@@ -201,20 +200,26 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
 
 
 
+    /// <summary>
+    /// 例外発生時の処理を行う
+    /// PCが変更され，カーネル空間へ移動する．
+    /// </summary>
+    /// <param name="reason">発生理由</param>
+    /// <param name="badVAddr">アドレスが関わる場合は，原因となったアドレス</param>
     public void RaiseException(ExcCode reason, Address? badVAddr = null) {
         this.Log($"Exception raised: {reason}");
 
         this._cp0Regs = new CP0RegisterFile {
             BadVAddr = badVAddr,
-            Exl = true,
+            Exl = true, // 実質的にカーネル空間のフラグ
             Exc = reason,
             Epc = this.PC
         };
 
-
+        this.PC = new(0);
     }
 
-    public bool IsException() {
+    public bool IsKernelMode() {
         return this._cp0Regs.Exl;
     }
 }
