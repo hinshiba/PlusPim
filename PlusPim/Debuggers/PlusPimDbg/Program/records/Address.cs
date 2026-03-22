@@ -24,6 +24,22 @@ internal record struct Address(uint Addr) {
         return val;
     }
 
+    public static bool operator <(Address lhs, Address rhs) {
+        return lhs.Addr < rhs.Addr;
+    }
+
+    public static bool operator >(Address lhs, Address rhs) {
+        return lhs.Addr > rhs.Addr;
+    }
+
+    public static bool operator <=(Address lhs, Address rhs) {
+        return lhs.Addr <= rhs.Addr;
+    }
+
+    public static bool operator >=(Address lhs, Address rhs) {
+        return lhs.Addr >= rhs.Addr;
+    }
+
     public static int operator %(Address lhs, int rhs) {
         return (int)(lhs.Addr % rhs);
     }
