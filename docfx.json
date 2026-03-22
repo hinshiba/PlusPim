@@ -1,0 +1,51 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "PlusPim/PlusPim.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "includePrivateMembers": true,
+      "filter": "filterConfig.yml",
+      "properties": {
+        "TargetFramework": "net10.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "*.{md,yml}",
+          "docs/**/*.{md,yml}",
+          "api/**/*.{md,yml}"
+        ],
+        "exclude": [
+          "filterConfig.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "PlusPim",
+      "_appTitle": "PlusPim",
+      "_enableSearch": true
+    }
+  }
+}

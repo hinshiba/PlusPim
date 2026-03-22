@@ -7,6 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// テキストセグメントを表現する
 /// </summary>
 /// <param name="instructions">命令列</param>
+/// <param name="addr">開始アドレス</param>
 /// <remarks>
 /// カーネルテキストセグメントもこのクラスで表現する
 /// </remarks>

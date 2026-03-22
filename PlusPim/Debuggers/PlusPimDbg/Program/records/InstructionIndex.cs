@@ -30,6 +30,7 @@ internal record struct InstructionIndex(int Idx) {
     /// アドレスから命令インデックスを生成する
     /// </summary>
     /// <param name="Addr">アドレス</param>
+    /// <param name="IsKernelMode">カーネルモードかどうか</param>
     /// <returns>4バイトアライメントでない場合<see langword="null"/>，または命令インデックス</returns>
     public static InstructionIndex? FromAddress(Address Addr, bool IsKernelMode) {
         return IsKernelMode

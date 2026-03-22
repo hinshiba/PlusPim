@@ -148,6 +148,7 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// 任意のバイト数のメモリ読み込み
     /// </summary>
     /// <param name="address">アドレス</param>
+    /// <param name="num">読み込むメモリ数</param>
     /// <param name="isSign">符号拡張をするかどうか．<see langword="false"/>ならゼロ拡張</param>
     /// <returns>そのアドレスから任意のバイト数を読み込んで拡張した値</returns>
     public uint ReadMemoryBytes(Address address, int num, bool isSign) {
