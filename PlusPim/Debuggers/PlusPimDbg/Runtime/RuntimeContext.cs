@@ -1,4 +1,3 @@
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using System.Buffers.Binary;
 
@@ -7,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex, Label startLabel) {
+internal sealed class RuntimeContext(Action<string> log, Func<string, InstructionIndex, bool, Label?> resolveLabel, InstructionIndex startIndex, Label startLabel) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
@@ -62,14 +61,14 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     /// <param name="name">ラベル名</param>
     /// <returns>ラベル</returns>
     public Label? ResolveLabelName(string name) {
-        return symbolTable.Resolve(name);
+        return resolveLabel(name, this.PC, this.IsKernelMode());
     }
 
     /// <summary>
-    /// DataSegmentのメモリイメージをメモリに書き込む
+    /// メモリイメージをメモリに書き込む
     /// </summary>
-    public void LoadDataSegment(DataSegment dataSegment) {
-        foreach(KeyValuePair<Address, byte> kvp in dataSegment.MemoryImage) {
+    public void LoadMemoryImage(Dictionary<Address, byte> memoryImage) {
+        foreach(KeyValuePair<Address, byte> kvp in memoryImage) {
             this._memory[kvp.Key] = kvp.Value;
         }
     }

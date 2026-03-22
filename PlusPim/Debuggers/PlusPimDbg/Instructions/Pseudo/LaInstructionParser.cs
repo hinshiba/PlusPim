@@ -44,8 +44,8 @@ internal sealed partial class LaInstructionParser: IPseudoInstructionParser {
             return false;
         }
 
-        int addr = label.Addr.Addr;
-        ushort upper = (ushort)((uint)addr >>> 16);
+        uint addr = label.Addr.Addr;
+        ushort upper = (ushort)(addr >>> 16);
         ushort lower = (ushort)(addr & 0xFFFF);
 
         instructions = [

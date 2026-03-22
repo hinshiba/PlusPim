@@ -5,8 +5,11 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// </summary>
 /// <param name="Addr">アドレスとなる<see langword="int"/></param>
 internal record struct Address(uint Addr) {
-    public static Address FromInstructionIndex(InstructionIndex iIdx, Address baseAddr) {
-        return new Address((uint)iIdx.Idx * 4) + baseAddr;
+    public static Address FromInstructionIndex(InstructionIndex iIdx, bool isKernelMode) {
+        return isKernelMode
+            ? new Address((uint)iIdx.Idx * 4) + TextSegment.KernelTextSegmentBase
+            : new Address((uint)iIdx.Idx * 4) + TextSegment.TextSegmentBase;
+
     }
 
     public static Address operator +(Address lhs, Address rhs) {
@@ -22,6 +25,11 @@ internal record struct Address(uint Addr) {
     public static Address operator ++(Address val) {
         val.Addr++;
         return val;
+    }
+
+    public static Address operator -(Address lhs, Address rhs) {
+        lhs.Addr -= rhs.Addr;
+        return lhs;
     }
 
     public static bool operator <(Address lhs, Address rhs) {

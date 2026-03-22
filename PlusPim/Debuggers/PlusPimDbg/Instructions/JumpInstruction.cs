@@ -42,7 +42,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// ラベルを指定してジャンプする
     /// </summary>
     protected void JumpTo(RuntimeContext context, Label target) {
-        this.JumpTo(context, InstructionIndex.FromAddress(target.Addr) ?? throw new AlignmentException($"Try Jump to {target} but not aligned"));
+        this.JumpTo(context, InstructionIndex.FromAddress(target.Addr, context) ?? throw new AlignmentException($"Try Jump to {target} but not aligned"));
     }
 
     /// <summary>

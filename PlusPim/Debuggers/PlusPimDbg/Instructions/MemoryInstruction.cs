@@ -51,7 +51,7 @@ internal abstract partial class MemoryInstruction: IInstruction {
     /// 実効アドレスを計算する
     /// </summary>
     private Address ComputeAddress(RuntimeContext context) {
-        return new Address(context.Registers[this.Rs] + this.Offset.ToSInt());
+        return new Address(context.Registers[this.Rs] + this.Offset.ToUInt());
     }
 
     public void Execute(RuntimeContext context) {

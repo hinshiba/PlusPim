@@ -24,7 +24,7 @@ internal sealed class TextSegment(List<IInstruction> instructions, Address addr)
     /// <summary>
     /// このインスタンスのテキストセグメントの開始アドレス
     /// </summary>
-    public readonly Address BaseAddr = addr;
+    public readonly Address BaseAddress = addr;
 
     public ReadOnlySpan<IInstruction> Instructions => this._instructions.AsSpan();
     private readonly IInstruction[] _instructions = [.. instructions];

@@ -9,25 +9,25 @@ namespace PlusPim.Debuggers.PlusPimDbg;
 
 internal class PlusPimDbg: IDebugger {
     private readonly RuntimeContext _context;
-    private readonly ParsedProgram _program;
+    private readonly ParsedPrograms _programs;
     private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
 
-    internal PlusPimDbg(string programPath, ILogger logger) {
-        this._program = new ParsedProgram(programPath, logger);
+    internal PlusPimDbg(FileInfo[] files, ILogger logger) {
+        this._programs = new ParsedPrograms(files, logger);
 
         // mainがなければ暫定で0スタート
         InstructionIndex startIndex = new(0);
-        Label? mainLabel = this._program.SymbolTable.Resolve("main");
+        Label? mainLabel = this._programs.ResolveFromAll("main");
         if(mainLabel is null) {
             logger.Warning("PlusPimDbg", "'main' label not found. Starting execution at index 0.");
             mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         } else {
-            startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr) ?? new(0);
+            startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr, TextSegment.TextSegmentBase) ?? new(0);
         }
 
         // コンテキスト設定
-        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._program.SymbolTable, startIndex, (Label)mainLabel);
-        this._context.LoadDataSegment(this._program.DataSegment);
+        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startIndex, (Label)mainLabel);
+        this._context.LoadMemoryImage(this._programs.MemoryImage);
     }
 
     public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
@@ -43,31 +43,34 @@ internal class PlusPimDbg: IDebugger {
             return;
         }
 
-        if(this._program.InstructionCount <= this._context.PC.Idx) {
-            this._context.IsTerminated = true;
-            return;
-        }
-
         // 命令を取得
-        IInstruction instruction = this._program.GetInstruction(this._context.PC);
+        IInstruction instruction = this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode());
         // ブランチやジャンプならPCの変更(条件未成立時の+1を含む)は命令側の責任
         bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
         // インスタンスを履歴に保存
         this._history.Push((instruction, this._context.IsTerminated));
-        instruction.Execute(this._context);
 
-        // PC変更
-        if(this._context.IsException()) {
-            // 例外検知
-            // カーネルセグメントの0番目の命令に飛ばす
-            this._context.PC = new(0);
-        } else if(!modifiesPC) {
-            // JumpやBranchでないならPCを次に進める
+        // 実行
+        instruction.Execute(this._context);
+        if(!modifiesPC) {
+            // JumpやBranchはPCを変化させない
+        } else {
+            // それ以外はPC++
             this._context.PC++;
         }
 
-        if(this._program.InstructionCount <= this._context.PC.Idx) {
-            this._context.IsTerminated = true;
+        // 次のPCに命令があるか確認
+        if(this._context.IsKernelMode()) {
+            if(this._programs.KernelInstructionCount <= this._context.PC.Idx) {
+                // todo 例外が発生すべき
+                this._context.IsTerminated = true;
+                return;
+            }
+        } else {
+            if(this._programs.UserInstructionCount <= this._context.PC.Idx) {
+                this._context.IsTerminated = true;
+                return;
+            }
         }
     }
 
@@ -92,11 +95,12 @@ internal class PlusPimDbg: IDebugger {
     }
 
     public int GetCurrentLine() {
-        return this._context.PC.Idx >= this._program.InstructionCount ? 0 : this._program.GetInstruction(this._context.PC).SourceLine;
+        int totalCount = this._context.IsKernelMode() ? this._programs.KernelInstructionCount : this._programs.UserInstructionCount;
+        return this._context.PC.Idx >= totalCount ? 0 : this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode()).SourceLine;
     }
 
     public string GetProgramPath() {
-        return this._program.ProgramPath;
+        return this._programs.GetProgramPath(this._context.PC, this._context.IsKernelMode());
     }
 
     public bool IsTerminated() {
@@ -114,7 +118,7 @@ internal class PlusPimDbg: IDebugger {
             Name = this._context.CurrentLabel.Name,
             Line = this.GetCurrentLine(),
             Registers = this._context.Registers.ToArray(),
-            PC = Address.FromInstructionIndex(this._context.PC).Addr,
+            PC = (int)Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr,
             HI = this._context.HI,
             LO = this._context.LO
         });
@@ -125,9 +129,9 @@ internal class PlusPimDbg: IDebugger {
             frames.Add(new StackFrameInfo {
                 FrameId = frameId,
                 Name = frame.Label.Name,
-                Line = this._program.GetInstruction(frame.CurrentPC).SourceLine,
+                Line = this._programs.GetInstruction(frame.CurrentPC, false).SourceLine,
                 Registers = frame.Registers.ToArray(),
-                PC = Address.FromInstructionIndex(frame.CurrentPC).Addr,
+                PC = (int)Address.FromInstructionIndex(frame.CurrentPC, this._context.IsKernelMode()).Addr,
                 HI = frame.HISnapshot,
                 LO = frame.LOSnapshot
             });

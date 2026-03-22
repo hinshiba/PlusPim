@@ -29,7 +29,7 @@ internal class Application: IApplication {
     /// </summary>
     /// <returns>成功した場合<see langword="true"/></returns>
     public bool Load() {
-        this._debugger = new PlusPimDbg(this._files[0].FullName, this._logger);
+        this._debugger = new PlusPimDbg(this._files, this._logger);
 
         if(!this._isDebug) {
             // デバッガモードでない場合はすぐに実行する

@@ -68,7 +68,7 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// パース結果をDataSegmentとして返す
     /// </summary>
     public DataSegment Build() {
-        return new DataSegment(this._memoryImage);
+        return new DataSegment(this._memoryImage, baseAddr, this.NextDataAddress.Addr - baseAddr.Addr);
     }
 
 
@@ -150,7 +150,7 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
         }
 
         // アライメント処理
-        int mask = (1 << n) - 1;
+        uint mask = (uint)((1 << n) - 1);
         this.NextDataAddress = new((this.NextDataAddress.Addr + mask) & ~mask);
     }
 

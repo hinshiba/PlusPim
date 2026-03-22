@@ -19,11 +19,11 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
 
         // $raにアドレス形式で次の命令アドレスを保存
         this._previousRaValues.Push(context.Registers[RegisterID.Ra]);
-        context.Registers[RegisterID.Ra] = Address.FromInstructionIndex(returnPC).Addr;
+        context.Registers[RegisterID.Ra] = (int)Address.FromInstructionIndex(returnPC, context.IsKernelMode()).Addr;
 
         // ジャンプ
         this.JumpTo(context, label);
-        context.Log($"jal {this.TargetLabel}: $ra = 0x{Address.FromInstructionIndex(returnPC).Addr:X8}");
+        context.Log($"jal {this.TargetLabel}: $ra = 0x{Address.FromInstructionIndex(returnPC, context.IsKernelMode()).Addr:X8}");
     }
 
     public override void Undo(RuntimeContext context) {
