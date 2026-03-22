@@ -13,6 +13,7 @@ internal record struct InstructionIndex(int Idx) {
     /// 不適切なアドレスであった場合はAdEL例外が発生する
     /// </summary>
     /// <param name="Addr">アドレス</param>
+    /// <param name="context">コンテキスト</param>
     /// <returns>4バイトアライメントでない場合<see langword="null"/>，または命令インデックス</returns>
     public static InstructionIndex? FromAddress(Address Addr, RuntimeContext context) {
         if((Addr.Addr & 0b11) != 0) {
@@ -21,6 +22,17 @@ internal record struct InstructionIndex(int Idx) {
         }
 
         return context.IsKernelMode()
+            ? new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4)
+            : new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4);
+    }
+
+    /// <summary>
+    /// アドレスから命令インデックスを生成する
+    /// </summary>
+    /// <param name="Addr">アドレス</param>
+    /// <returns>4バイトアライメントでない場合<see langword="null"/>，または命令インデックス</returns>
+    public static InstructionIndex? FromAddress(Address Addr, bool IsKernelMode) {
+        return IsKernelMode
             ? new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4)
             : new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4);
     }

@@ -9,6 +9,10 @@ internal record struct Address(uint Addr) {
         return isKernelMode
             ? new Address((uint)iIdx.Idx * 4) + TextSegment.KernelTextSegmentBase
             : new Address((uint)iIdx.Idx * 4) + TextSegment.TextSegmentBase;
+    }
+
+    public static Address FromInstructionIndex(InstructionIndex iIdx, Address offset) {
+        return new Address((uint)iIdx.Idx * 4) + offset;
 
     }
 

@@ -22,7 +22,7 @@ internal class PlusPimDbg: IDebugger {
             logger.Warning("PlusPimDbg", "'main' label not found. Starting execution at index 0.");
             mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         } else {
-            startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr, TextSegment.TextSegmentBase) ?? new(0);
+            startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr, false) ?? new(0);
         }
 
         // コンテキスト設定
