@@ -1,4 +1,5 @@
-using PlusPim.Debuggers.PlusPimDbg.Instructions;
+using PlusPim.Debuggers.PlusPimDbg.Instruction;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Logging;
 
