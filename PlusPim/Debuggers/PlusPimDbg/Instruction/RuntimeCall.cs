@@ -1,12 +1,18 @@
+using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction;
 
-internal class SyscallInstruction(int sourceLine): IInstruction {
-    public int SourceLine => sourceLine;
+/// <summary>
+/// カーネルモードのみから呼び出せるSyscall命令のハンドラ
+/// </summary>
+internal sealed class RuntimeCall(int sourceLine): IInstruction {
+    /// <summary>
+    /// 行番号
+    /// </summary>
+    public int SourceLine { get; } = sourceLine;
 
 
     private readonly Stack<SyscallCode> _history = new();
@@ -15,6 +21,12 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
 
 
     public void Execute(RuntimeContext context) {
+        if(!context.IsKernelMode()) {
+            // カーネル空間でないならコプロセッサ例外
+            context.RaiseException(ExcCode.CpU);
+        }
+
+
         SyscallCode code = (SyscallCode)context.Registers[RegisterID.V0];
         switch(code) {
             case SyscallCode.PrintInt:
@@ -116,6 +128,16 @@ internal class SyscallInstruction(int sourceLine): IInstruction {
                 break;
         }
     }
+
+    /// <summary>
+    /// 命令のパーサーを生成するファクトリ
+    /// </summary>
+    internal static Func<string, IInstructionParser> CreateParser() {
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+            return new RuntimeCall(lineIndex);
+        });
+    }
+
 }
 
 internal enum SyscallCode {
@@ -124,13 +146,4 @@ internal enum SyscallCode {
     ReadInt = 5,
     ReadString = 8,
     Exit = 10,
-}
-
-internal class SyscallInstructionParser: IInstructionParser {
-    public string Mnemonic => "syscall";
-
-    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
-        instruction = new SyscallInstruction(lineIndex);
-        return true; // オペランドはないので常に成功
-    }
 }

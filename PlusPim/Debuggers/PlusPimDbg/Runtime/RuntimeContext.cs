@@ -53,7 +53,7 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
     // 例外処理のためのフィールド
-    private CP0RegisterFile _cp0Regs = new();
+    private CP0RegisterFile _cp0Regs = CP0RegisterFile.Default;
 
     /// <summary>
     /// ラベル名からラベルを解決する
@@ -212,7 +212,7 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
 
 
     /// <summary>
-    /// 例外発生時の処理を行う
+    /// 例外を発生させる
     /// PCが変更され，カーネル空間へ移動する．
     /// </summary>
     /// <param name="reason">発生理由</param>
@@ -229,6 +229,17 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
 
         this.PC = new(0);
     }
+
+    /// <summary>
+    /// 例外を解決する
+    /// </summary>
+    public void RetException() {
+        // EPCの値に復帰
+        this.PC = this._cp0Regs.Epc;
+        // カーネルモードから脱出する
+        this._cp0Regs = CP0RegisterFile.Default;
+    }
+
 
     public bool IsKernelMode() {
         return this._cp0Regs.Exl;

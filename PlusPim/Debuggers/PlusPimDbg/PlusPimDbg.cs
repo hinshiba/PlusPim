@@ -45,6 +45,10 @@ internal class PlusPimDbg: IDebugger {
             return;
         }
 
+        // 有効なPCでないなら例外を発生させて例外ハンドラにジャンプ
+        if(this._context.PC == InstructionIndex.Invalid) {
+            this._context.RaiseException(ExcCode.AdEL, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+        }
         // 命令を取得
         IInstruction instruction = this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode());
         // ブランチやジャンプならPCの変更(条件未成立時の+1を含む)は命令側の責任

@@ -23,4 +23,10 @@ internal class CP0RegisterFile {
     /// </summary>
     public InstructionIndex Epc { get; init; }
 
+    public static CP0RegisterFile Default = new() {
+        BadVAddr = Address.InValid,
+        Exl = false,
+        Exc = ExcCode.RI,
+        Epc = InstructionIndex.Invalid
+    };
 }
