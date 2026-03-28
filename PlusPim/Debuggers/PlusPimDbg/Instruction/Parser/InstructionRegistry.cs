@@ -28,7 +28,6 @@ internal sealed partial class InstructionRegistry {
         RegisterParser(parsers, new JInstructionParser());
         RegisterParser(parsers, new JalInstructionParser());
         RegisterParser(parsers, new JrInstructionParser());
-        RegisterParser(parsers, new SyscallInstructionParser());
 
         Dictionary<string, IPseudoInstructionParser> pseudoParsers = new(StringComparer.OrdinalIgnoreCase);
         RegisterPseudoParser(pseudoParsers, new NopInstructionParser());
@@ -59,8 +58,8 @@ internal sealed partial class InstructionRegistry {
     private void RegisterLambdaInstructions() {
         // R-Type 3レジスタ
         this.Register("add", RType3RegInstruction.CreateParser((rs, rt) => (uint)checked((int)rs + (int)rt)));
-        this.Register("sub", RType3RegInstruction.CreateParser((rs, rt) => (uint)checked((int)rs - (int)rt)));
         this.Register("addu", RType3RegInstruction.CreateParser((rs, rt) => rs + rt));
+        this.Register("sub", RType3RegInstruction.CreateParser((rs, rt) => (uint)checked((int)rs - (int)rt)));
         this.Register("subu", RType3RegInstruction.CreateParser((rs, rt) => rs - rt));
         this.Register("and", RType3RegInstruction.CreateParser((rs, rt) => rs & rt));
         this.Register("or", RType3RegInstruction.CreateParser((rs, rt) => rs | rt));
@@ -80,6 +79,7 @@ internal sealed partial class InstructionRegistry {
         this.Register("srav", RTypeShiftVarInstruction.CreateParser((rt, shift) => (uint)((int)rt >> shift)));
 
         // I-Type
+        this.Register("addi", ITypeInstruction.CreateParser((rs, imm) => (uint)checked((int)rs + imm.ToSInt())));
         this.Register("addiu", ITypeInstruction.CreateParser((rs, imm) => (uint)((int)rs + imm.ToSInt())));
         this.Register("andi", ITypeInstruction.CreateParser((rs, imm) => rs & imm.ToUInt()));
         this.Register("ori", ITypeInstruction.CreateParser((rs, imm) => rs | imm.ToUInt()));
@@ -97,8 +97,15 @@ internal sealed partial class InstructionRegistry {
             long result = (long)(int)rs * (int)rt;
             return ((uint)(result >> 32), (uint)(result & 0xFFFFFFFF));
         }));
+        this.Register("multu", MulDivInstruction.CreateParser((rs, rt) => {
+            ulong result = (ulong)rs * rt;
+            return ((uint)(result >> 32), (uint)(result & 0xFFFFFFFF));
+        }));
+
         this.Register("div", MulDivInstruction.CreateParser((rs, rt) =>
             ((uint)((int)rs % (int)rt), (uint)((int)rs / (int)rt))));
+        this.Register("divu", MulDivInstruction.CreateParser((rs, rt) =>
+            (rs % rt, rs / rt)));
 
         // LoHi
         this.Register("mfhi", LoHiRegisterInstruction.CreateParser(true, true));
@@ -110,6 +117,13 @@ internal sealed partial class InstructionRegistry {
         // Memory
         this.Register("lw", MemoryInstruction.CreateParser(byteNum: 4, isWrite: false));
         this.Register("sw", MemoryInstruction.CreateParser(byteNum: 4, isWrite: true));
+
+        // Syscall等
+        this.Register("syscall", SyscallInstruction.CreateParser());
+        this.Register("runtime_call!", RuntimeCall.CreateParser());
+
+        // 例外系
+
     }
 
     /// <summary>
