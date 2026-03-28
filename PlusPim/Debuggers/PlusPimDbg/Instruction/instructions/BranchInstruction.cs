@@ -1,7 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
-using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 
@@ -13,14 +12,11 @@ internal sealed class BranchInstruction(
     RegisterID rs, RegisterID rt, string targetLabel, int sourceLine,
     string mnemonic, Func<uint, uint, bool> condition
 ): IInstruction {
-    private RegisterID Rs { get; } = rs;
-    private RegisterID Rt { get; } = rt;
-    private string TargetLabel { get; } = targetLabel;
 
     /// <summary>
     /// 行番号
     /// </summary>
-    public int SourceLine => sourceLine;
+    public int SourceLine { get; } = sourceLine;
 
     /// <summary>
     /// Undo用に前のPCをスタックで管理
@@ -31,25 +27,27 @@ internal sealed class BranchInstruction(
     /// 分岐条件を評価する
     /// </summary>
     private bool EvaluateCondition(RuntimeContext context) {
-        uint rsVal = context.Registers[this.Rs];
-        uint rtVal = context.Registers[this.Rt];
+        uint rsVal = context.Registers[rs];
+        uint rtVal = context.Registers[rt];
         bool result = condition(rsVal, rtVal);
-        context.Log($"{mnemonic} ${this.Rs}, ${this.Rt}, {this.TargetLabel}: 0x{rsVal:X8}, 0x{rtVal:X8} => {result}");
+        context.Log($"{mnemonic} ${rs}, ${rt}, {targetLabel}: 0x{rsVal:X8}, 0x{rtVal:X8} => {result}");
         return result;
     }
 
     /// <summary>
     /// 分岐条件が真のときにラベル先にジャンプする
     /// </summary>
-    /// <exception cref="InvalidOperationException">ラベルが解決できない場合</exception>
+    /// <remarks>
+    /// ラベルが解決できなくても例外は発生しない．その場合は-1にジャンプする．
+    /// </remarks>
     public void Execute(RuntimeContext context) {
         // Undoのために現在のPCを保存
         this._previousPCs.Push(context.PC);
 
         if(this.EvaluateCondition(context)) {
-            Label executionIndex = context.ResolveLabelName(this.TargetLabel) ?? throw new InvalidOperationException($"Label '{this.TargetLabel}' not found.");
-            context.PC = InstructionIndex.FromAddress(executionIndex.Addr, context) ?? throw new AlignmentException($"Attempted branch to {executionIndex} but address is not aligned");
-            context.Log($"{mnemonic}: branch taken to {this.TargetLabel}");
+            // 不正なラベルでも，InstructionFetchで例外が発生するべき
+            context.PC = context.ResolveLabelIndex(targetLabel) ?? InstructionIndex.Invalid;
+            context.Log($"{mnemonic}: branch taken to {targetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
             context.PC++;
@@ -65,7 +63,7 @@ internal sealed class BranchInstruction(
     }
 
     /// <summary>
-    /// 条件分岐命令のパーサーを生成するファクトリ (beq, bne)
+    /// 条件分岐命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(Func<uint, uint, bool> condition) {
         return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {

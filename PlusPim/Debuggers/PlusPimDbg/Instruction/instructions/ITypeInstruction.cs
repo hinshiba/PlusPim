@@ -11,9 +11,6 @@ internal sealed class ITypeInstruction(
     RegisterID rt, RegisterID rs, Immediate imm, int sourceLine,
     string mnemonic, Func<uint, Immediate, uint> compute
 ): IInstruction {
-    private RegisterID Rs { get; } = rs;
-    private RegisterID Rt { get; } = rt;
-    private Immediate Imm { get; } = imm;
 
     /// <summary>
     /// 行番号
@@ -25,23 +22,23 @@ internal sealed class ITypeInstruction(
     private readonly Stack<uint> _prevRtValues = new();
 
     public void Execute(RuntimeContext context) {
-        uint rsVal = context.Registers[this.Rs];
-        uint result = compute(rsVal, this.Imm);
+        uint rsVal = context.Registers[rs];
+        uint result = compute(rsVal, imm);
         this.WriteRt(context, result);
-        context.Log($"{mnemonic} ${this.Rt}, ${this.Rs}, {this.Imm}: 0x{rsVal:X8}, {this.Imm} => 0x{result:X8}");
+        context.Log($"{mnemonic} ${rt}, ${rs}, {imm}: 0x{rsVal:X8}, {imm} => 0x{result:X8}");
     }
 
     /// <summary>
     /// 命令の逆操作だが，ほとんどのI形式命令ではRtに書き込んだ値を元に戻すだけで良い
     /// </summary>
     public void Undo(RuntimeContext context) {
-        if(this.Rt == RegisterID.Zero) {
+        if(rt == RegisterID.Zero) {
             return;
         }
         if(this._prevRtValues.Count == 0) {
             throw new InvalidOperationException("No previous value to undo.");
         }
-        context.Registers[this.Rt] = this._prevRtValues.Pop();
+        context.Registers[rt] = this._prevRtValues.Pop();
     }
 
     /// <summary>
@@ -54,12 +51,12 @@ internal sealed class ITypeInstruction(
     /// <param name="value">書き込む値</param>
     private void WriteRt(RuntimeContext context, uint value) {
         // $zero保護
-        if(this.Rt == RegisterID.Zero) {
+        if(rt == RegisterID.Zero) {
             return;
         }
         // 逆操作のために保存
-        this._prevRtValues.Push(context.Registers[this.Rt]);
-        context.Registers[this.Rt] = value;
+        this._prevRtValues.Push(context.Registers[rt]);
+        context.Registers[rt] = value;
     }
 
     /// <summary>

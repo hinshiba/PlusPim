@@ -7,30 +7,22 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 /// <summary>
 /// MIPSにおいてメモリ操作命令を表すクラス
 /// </summary>
-/// <remarks>lw, sw, lb, sb, lh, sh 等の命令を表す</remarks>
+/// <param name="rt">メモリ領域とやり取りをするレジスタ</param>
+/// <param name="rs">アドレスを指すレジスタ</param>
+/// <param name="offset"><paramref name="rs"/>からのオフセットを示す即値</param>
+/// <param name="isWrite">書き込みかどうか</param>
+/// <param name="isSign">符号拡張するかどうか <paramref name="isWrite"/>が<see langword="false"/>のときのみ意味を持つ</param>
+/// <param name="byteNum">操作するバイト数</param>
+/// <param name="sourceLine">行番号</param>
 internal sealed class MemoryInstruction(
     RegisterID rt, RegisterID rs, Immediate offset,
     bool isWrite, bool isSign, int byteNum, int sourceLine
 ): IInstruction {
+
+    /// <summary>
+    /// 行番号
+    /// </summary>
     public int SourceLine { get; } = sourceLine;
-
-    private RegisterID Rt { get; } = rt;
-
-    private RegisterID Rs { get; } = rs;
-
-    private Immediate Offset { get; } = offset;
-
-    private bool IsWrite { get; } = isWrite;
-
-    /// <summary>
-    /// 符号拡張するかどうか <see cref="IsWrite"/>が<see langword="false"/>のときのみ意味を持つ
-    /// </summary>
-    private bool IsSign { get; } = isSign;
-
-    /// <summary>
-    /// 操作するバイト数
-    /// </summary>
-    private int ByteNum { get; } = byteNum;
 
     /// <summary>
     /// 逆操作のためのスタック．書き込み命令なら元のメモリの値，読み込み命令なら元のレジスタの値を保存する
@@ -41,19 +33,19 @@ internal sealed class MemoryInstruction(
     /// 実効アドレスを計算する
     /// </summary>
     private Address ComputeAddress(RuntimeContext context) {
-        return new Address(context.Registers[this.Rs] + this.Offset.ToUInt());
+        return new Address(context.Registers[rs] + offset.ToUInt());
     }
 
     public void Execute(RuntimeContext context) {
         Address addr = this.ComputeAddress(context);
 
         // アライメントの確認
-        if(addr % this.ByteNum != 0) {
+        if(addr % byteNum != 0) {
             // TODO: MIPSの例外にする
-            throw new InvalidOperationException($"Memory Access: {addr} does not meet {this.ByteNum}Byte alignment.");
+            throw new InvalidOperationException($"Memory Access: {addr} does not meet {byteNum}Byte alignment.");
         }
 
-        if(this.IsWrite) {
+        if(isWrite) {
             this.ExecuteWrite(context, addr);
         } else {
             this.ExecuteRead(context, addr);
@@ -61,31 +53,31 @@ internal sealed class MemoryInstruction(
     }
 
     private void ExecuteWrite(RuntimeContext context, Address addr) {
-        context.Log($"Memory Write: {addr} <= {context.Registers[this.Rt]} (ByteNum: {this.ByteNum})");
+        context.Log($"Memory Write: {addr} <= {context.Registers[rt]} (ByteNum: {byteNum})");
 
         // Undoのために保存
-        this._prevVal.Push(context.ReadMemoryBytes(addr, this.ByteNum, false));
+        this._prevVal.Push(context.ReadMemoryBytes(addr, byteNum, false));
 
         // 書き込み
-        context.WriteMemoryBytes(addr, context.Registers[this.Rt], this.ByteNum);
+        context.WriteMemoryBytes(addr, context.Registers[rt], byteNum);
     }
 
     private void ExecuteRead(RuntimeContext context, Address addr) {
-        context.Log($"Memory Read: {addr} => {this.Rt} (ByteNum: {this.ByteNum}, IsSign: {this.IsSign})");
+        context.Log($"Memory Read: {addr} => {rt} (ByteNum: {byteNum}, IsSign: {isSign})");
 
         // Undoのために保存
-        this._prevVal.Push(context.Registers[this.Rt]);
+        this._prevVal.Push(context.Registers[rt]);
 
         // 読み込み
-        context.Registers[this.Rt] = context.ReadMemoryBytes(addr, this.ByteNum, this.IsSign);
+        context.Registers[rt] = context.ReadMemoryBytes(addr, byteNum, isSign);
     }
 
     public void Undo(RuntimeContext context) {
         Address addr = this.ComputeAddress(context);
-        if(this.IsWrite) {
-            context.WriteMemoryBytes(addr, this._prevVal.Pop(), this.ByteNum);
+        if(isWrite) {
+            context.WriteMemoryBytes(addr, this._prevVal.Pop(), byteNum);
         } else {
-            context.Registers[this.Rt] = this._prevVal.Pop();
+            context.Registers[rt] = this._prevVal.Pop();
         }
     }
 

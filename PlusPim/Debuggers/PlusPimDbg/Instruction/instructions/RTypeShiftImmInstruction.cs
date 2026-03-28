@@ -11,37 +11,38 @@ internal sealed class RTypeShiftImmInstruction(
     RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex,
     string mnemonic, Func<uint, int, uint> compute
 ): IInstruction {
-    private RegisterID Rd { get; } = rd;
-    private RegisterID Rt { get; } = rt;
-    private Immediate Shamt { get; } = shamt;
+
+    /// <summary>
+    /// 行番号
+    /// </summary>
     public int SourceLine { get; } = lineIndex;
 
     private readonly Stack<uint> _previousRdValues = new();
 
     public void Execute(RuntimeContext context) {
-        uint rtVal = context.Registers[this.Rt];
-        int shamtVal = this.Shamt.ToSInt();
+        uint rtVal = context.Registers[rt];
+        int shamtVal = shamt.ToSInt();
         uint result = compute(rtVal, shamtVal);
         this.WriteRd(context, result);
-        context.Log($"{mnemonic} ${this.Rd}, ${this.Rt}, {this.Shamt}: 0x{rtVal:X8}, {shamtVal} => 0x{result:X8}");
+        context.Log($"{mnemonic} ${rd}, ${rt}, {shamt}: 0x{rtVal:X8}, {shamtVal} => 0x{result:X8}");
     }
 
     public void Undo(RuntimeContext context) {
-        if(this.Rd == RegisterID.Zero) {
+        if(rd == RegisterID.Zero) {
             return;
         }
         if(this._previousRdValues.Count == 0) {
             throw new InvalidOperationException("No previous value to undo.");
         }
-        context.Registers[this.Rd] = this._previousRdValues.Pop();
+        context.Registers[rd] = this._previousRdValues.Pop();
     }
 
     private void WriteRd(RuntimeContext context, uint value) {
-        if(this.Rd == RegisterID.Zero) {
+        if(rd == RegisterID.Zero) {
             return;
         }
-        this._previousRdValues.Push(context.Registers[this.Rd]);
-        context.Registers[this.Rd] = value;
+        this._previousRdValues.Push(context.Registers[rd]);
+        context.Registers[rd] = value;
     }
 
     /// <summary>

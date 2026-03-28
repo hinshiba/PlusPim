@@ -1,6 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
-using PlusPim.Debuggers.PlusPimDbg.Runtime.Exceptions;
 using Label = PlusPim.Debuggers.PlusPimDbg.Program.records.Label;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;

@@ -7,7 +7,6 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 /// MIPSにおいてLo Hiレジスタ間の転送を行う命令のクラス
 /// </summary>
 internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool isFrom, int sourceLine): IInstruction {
-    public RegisterID Reg { get; } = reg;
 
     /// <summary>
     /// 行番号
@@ -28,9 +27,9 @@ internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool is
 
     private void ExecuteFrom(RuntimeContext context) {
         // まず書き込まれる汎用レジスタを保存
-        this._prevRegValues.Push(context.Registers[this.Reg]);
+        this._prevRegValues.Push(context.Registers[reg]);
         // 書き込みを実施
-        context.Registers[this.Reg] = isHi ? context.HI : context.LO;
+        context.Registers[reg] = isHi ? context.HI : context.LO;
     }
 
     private void ExecuteTo(RuntimeContext context) {
@@ -38,11 +37,11 @@ internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool is
             // まず書き込まれるHiレジスタを保存
             this._prevRegValues.Push(context.HI);
             // 書き込みを実施
-            context.HI = context.Registers[this.Reg];
+            context.HI = context.Registers[reg];
         } else {
             this._prevRegValues.Push(context.LO);
 
-            context.LO = context.Registers[this.Reg];
+            context.LO = context.Registers[reg];
         }
     }
 
@@ -51,7 +50,7 @@ internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool is
     /// </summary>
     public void Undo(RuntimeContext context) {
         if(isFrom) {
-            context.Registers[this.Reg] = this._prevRegValues.Pop();
+            context.Registers[reg] = this._prevRegValues.Pop();
         } else {
             if(isHi) {
                 context.HI = this._prevRegValues.Pop();

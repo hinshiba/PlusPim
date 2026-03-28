@@ -10,8 +10,6 @@ internal sealed class MulDivInstruction(
     RegisterID rs, RegisterID rt, int sourceLine,
     string mnemonic, Func<uint, uint, (uint hi, uint lo)> compute
 ): IInstruction {
-    private RegisterID Rs { get; } = rs;
-    private RegisterID Rt { get; } = rt;
 
     /// <summary>
     /// 行番号
@@ -24,11 +22,11 @@ internal sealed class MulDivInstruction(
     private readonly Stack<(uint, uint)> _prevHiLoValues = new();
 
     public void Execute(RuntimeContext context) {
-        uint rsVal = context.Registers[this.Rs];
-        uint rtVal = context.Registers[this.Rt];
+        uint rsVal = context.Registers[rs];
+        uint rtVal = context.Registers[rt];
         (uint hi, uint lo) = compute(rsVal, rtVal);
         this.WriteHiLo(context, hi, lo);
-        context.Log($"{mnemonic} ${this.Rs}, ${this.Rt}: 0x{rsVal:X8}, 0x{rtVal:X8} => HI=0x{hi:X8}, LO=0x{lo:X8}");
+        context.Log($"{mnemonic} ${rs}, ${rt}: 0x{rsVal:X8}, 0x{rtVal:X8} => HI=0x{hi:X8}, LO=0x{lo:X8}");
     }
 
     /// <summary>
