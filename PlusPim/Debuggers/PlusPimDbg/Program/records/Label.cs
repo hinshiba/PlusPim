@@ -9,6 +9,6 @@ internal readonly record struct Label(string Name, Address Addr) {
     public override string ToString() {
         return $"{this.Name}: @ 0x{this.Addr.Addr:X}";
     }
-}
 
-// TODO ラベルのパーサー
+    public static readonly Label Invalid = new("<invalid>", Address.InValid);
+}

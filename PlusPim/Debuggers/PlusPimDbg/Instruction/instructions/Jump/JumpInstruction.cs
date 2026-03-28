@@ -18,7 +18,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// <summary>
     /// 行番号
     /// </summary>
-    public int SourceLine => sourceLine;
+    public int SourceLine { get; } = sourceLine;
 
     /// <summary>
     /// Undo用に前のPCをスタックで管理
@@ -40,7 +40,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// ラベルを指定してジャンプする
     /// </summary>
     protected void JumpTo(RuntimeContext context, Label target) {
-        this.JumpTo(context, InstructionIndex.FromAddress(target.Addr, context) ?? throw new AlignmentException($"Try Jump to {target} but not aligned"));
+        this.JumpTo(context, InstructionIndex.FromAddress(target.Addr, context) ?? InstructionIndex.Invalid);
     }
 
     /// <summary>

@@ -53,4 +53,6 @@ internal record struct InstructionIndex(int Idx) {
         val.Idx--;
         return val;
     }
+
+    public static readonly InstructionIndex Invalid = new(-1);
 }

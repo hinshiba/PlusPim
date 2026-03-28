@@ -64,6 +64,17 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
         return resolveLabel(name, this.PC, this.IsKernelMode());
     }
 
+
+    /// <summary>
+    /// ラベル名から命令インデックスを解決する
+    /// </summary>
+    /// <param name="name">ラベル名</param>
+    /// <returns>命令インデックス</returns>
+    public InstructionIndex? ResolveLabelIndex(string name) {
+        return this.ResolveLabelName(name) is { } l ? InstructionIndex.FromAddress(l.Addr, this.IsKernelMode()) : null;
+    }
+
+
     /// <summary>
     /// メモリイメージをメモリに書き込む
     /// </summary>

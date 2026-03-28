@@ -59,4 +59,6 @@ internal record struct Address(uint Addr) {
     public override string ToString() {
         return $"0x{this.Addr:X}";
     }
+
+    public static readonly Address InValid = new(0);
 }
