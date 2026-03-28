@@ -1,5 +1,7 @@
 using PlusPim.Application;
-using PlusPim.Debuggers.PlusPimDbg.Instructions;
+using PlusPim.Debuggers.PlusPimDbg.Instruction;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
