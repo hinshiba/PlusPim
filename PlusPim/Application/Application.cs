@@ -90,4 +90,8 @@ internal class Application: IApplication {
         }
         return null;
     }
+
+    public ExceptionInfo? GetLastException() {
+        return this._debugger?.GetLastException();
+    }
 }

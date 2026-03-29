@@ -8,9 +8,12 @@
             "type": "pluspim",
             "request": "launch",
             "name": "Minimal Launch",
-            "program": "${file}",
+            "program": [
+                "${file}",
+                "${workspaceFolder}/kseg.asm"
+            ],
             "args": [
-                "-v"
+                "-d",
             ],
             "trace": false
         }

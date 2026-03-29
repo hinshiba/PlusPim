@@ -32,9 +32,14 @@
             ],
             "properties": {
               "program": {
-                "type": "string",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "Path to the MIPS assembly file",
-                "default": "${file}"
+                "default": [
+                  "${file}"
+                ]
               },
               "trace": {
                 "type": "boolean",
@@ -62,7 +67,7 @@
             "type": "pluspim",
             "request": "launch",
             "name": "Minimal Launch",
-            "program": "${file}"
+            "program": ["${file}"]
           }
         ]
       }
@@ -74,6 +79,7 @@
     "package:linux-x64": "node scripts/vsix.mjs linux-x64",
     "dotnet:publish:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Release -r win-x64 --self-contained -o ./bin/win-x64 -p:DebugType=none -p:DebugSymbols=false",
     "dotnet:publish:linux": "dotnet publish ../../PlusPim/PlusPim.csproj -c Release -r linux-x64 --self-contained -o ./bin/linux-x64 -p:DebugType=none -p:DebugSymbols=false",
+    "dotnet:debug:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/win-x64",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",

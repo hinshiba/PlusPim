@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 
 internal sealed partial class InstructionRegistry {
-    [GeneratedRegex(@"^(?<op>\w+)(\s+(?<operands>.+))?$")]
+    [GeneratedRegex(@"^(?<op>\w+!?)(\s+(?<operands>.+))?$")]
     private static partial Regex AssemblyLinePattern();
 
     public static InstructionRegistry Default => field ??= CreateDefault();

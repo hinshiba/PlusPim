@@ -41,6 +41,11 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     public bool IsTerminated { get; set; } = false;
 
     /// <summary>
+    /// 直前のステップで発生した例外の情報 (nullなら例外なし)
+    /// </summary>
+    public ExceptionEvent? LastException { get; private set; }
+
+    /// <summary>
     /// 現在実行中の命令に属すると考えられるラベル
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;
@@ -219,11 +224,13 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// <param name="badVAddr">アドレスが関わる場合は，原因となったアドレス</param>
     public void RaiseException(ExcCode reason, Address? badVAddr = null) {
         if(this.IsKernelMode()) {
+            this.LastException = new ExceptionEvent(reason, IsDouble: true);
             this.Log($"Double exception raised: {reason}. So terminate debugee.");
             this.IsTerminated = true;
             return;
         }
 
+        this.LastException = new ExceptionEvent(reason, IsDouble: false);
         this.Log($"Exception raised: {reason}");
 
         this._cp0Regs = new CP0RegisterFile {
@@ -301,4 +308,16 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     public (uint BadVAddr, uint Status, uint Cause, uint EPC) GetCP0DisplayValues() {
         return (this.ReadCP0Register(8), this.ReadCP0Register(12), this.ReadCP0Register(13), this.ReadCP0Register(14));
     }
+
+    /// <summary>
+    /// LastExceptionをクリアする．ステップの開始前に呼び出す．
+    /// </summary>
+    public void ClearLastException() {
+        this.LastException = null;
+    }
 }
+
+/// <summary>
+/// ステップ実行中に発生した例外イベントの情報
+/// </summary>
+internal record ExceptionEvent(ExcCode Code, bool IsDouble);

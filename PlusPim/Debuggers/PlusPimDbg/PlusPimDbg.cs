@@ -42,6 +42,7 @@ internal class PlusPimDbg: IDebugger {
         if(this._context.IsTerminated) {
             return;
         }
+        this._context.ClearLastException();
 
         // 有効なPCでないなら例外を発生させて例外ハンドラにジャンプ
         if(this._context.PC == InstructionIndex.Invalid) {
@@ -87,6 +88,7 @@ internal class PlusPimDbg: IDebugger {
         if(this._history.Count == 0) {
             return false;
         }
+        this._context.ClearLastException();
 
         // popして逆操作しているだけ
         (IInstruction instruction, bool wasTerminated, bool pcAutoIncremented) = this._history.Pop();
@@ -109,6 +111,23 @@ internal class PlusPimDbg: IDebugger {
 
     public bool IsTerminated() {
         return this._context.IsTerminated;
+    }
+
+    public ExceptionInfo? GetLastException() {
+        ExceptionEvent? exc = this._context.LastException;
+        if(exc is null) {
+            return null;
+        }
+
+        string desc = exc.IsDouble
+            ? $"Double exception: {exc.Code} (program will terminate)"
+            : $"MIPS exception: {exc.Code}";
+
+        return new ExceptionInfo {
+            ExceptionId = exc.Code.ToString(),
+            Description = desc,
+            IsDouble = exc.IsDouble
+        };
     }
 
     /// <summary>
