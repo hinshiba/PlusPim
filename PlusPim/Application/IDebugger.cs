@@ -1,7 +1,7 @@
 namespace PlusPim.Application;
 
 internal interface IDebugger {
-    (uint[] Registers, int PC, uint HI, uint LO) GetRegisters();
+    (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters();
     void Step();
 
     /// <summary>

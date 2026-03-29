@@ -27,7 +27,7 @@ internal sealed class StackFrameInfo {
     /// <summary>
     /// プログラムカウンタの値
     /// </summary>
-    public required int PC { get; init; }
+    public required uint PC { get; init; }
 
     /// <summary>
     /// HIレジスタの値

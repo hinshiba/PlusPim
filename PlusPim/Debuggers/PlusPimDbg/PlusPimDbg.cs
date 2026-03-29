@@ -30,14 +30,14 @@ internal class PlusPimDbg: IDebugger {
         this._context.LoadMemoryImage(this._programs.MemoryImage);
     }
 
-    public (uint[] Registers, int PC, uint HI, uint LO) GetRegisters() {
-        return (this._context.Registers.ToArray(), this._context.PC.Idx, this._context.HI, this._context.LO);
+    public (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters() {
+        return (this._context.Registers.ToArray(), Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr, this._context.HI, this._context.LO);
     }
 
     /// <summary>
     /// 命令を1ステップ実行する
     /// </summary>
-    /// <remarks>終了状態である場合は何もしません</remarks>
+    /// <remarks>終了状態である場合は何もしない</remarks>
     public void Step() {
         if(this._context.IsTerminated) {
             return;
@@ -121,7 +121,7 @@ internal class PlusPimDbg: IDebugger {
             Name = this._context.CurrentLabel.Name,
             Line = this.GetCurrentLine(),
             Registers = this._context.Registers.ToArray(),
-            PC = (int)Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr,
+            PC = Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr,
             HI = this._context.HI,
             LO = this._context.LO
         });
@@ -134,7 +134,7 @@ internal class PlusPimDbg: IDebugger {
                 Name = frame.Label.Name,
                 Line = this._programs.GetInstruction(frame.CurrentPC, false).SourceLine,
                 Registers = frame.Registers.ToArray(),
-                PC = (int)Address.FromInstructionIndex(frame.CurrentPC, this._context.IsKernelMode()).Addr,
+                PC = Address.FromInstructionIndex(frame.CurrentPC, this._context.IsKernelMode()).Addr,
                 HI = frame.HISnapshot,
                 LO = frame.LOSnapshot
             });

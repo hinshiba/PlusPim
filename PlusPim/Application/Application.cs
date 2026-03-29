@@ -42,7 +42,7 @@ internal class Application: IApplication {
     }
 
     public (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters() {
-        (uint[], uint, uint, uint)? info = ((uint[], uint, uint, uint)?)this._debugger?.GetRegisters();
+        (uint[], uint, uint, uint)? info = this._debugger?.GetRegisters();
         return info ?? ([], 0u, 0u, 0u);
     }
 
