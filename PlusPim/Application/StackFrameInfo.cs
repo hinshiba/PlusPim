@@ -22,20 +22,26 @@ internal sealed class StackFrameInfo {
     /// <summary>
     /// レジスタのスナップショットまたは実行中の値
     /// </summary>
-    public required int[] Registers { get; init; }
+    public required uint[] Registers { get; init; }
 
     /// <summary>
     /// プログラムカウンタの値
     /// </summary>
-    public required int PC { get; init; }
+    public required uint PC { get; init; }
 
     /// <summary>
     /// HIレジスタの値
     /// </summary>
-    public required int HI { get; init; }
+    public required uint HI { get; init; }
 
     /// <summary>
     /// LOレジスタの値
     /// </summary>
-    public required int LO { get; init; }
+    public required uint LO { get; init; }
+
+    // CP0レジスタ (ライブフレームのみ設定)
+    public uint? CP0BadVAddr { get; init; }
+    public uint? CP0Status { get; init; }
+    public uint? CP0Cause { get; init; }
+    public uint? CP0EPC { get; init; }
 }

@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// <summary>
 /// .dataセグメントの行を処理し，メモリイメージを構築する
 /// </summary>
-internal sealed class DataSegmentBuilder(ILogger logger) {
+internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
 
 
     private readonly Dictionary<Address, byte> _memoryImage = [];
@@ -68,7 +68,7 @@ internal sealed class DataSegmentBuilder(ILogger logger) {
     /// パース結果をDataSegmentとして返す
     /// </summary>
     public DataSegment Build() {
-        return new DataSegment(this._memoryImage);
+        return new DataSegment(this._memoryImage, baseAddr, this.NextDataAddress.Addr - baseAddr.Addr);
     }
 
 
@@ -150,7 +150,7 @@ internal sealed class DataSegmentBuilder(ILogger logger) {
         }
 
         // アライメント処理
-        int mask = (1 << n) - 1;
+        uint mask = (uint)((1 << n) - 1);
         this.NextDataAddress = new((this.NextDataAddress.Addr + mask) & ~mask);
     }
 

@@ -1,0 +1,7 @@
+apiRules:
+  - include:
+      uidRegex: ^PlusPim
+  - exclude:
+      uidRegex: .*
+      hasAttribute:
+        uid: System.Runtime.CompilerServices.CompilerGeneratedAttribute

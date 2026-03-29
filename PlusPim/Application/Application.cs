@@ -29,7 +29,7 @@ internal class Application: IApplication {
     /// </summary>
     /// <returns>成功した場合<see langword="true"/></returns>
     public bool Load() {
-        this._debugger = new PlusPimDbg(this._files[0].FullName, this._logger);
+        this._debugger = new PlusPimDbg(this._files, this._logger);
 
         if(!this._isDebug) {
             // デバッガモードでない場合はすぐに実行する
@@ -41,8 +41,9 @@ internal class Application: IApplication {
         return true;
     }
 
-    public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
-        return this._debugger?.GetRegisters() ?? ([], -1, -1, -1);
+    public (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters() {
+        (uint[], uint, uint, uint)? info = this._debugger?.GetRegisters();
+        return info ?? ([], 0u, 0u, 0u);
     }
 
     public void Step() {
@@ -88,5 +89,9 @@ internal class Application: IApplication {
             }
         }
         return null;
+    }
+
+    public ExceptionInfo? GetLastException() {
+        return this._debugger?.GetLastException();
     }
 }

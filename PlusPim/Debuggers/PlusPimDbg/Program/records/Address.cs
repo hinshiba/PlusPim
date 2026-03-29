@@ -4,9 +4,16 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
 /// アドレスを表す値型
 /// </summary>
 /// <param name="Addr">アドレスとなる<see langword="int"/></param>
-internal record struct Address(int Addr) {
-    public static Address FromInstructionIndex(InstructionIndex IIdx) {
-        return new Address((IIdx.Idx * 4) + TextSegment.TextSegmentBase.Addr);
+internal record struct Address(uint Addr) {
+    public static Address FromInstructionIndex(InstructionIndex iIdx, bool isKernelMode) {
+        return isKernelMode
+            ? new Address((uint)iIdx.Idx * 4) + TextSegment.KernelTextSegmentBase
+            : new Address((uint)iIdx.Idx * 4) + TextSegment.TextSegmentBase;
+    }
+
+    public static Address FromInstructionIndex(InstructionIndex iIdx, Address offset) {
+        return new Address((uint)iIdx.Idx * 4) + offset;
+
     }
 
     public static Address operator +(Address lhs, Address rhs) {
@@ -15,7 +22,7 @@ internal record struct Address(int Addr) {
     }
 
     public static Address operator +(Address lhs, int rhs) {
-        lhs.Addr += rhs;
+        lhs.Addr += (uint)rhs;
         return lhs;
     }
 
@@ -24,11 +31,34 @@ internal record struct Address(int Addr) {
         return val;
     }
 
+    public static Address operator -(Address lhs, Address rhs) {
+        lhs.Addr -= rhs.Addr;
+        return lhs;
+    }
+
+    public static bool operator <(Address lhs, Address rhs) {
+        return lhs.Addr < rhs.Addr;
+    }
+
+    public static bool operator >(Address lhs, Address rhs) {
+        return lhs.Addr > rhs.Addr;
+    }
+
+    public static bool operator <=(Address lhs, Address rhs) {
+        return lhs.Addr <= rhs.Addr;
+    }
+
+    public static bool operator >=(Address lhs, Address rhs) {
+        return lhs.Addr >= rhs.Addr;
+    }
+
     public static int operator %(Address lhs, int rhs) {
-        return lhs.Addr % rhs;
+        return (int)(lhs.Addr % rhs);
     }
 
     public override string ToString() {
         return $"0x{this.Addr:X}";
     }
+
+    public static readonly Address InValid = new(0);
 }
