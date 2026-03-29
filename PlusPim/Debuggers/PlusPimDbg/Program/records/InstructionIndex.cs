@@ -22,7 +22,7 @@ internal record struct InstructionIndex(int Idx) {
         }
 
         return context.IsKernelMode()
-            ? new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4)
+            ? new(unchecked((int)(Addr - TextSegment.KernelTextSegmentBase).Addr) / 4)
             : new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4);
     }
 
@@ -34,7 +34,7 @@ internal record struct InstructionIndex(int Idx) {
     /// <returns>4バイトアライメントでない場合<see langword="null"/>，または命令インデックス</returns>
     public static InstructionIndex? FromAddress(Address Addr, bool IsKernelMode) {
         return IsKernelMode
-            ? new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4)
+            ? new(unchecked((int)(Addr - TextSegment.KernelTextSegmentBase).Addr) / 4)
             : new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4);
     }
 
