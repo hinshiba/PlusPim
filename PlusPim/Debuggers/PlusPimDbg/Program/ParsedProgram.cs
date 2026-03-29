@@ -51,8 +51,9 @@ internal class ParsedProgram {
         SegmentType currentSegment = SegmentType.Text;
         {
             using StreamReader reader = file.OpenText();
-            int lineIndex = 0;
+            int lineIndex = -1;
             while(reader.ReadLine() is string line) {
+                lineIndex++;
                 string processed = RemoveComment(line).Trim();
                 if(string.IsNullOrEmpty(processed)) {
                     continue;
@@ -85,7 +86,6 @@ internal class ParsedProgram {
                     default:
                         throw new Exception("cant reach here");
                 }
-                lineIndex++;
             }
         }
 
