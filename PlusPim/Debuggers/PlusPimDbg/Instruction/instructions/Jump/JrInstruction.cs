@@ -13,8 +13,8 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
         Label prevLabel = context.CurrentLabel;
         Address targetAddress = new(context.Registers[this.Rs]);
         InstructionIndex? target_ = InstructionIndex.FromAddress(targetAddress, context);
-        if(target_ != null) {
-            // nullなら例外が発生
+        if(target_ is null) {
+            // nullなら例外が発生済み
             return;
         }
         InstructionIndex target = (InstructionIndex)target_!;
