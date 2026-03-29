@@ -1,5 +1,5 @@
 using PlusPim.Application;
-using PlusPim.Debuggers.PlusPimDbg.Instructions;
+using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
@@ -9,66 +9,75 @@ namespace PlusPim.Debuggers.PlusPimDbg;
 
 internal class PlusPimDbg: IDebugger {
     private readonly RuntimeContext _context;
-    private readonly ParsedProgram _program;
-    private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
+    private readonly ParsedPrograms _programs;
+    private readonly Stack<(IInstruction Instruction, bool WasTerminated, bool PcAutoIncremented)> _history = new();
 
-    internal PlusPimDbg(string programPath, ILogger logger) {
-        this._program = new ParsedProgram(programPath, logger);
+    internal PlusPimDbg(FileInfo[] files, ILogger logger) {
+        this._programs = new ParsedPrograms(files, logger);
 
         // mainがなければ暫定で0スタート
         InstructionIndex startIndex = new(0);
-        Label? mainLabel = this._program.SymbolTable.Resolve("main");
+        Label? mainLabel = this._programs.ResolveFromAll("main");
         if(mainLabel is null) {
             logger.Warning("PlusPimDbg", "'main' label not found. Starting execution at index 0.");
             mainLabel = new Label { Name = "<unk>", Addr = new(0) };
         } else {
-            startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr) ?? new(0);
+            startIndex = InstructionIndex.FromAddress(((Label)mainLabel).Addr, false) ?? new(0);
         }
 
         // コンテキスト設定
-        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._program.SymbolTable, startIndex, (Label)mainLabel);
-        this._context.LoadDataSegment(this._program.DataSegment);
+        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startIndex, (Label)mainLabel);
+        this._context.LoadMemoryImage(this._programs.MemoryImage);
     }
 
-    public (int[] Registers, int PC, int HI, int LO) GetRegisters() {
-        return (this._context.Registers.ToArray(), this._context.PC.Idx, this._context.HI, this._context.LO);
+    public (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters() {
+        return (this._context.Registers.ToArray(), Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr, this._context.HI, this._context.LO);
     }
 
     /// <summary>
     /// 命令を1ステップ実行する
     /// </summary>
-    /// <remarks>終了状態である場合は何もしません</remarks>
+    /// <remarks>終了状態である場合は何もしない</remarks>
     public void Step() {
         if(this._context.IsTerminated) {
             return;
         }
+        this._context.ClearLastException();
 
-        if(this._program.InstructionCount <= this._context.PC.Idx) {
-            this._context.IsTerminated = true;
-            return;
+        // 有効なPCでないなら例外を発生させて例外ハンドラにジャンプ
+        if(this._context.PC == InstructionIndex.Invalid) {
+            // jumpで指定されていないラベルへジャンプした場合にセットされる
+            this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+        } else {
+            // 次のPCに命令があるか確認
+            if(this._context.IsKernelMode()) {
+                if(this._programs.KernelInstructionCount <= this._context.PC.Idx) {
+                    this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+                    return;
+                }
+            } else {
+                if(this._programs.UserInstructionCount <= this._context.PC.Idx) {
+                    this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+                    return;
+                }
+            }
         }
 
         // 命令を取得
-        IInstruction instruction = this._program.GetInstruction(this._context.PC);
-        // ブランチやジャンプならPCの変更(条件未成立時の+1を含む)は命令側の責任
-        bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
-        // インスタンスを履歴に保存
-        this._history.Push((instruction, this._context.IsTerminated));
+        IInstruction instruction = this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode());
+        // 実行前のPCを保存
+        InstructionIndex pcBeforeExec = this._context.PC;
+
+        // 実行
         instruction.Execute(this._context);
 
-        // PC変更
-        if(this._context.IsException()) {
-            // 例外検知
-            // カーネルセグメントの0番目の命令に飛ばす
-            this._context.PC = new(0);
-        } else if(!modifiesPC) {
-            // JumpやBranchでないならPCを次に進める
+        // 命令がPCを変更しなかった場合のみ自動increment
+        bool pcAutoIncremented = this._context.PC == pcBeforeExec;
+        if(pcAutoIncremented) {
             this._context.PC++;
         }
-
-        if(this._program.InstructionCount <= this._context.PC.Idx) {
-            this._context.IsTerminated = true;
-        }
+        // 履歴に保存
+        this._history.Push((instruction, this._context.IsTerminated, pcAutoIncremented));
     }
 
     /// <summary>
@@ -79,12 +88,12 @@ internal class PlusPimDbg: IDebugger {
         if(this._history.Count == 0) {
             return false;
         }
+        this._context.ClearLastException();
 
         // popして逆操作しているだけ
-        (IInstruction instruction, bool wasTerminated) = this._history.Pop();
-        bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
+        (IInstruction instruction, bool wasTerminated, bool pcAutoIncremented) = this._history.Pop();
         instruction.Undo(this._context);
-        if(!modifiesPC) {
+        if(pcAutoIncremented) {
             this._context.PC--;
         }
         this._context.IsTerminated = wasTerminated;
@@ -92,15 +101,33 @@ internal class PlusPimDbg: IDebugger {
     }
 
     public int GetCurrentLine() {
-        return this._context.PC.Idx >= this._program.InstructionCount ? 0 : this._program.GetInstruction(this._context.PC).SourceLine;
+        int totalCount = this._context.IsKernelMode() ? this._programs.KernelInstructionCount : this._programs.UserInstructionCount;
+        return this._context.PC.Idx >= totalCount ? 0 : this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode()).SourceLine;
     }
 
     public string GetProgramPath() {
-        return this._program.ProgramPath;
+        return this._programs.GetProgramPath(this._context.PC, this._context.IsKernelMode());
     }
 
     public bool IsTerminated() {
         return this._context.IsTerminated;
+    }
+
+    public ExceptionInfo? GetLastException() {
+        ExceptionEvent? exc = this._context.LastException;
+        if(exc is null) {
+            return null;
+        }
+
+        string desc = exc.IsDouble
+            ? $"Double exception: {exc.Code} (program will terminate)"
+            : $"MIPS exception: {exc.Code}";
+
+        return new ExceptionInfo {
+            ExceptionId = exc.Code.ToString(),
+            Description = desc,
+            IsDouble = exc.IsDouble
+        };
     }
 
     /// <summary>
@@ -109,14 +136,19 @@ internal class PlusPimDbg: IDebugger {
     public StackFrameInfo[] GetCallStack() {
         List<StackFrameInfo> frames = [];
 
+        (uint badVAddr, uint status, uint cause, uint epc) = this._context.GetCP0DisplayValues();
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = this._context.CurrentLabel.Name,
             Line = this.GetCurrentLine(),
             Registers = this._context.Registers.ToArray(),
-            PC = Address.FromInstructionIndex(this._context.PC).Addr,
+            PC = Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr,
             HI = this._context.HI,
-            LO = this._context.LO
+            LO = this._context.LO,
+            CP0BadVAddr = badVAddr,
+            CP0Status = status,
+            CP0Cause = cause,
+            CP0EPC = epc
         });
 
         // CallStackの各フレーム
@@ -125,9 +157,9 @@ internal class PlusPimDbg: IDebugger {
             frames.Add(new StackFrameInfo {
                 FrameId = frameId,
                 Name = frame.Label.Name,
-                Line = this._program.GetInstruction(frame.CurrentPC).SourceLine,
+                Line = this._programs.GetInstruction(frame.CurrentPC, false).SourceLine,
                 Registers = frame.Registers.ToArray(),
-                PC = Address.FromInstructionIndex(frame.CurrentPC).Addr,
+                PC = Address.FromInstructionIndex(frame.CurrentPC, this._context.IsKernelMode()).Addr,
                 HI = frame.HISnapshot,
                 LO = frame.LOSnapshot
             });

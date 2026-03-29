@@ -2,7 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Program.records;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-internal class CP0RegisterFile {
+internal record class CP0RegisterFile {
     /// <summary>
     /// アドレス例外を引き起こしたアドレス
     /// </summary>
@@ -23,4 +23,10 @@ internal class CP0RegisterFile {
     /// </summary>
     public InstructionIndex Epc { get; init; }
 
+    public static CP0RegisterFile Default = new() {
+        BadVAddr = Address.InValid,
+        Exl = false,
+        Exc = ExcCode.RI,
+        Epc = InstructionIndex.Invalid
+    };
 }

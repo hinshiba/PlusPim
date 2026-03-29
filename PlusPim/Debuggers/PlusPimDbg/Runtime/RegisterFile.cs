@@ -4,7 +4,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// 32本のMIPSの汎用レジスタを管理する
 /// </summary>
 internal sealed class RegisterFile {
-    private readonly int[] _values = new int[32];
+    private readonly uint[] _values = new uint[32];
 
     /// <summary>
     /// 簡単にアクセスするためのインデクサ
@@ -13,7 +13,7 @@ internal sealed class RegisterFile {
     /// <returns>そのレジスタの値</returns>
     /// <remarks>$zeroへの書き込みは無視される．
     /// $zeroに書き込んでもエミュレータで例外等は発生しない</remarks>
-    public int this[RegisterID id] {
+    public uint this[RegisterID id] {
         get => this._values[(int)id];
         set {
             // $zero保護: 書き込みを無視
@@ -33,7 +33,7 @@ internal sealed class RegisterFile {
     /// <summary>
     /// 受け渡し等のために配列化する
     /// </summary>
-    public int[] ToArray() {
-        return (int[])this._values.Clone();
+    public uint[] ToArray() {
+        return (uint[])this._values.Clone();
     }
 }

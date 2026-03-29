@@ -58,9 +58,10 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 		const binPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
 
 		// ターミナルで呼んでもらう
-		const args = ["-d", "--port", String(port), ...extraArgs, program];
+		const programs: string[] = Array.isArray(program) ? program : [program];
+		const args = ["-d", "--port", String(port), ...extraArgs, ...programs];
 		this.terminal = vscode.window.createTerminal({
-			name: `Debug: ${path.basename(program)}`,
+			name: `Debug: ${programs.map(p => path.basename(p)).join(", ")}`,
 			shellPath: binPath,
 			shellArgs: args,
 		});

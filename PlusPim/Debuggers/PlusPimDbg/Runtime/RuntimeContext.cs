@@ -1,4 +1,3 @@
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using System.Buffers.Binary;
 
@@ -7,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable, InstructionIndex startIndex, Label startLabel) {
+internal sealed class RuntimeContext(Action<string> log, Func<string, InstructionIndex, bool, Label?> resolveLabel, InstructionIndex startIndex, Label startLabel) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
@@ -21,12 +20,12 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     /// <summary>
     /// HIレジスタ
     /// </summary>
-    public int HI { get; set; }
+    public uint HI { get; set; }
 
     /// <summary>
     /// LOレジスタ
     /// </summary>
-    public int LO { get; set; }
+    public uint LO { get; set; }
 
     /// <summary>
     /// メモリ空間の表現
@@ -42,6 +41,11 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     public bool IsTerminated { get; set; } = false;
 
     /// <summary>
+    /// 直前のステップで発生した例外の情報 (nullなら例外なし)
+    /// </summary>
+    public ExceptionEvent? LastException { get; private set; }
+
+    /// <summary>
     /// 現在実行中の命令に属すると考えられるラベル
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;
@@ -54,7 +58,7 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
     // 例外処理のためのフィールド
-    private CP0RegisterFile _cp0Regs = new();
+    private CP0RegisterFile _cp0Regs = CP0RegisterFile.Default;
 
     /// <summary>
     /// ラベル名からラベルを解決する
@@ -62,14 +66,25 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     /// <param name="name">ラベル名</param>
     /// <returns>ラベル</returns>
     public Label? ResolveLabelName(string name) {
-        return symbolTable.Resolve(name);
+        return resolveLabel(name, this.PC, this.IsKernelMode());
     }
 
+
     /// <summary>
-    /// DataSegmentのメモリイメージをメモリに書き込む
+    /// ラベル名から命令インデックスを解決する
     /// </summary>
-    public void LoadDataSegment(DataSegment dataSegment) {
-        foreach(KeyValuePair<Address, byte> kvp in dataSegment.MemoryImage) {
+    /// <param name="name">ラベル名</param>
+    /// <returns>命令インデックス</returns>
+    public InstructionIndex? ResolveLabelIndex(string name) {
+        return this.ResolveLabelName(name) is { } l ? InstructionIndex.FromAddress(l.Addr, this.IsKernelMode()) : null;
+    }
+
+
+    /// <summary>
+    /// メモリイメージをメモリに書き込む
+    /// </summary>
+    public void LoadMemoryImage(Dictionary<Address, byte> memoryImage) {
+        foreach(KeyValuePair<Address, byte> kvp in memoryImage) {
             this._memory[kvp.Key] = kvp.Value;
         }
     }
@@ -149,6 +164,7 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
     /// 任意のバイト数のメモリ読み込み
     /// </summary>
     /// <param name="address">アドレス</param>
+    /// <param name="num">読み込むメモリ数</param>
     /// <param name="isSign">符号拡張をするかどうか．<see langword="false"/>ならゼロ拡張</param>
     /// <returns>そのアドレスから任意のバイト数を読み込んで拡張した値</returns>
     public uint ReadMemoryBytes(Address address, int num, bool isSign) {
@@ -201,12 +217,20 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
 
 
     /// <summary>
-    /// 例外発生時の処理を行う
+    /// 例外を発生させる
     /// PCが変更され，カーネル空間へ移動する．
     /// </summary>
     /// <param name="reason">発生理由</param>
     /// <param name="badVAddr">アドレスが関わる場合は，原因となったアドレス</param>
     public void RaiseException(ExcCode reason, Address? badVAddr = null) {
+        if(this.IsKernelMode()) {
+            this.LastException = new ExceptionEvent(reason, IsDouble: true);
+            this.Log($"Double exception raised: {reason}. So terminate debugee.");
+            this.IsTerminated = true;
+            return;
+        }
+
+        this.LastException = new ExceptionEvent(reason, IsDouble: false);
         this.Log($"Exception raised: {reason}");
 
         this._cp0Regs = new CP0RegisterFile {
@@ -219,7 +243,81 @@ internal sealed class RuntimeContext(Action<string> log, SymbolTable symbolTable
         this.PC = new(0);
     }
 
+    /// <summary>
+    /// 例外を解決する
+    /// </summary>
+    public void RetException() {
+        // EPCの値に復帰
+        this.PC = this._cp0Regs.Epc;
+        // カーネルモードから脱出する
+        this._cp0Regs = CP0RegisterFile.Default;
+    }
+
+
     public bool IsKernelMode() {
         return this._cp0Regs.Exl;
     }
+
+
+    /// <summary>
+    /// CP0レジスタをMIPS番号で読み取る
+    /// </summary>
+    public uint ReadCP0Register(int regNum) {
+        return regNum switch {
+            8 => this._cp0Regs.BadVAddr?.Addr ?? 0,
+            12 => this._cp0Regs.Exl ? 0x2u : 0x0u,
+            13 => (uint)this._cp0Regs.Exc << 2,
+            14 => Address.FromInstructionIndex(this._cp0Regs.Epc, this.IsKernelMode()).Addr,
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// CP0レジスタをMIPS番号で書き込む
+    /// </summary>
+    public void WriteCP0Register(int regNum, uint value) {
+        this._cp0Regs = regNum switch {
+            8 => this._cp0Regs with { BadVAddr = new Address(value) },
+            12 => this._cp0Regs with { Exl = (value & 0x2) != 0 },
+            13 => this._cp0Regs with { Exc = (ExcCode)((value >> 2) & 0x1F) },
+            14 => this._cp0Regs with {
+                Epc = InstructionIndex.FromAddress(new Address(value), this.IsKernelMode())
+                      ?? this._cp0Regs.Epc
+            },
+            _ => this._cp0Regs
+        };
+    }
+
+    /// <summary>
+    /// CP0状態のスナップショットを取得する (Undo用)
+    /// </summary>
+    public CP0RegisterFile GetCP0Snapshot() {
+        return this._cp0Regs;
+    }
+
+    /// <summary>
+    /// CP0状態を復元する (Undo用)
+    /// </summary>
+    public void RestoreCP0(CP0RegisterFile snapshot) {
+        this._cp0Regs = snapshot;
+    }
+
+    /// <summary>
+    /// CP0レジスタの表示用値を取得する (DAP用)
+    /// </summary>
+    public (uint BadVAddr, uint Status, uint Cause, uint EPC) GetCP0DisplayValues() {
+        return (this.ReadCP0Register(8), this.ReadCP0Register(12), this.ReadCP0Register(13), this.ReadCP0Register(14));
+    }
+
+    /// <summary>
+    /// LastExceptionをクリアする．ステップの開始前に呼び出す．
+    /// </summary>
+    public void ClearLastException() {
+        this.LastException = null;
+    }
 }
+
+/// <summary>
+/// ステップ実行中に発生した例外イベントの情報
+/// </summary>
+internal record ExceptionEvent(ExcCode Code, bool IsDouble);

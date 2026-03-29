@@ -9,7 +9,7 @@ internal interface IApplication {
     /// </summary>
     /// <returns>成功した場合は<see langword="true"/></returns>
     bool Load();
-    (int[] Registers, int PC, int HI, int LO) GetRegisters();
+    (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters();
     void Step();
 
     /// <summary>
@@ -48,4 +48,10 @@ internal interface IApplication {
     /// <param name="frameId">フレームID</param>
     /// <returns>見つかった場合は<see cref="StackFrameInfo"/>，見つからない場合はnull</returns>
     StackFrameInfo? GetStackFrame(int frameId);
+
+    /// <summary>
+    /// 直前のStepで発生した例外情報を取得する
+    /// </summary>
+    /// <returns>例外情報．例外が発生していない場合はnull</returns>
+    ExceptionInfo? GetLastException();
 }

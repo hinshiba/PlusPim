@@ -4,9 +4,9 @@
 
 ### 算術・論理演算
 
-- [ ] `add` — Add (rd = rs + rt, オーバーフロー例外)
+- [x] `add` — Add (rd = rs + rt, オーバーフロー例外)
 - [x] `addu` — Add Unsigned (rd = rs + rt)
-- [ ] `sub` — Subtract (rd = rs - rt, オーバーフロー例外)
+- [x] `sub` — Subtract (rd = rs - rt, オーバーフロー例外)
 - [x] `subu` — Subtract Unsigned (rd = rs - rt)
 - [x] `and` — AND (rd = rs & rt)
 - [x] `or` — OR (rd = rs | rt)
@@ -38,8 +38,8 @@
 
 - [x] `mfhi` — Move From Hi (rd = Hi)
 - [x] `mflo` — Move From Lo (rd = Lo)
-- [ ] `mthi` — Move To Hi (Hi = rs)
-- [ ] `mtlo` — Move To Lo (Lo = rs)
+- [x] `mthi` — Move To Hi (Hi = rs)
+- [x] `mtlo` — Move To Lo (Lo = rs)
 
 ### ジャンプ (レジスタ)
 
@@ -66,7 +66,7 @@
 
 ### 算術・論理演算 (即値)
 
-- [ ] `addi` — Add Immediate (rt = rs + imm, オーバーフロー例外)
+- [x] `addi` — Add Immediate (rt = rs + imm, オーバーフロー例外)
 - [x] `addiu` — Add Immediate Unsigned (rt = rs + imm)
 - [x] `andi` — AND Immediate (rt = rs & imm, ゼロ拡張)
 - [x] `ori` — OR Immediate (rt = rs | imm, ゼロ拡張)
@@ -192,8 +192,8 @@
 
 - [x] `.text` — テキスト(コード)セクション開始
 - [x] `.data` — データセクション開始
-- [ ] `.ktext` — カーネルテキストセクション開始
-- [ ] `.kdata` — カーネルデータセクション開始
+- [x] `.ktext` — カーネルテキストセクション開始
+- [x] `.kdata` — カーネルデータセクション開始
 
 ### データ定義
 
@@ -202,7 +202,7 @@
 - [x] `.word` — ワード(4バイト)データ定義
 - [x] `.ascii` — ASCII文字列 (NULLなし)
 - [x] `.asciiz` — ASCII文字列 (NULL終端)
-- [ ] `.space` — 領域確保 (バイト数指定)
+- [x] `.space` — 領域確保 (バイト数指定)
 
 ### アラインメント・配置
 

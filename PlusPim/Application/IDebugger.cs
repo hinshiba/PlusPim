@@ -1,7 +1,7 @@
 namespace PlusPim.Application;
 
 internal interface IDebugger {
-    (int[] Registers, int PC, int HI, int LO) GetRegisters();
+    (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters();
     void Step();
 
     /// <summary>
@@ -23,4 +23,10 @@ internal interface IDebugger {
     /// </summary>
     /// <returns><see cref="StackFrameInfo"/>の配列．ライブフレームが先頭である</returns>
     StackFrameInfo[] GetCallStack();
+
+    /// <summary>
+    /// 直前のStepで発生した例外情報を取得する
+    /// </summary>
+    /// <returns>例外情報．例外が発生していない場合はnull</returns>
+    ExceptionInfo? GetLastException();
 }
