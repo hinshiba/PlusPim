@@ -18,21 +18,24 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
     private readonly Stack<SyscallCode> _history = new();
     private readonly Stack<uint> _prevReadInt = new();
     private readonly Stack<(Address, byte[])> _prevReadString = new();
+    private readonly Stack<bool> _wasCpU = new();
 
 
     public void Execute(RuntimeContext context) {
         if(!context.IsKernelMode()) {
             // カーネル空間でないならコプロセッサ例外
             context.RaiseException(ExcCode.CpU);
+            this._wasCpU.Push(true);
+            return;
         }
-
+        this._wasCpU.Push(false);
 
         SyscallCode code = (SyscallCode)context.Registers[RegisterID.V0];
         switch(code) {
             case SyscallCode.PrintInt:
                 context.Log($"Syscall: print_int {context.Registers[RegisterID.A0]}");
 
-                Console.WriteLine(context.Registers[RegisterID.A0]);
+                Console.Write(context.Registers[RegisterID.A0]);
                 break;
 
             case SyscallCode.PrintString:
@@ -44,7 +47,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 for(byte b; (b = context.ReadMemoryByte(readAddr++)) != 0;) {
                     bytes.Add(b);
                 }
-                Console.WriteLine(System.Text.Encoding.UTF8.GetString([.. bytes]));
+                Console.Write(System.Text.Encoding.UTF8.GetString([.. bytes]));
                 break;
 
             case SyscallCode.ReadInt:
@@ -99,6 +102,10 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
         this._history.Push(code);
     }
     public void Undo(RuntimeContext context) {
+        if(this._wasCpU.Pop()) {
+            context.RetException();
+            return;
+        }
         switch(this._history.Pop()) {
             case SyscallCode.PrintInt:
             case SyscallCode.PrintString:

@@ -123,7 +123,10 @@ internal sealed partial class InstructionRegistry {
         this.Register("runtime_call!", RuntimeCall.CreateParser());
 
         // 例外系
-
+        this.Register("mfc0", CP0RegisterInstruction.CreateParser(isFrom: true));
+        this.Register("mtc0", CP0RegisterInstruction.CreateParser(isFrom: false));
+        this.Register("eret", EretInstruction.CreateParser());
+        this.Register("break", BreakInstruction.CreateParser());
     }
 
     /// <summary>

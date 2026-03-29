@@ -45,8 +45,23 @@ internal class PlusPimDbg: IDebugger {
 
         // 有効なPCでないなら例外を発生させて例外ハンドラにジャンプ
         if(this._context.PC == InstructionIndex.Invalid) {
-            this._context.RaiseException(ExcCode.AdEL, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+            // jumpで指定されていないラベルへジャンプした場合にセットされる
+            this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+        } else {
+            // 次のPCに命令があるか確認
+            if(this._context.IsKernelMode()) {
+                if(this._programs.KernelInstructionCount <= this._context.PC.Idx) {
+                    this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+                    return;
+                }
+            } else {
+                if(this._programs.UserInstructionCount <= this._context.PC.Idx) {
+                    this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+                    return;
+                }
+            }
         }
+
         // 命令を取得
         IInstruction instruction = this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode());
         // 実行前のPCを保存
@@ -62,20 +77,6 @@ internal class PlusPimDbg: IDebugger {
         }
         // 履歴に保存
         this._history.Push((instruction, this._context.IsTerminated, pcAutoIncremented));
-
-        // 次のPCに命令があるか確認
-        if(this._context.IsKernelMode()) {
-            if(this._programs.KernelInstructionCount <= this._context.PC.Idx) {
-                // todo 例外が発生すべき
-                this._context.IsTerminated = true;
-                return;
-            }
-        } else {
-            if(this._programs.UserInstructionCount <= this._context.PC.Idx) {
-                this._context.IsTerminated = true;
-                return;
-            }
-        }
     }
 
     /// <summary>
@@ -116,6 +117,7 @@ internal class PlusPimDbg: IDebugger {
     public StackFrameInfo[] GetCallStack() {
         List<StackFrameInfo> frames = [];
 
+        (uint badVAddr, uint status, uint cause, uint epc) = this._context.GetCP0DisplayValues();
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = this._context.CurrentLabel.Name,
@@ -123,7 +125,11 @@ internal class PlusPimDbg: IDebugger {
             Registers = this._context.Registers.ToArray(),
             PC = Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()).Addr,
             HI = this._context.HI,
-            LO = this._context.LO
+            LO = this._context.LO,
+            CP0BadVAddr = badVAddr,
+            CP0Status = status,
+            CP0Cause = cause,
+            CP0EPC = epc
         });
 
         // CallStackの各フレーム

@@ -1,30 +1,26 @@
+using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 
-internal sealed class SyscallInstruction(int sourceLine): IInstruction {
-    /// <summary>
-    /// 行番号
-    /// </summary>
+/// <summary>
+/// break命令: ブレークポイント例外 (ExcCode=9) を発生させる
+/// </summary>
+internal sealed class BreakInstruction(int sourceLine): IInstruction {
     public int SourceLine { get; } = sourceLine;
 
-
     public void Execute(RuntimeContext context) {
-        context.RaiseException(ExcCode.Sys);
+        context.RaiseException(ExcCode.Bp);
     }
 
     public void Undo(RuntimeContext context) {
         context.RetException();
     }
 
-    /// <summary>
-    /// 命令のパーサーを生成するファクトリ
-    /// </summary>
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return new SyscallInstruction(lineIndex);
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+            return new BreakInstruction(lineIndex);
         });
     }
-
 }

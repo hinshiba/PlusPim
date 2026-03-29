@@ -8,6 +8,7 @@ namespace PlusPim.EditorController.DebugAdapter;
 internal class DebugAdapter: DebugAdapterBase {
     private const int SCOPE_REGISTERS = 1;
     private const int SCOPE_SPECIAL_REGISTERS = 2;
+    private const int SCOPE_CP0_REGISTERS = 3;
 
     private static readonly string[] RegisterNames = [
         "$zero ($0)", "$at ($1)", "$v0 ($2)", "$v1 ($3)",
@@ -120,6 +121,7 @@ internal class DebugAdapter: DebugAdapterBase {
         // エンコード: (frameId << 16) | scopeType
         int registersRef = (frameId << 16) | SCOPE_REGISTERS;
         int specialRegistersRef = (frameId << 16) | SCOPE_SPECIAL_REGISTERS;
+        int cp0RegistersRef = (frameId << 16) | SCOPE_CP0_REGISTERS;
 
         return new ScopesResponse {
             Scopes = [
@@ -127,6 +129,9 @@ internal class DebugAdapter: DebugAdapterBase {
                     PresentationHint = Scope.PresentationHintValue.Registers
                 },
                 new Scope("Special Registers", specialRegistersRef, false) {
+                    PresentationHint = Scope.PresentationHintValue.Registers
+                },
+                new Scope("CP0 Registers", cp0RegistersRef, false) {
                     PresentationHint = Scope.PresentationHintValue.Registers
                 }
             ]
@@ -154,6 +159,11 @@ internal class DebugAdapter: DebugAdapterBase {
                 variables.Add(new Variable("PC", $"0x{targetFrame.PC:X8}", 0));
                 variables.Add(new Variable("HI", $"0x{targetFrame.HI:X8}", 0));
                 variables.Add(new Variable("LO", $"0x{targetFrame.LO:X8}", 0));
+            } else if(scopeType == SCOPE_CP0_REGISTERS && targetFrame.CP0BadVAddr.HasValue) {
+                variables.Add(new Variable("BadVAddr ($8)", $"0x{targetFrame.CP0BadVAddr.Value:X8}", 0));
+                variables.Add(new Variable("Status ($12)", $"0x{targetFrame.CP0Status!.Value:X8}", 0));
+                variables.Add(new Variable("Cause ($13)", $"0x{targetFrame.CP0Cause!.Value:X8}", 0));
+                variables.Add(new Variable("EPC ($14)", $"0x{targetFrame.CP0EPC!.Value:X8}", 0));
             }
         }
 

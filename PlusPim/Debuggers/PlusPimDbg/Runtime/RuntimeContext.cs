@@ -218,6 +218,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// <param name="reason">発生理由</param>
     /// <param name="badVAddr">アドレスが関わる場合は，原因となったアドレス</param>
     public void RaiseException(ExcCode reason, Address? badVAddr = null) {
+        if(this.IsKernelMode()) {
+            this.Log($"Double exception raised: {reason}. So terminate debugee.");
+            this.IsTerminated = true;
+            return;
+        }
+
         this.Log($"Exception raised: {reason}");
 
         this._cp0Regs = new CP0RegisterFile {
@@ -243,5 +249,56 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
 
     public bool IsKernelMode() {
         return this._cp0Regs.Exl;
+    }
+
+
+    /// <summary>
+    /// CP0レジスタをMIPS番号で読み取る
+    /// </summary>
+    public uint ReadCP0Register(int regNum) {
+        return regNum switch {
+            8 => this._cp0Regs.BadVAddr?.Addr ?? 0,
+            12 => this._cp0Regs.Exl ? 0x2u : 0x0u,
+            13 => (uint)this._cp0Regs.Exc << 2,
+            14 => Address.FromInstructionIndex(this._cp0Regs.Epc, this.IsKernelMode()).Addr,
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// CP0レジスタをMIPS番号で書き込む
+    /// </summary>
+    public void WriteCP0Register(int regNum, uint value) {
+        this._cp0Regs = regNum switch {
+            8 => this._cp0Regs with { BadVAddr = new Address(value) },
+            12 => this._cp0Regs with { Exl = (value & 0x2) != 0 },
+            13 => this._cp0Regs with { Exc = (ExcCode)((value >> 2) & 0x1F) },
+            14 => this._cp0Regs with {
+                Epc = InstructionIndex.FromAddress(new Address(value), this.IsKernelMode())
+                      ?? this._cp0Regs.Epc
+            },
+            _ => this._cp0Regs
+        };
+    }
+
+    /// <summary>
+    /// CP0状態のスナップショットを取得する (Undo用)
+    /// </summary>
+    public CP0RegisterFile GetCP0Snapshot() {
+        return this._cp0Regs;
+    }
+
+    /// <summary>
+    /// CP0状態を復元する (Undo用)
+    /// </summary>
+    public void RestoreCP0(CP0RegisterFile snapshot) {
+        this._cp0Regs = snapshot;
+    }
+
+    /// <summary>
+    /// CP0レジスタの表示用値を取得する (DAP用)
+    /// </summary>
+    public (uint BadVAddr, uint Status, uint Cause, uint EPC) GetCP0DisplayValues() {
+        return (this.ReadCP0Register(8), this.ReadCP0Register(12), this.ReadCP0Register(13), this.ReadCP0Register(14));
     }
 }
