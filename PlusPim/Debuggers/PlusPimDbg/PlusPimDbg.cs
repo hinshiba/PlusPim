@@ -1,7 +1,5 @@
 using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
@@ -12,7 +10,7 @@ namespace PlusPim.Debuggers.PlusPimDbg;
 internal class PlusPimDbg: IDebugger {
     private readonly RuntimeContext _context;
     private readonly ParsedPrograms _programs;
-    private readonly Stack<(IInstruction Instruction, bool WasTerminated)> _history = new();
+    private readonly Stack<(IInstruction Instruction, bool WasTerminated, bool PcAutoIncremented)> _history = new();
 
     internal PlusPimDbg(FileInfo[] files, ILogger logger) {
         this._programs = new ParsedPrograms(files, logger);
@@ -51,19 +49,19 @@ internal class PlusPimDbg: IDebugger {
         }
         // 命令を取得
         IInstruction instruction = this._programs.GetInstruction(this._context.PC, this._context.IsKernelMode());
-        // ブランチやジャンプならPCの変更(条件未成立時の+1を含む)は命令側の責任
-        bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
-        // インスタンスを履歴に保存
-        this._history.Push((instruction, this._context.IsTerminated));
+        // 実行前のPCを保存
+        InstructionIndex pcBeforeExec = this._context.PC;
 
         // 実行
         instruction.Execute(this._context);
-        if(!modifiesPC) {
-            // JumpやBranchはPCを変化させない
-        } else {
-            // それ以外はPC++
+
+        // 命令がPCを変更しなかった場合のみ自動increment
+        bool pcAutoIncremented = this._context.PC == pcBeforeExec;
+        if(pcAutoIncremented) {
             this._context.PC++;
         }
+        // 履歴に保存
+        this._history.Push((instruction, this._context.IsTerminated, pcAutoIncremented));
 
         // 次のPCに命令があるか確認
         if(this._context.IsKernelMode()) {
@@ -90,10 +88,9 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // popして逆操作しているだけ
-        (IInstruction instruction, bool wasTerminated) = this._history.Pop();
-        bool modifiesPC = instruction is JumpInstruction or BranchInstruction;
+        (IInstruction instruction, bool wasTerminated, bool pcAutoIncremented) = this._history.Pop();
         instruction.Undo(this._context);
-        if(!modifiesPC) {
+        if(pcAutoIncremented) {
             this._context.PC--;
         }
         this._context.IsTerminated = wasTerminated;
