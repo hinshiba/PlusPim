@@ -17,7 +17,7 @@ internal static class InstructionFactory {
     }
 
     internal static IInstruction Addu(RegisterID rd, RegisterID rs, RegisterID rt, int lineIndex) {
-        return new RType3RegInstruction(rd, rs, rt, lineIndex, "addu", (rsVal, rtVal) => rsVal + rtVal);
+        return new RType3RegInstruction(rd, rs, rt, lineIndex, "addu", (rsVal, rtVal) => unchecked(rsVal + rtVal));
     }
 
     internal static IInstruction Sll(RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex) {
