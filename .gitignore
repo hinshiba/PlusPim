@@ -368,3 +368,5 @@ CLAUDE.md
 *.vsix
 
 _site
+/api
+/doc/local

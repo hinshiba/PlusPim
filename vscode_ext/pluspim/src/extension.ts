@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
 import * as net from "net";
 import * as path from "path";
 
@@ -63,7 +64,10 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
 		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
-		const binPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
+		// 開発用(dotnet build)を優先，なければリリース用(dotnet publish)にフォールバック
+		const debugBinPath = this.context.asAbsolutePath(`bin/debug/${exe}`);
+		const releaseBinPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
+		const binPath = fs.existsSync(debugBinPath) ? debugBinPath : releaseBinPath;
 
 		// ターミナルで呼んでもらう
 		const args = ["-d", "--port", String(port), ...extraArgs, ...programs];
