@@ -32,9 +32,6 @@ internal sealed class ITypeInstruction(
     /// 命令の逆操作だが，ほとんどのI形式命令ではRtに書き込んだ値を元に戻すだけで良い
     /// </summary>
     public void Undo(RuntimeContext context) {
-        if(rt == RegisterID.Zero) {
-            return;
-        }
         if(this._prevRtValues.Count == 0) {
             throw new InvalidOperationException("No previous value to undo.");
         }
@@ -50,10 +47,6 @@ internal sealed class ITypeInstruction(
     /// <param name="context">レジスタを含むコンテキスト</param>
     /// <param name="value">書き込む値</param>
     private void WriteRt(RuntimeContext context, uint value) {
-        // $zero保護
-        if(rt == RegisterID.Zero) {
-            return;
-        }
         // 逆操作のために保存
         this._prevRtValues.Push(context.Registers[rt]);
         context.Registers[rt] = value;

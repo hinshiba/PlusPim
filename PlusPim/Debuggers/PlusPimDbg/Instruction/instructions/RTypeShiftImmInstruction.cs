@@ -28,9 +28,6 @@ internal sealed class RTypeShiftImmInstruction(
     }
 
     public void Undo(RuntimeContext context) {
-        if(rd == RegisterID.Zero) {
-            return;
-        }
         if(this._previousRdValues.Count == 0) {
             throw new InvalidOperationException("No previous value to undo.");
         }
@@ -38,9 +35,6 @@ internal sealed class RTypeShiftImmInstruction(
     }
 
     private void WriteRd(RuntimeContext context, uint value) {
-        if(rd == RegisterID.Zero) {
-            return;
-        }
         this._previousRdValues.Push(context.Registers[rd]);
         context.Registers[rd] = value;
     }
