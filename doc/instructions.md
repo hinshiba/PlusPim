@@ -30,9 +30,9 @@
 ### 乗除算
 
 - [x] `mult` — Multiply (Hi, Lo = rs * rt, 符号付き)
-- [ ] `multu` — Multiply Unsigned (Hi, Lo = rs * rt, 符号なし)
+- [x] `multu` — Multiply Unsigned (Hi, Lo = rs * rt, 符号なし)
 - [x] `div` — Divide (Lo = rs / rt, Hi = rs % rt, 符号付き)
-- [ ] `divu` — Divide Unsigned (Lo = rs / rt, Hi = rs % rt, 符号なし)
+- [x] `divu` — Divide Unsigned (Lo = rs / rt, Hi = rs % rt, 符号なし)
 
 ### Hi/Lo レジスタ操作
 
@@ -49,7 +49,7 @@
 ### システム
 
 - [x] `syscall` — System Call
-- [ ] `break` — Breakpoint
+- [x] `break` — Breakpoint
 
 ### トラップ
 
