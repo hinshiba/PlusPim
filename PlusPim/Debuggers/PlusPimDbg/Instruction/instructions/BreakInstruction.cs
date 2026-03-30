@@ -20,7 +20,7 @@ internal sealed class BreakInstruction(int sourceLine): IInstruction {
 
     internal static Func<string, IInstructionParser> CreateParser() {
         return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return new BreakInstruction(lineIndex);
+            return OperandParser.TryParseNoOperand(operands) ? new BreakInstruction(lineIndex) : null;
         });
     }
 }

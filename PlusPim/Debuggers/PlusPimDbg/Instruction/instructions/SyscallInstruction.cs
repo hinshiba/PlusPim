@@ -23,7 +23,7 @@ internal sealed class SyscallInstruction(int sourceLine): IInstruction {
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser() {
         return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return new SyscallInstruction(lineIndex);
+            return OperandParser.TryParseNoOperand(operands) ? new SyscallInstruction(lineIndex) : null;
         });
     }
 

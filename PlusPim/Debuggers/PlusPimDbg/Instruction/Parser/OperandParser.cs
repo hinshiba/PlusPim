@@ -267,4 +267,11 @@ internal static partial class OperandParser {
         label = trimmed;
         return true;
     }
+
+    /// <summary>
+    /// オペランドがないことを確認する
+    /// </summary>
+    internal static bool TryParseNoOperand(string operands) {
+        return string.IsNullOrWhiteSpace(operands);
+    }
 }
