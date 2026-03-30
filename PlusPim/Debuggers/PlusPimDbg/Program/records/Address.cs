@@ -25,6 +25,11 @@ internal record struct Address(uint Addr) {
         return new Address(unchecked(lhs.Addr + (uint)rhs));
     }
 
+    public static Address operator +(Address lhs, uint rhs) {
+        lhs.Addr += rhs;
+        return lhs;
+    }
+
     public static Address operator ++(Address val) {
         val.Addr++;
         return val;
