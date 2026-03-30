@@ -33,13 +33,13 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
         SyscallCode code = (SyscallCode)context.Registers[RegisterID.V0];
         switch(code) {
             case SyscallCode.PrintInt:
-                context.Log($"Syscall: print_int {context.Registers[RegisterID.A0]}");
+                context.Log($"RuntimeCall: print_int {context.Registers[RegisterID.A0]}");
 
                 Console.Write(context.Registers[RegisterID.A0]);
                 break;
 
             case SyscallCode.PrintString:
-                context.Log($"Syscall: print_string at address 0x{context.Registers[RegisterID.A0]:X8}");
+                context.Log($"RuntimeCall: print_string at address 0x{context.Registers[RegisterID.A0]:X8}");
 
                 Address readAddr = new(context.Registers[RegisterID.A0]);
                 List<byte> bytes = [];
@@ -51,7 +51,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 break;
 
             case SyscallCode.ReadInt:
-                context.Log("Syscall: read_int to $v0");
+                context.Log("RuntimeCall: read_int to $v0");
 
                 // Undoのために現在の値を保存
                 this._prevReadInt.Push(context.Registers[RegisterID.V0]);
@@ -60,20 +60,29 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 if(int.TryParse(Console.ReadLine(), out int value)) {
                     context.Registers[RegisterID.V0] = (uint)value;
                 } else {
-                    context.Log("Syscall: Invalid input for read_int, so set 0");
+                    context.Log("RuntimeCall: Invalid input for read_int, so set 0");
                     context.Registers[RegisterID.V0] = 0;
                 }
                 break;
 
             case SyscallCode.ReadString:
-                context.Log($"Syscall: read_string to address 0x{context.Registers[RegisterID.A0]:X8}");
+                context.Log($"RuntimeCall: read_string to address 0x{context.Registers[RegisterID.A0]:X8}");
 
                 Address writeAddr = new(context.Registers[RegisterID.A0]);
-                int maxLength = (int)context.Registers[RegisterID.A1];
+                uint maxLength_ = context.Registers[RegisterID.A1];
+                int maxLength;
+
+                // C#のコレクションの最大長はint.MaxValueなので，それ以上の値が指定された場合はint.MaxValueに丸める
+                if(int.MaxValue < maxLength_) {
+                    context.Log("RuntimeCall: Too large maxLength, so set int.MaxValue");
+                    maxLength = int.MaxValue;
+                } else {
+                    maxLength = (int)maxLength_;
+                }
 
                 // Undoのためにメモリの内容を保存
                 List<byte> prevBytes = [];
-                for(int i = 0; i < maxLength + 1; i++) {
+                for(uint i = 0; i < maxLength + 1; i++) {
                     prevBytes.Add(context.ReadMemoryByte(writeAddr + i));
                 }
                 this._prevReadString.Push((writeAddr, [.. prevBytes]));
@@ -91,12 +100,12 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 break;
 
             case SyscallCode.Exit:
-                context.Log("Syscall: exit");
+                context.Log("RuntimeCall: exit");
                 context.IsTerminated = true;
                 break;
 
             default:
-                context.Log($"Syscall: unknown code {context.Registers[RegisterID.V0]}");
+                context.Log($"RuntimeCall: unknown code {context.Registers[RegisterID.V0]}");
                 break;
         }
         this._history.Push(code);
