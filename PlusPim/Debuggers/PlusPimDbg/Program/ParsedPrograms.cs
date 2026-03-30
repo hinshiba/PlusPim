@@ -50,6 +50,9 @@ internal sealed class ParsedPrograms {
 
             // データセグメントの結合
             foreach(KeyValuePair<Address, byte> entry in program.DataSegment.MemoryImage) {
+                if(this.MemoryImage.ContainsKey(entry.Key)) {
+                    logger.Warning("ParsedPrograms", $"Memory address {entry.Key} defined in multiple files; overwriting.");
+                }
                 this.MemoryImage[entry.Key] = entry.Value;
             }
 
