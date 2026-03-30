@@ -32,11 +32,14 @@
             ],
             "properties": {
               "program": {
-                "type": "array",
+                "type": [
+                  "string",
+                  "array"
+                ],
                 "items": {
                   "type": "string"
                 },
-                "description": "Path to the MIPS assembly file",
+                "description": "Path to the MIPS assembly file (string) or an array of paths. The runtime will normalize either form.",
                 "default": [
                   "${file}"
                 ]
