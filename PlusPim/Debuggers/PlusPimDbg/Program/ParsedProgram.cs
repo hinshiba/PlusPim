@@ -48,7 +48,7 @@ internal class ParsedProgram {
 
         List<(string Trimmed, int LineIndex)> kernelTextLines = [];
 
-        SegmentType currentSegment = SegmentType.Text;
+        SegmentType currentSegment = SegmentType.Unknown;
         {
             using StreamReader reader = file.OpenText();
             int lineIndex = -1;
@@ -84,7 +84,10 @@ internal class ParsedProgram {
                         kernelTextLines.Add((processed, lineIndex));
                         break;
                     default:
-                        throw new Exception("cant reach here");
+                        logger.Warning("ParsedProgram", $"Line{lineIndex + 1} Segment type is not specified. So set text segment.");
+                        currentSegment = SegmentType.Text;
+                        textLines.Add((processed, lineIndex));
+                        break;
                 }
             }
         }

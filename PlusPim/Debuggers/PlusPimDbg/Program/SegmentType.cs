@@ -7,4 +7,5 @@ internal enum SegmentType {
     Text,
     Data,
     KernelText,
+    Unknown,
 }
