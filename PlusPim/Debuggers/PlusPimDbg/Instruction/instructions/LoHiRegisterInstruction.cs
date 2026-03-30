@@ -15,7 +15,7 @@ internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool is
 
     // 逆操作のためのレジスタの以前の値
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
-    public readonly Stack<uint> _prevRegValues = new();
+    private readonly Stack<uint> _prevRegValues = new();
 
     public void Execute(RuntimeContext context) {
         if(isFrom) {
