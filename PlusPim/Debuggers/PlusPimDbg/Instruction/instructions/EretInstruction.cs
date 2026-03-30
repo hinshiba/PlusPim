@@ -14,10 +14,11 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
     private readonly Stack<(InstructionIndex PrevPC, CP0RegisterFile PrevCP0)> _prevState = new();
 
     public void Execute(RuntimeContext context) {
-        this._prevState.Push((context.PC, context.GetCP0Snapshot()));
+        CP0RegisterFile cp0regs = context.GetCP0Snapshot();
+        this._prevState.Push((context.PC, cp0regs));
 
         // EPC (InstructionIndex) を直接PCに代入
-        context.PC = context.GetCP0Snapshot().Epc;
+        context.PC = cp0regs.Epc;
 
         // EXLクリア (カーネルモード脱出)
         context.WriteCP0Register(12, 0);
