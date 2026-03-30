@@ -22,8 +22,7 @@ internal record struct Address(uint Addr) {
     }
 
     public static Address operator +(Address lhs, int rhs) {
-        lhs.Addr += (uint)rhs;
-        return lhs;
+        return new Address(unchecked(lhs.Addr + (uint)rhs));
     }
 
     public static Address operator ++(Address val) {
