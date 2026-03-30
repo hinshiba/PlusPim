@@ -267,7 +267,8 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
             8 => this._cp0Regs.BadVAddr?.Addr ?? 0,
             12 => this._cp0Regs.Exl ? 0x2u : 0x0u,
             13 => (uint)this._cp0Regs.Exc << 2,
-            14 => Address.FromInstructionIndex(this._cp0Regs.Epc, this.IsKernelMode()).Addr,
+            // double exceptionはterminateするので，必ずuser空間であるといえる
+            14 => Address.FromInstructionIndex(this._cp0Regs.Epc, false).Addr,
             _ => 0
         };
     }
