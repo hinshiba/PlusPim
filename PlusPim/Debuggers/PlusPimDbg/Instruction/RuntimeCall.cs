@@ -141,7 +141,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser() {
         return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return new RuntimeCall(lineIndex);
+            return OperandParser.TryParseNoOperand(operands) ? new RuntimeCall(lineIndex) : null;
         });
     }
 
