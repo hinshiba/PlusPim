@@ -1,0 +1,579 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  id: Label
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Program.records.Label.#ctor(System.String,PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  - PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr
+  - PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Invalid
+  - PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name
+  - PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString
+  langs:
+  - csharp
+  - vb
+  name: Label
+  nameWithType: Label
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  type: Struct
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Label
+    path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+    startLine: 7
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program.records
+  summary: ラベルを表す値型
+  example: []
+  syntax:
+    content: 'internal readonly record struct Label : IEquatable<Label>'
+    content.vb: Friend Structure Label Implements IEquatable(Of Label)
+  implements:
+  - System.IEquatable{PlusPim.Debuggers.PlusPimDbg.Program.records.Label}
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.#ctor(System.String,PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.#ctor(System.String,PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  id: '#ctor(System.String,PlusPim.Debuggers.PlusPimDbg.Program.records.Address)'
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  langs:
+  - csharp
+  - vb
+  name: Label(string, Address)
+  nameWithType: Label.Label(string, Address)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Label(string, PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  type: Constructor
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: .ctor
+    path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+    startLine: 7
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program.records
+  summary: ラベルを表す値型
+  example: []
+  syntax:
+    content: public Label(string Name, Address Addr)
+    parameters:
+    - id: Name
+      type: System.String
+      description: ラベルのシンボル名
+    - id: Addr
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+      description: ラベルのアドレス
+    content.vb: Public Sub New(Name As String, Addr As Address)
+  overload: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.#ctor*
+  nameWithType.vb: Label.New(String, Address)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.New(String, PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  name.vb: New(String, Address)
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name
+  id: Name
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: Label.Name
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Name
+    path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+    startLine: 7
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program.records
+  summary: ラベルのシンボル名
+  example: []
+  syntax:
+    content: public string Name { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name*
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr
+  id: Addr
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  langs:
+  - csharp
+  - vb
+  name: Addr
+  nameWithType: Label.Addr
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Addr
+    path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+    startLine: 7
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program.records
+  summary: ラベルのアドレス
+  example: []
+  syntax:
+    content: public Address Addr { get; init; }
+    parameters: []
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+    content.vb: Public Property Addr As Address
+  overload: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr*
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString
+  id: ToString
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: Label.ToString()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: ToString
+    path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+    startLine: 8
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program.records
+  summary: Returns the fully qualified type name of this instance.
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+      description: The fully qualified type name.
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.ValueType.ToString
+  overload: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString*
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Invalid
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Invalid
+  id: Invalid
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  langs:
+  - csharp
+  - vb
+  name: Invalid
+  nameWithType: Label.Invalid
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Invalid
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Invalid
+    path: PlusPim/Debuggers/PlusPimDbg/Program/records/Label.cs
+    startLine: 12
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program.records
+  syntax:
+    content: public static readonly Label Invalid
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+    content.vb: Public Shared ReadOnly Invalid As Label
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program.records
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Program.records
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program.records
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+    name: records
+    href: PlusPim.Debuggers.PlusPimDbg.Program.records.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+    name: records
+    href: PlusPim.Debuggers.PlusPimDbg.Program.records.html
+- uid: System.IEquatable{PlusPim.Debuggers.PlusPimDbg.Program.records.Label}
+  commentId: T:System.IEquatable{PlusPim.Debuggers.PlusPimDbg.Program.records.Label}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<Label>
+  nameWithType: IEquatable<Label>
+  fullName: System.IEquatable<PlusPim.Debuggers.PlusPimDbg.Program.records.Label>
+  nameWithType.vb: IEquatable(Of Label)
+  fullName.vb: System.IEquatable(Of PlusPim.Debuggers.PlusPimDbg.Program.records.Label)
+  name.vb: IEquatable(Of Label)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+    name: Label
+    href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+    name: Label
+    href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html
+  - name: )
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.#ctor*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.#ctor
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html#PlusPim_Debuggers_PlusPimDbg_Program_records_Label__ctor_System_String_PlusPim_Debuggers_PlusPimDbg_Program_records_Address_
+  name: Label
+  nameWithType: Label.Label
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Label
+  nameWithType.vb: Label.New
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.New
+  name.vb: New
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Address.html
+  name: Address
+  nameWithType: Address
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html#PlusPim_Debuggers_PlusPimDbg_Program_records_Label_Name
+  name: Name
+  nameWithType: Label.Name
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Name
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html#PlusPim_Debuggers_PlusPimDbg_Program_records_Label_Addr
+  name: Addr
+  nameWithType: Label.Addr
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.Addr
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html#PlusPim_Debuggers_PlusPimDbg_Program_records_Label_ToString
+  name: ToString
+  nameWithType: Label.ToString
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.ToString
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Label.html
+  name: Label
+  nameWithType: Label
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Label

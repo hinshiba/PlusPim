@@ -1,0 +1,1092 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Logging.Logger.NullLogger
+  commentId: T:PlusPim.Logging.Logger.NullLogger
+  id: Logger.NullLogger
+  parent: PlusPim.Logging
+  children:
+  - PlusPim.Logging.Logger.NullLogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  - PlusPim.Logging.Logger.NullLogger.Debug(System.String,System.String)
+  - PlusPim.Logging.Logger.NullLogger.Error(System.String,System.String)
+  - PlusPim.Logging.Logger.NullLogger.Info(System.String,System.String)
+  - PlusPim.Logging.Logger.NullLogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  - PlusPim.Logging.Logger.NullLogger.ToAction(System.String)
+  - PlusPim.Logging.Logger.NullLogger.Warning(System.String,System.String)
+  langs:
+  - csharp
+  - vb
+  name: Logger.NullLogger
+  nameWithType: Logger.NullLogger
+  fullName: PlusPim.Logging.Logger.NullLogger
+  type: Class
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: NullLogger
+    path: PlusPim/Logging/Logger.cs
+    startLine: 57
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  syntax:
+    content: 'private sealed class Logger.NullLogger : ILogger'
+    content.vb: Private NotInheritable Class Logger.NullLogger Implements ILogger
+  inheritance:
+  - System.Object
+  implements:
+  - PlusPim.Logging.ILogger
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Logging.Logger.NullLogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  commentId: M:PlusPim.Logging.Logger.NullLogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  id: Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: Log(LogLevel, string, string)
+  nameWithType: Logger.NullLogger.Log(LogLevel, string, string)
+  fullName: PlusPim.Logging.Logger.NullLogger.Log(PlusPim.Logging.LogLevel, string, string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Log
+    path: PlusPim/Logging/Logger.cs
+    startLine: 58
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  example: []
+  syntax:
+    content: public void Log(LogLevel level, string source, string message)
+    parameters:
+    - id: level
+      type: PlusPim.Logging.LogLevel
+    - id: source
+      type: System.String
+    - id: message
+      type: System.String
+    content.vb: Public Sub Log(level As LogLevel, source As String, message As String)
+  overload: PlusPim.Logging.Logger.NullLogger.Log*
+  implements:
+  - PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  nameWithType.vb: Logger.NullLogger.Log(LogLevel, String, String)
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.Log(PlusPim.Logging.LogLevel, String, String)
+  name.vb: Log(LogLevel, String, String)
+- uid: PlusPim.Logging.Logger.NullLogger.Debug(System.String,System.String)
+  commentId: M:PlusPim.Logging.Logger.NullLogger.Debug(System.String,System.String)
+  id: Debug(System.String,System.String)
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: Debug(string, string)
+  nameWithType: Logger.NullLogger.Debug(string, string)
+  fullName: PlusPim.Logging.Logger.NullLogger.Debug(string, string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Debug
+    path: PlusPim/Logging/Logger.cs
+    startLine: 59
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  example: []
+  syntax:
+    content: public void Debug(string source, string message)
+    parameters:
+    - id: source
+      type: System.String
+    - id: message
+      type: System.String
+    content.vb: Public Sub Debug(source As String, message As String)
+  overload: PlusPim.Logging.Logger.NullLogger.Debug*
+  implements:
+  - PlusPim.Logging.ILogger.Debug(System.String,System.String)
+  nameWithType.vb: Logger.NullLogger.Debug(String, String)
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.Debug(String, String)
+  name.vb: Debug(String, String)
+- uid: PlusPim.Logging.Logger.NullLogger.Info(System.String,System.String)
+  commentId: M:PlusPim.Logging.Logger.NullLogger.Info(System.String,System.String)
+  id: Info(System.String,System.String)
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: Info(string, string)
+  nameWithType: Logger.NullLogger.Info(string, string)
+  fullName: PlusPim.Logging.Logger.NullLogger.Info(string, string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Info
+    path: PlusPim/Logging/Logger.cs
+    startLine: 60
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  example: []
+  syntax:
+    content: public void Info(string source, string message)
+    parameters:
+    - id: source
+      type: System.String
+    - id: message
+      type: System.String
+    content.vb: Public Sub Info(source As String, message As String)
+  overload: PlusPim.Logging.Logger.NullLogger.Info*
+  implements:
+  - PlusPim.Logging.ILogger.Info(System.String,System.String)
+  nameWithType.vb: Logger.NullLogger.Info(String, String)
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.Info(String, String)
+  name.vb: Info(String, String)
+- uid: PlusPim.Logging.Logger.NullLogger.Warning(System.String,System.String)
+  commentId: M:PlusPim.Logging.Logger.NullLogger.Warning(System.String,System.String)
+  id: Warning(System.String,System.String)
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: Warning(string, string)
+  nameWithType: Logger.NullLogger.Warning(string, string)
+  fullName: PlusPim.Logging.Logger.NullLogger.Warning(string, string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Warning
+    path: PlusPim/Logging/Logger.cs
+    startLine: 61
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  example: []
+  syntax:
+    content: public void Warning(string source, string message)
+    parameters:
+    - id: source
+      type: System.String
+    - id: message
+      type: System.String
+    content.vb: Public Sub Warning(source As String, message As String)
+  overload: PlusPim.Logging.Logger.NullLogger.Warning*
+  implements:
+  - PlusPim.Logging.ILogger.Warning(System.String,System.String)
+  nameWithType.vb: Logger.NullLogger.Warning(String, String)
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.Warning(String, String)
+  name.vb: Warning(String, String)
+- uid: PlusPim.Logging.Logger.NullLogger.Error(System.String,System.String)
+  commentId: M:PlusPim.Logging.Logger.NullLogger.Error(System.String,System.String)
+  id: Error(System.String,System.String)
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: Error(string, string)
+  nameWithType: Logger.NullLogger.Error(string, string)
+  fullName: PlusPim.Logging.Logger.NullLogger.Error(string, string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Error
+    path: PlusPim/Logging/Logger.cs
+    startLine: 62
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  example: []
+  syntax:
+    content: public void Error(string source, string message)
+    parameters:
+    - id: source
+      type: System.String
+    - id: message
+      type: System.String
+    content.vb: Public Sub [Error](source As String, message As String)
+  overload: PlusPim.Logging.Logger.NullLogger.Error*
+  implements:
+  - PlusPim.Logging.ILogger.Error(System.String,System.String)
+  nameWithType.vb: Logger.NullLogger.Error(String, String)
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.Error(String, String)
+  name.vb: Error(String, String)
+- uid: PlusPim.Logging.Logger.NullLogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  commentId: M:PlusPim.Logging.Logger.NullLogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  id: AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: AddSink(Action<LogLevel, string, string>)
+  nameWithType: Logger.NullLogger.AddSink(Action<LogLevel, string, string>)
+  fullName: PlusPim.Logging.Logger.NullLogger.AddSink(System.Action<PlusPim.Logging.LogLevel, string, string>)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: AddSink
+    path: PlusPim/Logging/Logger.cs
+    startLine: 63
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  example: []
+  syntax:
+    content: public void AddSink(Action<LogLevel, string, string> sink)
+    parameters:
+    - id: sink
+      type: System.Action{PlusPim.Logging.LogLevel,System.String,System.String}
+    content.vb: Public Sub AddSink(sink As Action(Of LogLevel, String, String))
+  overload: PlusPim.Logging.Logger.NullLogger.AddSink*
+  implements:
+  - PlusPim.Logging.ILogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  nameWithType.vb: Logger.NullLogger.AddSink(Action(Of LogLevel, String, String))
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.AddSink(System.Action(Of PlusPim.Logging.LogLevel, String, String))
+  name.vb: AddSink(Action(Of LogLevel, String, String))
+- uid: PlusPim.Logging.Logger.NullLogger.ToAction(System.String)
+  commentId: M:PlusPim.Logging.Logger.NullLogger.ToAction(System.String)
+  id: ToAction(System.String)
+  parent: PlusPim.Logging.Logger.NullLogger
+  langs:
+  - csharp
+  - vb
+  name: ToAction(string)
+  nameWithType: Logger.NullLogger.ToAction(string)
+  fullName: PlusPim.Logging.Logger.NullLogger.ToAction(string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Logging/Logger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: ToAction
+    path: PlusPim/Logging/Logger.cs
+    startLine: 64
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Logging
+  summary: <xref href="System.Action%601" data-throw-if-not-resolved="false"></xref>ブリッジを返す．指定されたソース名でDebugレベルのログを出力する．
+  example: []
+  syntax:
+    content: public Action<string> ToAction(string source)
+    parameters:
+    - id: source
+      type: System.String
+    return:
+      type: System.Action{System.String}
+    content.vb: Public Function ToAction(source As String) As Action(Of String)
+  overload: PlusPim.Logging.Logger.NullLogger.ToAction*
+  implements:
+  - PlusPim.Logging.ILogger.ToAction(System.String)
+  nameWithType.vb: Logger.NullLogger.ToAction(String)
+  fullName.vb: PlusPim.Logging.Logger.NullLogger.ToAction(String)
+  name.vb: ToAction(String)
+references:
+- uid: PlusPim.Logging
+  commentId: N:PlusPim.Logging
+  href: PlusPim.html
+  name: PlusPim.Logging
+  nameWithType: PlusPim.Logging
+  fullName: PlusPim.Logging
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Logging
+    name: Logging
+    href: PlusPim.Logging.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Logging
+    name: Logging
+    href: PlusPim.Logging.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PlusPim.Logging.ILogger
+  commentId: T:PlusPim.Logging.ILogger
+  parent: PlusPim.Logging
+  href: PlusPim.Logging.ILogger.html
+  name: ILogger
+  nameWithType: ILogger
+  fullName: PlusPim.Logging.ILogger
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Logging.Logger.NullLogger.Log*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.Log
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_Log_PlusPim_Logging_LogLevel_System_String_System_String_
+  name: Log
+  nameWithType: Logger.NullLogger.Log
+  fullName: PlusPim.Logging.Logger.NullLogger.Log
+- uid: PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  commentId: M:PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Log_PlusPim_Logging_LogLevel_System_String_System_String_
+  name: Log(LogLevel, string, string)
+  nameWithType: ILogger.Log(LogLevel, string, string)
+  fullName: PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel, string, string)
+  nameWithType.vb: ILogger.Log(LogLevel, String, String)
+  fullName.vb: PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel, String, String)
+  name.vb: Log(LogLevel, String, String)
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+    name: Log
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Log_PlusPim_Logging_LogLevel_System_String_System_String_
+  - name: (
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    href: PlusPim.Logging.LogLevel.html
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.Log(PlusPim.Logging.LogLevel,System.String,System.String)
+    name: Log
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Log_PlusPim_Logging_LogLevel_System_String_System_String_
+  - name: (
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    href: PlusPim.Logging.LogLevel.html
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PlusPim.Logging.LogLevel
+  commentId: T:PlusPim.Logging.LogLevel
+  parent: PlusPim.Logging
+  href: PlusPim.Logging.LogLevel.html
+  name: LogLevel
+  nameWithType: LogLevel
+  fullName: PlusPim.Logging.LogLevel
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PlusPim.Logging.Logger.NullLogger.Debug*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.Debug
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_Debug_System_String_System_String_
+  name: Debug
+  nameWithType: Logger.NullLogger.Debug
+  fullName: PlusPim.Logging.Logger.NullLogger.Debug
+- uid: PlusPim.Logging.ILogger.Debug(System.String,System.String)
+  commentId: M:PlusPim.Logging.ILogger.Debug(System.String,System.String)
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Debug_System_String_System_String_
+  name: Debug(string, string)
+  nameWithType: ILogger.Debug(string, string)
+  fullName: PlusPim.Logging.ILogger.Debug(string, string)
+  nameWithType.vb: ILogger.Debug(String, String)
+  fullName.vb: PlusPim.Logging.ILogger.Debug(String, String)
+  name.vb: Debug(String, String)
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.Debug(System.String,System.String)
+    name: Debug
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Debug_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.Debug(System.String,System.String)
+    name: Debug
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Debug_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PlusPim.Logging.Logger.NullLogger.Info*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.Info
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_Info_System_String_System_String_
+  name: Info
+  nameWithType: Logger.NullLogger.Info
+  fullName: PlusPim.Logging.Logger.NullLogger.Info
+- uid: PlusPim.Logging.ILogger.Info(System.String,System.String)
+  commentId: M:PlusPim.Logging.ILogger.Info(System.String,System.String)
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Info_System_String_System_String_
+  name: Info(string, string)
+  nameWithType: ILogger.Info(string, string)
+  fullName: PlusPim.Logging.ILogger.Info(string, string)
+  nameWithType.vb: ILogger.Info(String, String)
+  fullName.vb: PlusPim.Logging.ILogger.Info(String, String)
+  name.vb: Info(String, String)
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.Info(System.String,System.String)
+    name: Info
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Info_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.Info(System.String,System.String)
+    name: Info
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Info_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PlusPim.Logging.Logger.NullLogger.Warning*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.Warning
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_Warning_System_String_System_String_
+  name: Warning
+  nameWithType: Logger.NullLogger.Warning
+  fullName: PlusPim.Logging.Logger.NullLogger.Warning
+- uid: PlusPim.Logging.ILogger.Warning(System.String,System.String)
+  commentId: M:PlusPim.Logging.ILogger.Warning(System.String,System.String)
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Warning_System_String_System_String_
+  name: Warning(string, string)
+  nameWithType: ILogger.Warning(string, string)
+  fullName: PlusPim.Logging.ILogger.Warning(string, string)
+  nameWithType.vb: ILogger.Warning(String, String)
+  fullName.vb: PlusPim.Logging.ILogger.Warning(String, String)
+  name.vb: Warning(String, String)
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.Warning(System.String,System.String)
+    name: Warning
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Warning_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.Warning(System.String,System.String)
+    name: Warning
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Warning_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PlusPim.Logging.Logger.NullLogger.Error*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.Error
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_Error_System_String_System_String_
+  name: Error
+  nameWithType: Logger.NullLogger.Error
+  fullName: PlusPim.Logging.Logger.NullLogger.Error
+- uid: PlusPim.Logging.ILogger.Error(System.String,System.String)
+  commentId: M:PlusPim.Logging.ILogger.Error(System.String,System.String)
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Error_System_String_System_String_
+  name: Error(string, string)
+  nameWithType: ILogger.Error(string, string)
+  fullName: PlusPim.Logging.ILogger.Error(string, string)
+  nameWithType.vb: ILogger.Error(String, String)
+  fullName.vb: PlusPim.Logging.ILogger.Error(String, String)
+  name.vb: Error(String, String)
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.Error(System.String,System.String)
+    name: Error
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Error_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.Error(System.String,System.String)
+    name: Error
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_Error_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PlusPim.Logging.Logger.NullLogger.AddSink*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.AddSink
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_AddSink_System_Action_PlusPim_Logging_LogLevel_System_String_System_String__
+  name: AddSink
+  nameWithType: Logger.NullLogger.AddSink
+  fullName: PlusPim.Logging.Logger.NullLogger.AddSink
+- uid: PlusPim.Logging.ILogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  commentId: M:PlusPim.Logging.ILogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_AddSink_System_Action_PlusPim_Logging_LogLevel_System_String_System_String__
+  name: AddSink(Action<LogLevel, string, string>)
+  nameWithType: ILogger.AddSink(Action<LogLevel, string, string>)
+  fullName: PlusPim.Logging.ILogger.AddSink(System.Action<PlusPim.Logging.LogLevel, string, string>)
+  nameWithType.vb: ILogger.AddSink(Action(Of LogLevel, String, String))
+  fullName.vb: PlusPim.Logging.ILogger.AddSink(System.Action(Of PlusPim.Logging.LogLevel, String, String))
+  name.vb: AddSink(Action(Of LogLevel, String, String))
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+    name: AddSink
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_AddSink_System_Action_PlusPim_Logging_LogLevel_System_String_System_String__
+  - name: (
+  - uid: System.Action`3
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-3
+  - name: <
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    href: PlusPim.Logging.LogLevel.html
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.AddSink(System.Action{PlusPim.Logging.LogLevel,System.String,System.String})
+    name: AddSink
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_AddSink_System_Action_PlusPim_Logging_LogLevel_System_String_System_String__
+  - name: (
+  - uid: System.Action`3
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-3
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    href: PlusPim.Logging.LogLevel.html
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.Action{PlusPim.Logging.LogLevel,System.String,System.String}
+  commentId: T:System.Action{PlusPim.Logging.LogLevel,System.String,System.String}
+  parent: System
+  definition: System.Action`3
+  href: https://learn.microsoft.com/dotnet/api/system.action-3
+  name: Action<LogLevel, string, string>
+  nameWithType: Action<LogLevel, string, string>
+  fullName: System.Action<PlusPim.Logging.LogLevel, string, string>
+  nameWithType.vb: Action(Of LogLevel, String, String)
+  fullName.vb: System.Action(Of PlusPim.Logging.LogLevel, String, String)
+  name.vb: Action(Of LogLevel, String, String)
+  spec.csharp:
+  - uid: System.Action`3
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-3
+  - name: <
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    href: PlusPim.Logging.LogLevel.html
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`3
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-3
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    href: PlusPim.Logging.LogLevel.html
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Action`3
+  commentId: T:System.Action`3
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action-3
+  name: Action<T1, T2, T3>
+  nameWithType: Action<T1, T2, T3>
+  fullName: System.Action<T1, T2, T3>
+  nameWithType.vb: Action(Of T1, T2, T3)
+  fullName.vb: System.Action(Of T1, T2, T3)
+  name.vb: Action(Of T1, T2, T3)
+  spec.csharp:
+  - uid: System.Action`3
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-3
+  - name: <
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`3
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-3
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: )
+- uid: System.Action`1
+  commentId: T:System.Action`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<T>
+  nameWithType: Action<T>
+  fullName: System.Action<T>
+  nameWithType.vb: Action(Of T)
+  fullName.vb: System.Action(Of T)
+  name.vb: Action(Of T)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PlusPim.Logging.Logger.NullLogger.ToAction*
+  commentId: Overload:PlusPim.Logging.Logger.NullLogger.ToAction
+  href: PlusPim.Logging.Logger.NullLogger.html#PlusPim_Logging_Logger_NullLogger_ToAction_System_String_
+  name: ToAction
+  nameWithType: Logger.NullLogger.ToAction
+  fullName: PlusPim.Logging.Logger.NullLogger.ToAction
+- uid: PlusPim.Logging.ILogger.ToAction(System.String)
+  commentId: M:PlusPim.Logging.ILogger.ToAction(System.String)
+  parent: PlusPim.Logging.ILogger
+  isExternal: true
+  href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_ToAction_System_String_
+  name: ToAction(string)
+  nameWithType: ILogger.ToAction(string)
+  fullName: PlusPim.Logging.ILogger.ToAction(string)
+  nameWithType.vb: ILogger.ToAction(String)
+  fullName.vb: PlusPim.Logging.ILogger.ToAction(String)
+  name.vb: ToAction(String)
+  spec.csharp:
+  - uid: PlusPim.Logging.ILogger.ToAction(System.String)
+    name: ToAction
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_ToAction_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Logging.ILogger.ToAction(System.String)
+    name: ToAction
+    href: PlusPim.Logging.ILogger.html#PlusPim_Logging_ILogger_ToAction_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Action{System.String}
+  commentId: T:System.Action{System.String}
+  parent: System
+  definition: System.Action`1
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<string>
+  nameWithType: Action<string>
+  fullName: System.Action<string>
+  nameWithType.vb: Action(Of String)
+  fullName.vb: System.Action(Of String)
+  name.vb: Action(Of String)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )

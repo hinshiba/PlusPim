@@ -1,0 +1,30 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  id: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.FuncInstructionParser
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.InstructionFactory
+  langs:
+  - csharp
+  - vb
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  type: Namespace
+  assemblies:
+  - PlusPim
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.FuncInstructionParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.FuncInstructionParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.FuncInstructionParser.html
+  name: FuncInstructionParser
+  nameWithType: FuncInstructionParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.FuncInstructionParser
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.InstructionFactory
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.InstructionFactory
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.InstructionFactory.html
+  name: InstructionFactory
+  nameWithType: InstructionFactory
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.InstructionFactory

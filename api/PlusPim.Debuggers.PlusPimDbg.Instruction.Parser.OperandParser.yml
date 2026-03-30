@@ -1,0 +1,1566 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  id: OperandParser
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,System.String@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand(System.String,System.String@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  langs:
+  - csharp
+  - vb
+  name: OperandParser
+  nameWithType: OperandParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  type: Class
+  source:
+    id: OperandParser
+    path: D:\dev\_univ\g2t4\OOP10\PlusPim\obj\Release\net10.0\System.Text.RegularExpressions.Generator\System.Text.RegularExpressions.Generator.RegexGenerator\RegexGenerator.g.cs
+    startLine: 227
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: 命令オペランドの共通パースユーティリティ
+  example: []
+  syntax:
+    content: internal static class OperandParser
+    content.vb: Friend Module OperandParser
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.MemberwiseClone
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern
+  id: SingleRegPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: SingleRegPattern()
+  nameWithType: OperandParser.SingleRegPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: SingleRegPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 10
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rs&gt;\\w+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rs" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rs>\\w+)$")]
+
+      private static Regex SingleRegPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rs>\w+)$")>
+
+      Private Shared Function SingleRegPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rs>\w+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern
+  id: Operands2RegPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: Operands2RegPattern()
+  nameWithType: OperandParser.Operands2RegPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Operands2RegPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 13
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;r1&gt;\\w+),\\s*\\$(?&lt;r2&gt;\\w+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "r1" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ Match '$'.
+
+    ○ "r2" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<r1>\\w+),\\s*\\$(?<r2>\\w+)$")]
+
+      private static Regex Operands2RegPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<r1>\w+),\s*\$(?<r2>\w+)$")>
+
+      Private Shared Function Operands2RegPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<r1>\w+),\s*\$(?<r2>\w+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern
+  id: Operands3RegPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: Operands3RegPattern()
+  nameWithType: OperandParser.Operands3RegPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Operands3RegPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 16
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rd&gt;\\w+),\\s*\\$(?&lt;rs&gt;\\w+),\\s*\\$(?&lt;rt&gt;\\w+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rd" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ Match '$'.
+
+    ○ "rs" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ Match '$'.
+
+    ○ "rt" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rd>\\w+),\\s*\\$(?<rs>\\w+),\\s*\\$(?<rt>\\w+)$")]
+
+      private static Regex Operands3RegPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rd>\w+),\s*\$(?<rs>\w+),\s*\$(?<rt>\w+)$")>
+
+      Private Shared Function Operands3RegPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rd>\w+),\s*\$(?<rs>\w+),\s*\$(?<rt>\w+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern
+  id: Operands2RegShamtPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: Operands2RegShamtPattern()
+  nameWithType: OperandParser.Operands2RegShamtPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Operands2RegShamtPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 19
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rd&gt;\\w+),\\s*\\$(?&lt;rt&gt;\\w+),\\s*(?&lt;shamt&gt;\\S+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rd" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ Match '$'.
+
+    ○ "rt" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ "shamt" capture group.
+        ○ Match any character other than a whitespace character atomically at least once.
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rd>\\w+),\\s*\\$(?<rt>\\w+),\\s*(?<shamt>\\S+)$")]
+
+      private static Regex Operands2RegShamtPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rd>\w+),\s*\$(?<rt>\w+),\s*(?<shamt>\S+)$")>
+
+      Private Shared Function Operands2RegShamtPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rd>\w+),\s*\$(?<rt>\w+),\s*(?<shamt>\S+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern
+  id: RegImmPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: RegImmPattern()
+  nameWithType: OperandParser.RegImmPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: RegImmPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 22
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rt&gt;\\w+),\\s*(?&lt;imm&gt;\\S+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rt" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ "imm" capture group.
+        ○ Match any character other than a whitespace character atomically at least once.
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rt>\\w+),\\s*(?<imm>\\S+)$")]
+
+      private static Regex RegImmPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rt>\w+),\s*(?<imm>\S+)$")>
+
+      Private Shared Function RegImmPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rt>\w+),\s*(?<imm>\S+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern
+  id: OperandsItypePattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: OperandsItypePattern()
+  nameWithType: OperandParser.OperandsItypePattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: OperandsItypePattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 25
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rt&gt;\\w+),\\s*\\$(?&lt;rs&gt;\\w+),\\s*(?&lt;imm&gt;\\S+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rt" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ Match '$'.
+
+    ○ "rs" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ "imm" capture group.
+        ○ Match any character other than a whitespace character atomically at least once.
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rt>\\w+),\\s*\\$(?<rs>\\w+),\\s*(?<imm>\\S+)$")]
+
+      private static Regex OperandsItypePattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rt>\w+),\s*\$(?<rs>\w+),\s*(?<imm>\S+)$")>
+
+      Private Shared Function OperandsItypePattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rt>\w+),\s*\$(?<rs>\w+),\s*(?<imm>\S+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern
+  id: BranchOperandsPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: BranchOperandsPattern()
+  nameWithType: OperandParser.BranchOperandsPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: BranchOperandsPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 28
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rs&gt;\\w+),\\s*\\$(?&lt;rt&gt;\\w+),\\s*(?&lt;label&gt;(\\w|\\$)+)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rs" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ Match '$'.
+
+    ○ "rt" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character greedily any number of times.
+
+    ○ "label" capture group.
+        ○ Loop greedily at least once.
+            ○ 1st capture group.
+                ○ Match a character in the set [$\w].
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rs>\\w+),\\s*\\$(?<rt>\\w+),\\s*(?<label>(\\w|\\$)+)$")]
+
+      private static Regex BranchOperandsPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rs>\w+),\s*\$(?<rt>\w+),\s*(?<label>(\w|\$)+)$")>
+
+      Private Shared Function BranchOperandsPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rs>\w+),\s*\$(?<rt>\w+),\s*(?<label>(\w|\$)+)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern
+  id: MemoryOperandPattern
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: MemoryOperandPattern()
+  nameWithType: OperandParser.MemoryOperandPattern()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: MemoryOperandPattern
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 31
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  remarks: >-
+    Pattern:<br />
+
+    <pre><code class="lang-csharp">^\\$(?&lt;rt&gt;\\w+),\\s*(?&lt;offset&gt;\\S+)\\(\\$(?&lt;rs&gt;\\w+)\\)$</code></pre><br />
+        Explanation:<br />
+        <pre><code class="lang-csharp">○ Match if at the beginning of the string.
+    ○ Match '$'.
+
+    ○ "rt" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ','.
+
+    ○ Match a whitespace character atomically any number of times.
+
+    ○ "offset" capture group.
+        ○ Match any character other than a whitespace character greedily at least once.
+    ○ Match the string "($".
+
+    ○ "rs" capture group.
+        ○ Match a word character atomically at least once.
+    ○ Match ')'.
+
+    ○ Match if at the end of the string or if before an ending newline.</code></pre>
+  example: []
+  syntax:
+    content: >-
+      [GeneratedRegex("^\\$(?<rt>\\w+),\\s*(?<offset>\\S+)\\(\\$(?<rs>\\w+)\\)$")]
+
+      private static Regex MemoryOperandPattern()
+    return:
+      type: System.Text.RegularExpressions.Regex
+    content.vb: >-
+      <GeneratedRegex("^\$(?<rt>\w+),\s*(?<offset>\S+)\(\$(?<rs>\w+)\)$")>
+
+      Private Shared Function MemoryOperandPattern() As Regex
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern*
+  attributes:
+  - type: System.Text.RegularExpressions.GeneratedRegexAttribute
+    ctor: System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: ^\$(?<rt>\w+),\s*(?<offset>\S+)\(\$(?<rs>\w+)\)$
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  id: TryParseSingleRegOperand(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParseSingleRegOperand(string, out RegisterID)
+  nameWithType: OperandParser.TryParseSingleRegOperand(string, out RegisterID)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParseSingleRegOperand
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 37
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: 単一レジスタオペランド ($rs) を解析する
+  example: []
+  syntax:
+    content: internal static bool TryParseSingleRegOperand(string operands, out RegisterID rs)
+    parameters:
+    - id: operands
+      type: System.String
+    - id: rs
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+    content.vb: Friend Shared Function TryParseSingleRegOperand(operands As String, rs As RegisterID) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand*
+  nameWithType.vb: OperandParser.TryParseSingleRegOperand(String, RegisterID)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID)
+  name.vb: TryParseSingleRegOperand(String, RegisterID)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  id: TryParse2RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParse2RegOperands(string, out RegisterID, out RegisterID)
+  nameWithType: OperandParser.TryParse2RegOperands(string, out RegisterID, out RegisterID)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParse2RegOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 46
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: 2レジスタオペランド ($r1, $r2) を解析する (mult, div, move等)
+  example: []
+  syntax:
+    content: internal static bool TryParse2RegOperands(string operands, out RegisterID r1, out RegisterID r2)
+    parameters:
+    - id: operands
+      type: System.String
+    - id: r1
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: r2
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+    content.vb: Friend Shared Function TryParse2RegOperands(operands As String, r1 As RegisterID, r2 As RegisterID) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands*
+  nameWithType.vb: OperandParser.TryParse2RegOperands(String, RegisterID, RegisterID)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID)
+  name.vb: TryParse2RegOperands(String, RegisterID, RegisterID)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  id: TryParse3RegOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParse3RegOperands(string, out RegisterID, out RegisterID, out RegisterID)
+  nameWithType: OperandParser.TryParse3RegOperands(string, out RegisterID, out RegisterID, out RegisterID)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParse3RegOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 77
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: オペランドを3レジスタを指定している文字列から解析してRegisterIDに変換する
+  example: []
+  syntax:
+    content: internal static bool TryParse3RegOperands(string operands, out RegisterID rd, out RegisterID rs, out RegisterID rt)
+    parameters:
+    - id: operands
+      type: System.String
+      description: 対象の文字列
+    - id: rd
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      description: <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>ならばRegisterIDが代入される．<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">false</a>のときの値は未定義．
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: rs
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      description: rdと同様
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      description: rdと同様
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+      description: <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>ならば解析成功
+    content.vb: Friend Shared Function TryParse3RegOperands(operands As String, rd As RegisterID, rs As RegisterID, rt As RegisterID) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands*
+  nameWithType.vb: OperandParser.TryParse3RegOperands(String, RegisterID, RegisterID, RegisterID)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID)
+  name.vb: TryParse3RegOperands(String, RegisterID, RegisterID, RegisterID)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  id: TryParse2RegShamtOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParse2RegShamtOperands(string, out RegisterID, out RegisterID, out Immediate)
+  nameWithType: OperandParser.TryParse2RegShamtOperands(string, out RegisterID, out RegisterID, out Immediate)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParse2RegShamtOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 112
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: オペランドを2レジスタとシフト量を指定している文字列から解析してRegisterIDと即値に変換する
+  example: []
+  syntax:
+    content: internal static bool TryParse2RegShamtOperands(string operands, out RegisterID rd, out RegisterID rt, out Immediate shamt)
+    parameters:
+    - id: operands
+      type: System.String
+      description: 対象の文字列
+    - id: rd
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      description: <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>ならばRegisterIDが代入される．<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">false</a>のときの値は未定義．
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      description: rdと同様
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: shamt
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+      description: シフト量が代入される
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+      description: <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>ならば解析成功
+    content.vb: Friend Shared Function TryParse2RegShamtOperands(operands As String, rd As RegisterID, rt As RegisterID, shamt As Immediate) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands*
+  nameWithType.vb: OperandParser.TryParse2RegShamtOperands(String, RegisterID, RegisterID, Immediate)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  name.vb: TryParse2RegShamtOperands(String, RegisterID, RegisterID, Immediate)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  id: TryParseRegImmOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParseRegImmOperands(string, out RegisterID, out Immediate)
+  nameWithType: OperandParser.TryParseRegImmOperands(string, out RegisterID, out Immediate)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParseRegImmOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 146
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: レジスタ+即値のみのオペランド ($rt, imm) を解析する (lui等)
+  example: []
+  syntax:
+    content: internal static bool TryParseRegImmOperands(string operands, out RegisterID rt, out Immediate imm)
+    parameters:
+    - id: operands
+      type: System.String
+      description: 対象の文字列
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      description: <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>ならばRegisterIDが代入される．<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">false</a>のときの値は未定義．
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: imm
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+      description: 即値が代入される
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+      description: <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>ならば解析成功
+    content.vb: Friend Shared Function TryParseRegImmOperands(operands As String, rt As RegisterID, imm As Immediate) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands*
+  nameWithType.vb: OperandParser.TryParseRegImmOperands(String, RegisterID, Immediate)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  name.vb: TryParseRegImmOperands(String, RegisterID, Immediate)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  id: TryParseITypeOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParseITypeOperands(string, out RegisterID, out RegisterID, out Immediate)
+  nameWithType: OperandParser.TryParseITypeOperands(string, out RegisterID, out RegisterID, out Immediate)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParseITypeOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 172
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: I形式命令のオペランド ($rt, $rs, imm) を解析する (addiu, andi等)
+  example: []
+  syntax:
+    content: internal static bool TryParseITypeOperands(string operands, out RegisterID rt, out RegisterID rs, out Immediate imm)
+    parameters:
+    - id: operands
+      type: System.String
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: rs
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: imm
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+    content.vb: Friend Shared Function TryParseITypeOperands(operands As String, rt As RegisterID, rs As RegisterID, imm As Immediate) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands*
+  nameWithType.vb: OperandParser.TryParseITypeOperands(String, RegisterID, RegisterID, Immediate)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  name.vb: TryParseITypeOperands(String, RegisterID, RegisterID, Immediate)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,System.String@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,System.String@)
+  id: TryParseBranchOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,System.String@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParseBranchOperands(string, out RegisterID, out RegisterID, out string)
+  nameWithType: OperandParser.TryParseBranchOperands(string, out RegisterID, out RegisterID, out string)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParseBranchOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 202
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: 分岐命令のオペランド ($rs, $rt, label) を解析する (beq, bne等)
+  example: []
+  syntax:
+    content: internal static bool TryParseBranchOperands(string operands, out RegisterID rs, out RegisterID rt, out string label)
+    parameters:
+    - id: operands
+      type: System.String
+    - id: rs
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: label
+      type: System.String
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+    content.vb: Friend Shared Function TryParseBranchOperands(operands As String, rs As RegisterID, rt As RegisterID, label As String) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands*
+  nameWithType.vb: OperandParser.TryParseBranchOperands(String, RegisterID, RegisterID, String)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, String)
+  name.vb: TryParseBranchOperands(String, RegisterID, RegisterID, String)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  id: TryParseMemoryOperands(System.String,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID@,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParseMemoryOperands(string, out RegisterID, out RegisterID, out Immediate)
+  nameWithType: OperandParser.TryParseMemoryOperands(string, out RegisterID, out RegisterID, out Immediate)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands(string, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, out PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParseMemoryOperands
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 230
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: メモリ命令のオペランド ($rt, offset($rs)) を解析する (lw, sw等)
+  example: []
+  syntax:
+    content: internal static bool TryParseMemoryOperands(string operands, out RegisterID rt, out RegisterID rs, out Immediate offset)
+    parameters:
+    - id: operands
+      type: System.String
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: rs
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    - id: offset
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+    content.vb: Friend Shared Function TryParseMemoryOperands(operands As String, rt As RegisterID, rs As RegisterID, offset As Immediate) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands*
+  nameWithType.vb: OperandParser.TryParseMemoryOperands(String, RegisterID, RegisterID, Immediate)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands(String, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate)
+  name.vb: TryParseMemoryOperands(String, RegisterID, RegisterID, Immediate)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand(System.String,System.String@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand(System.String,System.String@)
+  id: TryParseLabelOperand(System.String,System.String@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+  langs:
+  - csharp
+  - vb
+  name: TryParseLabelOperand(string, out string)
+  nameWithType: OperandParser.TryParseLabelOperand(string, out string)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand(string, out string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryParseLabelOperand
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Parser/OperandParser.cs
+    startLine: 260
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  summary: ラベルオペランドを解析する (j, jal等)
+  example: []
+  syntax:
+    content: internal static bool TryParseLabelOperand(string operands, out string label)
+    parameters:
+    - id: operands
+      type: System.String
+    - id: label
+      type: System.String
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+    content.vb: Friend Shared Function TryParseLabelOperand(operands As String, label As String) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand*
+  nameWithType.vb: OperandParser.TryParseLabelOperand(String, String)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand(String, String)
+  name.vb: TryParseLabelOperand(String, String)
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+    name: Parser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+    name: Parser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.MemberwiseClone
+  commentId: M:System.Object.MemberwiseClone
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  name: MemberwiseClone()
+  nameWithType: object.MemberwiseClone()
+  fullName: object.MemberwiseClone()
+  nameWithType.vb: Object.MemberwiseClone()
+  fullName.vb: Object.MemberwiseClone()
+  spec.csharp:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_SingleRegPattern
+  name: SingleRegPattern
+  nameWithType: OperandParser.SingleRegPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.SingleRegPattern
+- uid: System.Text.RegularExpressions.Regex
+  commentId: T:System.Text.RegularExpressions.Regex
+  parent: System.Text.RegularExpressions
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.text.regularexpressions.regex
+  name: Regex
+  nameWithType: Regex
+  fullName: System.Text.RegularExpressions.Regex
+- uid: System.Text.RegularExpressions
+  commentId: N:System.Text.RegularExpressions
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Text.RegularExpressions
+  nameWithType: System.Text.RegularExpressions
+  fullName: System.Text.RegularExpressions
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.RegularExpressions
+    name: RegularExpressions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.regularexpressions
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.RegularExpressions
+    name: RegularExpressions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.regularexpressions
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_Operands2RegPattern
+  name: Operands2RegPattern
+  nameWithType: OperandParser.Operands2RegPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegPattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_Operands3RegPattern
+  name: Operands3RegPattern
+  nameWithType: OperandParser.Operands3RegPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands3RegPattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_Operands2RegShamtPattern
+  name: Operands2RegShamtPattern
+  nameWithType: OperandParser.Operands2RegShamtPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.Operands2RegShamtPattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_RegImmPattern
+  name: RegImmPattern
+  nameWithType: OperandParser.RegImmPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.RegImmPattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_OperandsItypePattern
+  name: OperandsItypePattern
+  nameWithType: OperandParser.OperandsItypePattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.OperandsItypePattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_BranchOperandsPattern
+  name: BranchOperandsPattern
+  nameWithType: OperandParser.BranchOperandsPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.BranchOperandsPattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_MemoryOperandPattern
+  name: MemoryOperandPattern
+  nameWithType: OperandParser.MemoryOperandPattern
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.MemoryOperandPattern
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParseSingleRegOperand_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__
+  name: TryParseSingleRegOperand
+  nameWithType: OperandParser.TryParseSingleRegOperand
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseSingleRegOperand
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID.html
+  name: RegisterID
+  nameWithType: RegisterID
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Runtime
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParse2RegOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__
+  name: TryParse2RegOperands
+  nameWithType: OperandParser.TryParse2RegOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParse3RegOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__
+  name: TryParse3RegOperands
+  nameWithType: OperandParser.TryParse3RegOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse3RegOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParse2RegShamtOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_Immediate__
+  name: TryParse2RegShamtOperands
+  nameWithType: OperandParser.TryParse2RegShamtOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParse2RegShamtOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate.html
+  name: Immediate
+  nameWithType: Immediate
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParseRegImmOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_Immediate__
+  name: TryParseRegImmOperands
+  nameWithType: OperandParser.TryParseRegImmOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseRegImmOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParseITypeOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_Immediate__
+  name: TryParseITypeOperands
+  nameWithType: OperandParser.TryParseITypeOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseITypeOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParseBranchOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__System_String__
+  name: TryParseBranchOperands
+  nameWithType: OperandParser.TryParseBranchOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseBranchOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParseMemoryOperands_System_String_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID__PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_Immediate__
+  name: TryParseMemoryOperands
+  nameWithType: OperandParser.TryParseMemoryOperands
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseMemoryOperands
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_OperandParser_TryParseLabelOperand_System_String_System_String__
+  name: TryParseLabelOperand
+  nameWithType: OperandParser.TryParseLabelOperand
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser.TryParseLabelOperand

@@ -1,0 +1,345 @@
+### YamlMime:TableOfContent
+items:
+- uid: PlusPim
+  name: PlusPim
+  type: Namespace
+  items:
+  - uid: PlusPim.Program
+    name: Program
+    type: Class
+- uid: PlusPim.Application
+  name: PlusPim.Application
+  type: Namespace
+  items:
+  - uid: PlusPim.Application.Application
+    name: Application
+    type: Class
+  - uid: PlusPim.Application.ExceptionInfo
+    name: ExceptionInfo
+    type: Class
+  - uid: PlusPim.Application.IApplication
+    name: IApplication
+    type: Interface
+  - uid: PlusPim.Application.IDebugger
+    name: IDebugger
+    type: Interface
+  - uid: PlusPim.Application.StackFrameInfo
+    name: StackFrameInfo
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg
+  name: PlusPim.Debuggers.PlusPimDbg
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.PlusPimDbg
+    name: PlusPimDbg
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    type: Interface
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall
+    name: RuntimeCall
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+    name: SyscallCode
+    type: Enum
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser
+    name: IInstructionParser
+    type: Interface
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+    name: IPseudoInstructionParser
+    type: Interface
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+    name: Immediate
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.InstructionRegistry
+    name: InstructionRegistry
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.OperandParser
+    name: OperandParser
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.LaInstructionParser
+    name: LaInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.LiInstructionParser
+    name: LiInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.MoveInstructionParser
+    name: MoveInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+    name: NopInstructionParser
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BranchInstruction
+    name: BranchInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+    name: BreakInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.CP0RegisterInstruction
+    name: CP0RegisterInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.EretInstruction
+    name: EretInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.ITypeInstruction
+    name: ITypeInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.LoHiRegisterInstruction
+    name: LoHiRegisterInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.MemoryInstruction
+    name: MemoryInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.MulDivInstruction
+    name: MulDivInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RType3RegInstruction
+    name: RType3RegInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+    name: RTypeShiftImmInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftVarInstruction
+    name: RTypeShiftVarInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.SyscallInstruction
+    name: SyscallInstruction
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.FuncInstructionParser
+    name: FuncInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories.InstructionFactory
+    name: InstructionFactory
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction
+    name: JInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstructionParser
+    name: JInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction
+    name: JalInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstructionParser
+    name: JalInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction
+    name: JrInstruction
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstructionParser
+    name: JrInstructionParser
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction
+    name: JumpInstruction
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Program
+  name: PlusPim.Debuggers.PlusPimDbg.Program
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.DataSegment
+    name: DataSegment
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.DataSegmentBuilder
+    name: DataSegmentBuilder
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.ParsedProgram
+    name: ParsedProgram
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.ParsedPrograms
+    name: ParsedPrograms
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+    name: SegmentType
+    type: Enum
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+    name: SymbolTable
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+    name: TextSegment
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegmentBuilder
+    name: TextSegmentBuilder
+    type: Class
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+  name: PlusPim.Debuggers.PlusPimDbg.Program.records
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+    name: Address
+    type: Struct
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records.InstructionIndex
+    name: InstructionIndex
+    type: Struct
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Label
+    name: Label
+    type: Struct
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  type: Namespace
+  items:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.CP0RegisterFile
+    name: CP0RegisterFile
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.ExcCode
+    name: ExcCode
+    type: Enum
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.ExceptionEvent
+    name: ExceptionEvent
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterFile
+    name: RegisterFile
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+    name: RegisterID
+    type: Enum
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    type: Class
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.StackFrame
+    name: StackFrame
+    type: Class
+- uid: PlusPim.EditorController.DebugAdapter
+  name: PlusPim.EditorController.DebugAdapter
+  type: Namespace
+  items:
+  - uid: PlusPim.EditorController.DebugAdapter.DebugAdapter
+    name: DebugAdapter
+    type: Class
+- uid: PlusPim.Logging
+  name: PlusPim.Logging
+  type: Namespace
+  items:
+  - uid: PlusPim.Logging.ILogger
+    name: ILogger
+    type: Interface
+  - uid: PlusPim.Logging.LogLevel
+    name: LogLevel
+    type: Enum
+  - uid: PlusPim.Logging.Logger
+    name: Logger
+    type: Class
+  - uid: PlusPim.Logging.Logger.NullLogger
+    name: Logger.NullLogger
+    type: Class
+- uid: System.Text.RegularExpressions.Generated
+  name: System.Text.RegularExpressions.Generated
+  type: Namespace
+  items:
+  - uid: System.Text.RegularExpressions.Generated.AssemblyLinePattern_0
+    name: AssemblyLinePattern_0
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.AssemblyLinePattern_0.RunnerFactory
+    name: AssemblyLinePattern_0.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.AssemblyLinePattern_0.RunnerFactory.Runner
+    name: AssemblyLinePattern_0.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.BranchOperandsPattern_7
+    name: BranchOperandsPattern_7
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.BranchOperandsPattern_7.RunnerFactory
+    name: BranchOperandsPattern_7.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.BranchOperandsPattern_7.RunnerFactory.Runner
+    name: BranchOperandsPattern_7.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.LaOperandsPattern_9
+    name: LaOperandsPattern_9
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.LaOperandsPattern_9.RunnerFactory
+    name: LaOperandsPattern_9.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.LaOperandsPattern_9.RunnerFactory.Runner
+    name: LaOperandsPattern_9.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.MemoryOperandPattern_8
+    name: MemoryOperandPattern_8
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.MemoryOperandPattern_8.RunnerFactory
+    name: MemoryOperandPattern_8.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.MemoryOperandPattern_8.RunnerFactory.Runner
+    name: MemoryOperandPattern_8.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands2RegPattern_2
+    name: Operands2RegPattern_2
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands2RegPattern_2.RunnerFactory
+    name: Operands2RegPattern_2.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands2RegPattern_2.RunnerFactory.Runner
+    name: Operands2RegPattern_2.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands2RegShamtPattern_4
+    name: Operands2RegShamtPattern_4
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands2RegShamtPattern_4.RunnerFactory
+    name: Operands2RegShamtPattern_4.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands2RegShamtPattern_4.RunnerFactory.Runner
+    name: Operands2RegShamtPattern_4.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands3RegPattern_3
+    name: Operands3RegPattern_3
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands3RegPattern_3.RunnerFactory
+    name: Operands3RegPattern_3.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Operands3RegPattern_3.RunnerFactory.Runner
+    name: Operands3RegPattern_3.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.OperandsItypePattern_6
+    name: OperandsItypePattern_6
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.OperandsItypePattern_6.RunnerFactory
+    name: OperandsItypePattern_6.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.OperandsItypePattern_6.RunnerFactory.Runner
+    name: OperandsItypePattern_6.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.RegImmPattern_5
+    name: RegImmPattern_5
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.RegImmPattern_5.RunnerFactory
+    name: RegImmPattern_5.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.RegImmPattern_5.RunnerFactory.Runner
+    name: RegImmPattern_5.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.SingleRegPattern_1
+    name: SingleRegPattern_1
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory
+    name: SingleRegPattern_1.RunnerFactory
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.Runner
+    name: SingleRegPattern_1.RunnerFactory.Runner
+    type: Class
+  - uid: System.Text.RegularExpressions.Generated.Utilities
+    name: Utilities
+    type: Class
+memberLayout: SamePage

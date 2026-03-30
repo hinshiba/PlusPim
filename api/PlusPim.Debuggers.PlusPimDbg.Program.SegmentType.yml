@@ -1,0 +1,157 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  id: SegmentType
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Data
+  - PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.KernelText
+  - PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Text
+  langs:
+  - csharp
+  - vb
+  name: SegmentType
+  nameWithType: SegmentType
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  type: Enum
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: SegmentType
+    path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+    startLine: 5
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  summary: アセンブリファイルのセグメント種別
+  example: []
+  syntax:
+    content: internal enum SegmentType
+    content.vb: Friend Enum SegmentType
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Text
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Text
+  id: Text
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  langs:
+  - csharp
+  - vb
+  name: Text
+  nameWithType: SegmentType.Text
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Text
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Text
+    path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+    startLine: 6
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  syntax:
+    content: Text = 0
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Data
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Data
+  id: Data
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  langs:
+  - csharp
+  - vb
+  name: Data
+  nameWithType: SegmentType.Data
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.Data
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Data
+    path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+    startLine: 7
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  syntax:
+    content: Data = 1
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.KernelText
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.KernelText
+  id: KernelText
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  langs:
+  - csharp
+  - vb
+  name: KernelText
+  nameWithType: SegmentType.KernelText
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.KernelText
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: KernelText
+    path: PlusPim/Debuggers/PlusPimDbg/Program/SegmentType.cs
+    startLine: 8
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  syntax:
+    content: KernelText = 2
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Program
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.html
+  name: SegmentType
+  nameWithType: SegmentType
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType

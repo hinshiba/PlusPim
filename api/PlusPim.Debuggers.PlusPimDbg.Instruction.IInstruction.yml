@@ -1,0 +1,266 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  id: IInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  langs:
+  - csharp
+  - vb
+  name: IInstruction
+  nameWithType: IInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  type: Interface
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: IInstruction
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+    startLine: 7
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  summary: 命令を意味するインターフェース
+  example: []
+  syntax:
+    content: internal interface IInstruction
+    content.vb: Friend Interface IInstruction
+  derivedClasses:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BranchInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.CP0RegisterInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.EretInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.ITypeInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.LoHiRegisterInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.MemoryInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.MulDivInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RType3RegInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftVarInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.SyscallInstruction
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  id: Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  langs:
+  - csharp
+  - vb
+  name: Execute(RuntimeContext)
+  nameWithType: IInstruction.Execute(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Execute
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+    startLine: 12
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  summary: 命令を実行し，コンテキストを変更する
+  example: []
+  syntax:
+    content: void Execute(RuntimeContext context)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+      description: レジスタ，メモリ状態等を示す
+    content.vb: Sub Execute(context As RuntimeContext)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute*
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  id: Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  langs:
+  - csharp
+  - vb
+  name: Undo(RuntimeContext)
+  nameWithType: IInstruction.Undo(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Undo
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+    startLine: 18
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  summary: 命令の逆操作を実行し，コンテキストを元に戻す
+  example: []
+  syntax:
+    content: void Undo(RuntimeContext context)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+      description: レジスタ，メモリ状態等を示す
+    content.vb: Sub Undo(context As RuntimeContext)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo*
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  id: SourceLine
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  langs:
+  - csharp
+  - vb
+  name: SourceLine
+  nameWithType: IInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: SourceLine
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/IInstruction.cs
+    startLine: 23
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  summary: その命令のファイル上での行番号(1-index)
+  example: []
+  syntax:
+    content: int SourceLine { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: ReadOnly Property SourceLine As Integer
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine*
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Execute
+  nameWithType: IInstruction.Execute
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  name: RuntimeContext
+  nameWithType: RuntimeContext
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Runtime
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Undo
+  nameWithType: IInstruction.Undo
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_SourceLine
+  name: SourceLine
+  nameWithType: IInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System

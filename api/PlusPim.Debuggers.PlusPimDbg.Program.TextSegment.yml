@@ -1,0 +1,728 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  id: TextSegment
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.#ctor(System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction},PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.BaseAddress
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.KernelTextSegmentBase
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.TextSegmentBase
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment._instructions
+  langs:
+  - csharp
+  - vb
+  name: TextSegment
+  nameWithType: TextSegment
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  type: Class
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TextSegment
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 13
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  summary: テキストセグメントを表現する
+  remarks: カーネルテキストセグメントもこのクラスで表現する
+  example: []
+  syntax:
+    content: internal sealed class TextSegment
+    content.vb: Friend NotInheritable Class TextSegment
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.#ctor(System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction},PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.#ctor(System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction},PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  id: '#ctor(System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction},PlusPim.Debuggers.PlusPimDbg.Program.records.Address)'
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  langs:
+  - csharp
+  - vb
+  name: TextSegment(List<IInstruction>, Address)
+  nameWithType: TextSegment.TextSegment(List<IInstruction>, Address)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.TextSegment(System.Collections.Generic.List<PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction>, PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  type: Constructor
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: .ctor
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 13
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  summary: テキストセグメントを表現する
+  remarks: カーネルテキストセグメントもこのクラスで表現する
+  example: []
+  syntax:
+    content: public TextSegment(List<IInstruction> instructions, Address addr)
+    parameters:
+    - id: instructions
+      type: System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction}
+      description: 命令列
+    - id: addr
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+      description: 開始アドレス
+    content.vb: Public Sub New(instructions As List(Of IInstruction), addr As Address)
+  overload: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.#ctor*
+  nameWithType.vb: TextSegment.New(List(Of IInstruction), Address)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.New(System.Collections.Generic.List(Of PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction), PlusPim.Debuggers.PlusPimDbg.Program.records.Address)
+  name.vb: New(List(Of IInstruction), Address)
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.TextSegmentBase
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.TextSegmentBase
+  id: TextSegmentBase
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  langs:
+  - csharp
+  - vb
+  name: TextSegmentBase
+  nameWithType: TextSegment.TextSegmentBase
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.TextSegmentBase
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TextSegmentBase
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 17
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  summary: 1ファイル名の(ユーザー)テキストセグメントの開始アドレス
+  example: []
+  syntax:
+    content: public static readonly Address TextSegmentBase
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+    content.vb: Public Shared ReadOnly TextSegmentBase As Address
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.KernelTextSegmentBase
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.KernelTextSegmentBase
+  id: KernelTextSegmentBase
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  langs:
+  - csharp
+  - vb
+  name: KernelTextSegmentBase
+  nameWithType: TextSegment.KernelTextSegmentBase
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.KernelTextSegmentBase
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: KernelTextSegmentBase
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 22
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  summary: 1ファイル名のカーネルテキストセグメントの開始アドレス
+  example: []
+  syntax:
+    content: public static readonly Address KernelTextSegmentBase
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+    content.vb: Public Shared ReadOnly KernelTextSegmentBase As Address
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.BaseAddress
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.BaseAddress
+  id: BaseAddress
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  langs:
+  - csharp
+  - vb
+  name: BaseAddress
+  nameWithType: TextSegment.BaseAddress
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.BaseAddress
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: BaseAddress
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 27
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  summary: このインスタンスのテキストセグメントの開始アドレス
+  example: []
+  syntax:
+    content: public readonly Address BaseAddress
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+    content.vb: Public ReadOnly BaseAddress As Address
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions
+  id: Instructions
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  langs:
+  - csharp
+  - vb
+  name: Instructions
+  nameWithType: TextSegment.Instructions
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Instructions
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 29
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  syntax:
+    content: public ReadOnlySpan<IInstruction> Instructions { get; }
+    parameters: []
+    return:
+      type: System.ReadOnlySpan{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction}
+    content.vb: Public ReadOnly Property Instructions As ReadOnlySpan(Of IInstruction)
+  overload: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions*
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment._instructions
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment._instructions
+  id: _instructions
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  langs:
+  - csharp
+  - vb
+  name: _instructions
+  nameWithType: TextSegment._instructions
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment._instructions
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: _instructions
+    path: PlusPim/Debuggers/PlusPimDbg/Program/TextSegment.cs
+    startLine: 30
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Program
+  syntax:
+    content: private readonly IInstruction[] _instructions
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]
+    content.vb: Private ReadOnly _instructions As IInstruction()
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Program
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.#ctor*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.#ctor
+  href: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.html#PlusPim_Debuggers_PlusPimDbg_Program_TextSegment__ctor_System_Collections_Generic_List_PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction__PlusPim_Debuggers_PlusPimDbg_Program_records_Address_
+  name: TextSegment
+  nameWithType: TextSegment.TextSegment
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.TextSegment
+  nameWithType.vb: TextSegment.New
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.New
+  name.vb: New
+- uid: System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction}
+  commentId: T:System.Collections.Generic.List{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<IInstruction>
+  nameWithType: List<IInstruction>
+  fullName: System.Collections.Generic.List<PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction>
+  nameWithType.vb: List(Of IInstruction)
+  fullName.vb: System.Collections.Generic.List(Of PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction)
+  name.vb: List(Of IInstruction)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+  parent: PlusPim.Debuggers.PlusPimDbg.Program.records
+  href: PlusPim.Debuggers.PlusPimDbg.Program.records.Address.html
+  name: Address
+  nameWithType: Address
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records.Address
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program.records
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Program.records
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program.records
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.records
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+    name: records
+    href: PlusPim.Debuggers.PlusPimDbg.Program.records.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.records
+    name: records
+    href: PlusPim.Debuggers.PlusPimDbg.Program.records.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions
+  href: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.html#PlusPim_Debuggers_PlusPimDbg_Program_TextSegment_Instructions
+  name: Instructions
+  nameWithType: TextSegment.Instructions
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.Instructions
+- uid: System.ReadOnlySpan{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction}
+  commentId: T:System.ReadOnlySpan{PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction}
+  parent: System
+  definition: System.ReadOnlySpan`1
+  href: https://learn.microsoft.com/dotnet/api/system.readonlyspan-1
+  name: ReadOnlySpan<IInstruction>
+  nameWithType: ReadOnlySpan<IInstruction>
+  fullName: System.ReadOnlySpan<PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction>
+  nameWithType.vb: ReadOnlySpan(Of IInstruction)
+  fullName.vb: System.ReadOnlySpan(Of PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction)
+  name.vb: ReadOnlySpan(Of IInstruction)
+  spec.csharp:
+  - uid: System.ReadOnlySpan`1
+    name: ReadOnlySpan
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.readonlyspan-1
+  - name: <
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: '>'
+  spec.vb:
+  - uid: System.ReadOnlySpan`1
+    name: ReadOnlySpan
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.readonlyspan-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: )
+- uid: System.ReadOnlySpan`1
+  commentId: T:System.ReadOnlySpan`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.readonlyspan-1
+  name: ReadOnlySpan<T>
+  nameWithType: ReadOnlySpan<T>
+  fullName: System.ReadOnlySpan<T>
+  nameWithType.vb: ReadOnlySpan(Of T)
+  fullName.vb: System.ReadOnlySpan(Of T)
+  name.vb: ReadOnlySpan(Of T)
+  spec.csharp:
+  - uid: System.ReadOnlySpan`1
+    name: ReadOnlySpan
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.readonlyspan-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.ReadOnlySpan`1
+    name: ReadOnlySpan
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.readonlyspan-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]
+  isExternal: true
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  name: IInstruction[]
+  nameWithType: IInstruction[]
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]
+  nameWithType.vb: IInstruction()
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction()
+  name.vb: IInstruction()
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: (
+  - name: )

@@ -1,0 +1,1107 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  id: RTypeShiftImmInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.#ctor(PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate,System.Int32,System.String,System.Func{System.UInt32,System.Int32,System.UInt32})
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser(System.Func{System.UInt32,System.Int32,System.UInt32})
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext,System.UInt32)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction._previousRdValues
+  langs:
+  - csharp
+  - vb
+  name: RTypeShiftImmInstruction
+  nameWithType: RTypeShiftImmInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  type: Class
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: RTypeShiftImmInstruction
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 9
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: シフト即値R形式命令の汎用実装（sll, srl, sra）
+  example: []
+  syntax:
+    content: 'internal sealed class RTypeShiftImmInstruction : IInstruction'
+    content.vb: Friend NotInheritable Class RTypeShiftImmInstruction Implements IInstruction
+  inheritance:
+  - System.Object
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.#ctor(PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate,System.Int32,System.String,System.Func{System.UInt32,System.Int32,System.UInt32})
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.#ctor(PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate,System.Int32,System.String,System.Func{System.UInt32,System.Int32,System.UInt32})
+  id: '#ctor(PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate,System.Int32,System.String,System.Func{System.UInt32,System.Int32,System.UInt32})'
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: RTypeShiftImmInstruction(RegisterID, RegisterID, Immediate, int, string, Func<uint, int, uint>)
+  nameWithType: RTypeShiftImmInstruction.RTypeShiftImmInstruction(RegisterID, RegisterID, Immediate, int, string, Func<uint, int, uint>)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.RTypeShiftImmInstruction(PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate, int, string, System.Func<uint, int, uint>)
+  type: Constructor
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: .ctor
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 9
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: シフト即値R形式命令の汎用実装（sll, srl, sra）
+  example: []
+  syntax:
+    content: public RTypeShiftImmInstruction(RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex, string mnemonic, Func<uint, int, uint> compute)
+    parameters:
+    - id: rd
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+    - id: rt
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+    - id: shamt
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+    - id: lineIndex
+      type: System.Int32
+    - id: mnemonic
+      type: System.String
+    - id: compute
+      type: System.Func{System.UInt32,System.Int32,System.UInt32}
+    content.vb: Public Sub New(rd As RegisterID, rt As RegisterID, shamt As Immediate, lineIndex As Integer, mnemonic As String, compute As Func(Of UInteger, Integer, UInteger))
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.#ctor*
+  nameWithType.vb: RTypeShiftImmInstruction.New(RegisterID, RegisterID, Immediate, Integer, String, Func(Of UInteger, Integer, UInteger))
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.New(PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate, Integer, String, System.Func(Of UInteger, Integer, UInteger))
+  name.vb: New(RegisterID, RegisterID, Immediate, Integer, String, Func(Of UInteger, Integer, UInteger))
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine
+  id: SourceLine
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: SourceLine
+  nameWithType: RTypeShiftImmInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: SourceLine
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 17
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 行番号
+  example: []
+  syntax:
+    content: public int SourceLine { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property SourceLine As Integer
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction._previousRdValues
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction._previousRdValues
+  id: _previousRdValues
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: _previousRdValues
+  nameWithType: RTypeShiftImmInstruction._previousRdValues
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction._previousRdValues
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: _previousRdValues
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 19
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  syntax:
+    content: private readonly Stack<uint> _previousRdValues
+    return:
+      type: System.Collections.Generic.Stack{System.UInt32}
+    content.vb: Private ReadOnly _previousRdValues As Stack(Of UInteger)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  id: Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: Execute(RuntimeContext)
+  nameWithType: RTypeShiftImmInstruction.Execute(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Execute
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 21
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 命令を実行し，コンテキストを変更する
+  example: []
+  syntax:
+    content: public void Execute(RuntimeContext context)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+      description: レジスタ，メモリ状態等を示す
+    content.vb: Public Sub Execute(context As RuntimeContext)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  id: Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: Undo(RuntimeContext)
+  nameWithType: RTypeShiftImmInstruction.Undo(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Undo
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 29
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 命令の逆操作を実行し，コンテキストを元に戻す
+  example: []
+  syntax:
+    content: public void Undo(RuntimeContext context)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+      description: レジスタ，メモリ状態等を示す
+    content.vb: Public Sub Undo(context As RuntimeContext)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext,System.UInt32)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext,System.UInt32)
+  id: WriteRd(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext,System.UInt32)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: WriteRd(RuntimeContext, uint)
+  nameWithType: RTypeShiftImmInstruction.WriteRd(RuntimeContext, uint)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext, uint)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: WriteRd
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 39
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  syntax:
+    content: private void WriteRd(RuntimeContext context, uint value)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    - id: value
+      type: System.UInt32
+    content.vb: Private Sub WriteRd(context As RuntimeContext, value As UInteger)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd*
+  nameWithType.vb: RTypeShiftImmInstruction.WriteRd(RuntimeContext, UInteger)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext, UInteger)
+  name.vb: WriteRd(RuntimeContext, UInteger)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser(System.Func{System.UInt32,System.Int32,System.UInt32})
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser(System.Func{System.UInt32,System.Int32,System.UInt32})
+  id: CreateParser(System.Func{System.UInt32,System.Int32,System.UInt32})
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction
+  langs:
+  - csharp
+  - vb
+  name: CreateParser(Func<uint, int, uint>)
+  nameWithType: RTypeShiftImmInstruction.CreateParser(Func<uint, int, uint>)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser(System.Func<uint, int, uint>)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: CreateParser
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/RTypeShiftImmInstruction.cs
+    startLine: 50
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: シフト即値R形式命令のパーサーを生成するファクトリ
+  example: []
+  syntax:
+    content: internal static Func<string, IInstructionParser> CreateParser(Func<uint, int, uint> compute)
+    parameters:
+    - id: compute
+      type: System.Func{System.UInt32,System.Int32,System.UInt32}
+    return:
+      type: System.Func{System.String,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser}
+    content.vb: Friend Shared Function CreateParser(compute As Func(Of UInteger, Integer, UInteger)) As Func(Of String, IInstructionParser)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser*
+  nameWithType.vb: RTypeShiftImmInstruction.CreateParser(Func(Of UInteger, Integer, UInteger))
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser(System.Func(Of UInteger, Integer, UInteger))
+  name.vb: CreateParser(Func(Of UInteger, Integer, UInteger))
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+    name: instructions
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+    name: instructions
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  name: IInstruction
+  nameWithType: IInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.#ctor*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.#ctor
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_RTypeShiftImmInstruction__ctor_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID_PlusPim_Debuggers_PlusPimDbg_Runtime_RegisterID_PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_Immediate_System_Int32_System_String_System_Func_System_UInt32_System_Int32_System_UInt32__
+  name: RTypeShiftImmInstruction
+  nameWithType: RTypeShiftImmInstruction.RTypeShiftImmInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.RTypeShiftImmInstruction
+  nameWithType.vb: RTypeShiftImmInstruction.New
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.New
+  name.vb: New
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID.html
+  name: RegisterID
+  nameWithType: RegisterID
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate.html
+  name: Immediate
+  nameWithType: Immediate
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.Immediate
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Func{System.UInt32,System.Int32,System.UInt32}
+  commentId: T:System.Func{System.UInt32,System.Int32,System.UInt32}
+  parent: System
+  definition: System.Func`3
+  href: https://learn.microsoft.com/dotnet/api/system.func-3
+  name: Func<uint, int, uint>
+  nameWithType: Func<uint, int, uint>
+  fullName: System.Func<uint, int, uint>
+  nameWithType.vb: Func(Of UInteger, Integer, UInteger)
+  fullName.vb: System.Func(Of UInteger, Integer, UInteger)
+  name.vb: Func(Of UInteger, Integer, UInteger)
+  spec.csharp:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: <
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Runtime
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+    name: Parser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+    name: Parser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.html
+- uid: System.Func`3
+  commentId: T:System.Func`3
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.func-3
+  name: Func<T1, T2, TResult>
+  nameWithType: Func<T1, T2, TResult>
+  fullName: System.Func<T1, T2, TResult>
+  nameWithType.vb: Func(Of T1, T2, TResult)
+  fullName.vb: System.Func(Of T1, T2, TResult)
+  name.vb: Func(Of T1, T2, TResult)
+  spec.csharp:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: <
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_RTypeShiftImmInstruction_SourceLine
+  name: SourceLine
+  nameWithType: RTypeShiftImmInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.SourceLine
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_SourceLine
+  name: SourceLine
+  nameWithType: IInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+- uid: System.Collections.Generic.Stack{System.UInt32}
+  commentId: T:System.Collections.Generic.Stack{System.UInt32}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.Stack`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.stack-1
+  name: Stack<uint>
+  nameWithType: Stack<uint>
+  fullName: System.Collections.Generic.Stack<uint>
+  nameWithType.vb: Stack(Of UInteger)
+  fullName.vb: System.Collections.Generic.Stack(Of UInteger)
+  name.vb: Stack(Of UInteger)
+  spec.csharp:
+  - uid: System.Collections.Generic.Stack`1
+    name: Stack
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.stack-1
+  - name: <
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.Stack`1
+    name: Stack
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.stack-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+- uid: System.Collections.Generic.Stack`1
+  commentId: T:System.Collections.Generic.Stack`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.stack-1
+  name: Stack<T>
+  nameWithType: Stack<T>
+  fullName: System.Collections.Generic.Stack<T>
+  nameWithType.vb: Stack(Of T)
+  fullName.vb: System.Collections.Generic.Stack(Of T)
+  name.vb: Stack(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.Stack`1
+    name: Stack
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.stack-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.Stack`1
+    name: Stack
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.stack-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_RTypeShiftImmInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Execute
+  nameWithType: RTypeShiftImmInstruction.Execute
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Execute
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Execute(RuntimeContext)
+  nameWithType: IInstruction.Execute(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Execute
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Execute
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  name: RuntimeContext
+  nameWithType: RuntimeContext
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_RTypeShiftImmInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Undo
+  nameWithType: RTypeShiftImmInstruction.Undo
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.Undo
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Undo(RuntimeContext)
+  nameWithType: IInstruction.Undo(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Undo
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Undo
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_RTypeShiftImmInstruction_WriteRd_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_System_UInt32_
+  name: WriteRd
+  nameWithType: RTypeShiftImmInstruction.WriteRd
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.WriteRd
+- uid: System.UInt32
+  commentId: T:System.UInt32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uint32
+  name: uint
+  nameWithType: uint
+  fullName: uint
+  nameWithType.vb: UInteger
+  fullName.vb: UInteger
+  name.vb: UInteger
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_RTypeShiftImmInstruction_CreateParser_System_Func_System_UInt32_System_Int32_System_UInt32__
+  name: CreateParser
+  nameWithType: RTypeShiftImmInstruction.CreateParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.RTypeShiftImmInstruction.CreateParser
+- uid: System.Func{System.String,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser}
+  commentId: T:System.Func{System.String,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser}
+  parent: System
+  definition: System.Func`2
+  href: https://learn.microsoft.com/dotnet/api/system.func-2
+  name: Func<string, IInstructionParser>
+  nameWithType: Func<string, IInstructionParser>
+  fullName: System.Func<string, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser>
+  nameWithType.vb: Func(Of String, IInstructionParser)
+  fullName.vb: System.Func(Of String, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser)
+  name.vb: Func(Of String, IInstructionParser)
+  spec.csharp:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser
+    name: IInstructionParser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser
+    name: IInstructionParser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser.html
+  - name: )
+- uid: System.Func`2
+  commentId: T:System.Func`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.func-2
+  name: Func<T, TResult>
+  nameWithType: Func<T, TResult>
+  fullName: System.Func<T, TResult>
+  nameWithType.vb: Func(Of T, TResult)
+  fullName.vb: System.Func(Of T, TResult)
+  name.vb: Func(Of T, TResult)
+  spec.csharp:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: <
+  - name: T
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: )

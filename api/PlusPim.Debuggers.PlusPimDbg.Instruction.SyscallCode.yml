@@ -1,0 +1,209 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  id: SyscallCode
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.Exit
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintInt
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintString
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadInt
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadString
+  langs:
+  - csharp
+  - vb
+  name: SyscallCode
+  nameWithType: SyscallCode
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  type: Enum
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: SyscallCode
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+    startLine: 149
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  syntax:
+    content: internal enum SyscallCode
+    content.vb: Friend Enum SyscallCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintInt
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintInt
+  id: PrintInt
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  langs:
+  - csharp
+  - vb
+  name: PrintInt
+  nameWithType: SyscallCode.PrintInt
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintInt
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: PrintInt
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+    startLine: 150
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  syntax:
+    content: PrintInt = 1
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintString
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintString
+  id: PrintString
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  langs:
+  - csharp
+  - vb
+  name: PrintString
+  nameWithType: SyscallCode.PrintString
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.PrintString
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: PrintString
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+    startLine: 151
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  syntax:
+    content: PrintString = 4
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadInt
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadInt
+  id: ReadInt
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  langs:
+  - csharp
+  - vb
+  name: ReadInt
+  nameWithType: SyscallCode.ReadInt
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadInt
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: ReadInt
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+    startLine: 152
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  syntax:
+    content: ReadInt = 5
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadString
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadString
+  id: ReadString
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  langs:
+  - csharp
+  - vb
+  name: ReadString
+  nameWithType: SyscallCode.ReadString
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.ReadString
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: ReadString
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+    startLine: 153
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  syntax:
+    content: ReadString = 8
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.Exit
+  commentId: F:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.Exit
+  id: Exit
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  langs:
+  - csharp
+  - vb
+  name: Exit
+  nameWithType: SyscallCode.Exit
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.Exit
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Exit
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/RuntimeCall.cs
+    startLine: 154
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction
+  syntax:
+    content: Exit = 10
+    return:
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.html
+  name: SyscallCode
+  nameWithType: SyscallCode
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode

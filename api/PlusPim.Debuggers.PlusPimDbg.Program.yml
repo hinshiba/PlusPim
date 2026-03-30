@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program
+  id: PlusPim.Debuggers.PlusPimDbg.Program
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Program.DataSegment
+  - PlusPim.Debuggers.PlusPimDbg.Program.DataSegmentBuilder
+  - PlusPim.Debuggers.PlusPimDbg.Program.ParsedProgram
+  - PlusPim.Debuggers.PlusPimDbg.Program.ParsedPrograms
+  - PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  - PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  - PlusPim.Debuggers.PlusPimDbg.Program.TextSegmentBuilder
+  langs:
+  - csharp
+  - vb
+  name: PlusPim.Debuggers.PlusPimDbg.Program
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program
+  type: Namespace
+  assemblies:
+  - PlusPim
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.DataSegment
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.DataSegment
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.DataSegment.html
+  name: DataSegment
+  nameWithType: DataSegment
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.DataSegment
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.DataSegmentBuilder
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.DataSegmentBuilder
+  href: PlusPim.Debuggers.PlusPimDbg.Program.DataSegmentBuilder.html
+  name: DataSegmentBuilder
+  nameWithType: DataSegmentBuilder
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.DataSegmentBuilder
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.ParsedProgram
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.ParsedProgram
+  href: PlusPim.Debuggers.PlusPimDbg.Program.ParsedProgram.html
+  name: ParsedProgram
+  nameWithType: ParsedProgram
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.ParsedProgram
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.ParsedPrograms
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.ParsedPrograms
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.ParsedPrograms.html
+  name: ParsedPrograms
+  nameWithType: ParsedPrograms
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.ParsedPrograms
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType.html
+  name: SegmentType
+  nameWithType: SegmentType
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SegmentType
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable.html
+  name: SymbolTable
+  nameWithType: SymbolTable
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment.html
+  name: TextSegment
+  nameWithType: TextSegment
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegment
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.TextSegmentBuilder
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.TextSegmentBuilder
+  href: PlusPim.Debuggers.PlusPimDbg.Program.TextSegmentBuilder.html
+  name: TextSegmentBuilder
+  nameWithType: TextSegmentBuilder
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.TextSegmentBuilder
+- uid: PlusPim.Debuggers.PlusPimDbg.Program
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Program
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html

@@ -1,0 +1,1446 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Application.Application
+  commentId: T:PlusPim.Application.Application
+  id: Application
+  parent: PlusPim.Application
+  children:
+  - PlusPim.Application.Application.#ctor(System.Boolean,System.IO.FileInfo[],PlusPim.Logging.ILogger)
+  - PlusPim.Application.Application.Continue
+  - PlusPim.Application.Application.GetCallStack
+  - PlusPim.Application.Application.GetCurrentLine
+  - PlusPim.Application.Application.GetLastException
+  - PlusPim.Application.Application.GetProgramPath
+  - PlusPim.Application.Application.GetRegisters
+  - PlusPim.Application.Application.GetStackFrame(System.Int32)
+  - PlusPim.Application.Application.IsTerminated
+  - PlusPim.Application.Application.Load
+  - PlusPim.Application.Application.ReverseContinue
+  - PlusPim.Application.Application.Step
+  - PlusPim.Application.Application.StepBack
+  - PlusPim.Application.Application._debugger
+  - PlusPim.Application.Application._files
+  - PlusPim.Application.Application._isDebug
+  - PlusPim.Application.Application._logger
+  langs:
+  - csharp
+  - vb
+  name: Application
+  nameWithType: Application
+  fullName: PlusPim.Application.Application
+  type: Class
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Application
+    path: PlusPim/Application/Application.cs
+    startLine: 8
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: アプリケーションの主要な機能を提供するクラス
+  example: []
+  syntax:
+    content: 'internal class Application : IApplication'
+    content.vb: Friend Class Application Implements IApplication
+  inheritance:
+  - System.Object
+  implements:
+  - PlusPim.Application.IApplication
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.MemberwiseClone
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Application.Application._debugger
+  commentId: F:PlusPim.Application.Application._debugger
+  id: _debugger
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: _debugger
+  nameWithType: Application._debugger
+  fullName: PlusPim.Application.Application._debugger
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: _debugger
+    path: PlusPim/Application/Application.cs
+    startLine: 9
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: private IDebugger? _debugger
+    return:
+      type: PlusPim.Application.IDebugger
+    content.vb: Private _debugger As IDebugger
+- uid: PlusPim.Application.Application._logger
+  commentId: F:PlusPim.Application.Application._logger
+  id: _logger
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: _logger
+  nameWithType: Application._logger
+  fullName: PlusPim.Application.Application._logger
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: _logger
+    path: PlusPim/Application/Application.cs
+    startLine: 10
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: private readonly ILogger _logger
+    return:
+      type: PlusPim.Logging.ILogger
+    content.vb: Private ReadOnly _logger As ILogger
+- uid: PlusPim.Application.Application._isDebug
+  commentId: F:PlusPim.Application.Application._isDebug
+  id: _isDebug
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: _isDebug
+  nameWithType: Application._isDebug
+  fullName: PlusPim.Application.Application._isDebug
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: _isDebug
+    path: PlusPim/Application/Application.cs
+    startLine: 11
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: private readonly bool _isDebug
+    return:
+      type: System.Boolean
+    content.vb: Private ReadOnly _isDebug As Boolean
+- uid: PlusPim.Application.Application._files
+  commentId: F:PlusPim.Application.Application._files
+  id: _files
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: _files
+  nameWithType: Application._files
+  fullName: PlusPim.Application.Application._files
+  type: Field
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: _files
+    path: PlusPim/Application/Application.cs
+    startLine: 12
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: private readonly FileInfo[] _files
+    return:
+      type: System.IO.FileInfo[]
+    content.vb: Private ReadOnly _files As FileInfo()
+- uid: PlusPim.Application.Application.#ctor(System.Boolean,System.IO.FileInfo[],PlusPim.Logging.ILogger)
+  commentId: M:PlusPim.Application.Application.#ctor(System.Boolean,System.IO.FileInfo[],PlusPim.Logging.ILogger)
+  id: '#ctor(System.Boolean,System.IO.FileInfo[],PlusPim.Logging.ILogger)'
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: Application(bool, FileInfo[], ILogger)
+  nameWithType: Application.Application(bool, FileInfo[], ILogger)
+  fullName: PlusPim.Application.Application.Application(bool, System.IO.FileInfo[], PlusPim.Logging.ILogger)
+  type: Constructor
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: .ctor
+    path: PlusPim/Application/Application.cs
+    startLine: 20
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: アプリケーションのコンストラクタ
+  example: []
+  syntax:
+    content: public Application(bool isDebug, FileInfo[] files, ILogger logger)
+    parameters:
+    - id: isDebug
+      type: System.Boolean
+      description: デバッグ起動かどうか
+    - id: files
+      type: System.IO.FileInfo[]
+      description: すべての実行するファイル
+    - id: logger
+      type: PlusPim.Logging.ILogger
+      description: ロガー
+    content.vb: Public Sub New(isDebug As Boolean, files As FileInfo(), logger As ILogger)
+  overload: PlusPim.Application.Application.#ctor*
+  nameWithType.vb: Application.New(Boolean, FileInfo(), ILogger)
+  fullName.vb: PlusPim.Application.Application.New(Boolean, System.IO.FileInfo(), PlusPim.Logging.ILogger)
+  name.vb: New(Boolean, FileInfo(), ILogger)
+- uid: PlusPim.Application.Application.Load
+  commentId: M:PlusPim.Application.Application.Load
+  id: Load
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: Load()
+  nameWithType: Application.Load()
+  fullName: PlusPim.Application.Application.Load()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Load
+    path: PlusPim/Application/Application.cs
+    startLine: 30
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: プログラムをロードする．ランタイムモードの場合はContinue()する．
+  example: []
+  syntax:
+    content: public bool Load()
+    return:
+      type: System.Boolean
+      description: 成功した場合<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>
+    content.vb: Public Function Load() As Boolean
+  overload: PlusPim.Application.Application.Load*
+  implements:
+  - PlusPim.Application.IApplication.Load
+- uid: PlusPim.Application.Application.GetRegisters
+  commentId: M:PlusPim.Application.Application.GetRegisters
+  id: GetRegisters
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: GetRegisters()
+  nameWithType: Application.GetRegisters()
+  fullName: PlusPim.Application.Application.GetRegisters()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetRegisters
+    path: PlusPim/Application/Application.cs
+    startLine: 43
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  example: []
+  syntax:
+    content: public (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters()
+    return:
+      type: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}
+    content.vb: Public Function GetRegisters() As (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  overload: PlusPim.Application.Application.GetRegisters*
+  implements:
+  - PlusPim.Application.IApplication.GetRegisters
+- uid: PlusPim.Application.Application.Step
+  commentId: M:PlusPim.Application.Application.Step
+  id: Step
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: Step()
+  nameWithType: Application.Step()
+  fullName: PlusPim.Application.Application.Step()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Step
+    path: PlusPim/Application/Application.cs
+    startLine: 48
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  example: []
+  syntax:
+    content: public void Step()
+    content.vb: Public Sub [Step]()
+  overload: PlusPim.Application.Application.Step*
+  implements:
+  - PlusPim.Application.IApplication.Step
+- uid: PlusPim.Application.Application.StepBack
+  commentId: M:PlusPim.Application.Application.StepBack
+  id: StepBack
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: StepBack()
+  nameWithType: Application.StepBack()
+  fullName: PlusPim.Application.Application.StepBack()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: StepBack
+    path: PlusPim/Application/Application.cs
+    startLine: 52
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 1ステップ分，実行を巻き戻す
+  example: []
+  syntax:
+    content: public bool StepBack()
+    return:
+      type: System.Boolean
+      description: 巻き戻しに成功した場合は<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>
+    content.vb: Public Function StepBack() As Boolean
+  overload: PlusPim.Application.Application.StepBack*
+  implements:
+  - PlusPim.Application.IApplication.StepBack
+- uid: PlusPim.Application.Application.GetCurrentLine
+  commentId: M:PlusPim.Application.Application.GetCurrentLine
+  id: GetCurrentLine
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: GetCurrentLine()
+  nameWithType: Application.GetCurrentLine()
+  fullName: PlusPim.Application.Application.GetCurrentLine()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetCurrentLine
+    path: PlusPim/Application/Application.cs
+    startLine: 56
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 現在の実行前の行を取得する
+  example: []
+  syntax:
+    content: public int GetCurrentLine()
+    return:
+      type: System.Int32
+      description: 1から始まる行番号．取得できない場合は0を返す．
+    content.vb: Public Function GetCurrentLine() As Integer
+  overload: PlusPim.Application.Application.GetCurrentLine*
+  implements:
+  - PlusPim.Application.IApplication.GetCurrentLine
+- uid: PlusPim.Application.Application.GetProgramPath
+  commentId: M:PlusPim.Application.Application.GetProgramPath
+  id: GetProgramPath
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: GetProgramPath()
+  nameWithType: Application.GetProgramPath()
+  fullName: PlusPim.Application.Application.GetProgramPath()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetProgramPath
+    path: PlusPim/Application/Application.cs
+    startLine: 60
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  example: []
+  syntax:
+    content: public string GetProgramPath()
+    return:
+      type: System.String
+    content.vb: Public Function GetProgramPath() As String
+  overload: PlusPim.Application.Application.GetProgramPath*
+  implements:
+  - PlusPim.Application.IApplication.GetProgramPath
+- uid: PlusPim.Application.Application.IsTerminated
+  commentId: M:PlusPim.Application.Application.IsTerminated
+  id: IsTerminated
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: IsTerminated()
+  nameWithType: Application.IsTerminated()
+  fullName: PlusPim.Application.Application.IsTerminated()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: IsTerminated
+    path: PlusPim/Application/Application.cs
+    startLine: 64
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  example: []
+  syntax:
+    content: public bool IsTerminated()
+    return:
+      type: System.Boolean
+    content.vb: Public Function IsTerminated() As Boolean
+  overload: PlusPim.Application.Application.IsTerminated*
+  implements:
+  - PlusPim.Application.IApplication.IsTerminated
+- uid: PlusPim.Application.Application.Continue
+  commentId: M:PlusPim.Application.Application.Continue
+  id: Continue
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: Continue()
+  nameWithType: Application.Continue()
+  fullName: PlusPim.Application.Application.Continue()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Continue
+    path: PlusPim/Application/Application.cs
+    startLine: 68
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 終了まで実行する
+  example: []
+  syntax:
+    content: public void Continue()
+    content.vb: Public Sub [Continue]()
+  overload: PlusPim.Application.Application.Continue*
+  implements:
+  - PlusPim.Application.IApplication.Continue
+- uid: PlusPim.Application.Application.ReverseContinue
+  commentId: M:PlusPim.Application.Application.ReverseContinue
+  id: ReverseContinue
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: ReverseContinue()
+  nameWithType: Application.ReverseContinue()
+  fullName: PlusPim.Application.Application.ReverseContinue()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: ReverseContinue
+    path: PlusPim/Application/Application.cs
+    startLine: 74
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 先頭まで巻き戻す
+  example: []
+  syntax:
+    content: public void ReverseContinue()
+    content.vb: Public Sub ReverseContinue()
+  overload: PlusPim.Application.Application.ReverseContinue*
+  implements:
+  - PlusPim.Application.IApplication.ReverseContinue
+- uid: PlusPim.Application.Application.GetCallStack
+  commentId: M:PlusPim.Application.Application.GetCallStack
+  id: GetCallStack
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: GetCallStack()
+  nameWithType: Application.GetCallStack()
+  fullName: PlusPim.Application.Application.GetCallStack()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetCallStack
+    path: PlusPim/Application/Application.cs
+    startLine: 79
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: コールスタックの情報を取得する
+  example: []
+  syntax:
+    content: public StackFrameInfo[] GetCallStack()
+    return:
+      type: PlusPim.Application.StackFrameInfo[]
+      description: <xref href="PlusPim.Application.StackFrameInfo" data-throw-if-not-resolved="false"></xref>の配列．ライブフレームが先頭である
+    content.vb: Public Function GetCallStack() As StackFrameInfo()
+  overload: PlusPim.Application.Application.GetCallStack*
+  implements:
+  - PlusPim.Application.IApplication.GetCallStack
+- uid: PlusPim.Application.Application.GetStackFrame(System.Int32)
+  commentId: M:PlusPim.Application.Application.GetStackFrame(System.Int32)
+  id: GetStackFrame(System.Int32)
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: GetStackFrame(int)
+  nameWithType: Application.GetStackFrame(int)
+  fullName: PlusPim.Application.Application.GetStackFrame(int)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetStackFrame
+    path: PlusPim/Application/Application.cs
+    startLine: 83
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: フレームIDからスタックフレーム情報を取得する
+  example: []
+  syntax:
+    content: public StackFrameInfo? GetStackFrame(int frameId)
+    parameters:
+    - id: frameId
+      type: System.Int32
+      description: フレームID
+    return:
+      type: PlusPim.Application.StackFrameInfo
+      description: 見つかった場合は<xref href="PlusPim.Application.StackFrameInfo" data-throw-if-not-resolved="false"></xref>，見つからない場合はnull
+    content.vb: Public Function GetStackFrame(frameId As Integer) As StackFrameInfo
+  overload: PlusPim.Application.Application.GetStackFrame*
+  implements:
+  - PlusPim.Application.IApplication.GetStackFrame(System.Int32)
+  nameWithType.vb: Application.GetStackFrame(Integer)
+  fullName.vb: PlusPim.Application.Application.GetStackFrame(Integer)
+  name.vb: GetStackFrame(Integer)
+- uid: PlusPim.Application.Application.GetLastException
+  commentId: M:PlusPim.Application.Application.GetLastException
+  id: GetLastException
+  parent: PlusPim.Application.Application
+  langs:
+  - csharp
+  - vb
+  name: GetLastException()
+  nameWithType: Application.GetLastException()
+  fullName: PlusPim.Application.Application.GetLastException()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/Application.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetLastException
+    path: PlusPim/Application/Application.cs
+    startLine: 93
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 直前のStepで発生した例外情報を取得する
+  example: []
+  syntax:
+    content: public ExceptionInfo? GetLastException()
+    return:
+      type: PlusPim.Application.ExceptionInfo
+      description: 例外情報．例外が発生していない場合はnull
+    content.vb: Public Function GetLastException() As ExceptionInfo
+  overload: PlusPim.Application.Application.GetLastException*
+  implements:
+  - PlusPim.Application.IApplication.GetLastException
+references:
+- uid: PlusPim.Application
+  commentId: N:PlusPim.Application
+  href: PlusPim.html
+  name: PlusPim.Application
+  nameWithType: PlusPim.Application
+  fullName: PlusPim.Application
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Application
+    name: Application
+    href: PlusPim.Application.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Application
+    name: Application
+    href: PlusPim.Application.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PlusPim.Application.IApplication
+  commentId: T:PlusPim.Application.IApplication
+  parent: PlusPim.Application
+  href: PlusPim.Application.IApplication.html
+  name: IApplication
+  nameWithType: IApplication
+  fullName: PlusPim.Application.IApplication
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.MemberwiseClone
+  commentId: M:System.Object.MemberwiseClone
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  name: MemberwiseClone()
+  nameWithType: object.MemberwiseClone()
+  fullName: object.MemberwiseClone()
+  nameWithType.vb: Object.MemberwiseClone()
+  fullName.vb: Object.MemberwiseClone()
+  spec.csharp:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Application.IDebugger
+  commentId: T:PlusPim.Application.IDebugger
+  parent: PlusPim.Application
+  href: PlusPim.Application.IDebugger.html
+  name: IDebugger
+  nameWithType: IDebugger
+  fullName: PlusPim.Application.IDebugger
+- uid: PlusPim.Logging.ILogger
+  commentId: T:PlusPim.Logging.ILogger
+  parent: PlusPim.Logging
+  href: PlusPim.Logging.ILogger.html
+  name: ILogger
+  nameWithType: ILogger
+  fullName: PlusPim.Logging.ILogger
+- uid: PlusPim.Logging
+  commentId: N:PlusPim.Logging
+  href: PlusPim.html
+  name: PlusPim.Logging
+  nameWithType: PlusPim.Logging
+  fullName: PlusPim.Logging
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Logging
+    name: Logging
+    href: PlusPim.Logging.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Logging
+    name: Logging
+    href: PlusPim.Logging.html
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.IO.FileInfo[]
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.io.fileinfo
+  name: FileInfo[]
+  nameWithType: FileInfo[]
+  fullName: System.IO.FileInfo[]
+  nameWithType.vb: FileInfo()
+  fullName.vb: System.IO.FileInfo()
+  name.vb: FileInfo()
+  spec.csharp:
+  - uid: System.IO.FileInfo
+    name: FileInfo
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.fileinfo
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: System.IO.FileInfo
+    name: FileInfo
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.fileinfo
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.#ctor*
+  commentId: Overload:PlusPim.Application.Application.#ctor
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application__ctor_System_Boolean_System_IO_FileInfo___PlusPim_Logging_ILogger_
+  name: Application
+  nameWithType: Application.Application
+  fullName: PlusPim.Application.Application.Application
+  nameWithType.vb: Application.New
+  fullName.vb: PlusPim.Application.Application.New
+  name.vb: New
+- uid: PlusPim.Application.Application.Load*
+  commentId: Overload:PlusPim.Application.Application.Load
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_Load
+  name: Load
+  nameWithType: Application.Load
+  fullName: PlusPim.Application.Application.Load
+- uid: PlusPim.Application.IApplication.Load
+  commentId: M:PlusPim.Application.IApplication.Load
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Load
+  name: Load()
+  nameWithType: IApplication.Load()
+  fullName: PlusPim.Application.IApplication.Load()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.Load
+    name: Load
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Load
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.Load
+    name: Load
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Load
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.GetRegisters*
+  commentId: Overload:PlusPim.Application.Application.GetRegisters
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_GetRegisters
+  name: GetRegisters
+  nameWithType: Application.GetRegisters
+  fullName: PlusPim.Application.Application.GetRegisters
+- uid: PlusPim.Application.IApplication.GetRegisters
+  commentId: M:PlusPim.Application.IApplication.GetRegisters
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetRegisters
+  name: GetRegisters()
+  nameWithType: IApplication.GetRegisters()
+  fullName: PlusPim.Application.IApplication.GetRegisters()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.GetRegisters
+    name: GetRegisters
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetRegisters
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.GetRegisters
+    name: GetRegisters
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetRegisters
+  - name: (
+  - name: )
+- uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}
+  commentId: T:System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}
+  parent: System
+  definition: System.ValueTuple`4
+  href: https://learn.microsoft.com/dotnet/api/system.uint32
+  name: (uint[] Registers, uint PC, uint HI, uint LO)
+  nameWithType: (uint[] Registers, uint PC, uint HI, uint LO)
+  fullName: (uint[] Registers, uint PC, uint HI, uint LO)
+  nameWithType.vb: (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  fullName.vb: (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  name.vb: (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  spec.csharp:
+  - name: (
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: '['
+  - name: ']'
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.Registers
+    name: Registers
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.registers
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.PC
+    name: PC
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.pc
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.HI
+    name: HI
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.hi
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.LO
+    name: LO
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.lo
+  - name: )
+  spec.vb:
+  - name: (
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.Registers
+    name: Registers
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.registers
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: (
+  - name: )
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.PC
+    name: PC
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.pc
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.HI
+    name: HI
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.hi
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.LO
+    name: LO
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.lo
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+- uid: System.ValueTuple`4
+  commentId: T:System.ValueTuple`4
+  name: (T1, T2, T3, T4)
+  nameWithType: (T1, T2, T3, T4)
+  fullName: (T1, T2, T3, T4)
+  spec.csharp:
+  - name: (
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: ','
+  - name: " "
+  - name: T4
+  - name: )
+  spec.vb:
+  - name: (
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: ','
+  - name: " "
+  - name: T4
+  - name: )
+- uid: PlusPim.Application.Application.Step*
+  commentId: Overload:PlusPim.Application.Application.Step
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_Step
+  name: Step
+  nameWithType: Application.Step
+  fullName: PlusPim.Application.Application.Step
+- uid: PlusPim.Application.IApplication.Step
+  commentId: M:PlusPim.Application.IApplication.Step
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Step
+  name: Step()
+  nameWithType: IApplication.Step()
+  fullName: PlusPim.Application.IApplication.Step()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.Step
+    name: Step
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Step
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.Step
+    name: Step
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Step
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.StepBack*
+  commentId: Overload:PlusPim.Application.Application.StepBack
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_StepBack
+  name: StepBack
+  nameWithType: Application.StepBack
+  fullName: PlusPim.Application.Application.StepBack
+- uid: PlusPim.Application.IApplication.StepBack
+  commentId: M:PlusPim.Application.IApplication.StepBack
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_StepBack
+  name: StepBack()
+  nameWithType: IApplication.StepBack()
+  fullName: PlusPim.Application.IApplication.StepBack()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.StepBack
+    name: StepBack
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_StepBack
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.StepBack
+    name: StepBack
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_StepBack
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.GetCurrentLine*
+  commentId: Overload:PlusPim.Application.Application.GetCurrentLine
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_GetCurrentLine
+  name: GetCurrentLine
+  nameWithType: Application.GetCurrentLine
+  fullName: PlusPim.Application.Application.GetCurrentLine
+- uid: PlusPim.Application.IApplication.GetCurrentLine
+  commentId: M:PlusPim.Application.IApplication.GetCurrentLine
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetCurrentLine
+  name: GetCurrentLine()
+  nameWithType: IApplication.GetCurrentLine()
+  fullName: PlusPim.Application.IApplication.GetCurrentLine()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.GetCurrentLine
+    name: GetCurrentLine
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetCurrentLine
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.GetCurrentLine
+    name: GetCurrentLine
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetCurrentLine
+  - name: (
+  - name: )
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PlusPim.Application.Application.GetProgramPath*
+  commentId: Overload:PlusPim.Application.Application.GetProgramPath
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_GetProgramPath
+  name: GetProgramPath
+  nameWithType: Application.GetProgramPath
+  fullName: PlusPim.Application.Application.GetProgramPath
+- uid: PlusPim.Application.IApplication.GetProgramPath
+  commentId: M:PlusPim.Application.IApplication.GetProgramPath
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetProgramPath
+  name: GetProgramPath()
+  nameWithType: IApplication.GetProgramPath()
+  fullName: PlusPim.Application.IApplication.GetProgramPath()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.GetProgramPath
+    name: GetProgramPath
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetProgramPath
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.GetProgramPath
+    name: GetProgramPath
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetProgramPath
+  - name: (
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PlusPim.Application.Application.IsTerminated*
+  commentId: Overload:PlusPim.Application.Application.IsTerminated
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_IsTerminated
+  name: IsTerminated
+  nameWithType: Application.IsTerminated
+  fullName: PlusPim.Application.Application.IsTerminated
+- uid: PlusPim.Application.IApplication.IsTerminated
+  commentId: M:PlusPim.Application.IApplication.IsTerminated
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_IsTerminated
+  name: IsTerminated()
+  nameWithType: IApplication.IsTerminated()
+  fullName: PlusPim.Application.IApplication.IsTerminated()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.IsTerminated
+    name: IsTerminated
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_IsTerminated
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.IsTerminated
+    name: IsTerminated
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_IsTerminated
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.Continue*
+  commentId: Overload:PlusPim.Application.Application.Continue
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_Continue
+  name: Continue
+  nameWithType: Application.Continue
+  fullName: PlusPim.Application.Application.Continue
+- uid: PlusPim.Application.IApplication.Continue
+  commentId: M:PlusPim.Application.IApplication.Continue
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Continue
+  name: Continue()
+  nameWithType: IApplication.Continue()
+  fullName: PlusPim.Application.IApplication.Continue()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.Continue
+    name: Continue
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Continue
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.Continue
+    name: Continue
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_Continue
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.ReverseContinue*
+  commentId: Overload:PlusPim.Application.Application.ReverseContinue
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_ReverseContinue
+  name: ReverseContinue
+  nameWithType: Application.ReverseContinue
+  fullName: PlusPim.Application.Application.ReverseContinue
+- uid: PlusPim.Application.IApplication.ReverseContinue
+  commentId: M:PlusPim.Application.IApplication.ReverseContinue
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_ReverseContinue
+  name: ReverseContinue()
+  nameWithType: IApplication.ReverseContinue()
+  fullName: PlusPim.Application.IApplication.ReverseContinue()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.ReverseContinue
+    name: ReverseContinue
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_ReverseContinue
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.ReverseContinue
+    name: ReverseContinue
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_ReverseContinue
+  - name: (
+  - name: )
+- uid: PlusPim.Application.StackFrameInfo
+  commentId: T:PlusPim.Application.StackFrameInfo
+  parent: PlusPim.Application
+  href: PlusPim.Application.StackFrameInfo.html
+  name: StackFrameInfo
+  nameWithType: StackFrameInfo
+  fullName: PlusPim.Application.StackFrameInfo
+- uid: PlusPim.Application.Application.GetCallStack*
+  commentId: Overload:PlusPim.Application.Application.GetCallStack
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_GetCallStack
+  name: GetCallStack
+  nameWithType: Application.GetCallStack
+  fullName: PlusPim.Application.Application.GetCallStack
+- uid: PlusPim.Application.IApplication.GetCallStack
+  commentId: M:PlusPim.Application.IApplication.GetCallStack
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetCallStack
+  name: GetCallStack()
+  nameWithType: IApplication.GetCallStack()
+  fullName: PlusPim.Application.IApplication.GetCallStack()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.GetCallStack
+    name: GetCallStack
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetCallStack
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.GetCallStack
+    name: GetCallStack
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetCallStack
+  - name: (
+  - name: )
+- uid: PlusPim.Application.StackFrameInfo[]
+  isExternal: true
+  href: PlusPim.Application.StackFrameInfo.html
+  name: StackFrameInfo[]
+  nameWithType: StackFrameInfo[]
+  fullName: PlusPim.Application.StackFrameInfo[]
+  nameWithType.vb: StackFrameInfo()
+  fullName.vb: PlusPim.Application.StackFrameInfo()
+  name.vb: StackFrameInfo()
+  spec.csharp:
+  - uid: PlusPim.Application.StackFrameInfo
+    name: StackFrameInfo
+    href: PlusPim.Application.StackFrameInfo.html
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: PlusPim.Application.StackFrameInfo
+    name: StackFrameInfo
+    href: PlusPim.Application.StackFrameInfo.html
+  - name: (
+  - name: )
+- uid: PlusPim.Application.Application.GetStackFrame*
+  commentId: Overload:PlusPim.Application.Application.GetStackFrame
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_GetStackFrame_System_Int32_
+  name: GetStackFrame
+  nameWithType: Application.GetStackFrame
+  fullName: PlusPim.Application.Application.GetStackFrame
+- uid: PlusPim.Application.IApplication.GetStackFrame(System.Int32)
+  commentId: M:PlusPim.Application.IApplication.GetStackFrame(System.Int32)
+  parent: PlusPim.Application.IApplication
+  isExternal: true
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetStackFrame_System_Int32_
+  name: GetStackFrame(int)
+  nameWithType: IApplication.GetStackFrame(int)
+  fullName: PlusPim.Application.IApplication.GetStackFrame(int)
+  nameWithType.vb: IApplication.GetStackFrame(Integer)
+  fullName.vb: PlusPim.Application.IApplication.GetStackFrame(Integer)
+  name.vb: GetStackFrame(Integer)
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.GetStackFrame(System.Int32)
+    name: GetStackFrame
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetStackFrame_System_Int32_
+  - name: (
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.GetStackFrame(System.Int32)
+    name: GetStackFrame
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetStackFrame_System_Int32_
+  - name: (
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+- uid: PlusPim.Application.Application.GetLastException*
+  commentId: Overload:PlusPim.Application.Application.GetLastException
+  href: PlusPim.Application.Application.html#PlusPim_Application_Application_GetLastException
+  name: GetLastException
+  nameWithType: Application.GetLastException
+  fullName: PlusPim.Application.Application.GetLastException
+- uid: PlusPim.Application.IApplication.GetLastException
+  commentId: M:PlusPim.Application.IApplication.GetLastException
+  parent: PlusPim.Application.IApplication
+  href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetLastException
+  name: GetLastException()
+  nameWithType: IApplication.GetLastException()
+  fullName: PlusPim.Application.IApplication.GetLastException()
+  spec.csharp:
+  - uid: PlusPim.Application.IApplication.GetLastException
+    name: GetLastException
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetLastException
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Application.IApplication.GetLastException
+    name: GetLastException
+    href: PlusPim.Application.IApplication.html#PlusPim_Application_IApplication_GetLastException
+  - name: (
+  - name: )
+- uid: PlusPim.Application.ExceptionInfo
+  commentId: T:PlusPim.Application.ExceptionInfo
+  parent: PlusPim.Application
+  href: PlusPim.Application.ExceptionInfo.html
+  name: ExceptionInfo
+  nameWithType: ExceptionInfo
+  fullName: PlusPim.Application.ExceptionInfo

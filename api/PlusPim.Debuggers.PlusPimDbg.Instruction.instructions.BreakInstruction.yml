@@ -1,0 +1,739 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  id: BreakInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.#ctor(System.Int32)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  langs:
+  - csharp
+  - vb
+  name: BreakInstruction
+  nameWithType: BreakInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  type: Class
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: BreakInstruction
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+    startLine: 9
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 'break命令: ブレークポイント例外 (ExcCode=9) を発生させる'
+  example: []
+  syntax:
+    content: 'internal sealed class BreakInstruction : IInstruction'
+    content.vb: Friend NotInheritable Class BreakInstruction Implements IInstruction
+  inheritance:
+  - System.Object
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.#ctor(System.Int32)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.#ctor(System.Int32)
+  id: '#ctor(System.Int32)'
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  langs:
+  - csharp
+  - vb
+  name: BreakInstruction(int)
+  nameWithType: BreakInstruction.BreakInstruction(int)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.BreakInstruction(int)
+  type: Constructor
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: .ctor
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+    startLine: 9
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 'break命令: ブレークポイント例外 (ExcCode=9) を発生させる'
+  example: []
+  syntax:
+    content: public BreakInstruction(int sourceLine)
+    parameters:
+    - id: sourceLine
+      type: System.Int32
+    content.vb: Public Sub New(sourceLine As Integer)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.#ctor*
+  nameWithType.vb: BreakInstruction.New(Integer)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.New(Integer)
+  name.vb: New(Integer)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine
+  id: SourceLine
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  langs:
+  - csharp
+  - vb
+  name: SourceLine
+  nameWithType: BreakInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: SourceLine
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+    startLine: 10
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: その命令のファイル上での行番号(1-index)
+  example: []
+  syntax:
+    content: public int SourceLine { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property SourceLine As Integer
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  id: Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  langs:
+  - csharp
+  - vb
+  name: Execute(RuntimeContext)
+  nameWithType: BreakInstruction.Execute(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Execute
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+    startLine: 12
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 命令を実行し，コンテキストを変更する
+  example: []
+  syntax:
+    content: public void Execute(RuntimeContext context)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+      description: レジスタ，メモリ状態等を示す
+    content.vb: Public Sub Execute(context As RuntimeContext)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  id: Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  langs:
+  - csharp
+  - vb
+  name: Undo(RuntimeContext)
+  nameWithType: BreakInstruction.Undo(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Undo
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+    startLine: 16
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  summary: 命令の逆操作を実行し，コンテキストを元に戻す
+  example: []
+  syntax:
+    content: public void Undo(RuntimeContext context)
+    parameters:
+    - id: context
+      type: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+      description: レジスタ，メモリ状態等を示す
+    content.vb: Public Sub Undo(context As RuntimeContext)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser
+  id: CreateParser
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction
+  langs:
+  - csharp
+  - vb
+  name: CreateParser()
+  nameWithType: BreakInstruction.CreateParser()
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: CreateParser
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/instructions/BreakInstruction.cs
+    startLine: 20
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  syntax:
+    content: internal static Func<string, IInstructionParser> CreateParser()
+    return:
+      type: System.Func{System.String,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser}
+    content.vb: Friend Shared Function CreateParser() As Func(Of String, IInstructionParser)
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser*
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+    name: instructions
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+    name: instructions
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  name: IInstruction
+  nameWithType: IInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.#ctor*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.#ctor
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_BreakInstruction__ctor_System_Int32_
+  name: BreakInstruction
+  nameWithType: BreakInstruction.BreakInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.BreakInstruction
+  nameWithType.vb: BreakInstruction.New
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.New
+  name.vb: New
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_BreakInstruction_SourceLine
+  name: SourceLine
+  nameWithType: BreakInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.SourceLine
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_SourceLine
+  name: SourceLine
+  nameWithType: IInstruction.SourceLine
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.SourceLine
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_BreakInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Execute
+  nameWithType: BreakInstruction.Execute
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Execute
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Execute(RuntimeContext)
+  nameWithType: IInstruction.Execute(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Execute
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Execute(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Execute
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Execute_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  name: RuntimeContext
+  nameWithType: RuntimeContext
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Runtime
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_BreakInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Undo
+  nameWithType: BreakInstruction.Undo
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.Undo
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  name: Undo(RuntimeContext)
+  nameWithType: IInstruction.Undo(RuntimeContext)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Undo
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.Undo(PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext)
+    name: Undo
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction_Undo_PlusPim_Debuggers_PlusPimDbg_Runtime_RuntimeContext_
+  - name: (
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+    name: RuntimeContext
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.html#PlusPim_Debuggers_PlusPimDbg_Instruction_instructions_BreakInstruction_CreateParser
+  name: CreateParser
+  nameWithType: BreakInstruction.CreateParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.BreakInstruction.CreateParser
+- uid: System.Func{System.String,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser}
+  commentId: T:System.Func{System.String,PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser}
+  parent: System
+  definition: System.Func`2
+  href: https://learn.microsoft.com/dotnet/api/system.func-2
+  name: Func<string, IInstructionParser>
+  nameWithType: Func<string, IInstructionParser>
+  fullName: System.Func<string, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser>
+  nameWithType.vb: Func(Of String, IInstructionParser)
+  fullName.vb: System.Func(Of String, PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser)
+  name.vb: Func(Of String, IInstructionParser)
+  spec.csharp:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser
+    name: IInstructionParser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser
+    name: IInstructionParser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IInstructionParser.html
+  - name: )
+- uid: System.Func`2
+  commentId: T:System.Func`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.func-2
+  name: Func<T, TResult>
+  nameWithType: Func<T, TResult>
+  fullName: System.Func<T, TResult>
+  nameWithType.vb: Func(Of T, TResult)
+  fullName.vb: System.Func(Of T, TResult)
+  name.vb: Func(Of T, TResult)
+  spec.csharp:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: <
+  - name: T
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`2
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: )

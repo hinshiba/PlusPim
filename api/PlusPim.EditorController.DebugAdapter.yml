@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.EditorController.DebugAdapter
+  commentId: N:PlusPim.EditorController.DebugAdapter
+  id: PlusPim.EditorController.DebugAdapter
+  children:
+  - PlusPim.EditorController.DebugAdapter.DebugAdapter
+  langs:
+  - csharp
+  - vb
+  name: PlusPim.EditorController.DebugAdapter
+  nameWithType: PlusPim.EditorController.DebugAdapter
+  fullName: PlusPim.EditorController.DebugAdapter
+  type: Namespace
+  assemblies:
+  - PlusPim
+references:
+- uid: PlusPim.EditorController.DebugAdapter.DebugAdapter
+  commentId: T:PlusPim.EditorController.DebugAdapter.DebugAdapter
+  href: PlusPim.EditorController.DebugAdapter.DebugAdapter.html
+  name: DebugAdapter
+  nameWithType: DebugAdapter
+  fullName: PlusPim.EditorController.DebugAdapter.DebugAdapter
