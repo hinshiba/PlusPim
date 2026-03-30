@@ -47,10 +47,19 @@ internal class Program {
             DefaultValueFactory = (_) => 4711
         };
 
+        Option<bool> attachArg = new(
+            name: "--attach"
+            ) {
+            Required = false,
+            Description = "Attach a .NET debugger on startup (default: false)",
+            DefaultValueFactory = (_) => false
+        };
+
         cmd.Arguments.Add(fileArg);
         cmd.Options.Add(verboseArg);
         cmd.Options.Add(debugArg);
         cmd.Options.Add(portArg);
+        cmd.Options.Add(attachArg);
 
 
         // 実際に解析
@@ -74,9 +83,9 @@ internal class Program {
             .InformationalVersion;
         logger.Info("Program", $"PlusPim version {version}");
 
-#if DEBUG
-        _ = System.Diagnostics.Debugger.Launch();
-#endif
+        if(parseResult.GetValue(attachArg)) {
+            _ = System.Diagnostics.Debugger.Launch();
+        }
 
         if(parseResult.GetValue(debugArg)) {
             // デバッガモードで起動する
