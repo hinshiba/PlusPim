@@ -85,7 +85,7 @@ internal sealed partial class InstructionRegistry {
         this.Register("ori", ITypeInstruction.CreateParser((rs, imm) => rs | imm.ToUInt()));
         this.Register("xori", ITypeInstruction.CreateParser((rs, imm) => rs ^ imm.ToUInt()));
         this.Register("slti", ITypeInstruction.CreateParser((rs, imm) => (uint)((int)rs < imm.ToSInt() ? 1 : 0)));
-        this.Register("sltiu", ITypeInstruction.CreateParser((rs, imm) => rs < (ushort)imm.ToSInt() ? 1u : 0u));
+        this.Register("sltiu", ITypeInstruction.CreateParser((rs, imm) => rs < (uint)imm.ToSInt() ? 1u : 0u));
         this.Register("lui", ITypeInstruction.CreateRegImmParser(imm => unchecked(imm.ToUInt() << 16)));
 
         // Branch
