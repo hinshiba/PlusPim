@@ -1,0 +1,77 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction
+  id: PlusPim.Debuggers.PlusPimDbg.Instruction
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  langs:
+  - csharp
+  - vb
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction
+  type: Namespace
+  assemblies:
+  - PlusPim
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  name: IInstruction
+  nameWithType: IInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall.html
+  name: RuntimeCall
+  nameWithType: RuntimeCall
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.RuntimeCall
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode.html
+  name: SyscallCode
+  nameWithType: SyscallCode
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.SyscallCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html

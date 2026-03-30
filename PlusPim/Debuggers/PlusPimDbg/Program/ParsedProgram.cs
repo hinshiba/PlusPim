@@ -1,4 +1,5 @@
-using PlusPim.Debuggers.PlusPimDbg.Instructions;
+using PlusPim.Debuggers.PlusPimDbg.Instruction;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Logging;
 
@@ -21,68 +22,83 @@ internal class ParsedProgram {
     public DataSegment DataSegment { get; }
 
     /// <summary>
+    /// .ktextセグメント
+    /// </summary>
+    public TextSegment KernelTextSegment { get; }
+
+    /// <summary>
     /// シンボルテーブル
     /// </summary>
     public SymbolTable SymbolTable { get; }
 
     /// <summary>
-    /// パースしたプログラムのファイルパス
+    /// パースしたプログラムのファイル
     /// </summary>
-    public string ProgramPath { get; }
+    public FileInfo File { get; }
 
-    public ParsedProgram(string programPath, ILogger logger) {
-        this.ProgramPath = Path.GetFullPath(programPath);
-
-        string[] lines = File.ReadAllLines(programPath);
+    public ParsedProgram(FileInfo file, Address textSegmentBase, Address dataSegmentBase, Address kernelTextSegmentBase, ILogger logger) {
+        this.File = file;
         this.SymbolTable = new SymbolTable();
 
 
         // 前処理: 各行をトリムして，セグメントごとに分割する
+        // 現在のファイルでの
         List<(string Trimmed, int LineIndex)> textLines = [];
         List<(string Trimmed, int LineIndex)> dataLines = [];
-        SegmentType currentSegment = SegmentType.Text;
 
-        for(int lineIndex = 0; lineIndex < lines.Length; lineIndex++) {
-            string processed = RemoveComment(lines[lineIndex]).Trim();
-            if(string.IsNullOrEmpty(processed)) {
-                continue;
-            }
+        List<(string Trimmed, int LineIndex)> kernelTextLines = [];
 
-            // セグメント切替判定
-            if(processed.Equals(".data", StringComparison.OrdinalIgnoreCase)) {
-                currentSegment = SegmentType.Data;
-                continue;
-            }
-            if(processed.Equals(".text", StringComparison.OrdinalIgnoreCase)) {
-                currentSegment = SegmentType.Text;
-                continue;
-            }
+        SegmentType currentSegment = SegmentType.Unknown;
+        {
+            using StreamReader reader = file.OpenText();
+            int lineIndex = -1;
+            while(reader.ReadLine() is string line) {
+                lineIndex++;
+                string processed = RemoveComment(line).Trim();
+                if(string.IsNullOrEmpty(processed)) {
+                    continue;
+                }
 
-            if(currentSegment == SegmentType.Text) {
-                textLines.Add((processed, lineIndex));
-            } else {
-                dataLines.Add((processed, lineIndex));
+                // セグメント切替判定
+                if(processed.Equals(".data", StringComparison.OrdinalIgnoreCase)) {
+                    currentSegment = SegmentType.Data;
+                    continue;
+                }
+                if(processed.Equals(".text", StringComparison.OrdinalIgnoreCase)) {
+                    currentSegment = SegmentType.Text;
+                    continue;
+                }
+                if(processed.Equals(".ktext", StringComparison.OrdinalIgnoreCase)) {
+                    currentSegment = SegmentType.KernelText;
+                    continue;
+                }
+
+                switch(currentSegment) {
+                    case SegmentType.Text:
+                        textLines.Add((processed, lineIndex));
+                        break;
+                    case SegmentType.Data:
+                        dataLines.Add((processed, lineIndex));
+                        break;
+                    case SegmentType.KernelText:
+                        kernelTextLines.Add((processed, lineIndex));
+                        break;
+                    default:
+                        logger.Warning("ParsedProgram", $"Line{lineIndex + 1} Segment type is not specified. So set text segment.");
+                        currentSegment = SegmentType.Text;
+                        textLines.Add((processed, lineIndex));
+                        break;
+                }
             }
         }
 
         // パス1: シンボルテーブルの構築
         // 疑似命令の展開後命令数を考慮してラベルアドレスを計算する
-        int instructionCount = 0;
-        foreach((string trimmed, int lineIndex) in textLines) {
-            if(IsLabel(trimmed)) {
-                string labelName = trimmed[..^1];
-                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount)));
-                if(this.SymbolTable.Add(label)) {
-                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
-                }
-                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
-            } else if(!trimmed.StartsWith('.')) {
-                instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
-            }
-        }
-        // この時点でデータセグメントは構築できる
-        DataSegmentBuilder dataSegmentBuilder = new(logger);
+        this.BuildTextSegmentSymbols(textLines, textSegmentBase, logger);
+        this.BuildTextSegmentSymbols(kernelTextLines, kernelTextSegmentBase, logger);
 
+        // データセグメント
+        DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
         foreach((string trimmed, int lineIndex) in dataLines) {
             if(IsLabel(trimmed)) {
                 string labelName = trimmed[..^1];
@@ -98,15 +114,25 @@ internal class ParsedProgram {
 
 
         // パス2: 完成したシンボルテーブルを使って命令をパース
-        TextSegmentBuilder textSegmentBuilder = new(logger);
+        // テキストセグメント
+        TextSegmentBuilder textSegmentBuilder = new(textSegmentBase, logger);
         foreach((string trimmed, int lineIndex) in textLines) {
             if(!IsLabel(trimmed)) {
                 textSegmentBuilder.AddLine(trimmed, lineIndex, this.SymbolTable);
             }
         }
 
+        // カーネルテキストセグメント
+        TextSegmentBuilder kernelTextSegmentBuilder = new(kernelTextSegmentBase, logger);
+        foreach((string trimmed, int lineIndex) in kernelTextLines) {
+            if(!IsLabel(trimmed)) {
+                kernelTextSegmentBuilder.AddLine(trimmed, lineIndex, this.SymbolTable);
+            }
+        }
+
         this.TextSegment = textSegmentBuilder.Build();
         this.DataSegment = dataSegmentBuilder.Build();
+        this.KernelTextSegment = kernelTextSegmentBuilder.Build();
     }
 
     /// <summary>
@@ -124,6 +150,25 @@ internal class ParsedProgram {
             }
         }
         return line;
+    }
+
+    /// <summary>
+    /// テキスト系セグメントのシンボルテーブルを構築する
+    /// </summary>
+    private void BuildTextSegmentSymbols(List<(string Trimmed, int LineIndex)> lines, Address segmentBase, ILogger logger) {
+        int instructionCount = 0;
+        foreach((string trimmed, int lineIndex) in lines) {
+            if(IsLabel(trimmed)) {
+                string labelName = trimmed[..^1];
+                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount), segmentBase));
+                if(this.SymbolTable.Add(label)) {
+                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
+                }
+                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
+            } else if(!trimmed.StartsWith('.')) {
+                instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
+            }
+        }
     }
 
     /// <summary>
@@ -149,5 +194,20 @@ internal class ParsedProgram {
     /// 命令数
     /// </summary>
     public int InstructionCount => this.TextSegment.Instructions.Length;
+
+    /// <summary>
+    /// テキストセグメントのバイト数
+    /// </summary>
+    public Address TextSegmentSize => new((uint)this.TextSegment.Instructions.Length * 4);
+
+    /// <summary>
+    /// カーネルテキストセグメントのバイト数
+    /// </summary>
+    public Address KernelTextSegmentSize => new((uint)this.KernelTextSegment.Instructions.Length * 4);
+
+    /// <summary>
+    /// データセグメントのバイト数
+    /// </summary>
+    public Address DataSegmentSize => new(this.DataSegment.Size);
 
 }

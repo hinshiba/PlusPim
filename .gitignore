@@ -366,3 +366,5 @@ FodyWeavers.xsd
 CLAUDE.md
 
 *.vsix
+
+_site

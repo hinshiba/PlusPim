@@ -1,0 +1,714 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+  id: NopInstructionParser
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize(System.String)
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  langs:
+  - csharp
+  - vb
+  name: NopInstructionParser
+  nameWithType: NopInstructionParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+  type: Class
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: NopInstructionParser
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+    startLine: 17
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  summary: nop疑似命令のパーサー
+  remarks: >-
+    <code>nop</code> を以下の1命令に展開する:
+
+
+    <pre><code class="lang-csharp">sll $zero, $zero, 0</code></pre>
+  example: []
+  syntax:
+    content: 'internal sealed class NopInstructionParser : IPseudoInstructionParser'
+    content.vb: Friend NotInheritable Class NopInstructionParser Implements IPseudoInstructionParser
+  inheritance:
+  - System.Object
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic
+  id: Mnemonic
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+  langs:
+  - csharp
+  - vb
+  name: Mnemonic
+  nameWithType: NopInstructionParser.Mnemonic
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic
+  type: Property
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Mnemonic
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+    startLine: 18
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  summary: 疑似命令のニーモニック
+  example: []
+  syntax:
+    content: public string Mnemonic { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property Mnemonic As String
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.Mnemonic
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize(System.String)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize(System.String)
+  id: GetExpansionSize(System.String)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+  langs:
+  - csharp
+  - vb
+  name: GetExpansionSize(string)
+  nameWithType: NopInstructionParser.GetExpansionSize(string)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize(string)
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetExpansionSize
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+    startLine: 20
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  summary: 展開後の命令数を返す
+  example: []
+  syntax:
+    content: public int GetExpansionSize(string operands)
+    parameters:
+    - id: operands
+      type: System.String
+      description: オペランド文字列
+    return:
+      type: System.Int32
+      description: 展開後の実命令数
+    content.vb: Public Function GetExpansionSize(operands As String) As Integer
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(System.String)
+  nameWithType.vb: NopInstructionParser.GetExpansionSize(String)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize(String)
+  name.vb: GetExpansionSize(String)
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  id: TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser
+  langs:
+  - csharp
+  - vb
+  name: TryExpand(string, int, SymbolTable, out IInstruction[])
+  nameWithType: NopInstructionParser.TryExpand(string, int, SymbolTable, out IInstruction[])
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand(string, int, PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable, out PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[])
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: TryExpand
+    path: PlusPim/Debuggers/PlusPimDbg/Instruction/Pseudo/NopInstructionParser.cs
+    startLine: 24
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  summary: 疑似命令を実命令列に展開する
+  example: []
+  syntax:
+    content: public bool TryExpand(string operands, int lineIndex, SymbolTable symbolTable, out IInstruction[] instructions)
+    parameters:
+    - id: operands
+      type: System.String
+      description: オペランド文字列
+    - id: lineIndex
+      type: System.Int32
+      description: ソースファイル上の行番号(1-based)
+    - id: symbolTable
+      type: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+      description: 解決済みのシンボルテーブル
+    - id: instructions
+      type: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]
+      description: 展開後の命令列
+      attributes:
+      - type: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+        ctor: System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute.#ctor(System.Boolean)
+        arguments:
+        - type: System.Boolean
+          value: false
+    return:
+      type: System.Boolean
+      description: 成功なら<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>
+    content.vb: Public Function TryExpand(operands As String, lineIndex As Integer, symbolTable As SymbolTable, instructions As IInstruction()) As Boolean
+  overload: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand*
+  implements:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  nameWithType.vb: NopInstructionParser.TryExpand(String, Integer, SymbolTable, IInstruction())
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand(String, Integer, PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable, PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction())
+  name.vb: TryExpand(String, Integer, SymbolTable, IInstruction())
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+    name: Pseudo
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo
+    name: Pseudo
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html
+  name: IPseudoInstructionParser
+  nameWithType: IPseudoInstructionParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+    name: Parser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser
+    name: Parser
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.html
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Pseudo_NopInstructionParser_Mnemonic
+  name: Mnemonic
+  nameWithType: NopInstructionParser.Mnemonic
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.Mnemonic
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.Mnemonic
+  commentId: P:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.Mnemonic
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_Mnemonic
+  name: Mnemonic
+  nameWithType: IPseudoInstructionParser.Mnemonic
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.Mnemonic
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Pseudo_NopInstructionParser_GetExpansionSize_System_String_
+  name: GetExpansionSize
+  nameWithType: NopInstructionParser.GetExpansionSize
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.GetExpansionSize
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(System.String)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(System.String)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+  isExternal: true
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_GetExpansionSize_System_String_
+  name: GetExpansionSize(string)
+  nameWithType: IPseudoInstructionParser.GetExpansionSize(string)
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(string)
+  nameWithType.vb: IPseudoInstructionParser.GetExpansionSize(String)
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(String)
+  name.vb: GetExpansionSize(String)
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(System.String)
+    name: GetExpansionSize
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_GetExpansionSize_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.GetExpansionSize(System.String)
+    name: GetExpansionSize
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_GetExpansionSize_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand*
+  commentId: Overload:PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Pseudo_NopInstructionParser_TryExpand_System_String_System_Int32_PlusPim_Debuggers_PlusPimDbg_Program_SymbolTable_PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction____
+  name: TryExpand
+  nameWithType: NopInstructionParser.TryExpand
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo.NopInstructionParser.TryExpand
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  commentId: M:PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser
+  isExternal: true
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_TryExpand_System_String_System_Int32_PlusPim_Debuggers_PlusPimDbg_Program_SymbolTable_PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction____
+  name: TryExpand(string, int, SymbolTable, out IInstruction[])
+  nameWithType: IPseudoInstructionParser.TryExpand(string, int, SymbolTable, out IInstruction[])
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(string, int, PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable, out PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[])
+  nameWithType.vb: IPseudoInstructionParser.TryExpand(String, Integer, SymbolTable, IInstruction())
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(String, Integer, PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable, PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction())
+  name.vb: TryExpand(String, Integer, SymbolTable, IInstruction())
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+    name: TryExpand
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_TryExpand_System_String_System_Int32_PlusPim_Debuggers_PlusPimDbg_Program_SymbolTable_PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction____
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+    name: SymbolTable
+    href: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable.html
+  - name: ','
+  - name: " "
+  - name: out
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: '['
+  - name: ']'
+  - name: )
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.TryExpand(System.String,System.Int32,PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable,PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]@)
+    name: TryExpand
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.Parser.IPseudoInstructionParser.html#PlusPim_Debuggers_PlusPimDbg_Instruction_Parser_IPseudoInstructionParser_TryExpand_System_String_System_Int32_PlusPim_Debuggers_PlusPimDbg_Program_SymbolTable_PlusPim_Debuggers_PlusPimDbg_Instruction_IInstruction____
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+    name: SymbolTable
+    href: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable.html
+  - name: ','
+  - name: " "
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: (
+  - name: )
+  - name: )
+- uid: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+  parent: PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable.html
+  name: SymbolTable
+  nameWithType: SymbolTable
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program.SymbolTable
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]
+  isExternal: true
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  name: IInstruction[]
+  nameWithType: IInstruction[]
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction[]
+  nameWithType.vb: IInstruction()
+  fullName.vb: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction()
+  name.vb: IInstruction()
+  spec.csharp:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction
+    name: IInstruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.IInstruction.html
+  - name: (
+  - name: )
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PlusPim.Debuggers.PlusPimDbg.Program
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Program
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Program
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Program
+  fullName: PlusPim.Debuggers.PlusPimDbg.Program
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Program
+    name: Program
+    href: PlusPim.Debuggers.PlusPimDbg.Program.html

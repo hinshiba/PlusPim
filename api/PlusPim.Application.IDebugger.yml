@@ -1,0 +1,554 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Application.IDebugger
+  commentId: T:PlusPim.Application.IDebugger
+  id: IDebugger
+  parent: PlusPim.Application
+  children:
+  - PlusPim.Application.IDebugger.GetCallStack
+  - PlusPim.Application.IDebugger.GetCurrentLine
+  - PlusPim.Application.IDebugger.GetLastException
+  - PlusPim.Application.IDebugger.GetProgramPath
+  - PlusPim.Application.IDebugger.GetRegisters
+  - PlusPim.Application.IDebugger.IsTerminated
+  - PlusPim.Application.IDebugger.Step
+  - PlusPim.Application.IDebugger.StepBack
+  langs:
+  - csharp
+  - vb
+  name: IDebugger
+  nameWithType: IDebugger
+  fullName: PlusPim.Application.IDebugger
+  type: Interface
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: IDebugger
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 2
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: internal interface IDebugger
+    content.vb: Friend Interface IDebugger
+  derivedClasses:
+  - PlusPim.Debuggers.PlusPimDbg.PlusPimDbg
+- uid: PlusPim.Application.IDebugger.GetRegisters
+  commentId: M:PlusPim.Application.IDebugger.GetRegisters
+  id: GetRegisters
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: GetRegisters()
+  nameWithType: IDebugger.GetRegisters()
+  fullName: PlusPim.Application.IDebugger.GetRegisters()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetRegisters
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 3
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters()
+    return:
+      type: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}
+    content.vb: Function GetRegisters() As (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  overload: PlusPim.Application.IDebugger.GetRegisters*
+- uid: PlusPim.Application.IDebugger.Step
+  commentId: M:PlusPim.Application.IDebugger.Step
+  id: Step
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: Step()
+  nameWithType: IDebugger.Step()
+  fullName: PlusPim.Application.IDebugger.Step()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: Step
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 4
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: void Step()
+    content.vb: Sub [Step]()
+  overload: PlusPim.Application.IDebugger.Step*
+- uid: PlusPim.Application.IDebugger.StepBack
+  commentId: M:PlusPim.Application.IDebugger.StepBack
+  id: StepBack
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: StepBack()
+  nameWithType: IDebugger.StepBack()
+  fullName: PlusPim.Application.IDebugger.StepBack()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: StepBack
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 10
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 1ステップ分，実行を巻き戻す
+  example: []
+  syntax:
+    content: bool StepBack()
+    return:
+      type: System.Boolean
+      description: 巻き戻しに成功した場合は<a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>
+    content.vb: Function StepBack() As Boolean
+  overload: PlusPim.Application.IDebugger.StepBack*
+- uid: PlusPim.Application.IDebugger.GetCurrentLine
+  commentId: M:PlusPim.Application.IDebugger.GetCurrentLine
+  id: GetCurrentLine
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: GetCurrentLine()
+  nameWithType: IDebugger.GetCurrentLine()
+  fullName: PlusPim.Application.IDebugger.GetCurrentLine()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetCurrentLine
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 16
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 1から始まる現在実行前の行番号を取得する
+  example: []
+  syntax:
+    content: int GetCurrentLine()
+    return:
+      type: System.Int32
+      description: 行番号．ただし何かしらの問題で無効であった場合は0
+    content.vb: Function GetCurrentLine() As Integer
+  overload: PlusPim.Application.IDebugger.GetCurrentLine*
+- uid: PlusPim.Application.IDebugger.GetProgramPath
+  commentId: M:PlusPim.Application.IDebugger.GetProgramPath
+  id: GetProgramPath
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: GetProgramPath()
+  nameWithType: IDebugger.GetProgramPath()
+  fullName: PlusPim.Application.IDebugger.GetProgramPath()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetProgramPath
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 17
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: string GetProgramPath()
+    return:
+      type: System.String
+    content.vb: Function GetProgramPath() As String
+  overload: PlusPim.Application.IDebugger.GetProgramPath*
+- uid: PlusPim.Application.IDebugger.IsTerminated
+  commentId: M:PlusPim.Application.IDebugger.IsTerminated
+  id: IsTerminated
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: IsTerminated()
+  nameWithType: IDebugger.IsTerminated()
+  fullName: PlusPim.Application.IDebugger.IsTerminated()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: IsTerminated
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 18
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  syntax:
+    content: bool IsTerminated()
+    return:
+      type: System.Boolean
+    content.vb: Function IsTerminated() As Boolean
+  overload: PlusPim.Application.IDebugger.IsTerminated*
+- uid: PlusPim.Application.IDebugger.GetCallStack
+  commentId: M:PlusPim.Application.IDebugger.GetCallStack
+  id: GetCallStack
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: GetCallStack()
+  nameWithType: IDebugger.GetCallStack()
+  fullName: PlusPim.Application.IDebugger.GetCallStack()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetCallStack
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 24
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: コールスタックの情報を取得する
+  example: []
+  syntax:
+    content: StackFrameInfo[] GetCallStack()
+    return:
+      type: PlusPim.Application.StackFrameInfo[]
+      description: <xref href="PlusPim.Application.StackFrameInfo" data-throw-if-not-resolved="false"></xref>の配列．ライブフレームが先頭である
+    content.vb: Function GetCallStack() As StackFrameInfo()
+  overload: PlusPim.Application.IDebugger.GetCallStack*
+- uid: PlusPim.Application.IDebugger.GetLastException
+  commentId: M:PlusPim.Application.IDebugger.GetLastException
+  id: GetLastException
+  parent: PlusPim.Application.IDebugger
+  langs:
+  - csharp
+  - vb
+  name: GetLastException()
+  nameWithType: IDebugger.GetLastException()
+  fullName: PlusPim.Application.IDebugger.GetLastException()
+  type: Method
+  source:
+    remote:
+      path: PlusPim/Application/IDebugger.cs
+      branch: feat/execption
+      repo: git@github.com:hinshiba/OOP10.git
+    id: GetLastException
+    path: PlusPim/Application/IDebugger.cs
+    startLine: 30
+  assemblies:
+  - PlusPim
+  namespace: PlusPim.Application
+  summary: 直前のStepで発生した例外情報を取得する
+  example: []
+  syntax:
+    content: ExceptionInfo? GetLastException()
+    return:
+      type: PlusPim.Application.ExceptionInfo
+      description: 例外情報．例外が発生していない場合はnull
+    content.vb: Function GetLastException() As ExceptionInfo
+  overload: PlusPim.Application.IDebugger.GetLastException*
+references:
+- uid: PlusPim.Application
+  commentId: N:PlusPim.Application
+  href: PlusPim.html
+  name: PlusPim.Application
+  nameWithType: PlusPim.Application
+  fullName: PlusPim.Application
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Application
+    name: Application
+    href: PlusPim.Application.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Application
+    name: Application
+    href: PlusPim.Application.html
+- uid: PlusPim.Application.IDebugger.GetRegisters*
+  commentId: Overload:PlusPim.Application.IDebugger.GetRegisters
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_GetRegisters
+  name: GetRegisters
+  nameWithType: IDebugger.GetRegisters
+  fullName: PlusPim.Application.IDebugger.GetRegisters
+- uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}
+  commentId: T:System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}
+  parent: System
+  definition: System.ValueTuple`4
+  href: https://learn.microsoft.com/dotnet/api/system.uint32
+  name: (uint[] Registers, uint PC, uint HI, uint LO)
+  nameWithType: (uint[] Registers, uint PC, uint HI, uint LO)
+  fullName: (uint[] Registers, uint PC, uint HI, uint LO)
+  nameWithType.vb: (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  fullName.vb: (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  name.vb: (Registers As UInteger(), PC As UInteger, HI As UInteger, LO As UInteger)
+  spec.csharp:
+  - name: (
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: '['
+  - name: ']'
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.Registers
+    name: Registers
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.registers
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.PC
+    name: PC
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.pc
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.HI
+    name: HI
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.hi
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.LO
+    name: LO
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.lo
+  - name: )
+  spec.vb:
+  - name: (
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.Registers
+    name: Registers
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.registers
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: (
+  - name: )
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.PC
+    name: PC
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.pc
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.HI
+    name: HI
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.hi
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.UInt32[],System.UInt32,System.UInt32,System.UInt32}.LO
+    name: LO
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.uint32[],system.uint32,system.uint32,system.uint32-.lo
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+- uid: System.ValueTuple`4
+  commentId: T:System.ValueTuple`4
+  name: (T1, T2, T3, T4)
+  nameWithType: (T1, T2, T3, T4)
+  fullName: (T1, T2, T3, T4)
+  spec.csharp:
+  - name: (
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: ','
+  - name: " "
+  - name: T4
+  - name: )
+  spec.vb:
+  - name: (
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: ','
+  - name: " "
+  - name: T4
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PlusPim.Application.IDebugger.Step*
+  commentId: Overload:PlusPim.Application.IDebugger.Step
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_Step
+  name: Step
+  nameWithType: IDebugger.Step
+  fullName: PlusPim.Application.IDebugger.Step
+- uid: PlusPim.Application.IDebugger.StepBack*
+  commentId: Overload:PlusPim.Application.IDebugger.StepBack
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_StepBack
+  name: StepBack
+  nameWithType: IDebugger.StepBack
+  fullName: PlusPim.Application.IDebugger.StepBack
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PlusPim.Application.IDebugger.GetCurrentLine*
+  commentId: Overload:PlusPim.Application.IDebugger.GetCurrentLine
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_GetCurrentLine
+  name: GetCurrentLine
+  nameWithType: IDebugger.GetCurrentLine
+  fullName: PlusPim.Application.IDebugger.GetCurrentLine
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PlusPim.Application.IDebugger.GetProgramPath*
+  commentId: Overload:PlusPim.Application.IDebugger.GetProgramPath
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_GetProgramPath
+  name: GetProgramPath
+  nameWithType: IDebugger.GetProgramPath
+  fullName: PlusPim.Application.IDebugger.GetProgramPath
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PlusPim.Application.IDebugger.IsTerminated*
+  commentId: Overload:PlusPim.Application.IDebugger.IsTerminated
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_IsTerminated
+  name: IsTerminated
+  nameWithType: IDebugger.IsTerminated
+  fullName: PlusPim.Application.IDebugger.IsTerminated
+- uid: PlusPim.Application.StackFrameInfo
+  commentId: T:PlusPim.Application.StackFrameInfo
+  parent: PlusPim.Application
+  href: PlusPim.Application.StackFrameInfo.html
+  name: StackFrameInfo
+  nameWithType: StackFrameInfo
+  fullName: PlusPim.Application.StackFrameInfo
+- uid: PlusPim.Application.IDebugger.GetCallStack*
+  commentId: Overload:PlusPim.Application.IDebugger.GetCallStack
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_GetCallStack
+  name: GetCallStack
+  nameWithType: IDebugger.GetCallStack
+  fullName: PlusPim.Application.IDebugger.GetCallStack
+- uid: PlusPim.Application.StackFrameInfo[]
+  isExternal: true
+  href: PlusPim.Application.StackFrameInfo.html
+  name: StackFrameInfo[]
+  nameWithType: StackFrameInfo[]
+  fullName: PlusPim.Application.StackFrameInfo[]
+  nameWithType.vb: StackFrameInfo()
+  fullName.vb: PlusPim.Application.StackFrameInfo()
+  name.vb: StackFrameInfo()
+  spec.csharp:
+  - uid: PlusPim.Application.StackFrameInfo
+    name: StackFrameInfo
+    href: PlusPim.Application.StackFrameInfo.html
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: PlusPim.Application.StackFrameInfo
+    name: StackFrameInfo
+    href: PlusPim.Application.StackFrameInfo.html
+  - name: (
+  - name: )
+- uid: PlusPim.Application.IDebugger.GetLastException*
+  commentId: Overload:PlusPim.Application.IDebugger.GetLastException
+  href: PlusPim.Application.IDebugger.html#PlusPim_Application_IDebugger_GetLastException
+  name: GetLastException
+  nameWithType: IDebugger.GetLastException
+  fullName: PlusPim.Application.IDebugger.GetLastException
+- uid: PlusPim.Application.ExceptionInfo
+  commentId: T:PlusPim.Application.ExceptionInfo
+  parent: PlusPim.Application
+  href: PlusPim.Application.ExceptionInfo.html
+  name: ExceptionInfo
+  nameWithType: ExceptionInfo
+  fullName: PlusPim.Application.ExceptionInfo

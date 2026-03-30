@@ -1,0 +1,400 @@
+### YamlMime:ManagedReference
+items:
+- uid: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory
+  commentId: T:System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory
+  id: SingleRegPattern_1.RunnerFactory
+  parent: System.Text.RegularExpressions.Generated
+  children:
+  - System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance
+  langs:
+  - csharp
+  - vb
+  name: SingleRegPattern_1.RunnerFactory
+  nameWithType: SingleRegPattern_1.RunnerFactory
+  fullName: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory
+  type: Class
+  source:
+    id: RunnerFactory
+    path: D:\dev\_univ\g2t4\OOP10\PlusPim\obj\Release\net10.0\System.Text.RegularExpressions.Generator\System.Text.RegularExpressions.Generator.RegexGenerator\RegexGenerator.g.cs
+    startLine: 701
+  assemblies:
+  - PlusPim
+  namespace: System.Text.RegularExpressions.Generated
+  summary: Provides a factory for creating <xref href="System.Text.RegularExpressions.RegexRunner" data-throw-if-not-resolved="false"></xref> instances to be used by methods on <xref href="System.Text.RegularExpressions.Regex" data-throw-if-not-resolved="false"></xref>.
+  example: []
+  syntax:
+    content: 'private sealed class SingleRegPattern_1.RunnerFactory : RegexRunnerFactory'
+    content.vb: Private NotInheritable Class SingleRegPattern_1.RunnerFactory Inherits RegexRunnerFactory
+  inheritance:
+  - System.Object
+  - System.Text.RegularExpressions.RegexRunnerFactory
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance
+  commentId: M:System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance
+  id: CreateInstance
+  parent: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory
+  langs:
+  - csharp
+  - vb
+  name: CreateInstance()
+  nameWithType: SingleRegPattern_1.RunnerFactory.CreateInstance()
+  fullName: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance()
+  type: Method
+  source:
+    id: CreateInstance
+    path: D:\dev\_univ\g2t4\OOP10\PlusPim\obj\Release\net10.0\System.Text.RegularExpressions.Generator\System.Text.RegularExpressions.Generator.RegexGenerator\RegexGenerator.g.cs
+    startLine: 704
+  assemblies:
+  - PlusPim
+  namespace: System.Text.RegularExpressions.Generated
+  summary: Creates an instance of a <xref href="System.Text.RegularExpressions.RegexRunner" data-throw-if-not-resolved="false"></xref> used by methods on <xref href="System.Text.RegularExpressions.Regex" data-throw-if-not-resolved="false"></xref>.
+  example: []
+  syntax:
+    content: protected override RegexRunner CreateInstance()
+    return:
+      type: System.Text.RegularExpressions.RegexRunner
+    content.vb: Protected Overrides Function CreateInstance() As RegexRunner
+  overridden: System.Text.RegularExpressions.RegexRunnerFactory.CreateInstance
+  overload: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance*
+references:
+- uid: System.Text.RegularExpressions.RegexRunner
+  commentId: T:System.Text.RegularExpressions.RegexRunner
+  parent: System.Text.RegularExpressions
+  isExternal: true
+  name: RegexRunner
+  nameWithType: RegexRunner
+  fullName: System.Text.RegularExpressions.RegexRunner
+- uid: System.Text.RegularExpressions.Regex
+  commentId: T:System.Text.RegularExpressions.Regex
+  parent: System.Text.RegularExpressions
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.text.regularexpressions.regex
+  name: Regex
+  nameWithType: Regex
+  fullName: System.Text.RegularExpressions.Regex
+- uid: System.Text.RegularExpressions.Generated
+  commentId: N:System.Text.RegularExpressions.Generated
+  href: System.html
+  name: System.Text.RegularExpressions.Generated
+  nameWithType: System.Text.RegularExpressions.Generated
+  fullName: System.Text.RegularExpressions.Generated
+  spec.csharp:
+  - uid: System
+    name: System
+    href: System.html
+  - name: .
+  - uid: System.Text
+    name: Text
+    href: System.Text.html
+  - name: .
+  - uid: System.Text.RegularExpressions
+    name: RegularExpressions
+    href: System.Text.RegularExpressions.html
+  - name: .
+  - uid: System.Text.RegularExpressions.Generated
+    name: Generated
+    href: System.Text.RegularExpressions.Generated.html
+  spec.vb:
+  - uid: System
+    name: System
+    href: System.html
+  - name: .
+  - uid: System.Text
+    name: Text
+    href: System.Text.html
+  - name: .
+  - uid: System.Text.RegularExpressions
+    name: RegularExpressions
+    href: System.Text.RegularExpressions.html
+  - name: .
+  - uid: System.Text.RegularExpressions.Generated
+    name: Generated
+    href: System.Text.RegularExpressions.Generated.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Text.RegularExpressions.RegexRunnerFactory
+  commentId: T:System.Text.RegularExpressions.RegexRunnerFactory
+  parent: System.Text.RegularExpressions
+  isExternal: true
+  name: RegexRunnerFactory
+  nameWithType: RegexRunnerFactory
+  fullName: System.Text.RegularExpressions.RegexRunnerFactory
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Text.RegularExpressions
+  commentId: N:System.Text.RegularExpressions
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Text.RegularExpressions
+  nameWithType: System.Text.RegularExpressions
+  fullName: System.Text.RegularExpressions
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.RegularExpressions
+    name: RegularExpressions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.regularexpressions
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.RegularExpressions
+    name: RegularExpressions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.regularexpressions
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.Text.RegularExpressions.RegexRunnerFactory.CreateInstance
+  commentId: M:System.Text.RegularExpressions.RegexRunnerFactory.CreateInstance
+  parent: System.Text.RegularExpressions.RegexRunnerFactory
+  isExternal: true
+  name: CreateInstance()
+  nameWithType: RegexRunnerFactory.CreateInstance()
+  fullName: System.Text.RegularExpressions.RegexRunnerFactory.CreateInstance()
+  spec.csharp:
+  - uid: System.Text.RegularExpressions.RegexRunnerFactory.CreateInstance
+    name: CreateInstance
+    isExternal: true
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Text.RegularExpressions.RegexRunnerFactory.CreateInstance
+    name: CreateInstance
+    isExternal: true
+  - name: (
+  - name: )
+- uid: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance*
+  commentId: Overload:System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance
+  href: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.html#System_Text_RegularExpressions_Generated_SingleRegPattern_1_RunnerFactory_CreateInstance
+  name: CreateInstance
+  nameWithType: SingleRegPattern_1.RunnerFactory.CreateInstance
+  fullName: System.Text.RegularExpressions.Generated.SingleRegPattern_1.RunnerFactory.CreateInstance

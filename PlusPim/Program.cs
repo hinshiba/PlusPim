@@ -74,6 +74,10 @@ internal class Program {
             .InformationalVersion;
         logger.Info("Program", $"PlusPim version {version}");
 
+#if DEBUG
+        _ = System.Diagnostics.Debugger.Launch();
+#endif
+
         if(parseResult.GetValue(debugArg)) {
             // デバッガモードで起動する
             logger.Debug("Program", "Debug Launch");

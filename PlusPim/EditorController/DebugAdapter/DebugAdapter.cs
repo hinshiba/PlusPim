@@ -8,6 +8,7 @@ namespace PlusPim.EditorController.DebugAdapter;
 internal class DebugAdapter: DebugAdapterBase {
     private const int SCOPE_REGISTERS = 1;
     private const int SCOPE_SPECIAL_REGISTERS = 2;
+    private const int SCOPE_CP0_REGISTERS = 3;
 
     private static readonly string[] RegisterNames = [
         "$zero ($0)", "$at ($1)", "$v0 ($2)", "$v1 ($3)",
@@ -24,6 +25,8 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
     private bool _isInit = false;
+    private HashSet<string> _activeExceptionFilters = [];
+    private ExceptionInfo? _lastStoppedException;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
@@ -58,7 +61,22 @@ internal class DebugAdapter: DebugAdapterBase {
         // InitializeRequestに対してResponseを返す前は，イベントを送信してはならない
         // 返さないといけないレスポンスに，戻り値の型が設定されているので便利
         return new InitializeResponse {
-            SupportsStepBack = true
+            SupportsStepBack = true,
+            SupportsExceptionInfoRequest = true,
+            ExceptionBreakpointFilters = [
+                new ExceptionBreakpointsFilter("double", "Double Exceptions") {
+                    Description = "Break when a second exception occurs in kernel mode (fatal crash)",
+                    Default = false
+                },
+                new ExceptionBreakpointsFilter("fatal", "Fatal Exceptions") {
+                    Description = "Break on non-syscall MIPS exceptions (AdEL, AdES, Bp, RI, CpU, Ov)",
+                    Default = true
+                },
+                new ExceptionBreakpointsFilter("all", "All Exceptions") {
+                    Description = "Break on all MIPS exceptions including syscall",
+                    Default = false
+                }
+            ]
         };
     }
 
@@ -73,7 +91,7 @@ internal class DebugAdapter: DebugAdapterBase {
             ThreadId = 1,
             AllThreadsStopped = true
         });
-
+        this.Protocol.SendEvent(new InitializedEvent());
         return new LaunchResponse();
     }
 
@@ -84,6 +102,26 @@ internal class DebugAdapter: DebugAdapterBase {
         this._isInit = false;
 
         return new DisconnectResponse();
+    }
+
+    protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
+        this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
+        this._activeExceptionFilters = [.. args.Filters];
+        return new SetExceptionBreakpointsResponse();
+    }
+
+    protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments args) {
+        this._logger.Debug("DebugAdapter", "ExceptionInfoRequest.");
+        return this._lastStoppedException is null
+            ? new ExceptionInfoResponse("unknown", ExceptionBreakMode.Always)
+            : new ExceptionInfoResponse(
+            this._lastStoppedException.ExceptionId,
+            this._lastStoppedException.IsDouble
+                ? ExceptionBreakMode.Unhandled
+                : ExceptionBreakMode.Always
+        ) {
+                Description = this._lastStoppedException.Description
+            };
     }
 
     protected override ThreadsResponse HandleThreadsRequest(ThreadsArguments args) {
@@ -120,6 +158,7 @@ internal class DebugAdapter: DebugAdapterBase {
         // エンコード: (frameId << 16) | scopeType
         int registersRef = (frameId << 16) | SCOPE_REGISTERS;
         int specialRegistersRef = (frameId << 16) | SCOPE_SPECIAL_REGISTERS;
+        int cp0RegistersRef = (frameId << 16) | SCOPE_CP0_REGISTERS;
 
         return new ScopesResponse {
             Scopes = [
@@ -127,6 +166,9 @@ internal class DebugAdapter: DebugAdapterBase {
                     PresentationHint = Scope.PresentationHintValue.Registers
                 },
                 new Scope("Special Registers", specialRegistersRef, false) {
+                    PresentationHint = Scope.PresentationHintValue.Registers
+                },
+                new Scope("CP0 Registers", cp0RegistersRef, false) {
                     PresentationHint = Scope.PresentationHintValue.Registers
                 }
             ]
@@ -154,6 +196,11 @@ internal class DebugAdapter: DebugAdapterBase {
                 variables.Add(new Variable("PC", $"0x{targetFrame.PC:X8}", 0));
                 variables.Add(new Variable("HI", $"0x{targetFrame.HI:X8}", 0));
                 variables.Add(new Variable("LO", $"0x{targetFrame.LO:X8}", 0));
+            } else if(scopeType == SCOPE_CP0_REGISTERS && targetFrame.CP0BadVAddr.HasValue) {
+                variables.Add(new Variable("BadVAddr ($8)", $"0x{targetFrame.CP0BadVAddr.Value:X8}", 0));
+                variables.Add(new Variable("Status ($12)", $"0x{targetFrame.CP0Status!.Value:X8}", 0));
+                variables.Add(new Variable("Cause ($13)", $"0x{targetFrame.CP0Cause!.Value:X8}", 0));
+                variables.Add(new Variable("EPC ($14)", $"0x{targetFrame.CP0EPC!.Value:X8}", 0));
             }
         }
 
@@ -164,9 +211,27 @@ internal class DebugAdapter: DebugAdapterBase {
 
     protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ContinueRequest.");
-        this._app.Continue();
-        this.Protocol.SendEvent(new TerminatedEvent());
-        return new ContinueResponse { AllThreadsContinued = true };
+
+        while(true) {
+            this._app.Step();
+            ExceptionInfo? exc = this._app.GetLastException();
+
+            if(exc is not null && this.ShouldBreakOnException(exc)) {
+                this._lastStoppedException = exc;
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true,
+                    Description = exc.Description,
+                    Text = exc.ExceptionId
+                });
+                return new ContinueResponse { AllThreadsContinued = true };
+            }
+
+            if(this._app.IsTerminated()) {
+                this.Protocol.SendEvent(new TerminatedEvent());
+                return new ContinueResponse { AllThreadsContinued = true };
+            }
+        }
     }
 
     protected override NextResponse HandleNextRequest(NextArguments args) {
@@ -220,7 +285,17 @@ internal class DebugAdapter: DebugAdapterBase {
 
     private void ExecuteSingleStep() {
         this._app.Step();
-        if(this._app.IsTerminated()) {
+        ExceptionInfo? exc = this._app.GetLastException();
+
+        if(exc is not null && this.ShouldBreakOnException(exc)) {
+            this._lastStoppedException = exc;
+            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                ThreadId = 1,
+                AllThreadsStopped = true,
+                Description = exc.Description,
+                Text = exc.ExceptionId
+            });
+        } else if(this._app.IsTerminated()) {
             this.Protocol.SendEvent(new OutputEvent {
                 Output = "debugee is terminated.\n",
                 Category = OutputEvent.CategoryValue.Console
@@ -232,5 +307,9 @@ internal class DebugAdapter: DebugAdapterBase {
                 AllThreadsStopped = true
             });
         }
+    }
+
+    private bool ShouldBreakOnException(ExceptionInfo exc) {
+        return this._activeExceptionFilters.Contains("all") || (this._activeExceptionFilters.Contains("fatal") && (exc.IsDouble || exc.ExceptionId != "Sys")) || (this._activeExceptionFilters.Contains("double") && exc.IsDouble);
     }
 }

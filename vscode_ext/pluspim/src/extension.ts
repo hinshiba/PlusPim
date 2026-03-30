@@ -50,17 +50,25 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	): Promise<vscode.DebugAdapterDescriptor> {
 		const port = session.configuration.port ?? 4711;
 		// vscode.DebugConfigurationの[key: string]: any
-		const program = session.configuration.program;
-		const extraArgs: string[] = session.configuration.args ?? [];
+		// Normalize program paths defensively
+		const programInput = session.configuration.program;
+		const programs: string[] = (Array.isArray(programInput) ? programInput : [programInput])
+			.filter(p => p !== null && p !== undefined)
+			.map(p => String(p));
+
+		const extraArgsInput: any[] = session.configuration.args ?? [];
+		const extraArgs: string[] = extraArgsInput
+			.filter(a => a !== null && a !== undefined)
+			.map(a => String(a));
 
 		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
 		const binPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
 
 		// ターミナルで呼んでもらう
-		const args = ["-d", "--port", String(port), ...extraArgs, program];
+		const args = ["-d", "--port", String(port), ...extraArgs, ...programs];
 		this.terminal = vscode.window.createTerminal({
-			name: `Debug: ${path.basename(program)}`,
+			name: `Debug: ${programs.length > 0 ? programs.map(p => path.basename(p)).join(", ") : "PlusPim"}`,
 			shellPath: binPath,
 			shellArgs: args,
 		});

@@ -1,0 +1,110 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Runtime
+  id: PlusPim.Debuggers.PlusPimDbg.Runtime
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.CP0RegisterFile
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.ExcCode
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.ExceptionEvent
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterFile
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  - PlusPim.Debuggers.PlusPimDbg.Runtime.StackFrame
+  langs:
+  - csharp
+  - vb
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Runtime
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime
+  type: Namespace
+  assemblies:
+  - PlusPim
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.CP0RegisterFile
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.CP0RegisterFile
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.CP0RegisterFile.html
+  name: CP0RegisterFile
+  nameWithType: CP0RegisterFile
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.CP0RegisterFile
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.ExcCode
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.ExcCode
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.ExcCode.html
+  name: ExcCode
+  nameWithType: ExcCode
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.ExcCode
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterFile
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterFile
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterFile.html
+  name: RegisterFile
+  nameWithType: RegisterFile
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterFile
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID.html
+  name: RegisterID
+  nameWithType: RegisterID
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RegisterID
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext.html
+  name: RuntimeContext
+  nameWithType: RuntimeContext
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.RuntimeContext
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.ExceptionEvent
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.ExceptionEvent
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.ExceptionEvent.html
+  name: ExceptionEvent
+  nameWithType: ExceptionEvent
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.ExceptionEvent
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime.StackFrame
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Runtime.StackFrame
+  parent: PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.Debuggers.PlusPimDbg.Runtime.StackFrame.html
+  name: StackFrame
+  nameWithType: StackFrame
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime.StackFrame
+- uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Runtime
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Runtime
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Runtime
+  fullName: PlusPim.Debuggers.PlusPimDbg.Runtime
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Runtime
+    name: Runtime
+    href: PlusPim.Debuggers.PlusPimDbg.Runtime.html

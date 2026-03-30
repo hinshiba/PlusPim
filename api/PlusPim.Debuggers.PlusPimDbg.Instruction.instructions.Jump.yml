@@ -1,0 +1,120 @@
+### YamlMime:ManagedReference
+items:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  id: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  children:
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstructionParser
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstructionParser
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstructionParser
+  - PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction
+  langs:
+  - csharp
+  - vb
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  type: Namespace
+  assemblies:
+  - PlusPim
+references:
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction.html
+  name: JalInstruction
+  nameWithType: JalInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstruction
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstructionParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstructionParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstructionParser.html
+  name: JalInstructionParser
+  nameWithType: JalInstructionParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JalInstructionParser
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction.html
+  name: JInstruction
+  nameWithType: JInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstruction
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstructionParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstructionParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstructionParser.html
+  name: JInstructionParser
+  nameWithType: JInstructionParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JInstructionParser
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction.html
+  name: JrInstruction
+  nameWithType: JrInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstruction
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstructionParser
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstructionParser
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstructionParser.html
+  name: JrInstructionParser
+  nameWithType: JrInstructionParser
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JrInstructionParser
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction
+  commentId: T:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction
+  parent: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction.html
+  name: JumpInstruction
+  nameWithType: JumpInstruction
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.JumpInstruction
+- uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  commentId: N:PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  href: PlusPim.html
+  name: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  nameWithType: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  fullName: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+  spec.csharp:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+    name: instructions
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+    name: Jump
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.html
+  spec.vb:
+  - uid: PlusPim
+    name: PlusPim
+    href: PlusPim.html
+  - name: .
+  - uid: PlusPim.Debuggers
+    name: Debuggers
+    href: PlusPim.Debuggers.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg
+    name: PlusPimDbg
+    href: PlusPim.Debuggers.PlusPimDbg.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction
+    name: Instruction
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions
+    name: instructions
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.html
+  - name: .
+  - uid: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump
+    name: Jump
+    href: PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump.html

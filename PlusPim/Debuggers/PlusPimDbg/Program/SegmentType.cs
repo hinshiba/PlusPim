@@ -6,4 +6,6 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 internal enum SegmentType {
     Text,
     Data,
+    KernelText,
+    Unknown,
 }
