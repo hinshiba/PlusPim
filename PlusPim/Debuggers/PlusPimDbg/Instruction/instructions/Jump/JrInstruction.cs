@@ -17,7 +17,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
             // nullなら例外が発生済み
             return;
         }
-        InstructionIndex target = (InstructionIndex)target_!;
+        InstructionIndex target = (InstructionIndex)target_;
         this.JumpTo(context, target);
 
         // コールスタックからpopを試み，Undo用にフレームを保存しておく
