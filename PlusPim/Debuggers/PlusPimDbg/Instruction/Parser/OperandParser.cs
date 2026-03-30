@@ -37,7 +37,7 @@ internal static partial class OperandParser {
     /// </summary>
     internal static bool TryParseSingleRegOperand(string operands, [MaybeNullWhen(false)] out RegisterID rs) {
         rs = default;
-        Match match = SingleRegPattern().Match(operands.Trim());
+        Match match = SingleRegPattern().Match(operands);
         return match.Success && Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out rs);
     }
 
@@ -259,12 +259,11 @@ internal static partial class OperandParser {
     /// ラベルオペランドを解析する (j, jal等)
     /// </summary>
     internal static bool TryParseLabelOperand(string operands, [MaybeNullWhen(false)] out string label) {
-        string trimmed = operands.Trim();
-        if(string.IsNullOrEmpty(trimmed) || trimmed.Contains(' ') || trimmed.Contains(',')) {
+        if(string.IsNullOrEmpty(operands) || operands.Contains(' ') || operands.Contains(',')) {
             label = null;
             return false;
         }
-        label = trimmed;
+        label = operands;
         return true;
     }
 
