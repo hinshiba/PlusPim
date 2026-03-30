@@ -32,6 +32,9 @@ internal static partial class OperandParser {
     [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<offset>\S+)\(\$(?<rs>\w+)\)$")]
     private static partial Regex MemoryOperandPattern();
 
+    [GeneratedRegex(@"^(?<label>(\w|\$)+)$")]
+    private static partial Regex LabelOperandPattern();
+
     /// <summary>
     /// 単一レジスタオペランド ($rs) を解析する
     /// </summary>
@@ -259,11 +262,12 @@ internal static partial class OperandParser {
     /// ラベルオペランドを解析する (j, jal等)
     /// </summary>
     internal static bool TryParseLabelOperand(string operands, [MaybeNullWhen(false)] out string label) {
-        if(string.IsNullOrEmpty(operands) || operands.Contains(' ') || operands.Contains(',')) {
+        Match match = LabelOperandPattern().Match(operands);
+        if(!match.Success) {
             label = null;
             return false;
         }
-        label = operands;
+        label = match.Groups["label"].Value;
         return true;
     }
 
