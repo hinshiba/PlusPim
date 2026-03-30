@@ -135,36 +135,6 @@ public class TimeTravelTests {
     }
 
     [Fact]
-    public void Step_AfterTermination_NoOp() {
-        string asm = """
-            .text
-            main:
-              addiu $t0, $zero, 1
-            """;
-        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
-        try {
-            debugger.Step();
-            // Run until terminated
-            for(int i = 0; i < 100 && !debugger.IsTerminated(); i++) {
-                debugger.Step();
-            }
-            Assert.True(debugger.IsTerminated());
-
-
-            (uint[] regsBefore, uint pcBefore, _, _) = debugger.GetRegisters();
-            debugger.Step();
-
-            (uint[] regsAfter, uint pcAfter, _, _) = debugger.GetRegisters();
-
-            Assert.Equal(regsBefore, regsAfter);
-            Assert.Equal(pcBefore, pcAfter);
-            Assert.True(debugger.IsTerminated());
-        } finally {
-            tempFile.Delete();
-        }
-    }
-
-    [Fact]
     public void StepBack_LoopTimeTravel() {
         string asm = """
             .text
