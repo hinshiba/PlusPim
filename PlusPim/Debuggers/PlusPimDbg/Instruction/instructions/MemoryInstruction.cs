@@ -41,8 +41,13 @@ internal sealed class MemoryInstruction(
 
         // アライメントの確認
         if(addr % byteNum != 0) {
-            // TODO: MIPSの例外にする
-            throw new InvalidOperationException($"Memory Access: {addr} does not meet {byteNum}Byte alignment.");
+            // MIPS例外を発生させる
+            if(isWrite) {
+                context.RaiseException(ExcCode.AdES, addr);
+            } else {
+                context.RaiseException(ExcCode.AdEL, addr);
+            }
+            return;
         }
 
         if(isWrite) {
