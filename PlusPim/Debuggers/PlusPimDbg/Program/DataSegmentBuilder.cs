@@ -14,7 +14,10 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// <summary>
     /// 空き領域の先頭を示す
     /// </summary>
-    public Address NextDataAddress { get; private set; } = DataSegment.DataSegmentBase;
+    public Address NextDataAddress { get; private set; } = baseAddr;
+
+    private readonly Address _baseAddr = baseAddr;
+
 
     /// <summary>
     /// データセグメントの1行を処理する
@@ -68,7 +71,7 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// パース結果をDataSegmentとして返す
     /// </summary>
     public DataSegment Build() {
-        return new DataSegment(this._memoryImage, baseAddr, this.NextDataAddress.Addr - baseAddr.Addr);
+        return new DataSegment(this._memoryImage, this._baseAddr, this.NextDataAddress.Addr - this._baseAddr.Addr);
     }
 
 
