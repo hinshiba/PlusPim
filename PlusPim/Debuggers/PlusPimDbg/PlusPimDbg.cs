@@ -52,13 +52,15 @@ internal class PlusPimDbg: IDebugger {
             // 次のPCに命令があるか確認
             if(this._context.IsKernelMode()) {
                 if(this._programs.KernelInstructionCount <= this._context.PC.Idx) {
+                    // 例外ハンドラにジャンプするが，カーネルモード中での例外であるので，double exceptionとなり終了する
                     this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+                    // terminatedになるので，続行する意味がないので早期リターン
                     return;
                 }
             } else {
                 if(this._programs.UserInstructionCount <= this._context.PC.Idx) {
+                    // 例外ハンドラにジャンプ
                     this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
-                    return;
                 }
             }
         }
