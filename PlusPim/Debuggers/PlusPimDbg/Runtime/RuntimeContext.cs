@@ -282,7 +282,8 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
             12 => this._cp0Regs with { Exl = (value & 0x2) != 0 },
             13 => this._cp0Regs with { Exc = (ExcCode)((value >> 2) & 0x1F) },
             14 => this._cp0Regs with {
-                Epc = InstructionIndex.FromAddress(new Address(value), this.IsKernelMode())
+                // double exceptionはterminateするので，必ずuser空間であるといえる
+                Epc = InstructionIndex.FromAddress(new Address(value), false)
                       ?? this._cp0Regs.Epc
             },
             _ => this._cp0Regs
