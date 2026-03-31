@@ -10,8 +10,10 @@ internal interface IApplication {
     /// <returns>成功した場合は<see langword="true"/></returns>
     bool Load();
 
-    [Obsolete("代わりにGetCallStackを使用してください")]
-    (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters();
+    /// <summary>
+    /// スタックフレームを1つ除去するまで実行する
+    /// </summary>
+    StopReason StepOut();
 
     /// <summary>
     /// 表示されている次の行まで実行する
@@ -22,11 +24,6 @@ internal interface IApplication {
     /// 次の命令を実行する
     /// </summary>
     StopReason StepIn();
-
-    /// <summary>
-    /// スタックフレームを1つ除去するまで実行する
-    /// </summary>
-    StopReason StepOut();
 
     /// <summary>
     /// 停止するまで実行する
@@ -46,17 +43,11 @@ internal interface IApplication {
     bool ReverseContinue();
 
     /// <summary>
-    /// 現在の実行前の行を取得する
+    /// 停止する例外を設定する
     /// </summary>
-    /// <returns>1から始まる行番号．取得できない場合は0を返す．</returns>
-    [Obsolete("代わりにGetCallStackを使用してください")]
-    int GetCurrentLine();
+    /// <param name="filters">例外フィルタ</param>
+    void SetExceptionFilters(HashSet<ExceptionFilter> filters);
 
-    [Obsolete("代わりにGetCallStackを使用してください")]
-    string GetProgramPath();
-
-    [Obsolete("代わりにそれぞれの実行命令のStopReasonを参照してください")]
-    bool IsTerminated();
 
     /// <summary>
     /// コールスタックの情報を取得する

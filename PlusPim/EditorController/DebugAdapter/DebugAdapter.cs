@@ -26,7 +26,6 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
     private bool _isInit = false;
-    private HashSet<string> _activeExceptionFilters = [];
     private ExceptionInfo? _lastStoppedException;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
@@ -67,14 +66,18 @@ internal class DebugAdapter: DebugAdapterBase {
             ExceptionBreakpointFilters = [
                 new ExceptionBreakpointsFilter("double", "Double Exceptions") {
                     Description = "Break when a second exception occurs in kernel mode (fatal crash)",
-                    Default = false
-                },
-                new ExceptionBreakpointsFilter("fatal", "Fatal Exceptions") {
-                    Description = "Break on non-syscall MIPS exceptions (AdEL, AdES, Bp, RI, CpU, Ov)",
                     Default = true
                 },
-                new ExceptionBreakpointsFilter("all", "All Exceptions") {
-                    Description = "Break on all MIPS exceptions including syscall",
+                new ExceptionBreakpointsFilter("fatal", "Fatal Exceptions") {
+                    Description = "Break when an (commonly) unrecoverable exception occurs (AdEL, AdES, RI, CpU, Ov)",
+                    Default = true
+                },
+                new ExceptionBreakpointsFilter("break", "Break Exceptions") {
+                    Description = "Break on break instruction (Bp)",
+                    Default = true
+                },
+                new ExceptionBreakpointsFilter("syscall", "Syscall Exceptions") {
+                    Description = "Break on syscll instruction (Sys)",
                     Default = false
                 }
             ]
@@ -107,7 +110,15 @@ internal class DebugAdapter: DebugAdapterBase {
 
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
-        this._activeExceptionFilters = [.. args.Filters];
+
+        HashSet<ExceptionFilter> filters = new(args.Filters.Count);
+        foreach(string filter in args.Filters) {
+            if(Enum.TryParse<ExceptionFilter>(filter, out ExceptionFilter exceptionFilter)) {
+                _ = filters.Add(exceptionFilter);
+            }
+
+        }
+        this._app.SetExceptionFilters(filters);
         return new SetExceptionBreakpointsResponse();
     }
 
@@ -336,21 +347,12 @@ internal class DebugAdapter: DebugAdapterBase {
                 break;
             case StopReason.Exception:
                 if(this._lastStoppedException != null) {
-                    if(this.ShouldBreakOnException(this._lastStoppedException)) {
-                        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                            ThreadId = 1,
-                            AllThreadsStopped = true,
-                            Description = this._lastStoppedException.Description,
-                            Text = this._lastStoppedException.ExceptionId
-                        });
-                    } else {
-                        // ブレークしない例外の場合は、ステップイベントを送る
-                        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
-                            ThreadId = 1,
-                            AllThreadsStopped = true
-                        });
-                    }
-
+                    this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                        ThreadId = 1,
+                        AllThreadsStopped = true,
+                        Description = this._lastStoppedException.Description,
+                        Text = this._lastStoppedException.ExceptionId
+                    });
                 } else {
                     // 例外情報がない場合はとりあえずExceptionで止める
                     this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
@@ -367,8 +369,4 @@ internal class DebugAdapter: DebugAdapterBase {
         }
     }
 
-
-    private bool ShouldBreakOnException(ExceptionInfo exc) {
-        return this._activeExceptionFilters.Contains("all") || (this._activeExceptionFilters.Contains("fatal") && (exc.IsDouble || exc.ExceptionId != "Sys")) || (this._activeExceptionFilters.Contains("double") && exc.IsDouble);
-    }
 }
