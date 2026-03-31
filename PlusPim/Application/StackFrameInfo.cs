@@ -3,7 +3,7 @@ namespace PlusPim.Application;
 /// <summary>
 /// スタックフレームに関する情報を表すクラス
 /// </summary>
-internal sealed class StackFrameInfo {
+public sealed class StackFrameInfo {
     /// <summary>
     /// スタックフレームに一意なID 小さいほうが呼び出し元に近い
     /// </summary>

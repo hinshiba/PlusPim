@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using PlusPim.Application;
 using PlusPim.Logging;
 using System.Diagnostics;
+using StackFrame = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.StackFrame;
 
 namespace PlusPim.EditorController.DebugAdapter;
 
@@ -26,7 +27,7 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
     private bool _isInit = false;
-    private ExceptionInfo? _lastStoppedException;
+    private readonly ExceptionInfo? _lastStoppedException;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
@@ -111,12 +112,12 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
 
-        HashSet<ExceptionFilter> filters = new(args.Filters.Count);
+        ExceptionFilter[] filters = new ExceptionFilter[args.Filters.Count];
+        int i = 0;
         foreach(string filter in args.Filters) {
             if(Enum.TryParse<ExceptionFilter>(filter, out ExceptionFilter exceptionFilter)) {
-                _ = filters.Add(exceptionFilter);
+                filters[i++] = exceptionFilter;
             }
-
         }
         this._app.SetExceptionFilters(filters);
         return new SetExceptionBreakpointsResponse();
@@ -143,7 +144,7 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
-    [Obsolete]
+
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments args) {
         this._logger.Debug("DebugAdapter", "StackTraceRequest.");
 
@@ -222,50 +223,36 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
-    [Obsolete]
+
     protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ContinueRequest.");
 
-        while(true) {
-            this._app.Step();
-            ExceptionInfo? exc = this._app.GetLastException();
+        this.SendExcecuteEvent(this._app.Continue());
 
-            if(exc is not null && this.ShouldBreakOnException(exc)) {
-                this._lastStoppedException = exc;
-                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                    ThreadId = 1,
-                    AllThreadsStopped = true,
-                    Description = exc.Description,
-                    Text = exc.ExceptionId
-                });
-                return new ContinueResponse { AllThreadsContinued = true };
-            }
-
-            if(this._app.IsTerminated()) {
-                this.Protocol.SendEvent(new TerminatedEvent());
-                return new ContinueResponse { AllThreadsContinued = true };
-            }
-        }
+        return new ContinueResponse();
     }
 
-    [Obsolete]
     protected override NextResponse HandleNextRequest(NextArguments args) {
         this._logger.Debug("DebugAdapter", "NextRequest.");
-        this.ExecuteSingleStep();
+
+        this.SendExcecuteEvent(this._app.StepOver());
+
         return new NextResponse();
     }
 
-    [Obsolete]
     protected override StepInResponse HandleStepInRequest(StepInArguments args) {
         this._logger.Debug("DebugAdapter", "StepInRequest.");
-        this.ExecuteSingleStep();
+
+        this.SendExcecuteEvent(this._app.StepIn());
+
         return new StepInResponse();
     }
 
-    [Obsolete]
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments args) {
         this._logger.Debug("DebugAdapter", "StepOutRequest.");
-        this.ExecuteSingleStep();
+
+        this.SendExcecuteEvent(this._app.StepOut());
+
         return new StepOutResponse();
     }
 
@@ -300,34 +287,6 @@ internal class DebugAdapter: DebugAdapterBase {
         return new ReverseContinueResponse();
     }
 
-
-    [Obsolete("すべての実行系はStopReasonを返すようになったので，SendExcecuteEventを使ってください．")]
-    private void ExecuteSingleStep() {
-        this._app.Step();
-        ExceptionInfo? exc = this._app.GetLastException();
-
-        if(exc is not null && this.ShouldBreakOnException(exc)) {
-            this._lastStoppedException = exc;
-            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                ThreadId = 1,
-                AllThreadsStopped = true,
-                Description = exc.Description,
-                Text = exc.ExceptionId
-            });
-        } else if(this._app.IsTerminated()) {
-            this.Protocol.SendEvent(new OutputEvent {
-                Output = "debugee is terminated.\n",
-                Category = OutputEvent.CategoryValue.Console
-            });
-            this.Protocol.SendEvent(new TerminatedEvent());
-        } else {
-            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
-                ThreadId = 1,
-                AllThreadsStopped = true
-            });
-        }
-    }
-
     private void SendExcecuteEvent(StopReason reason) {
         switch(reason) {
             case StopReason.Step:
@@ -345,6 +304,7 @@ internal class DebugAdapter: DebugAdapterBase {
             case StopReason.Terminated:
                 this.Protocol.SendEvent(new TerminatedEvent());
                 break;
+            // フィルタはアプリケーション側で適用されるので，例外情報がある場合は常にExceptionで止める
             case StopReason.Exception:
                 if(this._lastStoppedException != null) {
                     this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
@@ -354,7 +314,7 @@ internal class DebugAdapter: DebugAdapterBase {
                         Text = this._lastStoppedException.ExceptionId
                     });
                 } else {
-                    // 例外情報がない場合はとりあえずExceptionで止める
+                    // 例外情報がない場合でもとりあえずExceptionで止める
                     this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
                         ThreadId = 1,
                         AllThreadsStopped = true,

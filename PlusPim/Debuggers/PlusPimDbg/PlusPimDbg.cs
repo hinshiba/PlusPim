@@ -61,6 +61,8 @@ internal class PlusPimDbg: IDebugger {
                 if(this._programs.UserInstructionCount <= this._context.PC.Idx) {
                     // 例外ハンドラにジャンプ
                     this._context.RaiseException(ExcCode.RI, Address.FromInstructionIndex(this._context.PC, this._context.IsKernelMode()));
+                    // ここでカーネル空間に入るが，カーネル空間にハンドラがあるか不明なので
+                    return;
                 }
             }
         }

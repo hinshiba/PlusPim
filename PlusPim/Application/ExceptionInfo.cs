@@ -5,7 +5,7 @@ namespace PlusPim.Application;
 /// <summary>
 /// DAP層に公開する例外情報
 /// </summary>
-internal sealed class ExceptionInfo {
+public sealed class ExceptionInfo {
 
     /// <summary>
     /// 例外番号

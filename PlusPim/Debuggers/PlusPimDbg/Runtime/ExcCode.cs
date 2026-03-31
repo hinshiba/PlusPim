@@ -4,7 +4,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// MIPSの例外コードを表す列挙型
 /// 公式の略称を用いること
 /// </summary>
-internal enum ExcCode {
+public enum ExcCode {
     /// <summary>
     /// Loadアドレスエラー
     /// </summary>
