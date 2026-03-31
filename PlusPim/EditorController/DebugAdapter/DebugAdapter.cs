@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using PlusPim.Application;
 using PlusPim.Logging;
+using System.Diagnostics;
 
 namespace PlusPim.EditorController.DebugAdapter;
 
@@ -131,6 +132,7 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
+    [Obsolete]
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments args) {
         this._logger.Debug("DebugAdapter", "StackTraceRequest.");
 
@@ -209,6 +211,7 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
+    [Obsolete]
     protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ContinueRequest.");
 
@@ -234,18 +237,21 @@ internal class DebugAdapter: DebugAdapterBase {
         }
     }
 
+    [Obsolete]
     protected override NextResponse HandleNextRequest(NextArguments args) {
         this._logger.Debug("DebugAdapter", "NextRequest.");
         this.ExecuteSingleStep();
         return new NextResponse();
     }
 
+    [Obsolete]
     protected override StepInResponse HandleStepInRequest(StepInArguments args) {
         this._logger.Debug("DebugAdapter", "StepInRequest.");
         this.ExecuteSingleStep();
         return new StepInResponse();
     }
 
+    [Obsolete]
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments args) {
         this._logger.Debug("DebugAdapter", "StepOutRequest.");
         this.ExecuteSingleStep();
@@ -273,7 +279,7 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override ReverseContinueResponse HandleReverseContinueRequest(ReverseContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ReverseContinueRequest.");
 
-        this._app.ReverseContinue();
+        _ = this._app.ReverseContinue();
 
         this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
             ThreadId = 1,
@@ -283,6 +289,8 @@ internal class DebugAdapter: DebugAdapterBase {
         return new ReverseContinueResponse();
     }
 
+
+    [Obsolete("すべての実行系はStopReasonを返すようになったので，SendExcecuteEventを使ってください．")]
     private void ExecuteSingleStep() {
         this._app.Step();
         ExceptionInfo? exc = this._app.GetLastException();
@@ -308,6 +316,57 @@ internal class DebugAdapter: DebugAdapterBase {
             });
         }
     }
+
+    private void SendExcecuteEvent(StopReason reason) {
+        switch(reason) {
+            case StopReason.Step:
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true
+                });
+                break;
+            case StopReason.Breakpoint:
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true
+                });
+                break;
+            case StopReason.Terminated:
+                this.Protocol.SendEvent(new TerminatedEvent());
+                break;
+            case StopReason.Exception:
+                if(this._lastStoppedException != null) {
+                    if(this.ShouldBreakOnException(this._lastStoppedException)) {
+                        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                            ThreadId = 1,
+                            AllThreadsStopped = true,
+                            Description = this._lastStoppedException.Description,
+                            Text = this._lastStoppedException.ExceptionId
+                        });
+                    } else {
+                        // ブレークしない例外の場合は、ステップイベントを送る
+                        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
+                            ThreadId = 1,
+                            AllThreadsStopped = true
+                        });
+                    }
+
+                } else {
+                    // 例外情報がない場合はとりあえずExceptionで止める
+                    this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                        ThreadId = 1,
+                        AllThreadsStopped = true,
+                        Description = "Unknown exception",
+                        Text = "unknown"
+                    });
+                }
+                break;
+            default:
+                // 到達不能であるはず
+                throw new UnreachableException($"Unknown stop reason: {reason}");
+        }
+    }
+
 
     private bool ShouldBreakOnException(ExceptionInfo exc) {
         return this._activeExceptionFilters.Contains("all") || (this._activeExceptionFilters.Contains("fatal") && (exc.IsDouble || exc.ExceptionId != "Sys")) || (this._activeExceptionFilters.Contains("double") && exc.IsDouble);
