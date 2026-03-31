@@ -46,7 +46,7 @@ internal interface IApplication {
     /// 停止する例外を設定する
     /// </summary>
     /// <param name="filters">例外フィルタ</param>
-    void SetExceptionFilters(HashSet<ExceptionFilter> filters);
+    void SetExceptionFilters(ExceptionFilter[] filters);
 
 
     /// <summary>
