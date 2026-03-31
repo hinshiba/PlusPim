@@ -78,7 +78,7 @@ internal class DebugAdapter: DebugAdapterBase {
                     Default = true
                 },
                 new ExceptionBreakpointsFilter("syscall", "Syscall Exceptions") {
-                    Description = "Break on syscll instruction (Sys)",
+                    Description = "Break on syscall instruction (Sys)",
                     Default = false
                 }
             ]
