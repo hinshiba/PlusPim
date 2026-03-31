@@ -157,7 +157,7 @@ internal class Application: IApplication {
 
     // 例外系
 
-    public void SetExceptionFilters(ExceptionFilter[] filters) {
+    public void SetExceptionFilters(List<ExceptionFilter> filters) {
         this._reportDoubleExceptions = false;
         HashSet<ExcCode> newFilters = [];
         foreach(ExceptionFilter filter in filters) {

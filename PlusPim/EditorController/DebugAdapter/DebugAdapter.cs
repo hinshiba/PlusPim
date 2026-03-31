@@ -112,11 +112,10 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
 
-        ExceptionFilter[] filters = new ExceptionFilter[args.Filters.Count];
-        int i = 0;
+        List<ExceptionFilter> filters = new(args.Filters.Count);
         foreach(string filter in args.Filters) {
-            if(Enum.TryParse<ExceptionFilter>(filter, out ExceptionFilter exceptionFilter)) {
-                filters[i++] = exceptionFilter;
+            if(Enum.TryParse<ExceptionFilter>(filter, ignoreCase: true, out ExceptionFilter exceptionFilter)) {
+                filters.Add(exceptionFilter);
             }
         }
         this._app.SetExceptionFilters(filters);
