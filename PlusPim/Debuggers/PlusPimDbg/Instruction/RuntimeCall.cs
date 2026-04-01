@@ -82,7 +82,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
 
                 // Undoのためにメモリの内容を保存
                 List<byte> prevBytes = [];
-                for(uint i = 0; i < maxLength + 1; i++) {
+                for(uint i = 0; i < (uint)maxLength + 1; i++) {
                     prevBytes.Add(context.ReadMemoryByte(writeAddr + i));
                 }
                 this._prevReadString.Push((writeAddr, [.. prevBytes]));
