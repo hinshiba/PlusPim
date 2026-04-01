@@ -55,9 +55,11 @@ internal class PlusPimDbg: IDebugger {
             // 実行
             inst.Execute(this._context);
             // 命令がPCを変更しなかった場合のみ自動increment
-            pcAutoIncremented = this._context.PC == pcBeforeExec;
+            // 例外は完了させずに停止するので，例外が発生していないときのみPCを自動incrementする
+            pcAutoIncremented = (this._context.PC == pcBeforeExec) && (this._context.LastException is null);
 
             if(pcAutoIncremented) {
+
                 this._context.PC += 4;
             }
         }
