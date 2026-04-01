@@ -81,7 +81,7 @@ internal class Application: IApplication {
             } else {
                 return reason;
             }
-        } while(this.Debugger.GetCallStack().Length < startFrameNum);
+        } while(startFrameNum <= this.Debugger.GetCallStack().Length);
         // ステップアウトが完了したので停止する
         return StopReason.Step;
     }
@@ -100,7 +100,7 @@ internal class Application: IApplication {
             }
             // ステップアウトとの違いは条件が以下になっているだけ
             // サブルーチン呼出しでなければ==で．サブルーチン呼出しであればステップアウトと同じ挙動
-        } while(this.Debugger.GetCallStack().Length <= startFrameNum);
+        } while(startFrameNum < this.Debugger.GetCallStack().Length);
         // ステップオーバーが完了したので停止する
         return StopReason.Step;
     }
@@ -145,13 +145,13 @@ internal class Application: IApplication {
 
 
     public bool StepBack() {
-        return this.Debugger.StepBack();
+        return this.Debugger.Back();
     }
 
     public bool ReverseContinue() {
         // 一回でも成功すればtrueなので
-        bool result = this.Debugger.StepBack();
-        while(this.Debugger.StepBack()) { }
+        bool result = this.Debugger.Back();
+        while(this.Debugger.Back()) { }
         return result;
     }
 
@@ -186,6 +186,6 @@ internal class Application: IApplication {
     }
 
     private bool IsBreakException(ExceptionInfo exception) {
-        return (exception.IsDouble && this._reportDoubleExceptions) || this._filters.Contains(exception.reason);
+        return (exception.IsDouble && this._reportDoubleExceptions) || this._filters.Contains(exception.Reason);
     }
 }
