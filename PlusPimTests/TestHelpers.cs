@@ -9,7 +9,7 @@ using Xunit;
 
 namespace PlusPimTests;
 
-internal record ContextSnapshot(uint[] Registers, uint HI, uint LO, InstructionIndex PC, Dictionary<Address, byte>? Memory);
+internal record ContextSnapshot(uint[] Registers, uint HI, uint LO, Address PC, Dictionary<Address, byte>? Memory);
 
 internal static class TestHelpers {
     /// <summary>
@@ -29,7 +29,7 @@ internal static class TestHelpers {
         return new RuntimeContext(
             Logger.Null.ToAction("Test"),
             (name, _, _) => table.Resolve(name),
-            new InstructionIndex(0),
+            TextSegment.TextSegmentBase,
             new Label("test", new Address(0x400000))
         );
     }

@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class RuntimeContext(Action<string> log, Func<string, InstructionIndex, bool, Label?> resolveLabel, InstructionIndex startIndex, Label startLabel) {
+internal sealed class RuntimeContext(Action<string> log, Func<string, Address, bool, Label?> resolveLabel, Address startAddr, Label startLabel) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
@@ -15,7 +15,7 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// <summary>
     /// プログラムカウンタ
     /// </summary>
-    public InstructionIndex PC { get; set; } = startIndex;
+    public Address PC { get; set; } = startAddr;
 
     /// <summary>
     /// HIレジスタ
@@ -57,6 +57,9 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// </summary>
     public IReadOnlyCollection<StackFrame> CallStack => this._callStack;
 
+
+    public bool IsKernelMode => this._cp0Regs.Exl;
+
     // 例外処理のためのフィールド
     private CP0RegisterFile _cp0Regs = CP0RegisterFile.Default;
 
@@ -66,19 +69,8 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// <param name="name">ラベル名</param>
     /// <returns>ラベル</returns>
     public Label? ResolveLabelName(string name) {
-        return resolveLabel(name, this.PC, this.IsKernelMode());
+        return resolveLabel(name, this.PC, this.IsKernelMode);
     }
-
-
-    /// <summary>
-    /// ラベル名から命令インデックスを解決する
-    /// </summary>
-    /// <param name="name">ラベル名</param>
-    /// <returns>命令インデックス</returns>
-    public InstructionIndex? ResolveLabelIndex(string name) {
-        return this.ResolveLabelName(name) is { } l ? InstructionIndex.FromAddress(l.Addr, this.IsKernelMode()) : null;
-    }
-
 
     /// <summary>
     /// メモリイメージをメモリに書き込む
@@ -116,11 +108,11 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     /// <param name="jumpTo">ジャンプ先の命令インデックス</param>
     /// <returns>popされたスタックフレーム．ジャンプ先がスタックフレームのPC+1と一致しない場合はnull</returns>
     /// <remarks>ジャンプ先がスタックフレームのPC+1と一致する場合にのみpopする</remarks>
-    public StackFrame? TryPopCallStack(InstructionIndex jumpTo) {
+    public StackFrame? TryPopCallStack(Address jumpTo) {
         if(this.CallStack.Count > 0) {
             StackFrame frame = this._callStack.Peek();
-            // ジャンプ先がスタックフレームのPC+1と一致するか確認
-            if(frame.CurrentPC + 1 == jumpTo) {
+            // ジャンプ先がスタックフレームのPC+4と一致するか確認
+            if(frame.CurrentPC + 4 == jumpTo) {
                 // 実行中のサブルーチンのラベルをスタックフレームのものに戻す
                 this.CurrentLabel = frame.Label;
                 return this._callStack.Pop();
@@ -218,12 +210,11 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
 
     /// <summary>
     /// 例外を発生させる
-    /// PCが変更され，カーネル空間へ移動する．
     /// </summary>
     /// <param name="reason">発生理由</param>
     /// <param name="badVAddr">アドレスが関わる場合は，原因となったアドレス</param>
     public void RaiseException(ExcCode reason, Address? badVAddr = null) {
-        if(this.IsKernelMode()) {
+        if(this.IsKernelMode) {
             this.LastException = new ExceptionEvent(reason, IsDouble: true);
             this.Log($"Double exception raised: {reason}. So terminate debugee.");
             this.IsTerminated = true;
@@ -239,8 +230,6 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
             Exc = reason,
             Epc = this.PC
         };
-
-        this.PC = new(0);
     }
 
     /// <summary>
@@ -253,11 +242,17 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
         this._cp0Regs = CP0RegisterFile.Default;
     }
 
-
-    public bool IsKernelMode() {
-        return this._cp0Regs.Exl;
+    /// <summary>
+    /// 最後の例外イベントの情報を消す
+    /// </summary>
+    /// <returns>消去した場合は<see langword="true"/></returns>
+    public bool AckException() {
+        if(this.LastException is null) {
+            return false;
+        }
+        this.LastException = null;
+        return true;
     }
-
 
     /// <summary>
     /// CP0レジスタをMIPS番号で読み取る
@@ -267,8 +262,7 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
             8 => this._cp0Regs.BadVAddr?.Addr ?? 0,
             12 => this._cp0Regs.Exl ? 0x2u : 0x0u,
             13 => (uint)this._cp0Regs.Exc << 2,
-            // double exceptionはterminateするので，必ずuser空間であるといえる
-            14 => Address.FromInstructionIndex(this._cp0Regs.Epc, false).Addr,
+            14 => this._cp0Regs.Epc.Addr,
             _ => 0
         };
     }
@@ -282,9 +276,7 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
             12 => this._cp0Regs with { Exl = (value & 0x2) != 0 },
             13 => this._cp0Regs with { Exc = (ExcCode)((value >> 2) & 0x1F) },
             14 => this._cp0Regs with {
-                // double exceptionはterminateするので，必ずuser空間であるといえる
-                Epc = InstructionIndex.FromAddress(new Address(value), false)
-                      ?? this._cp0Regs.Epc
+                Epc = new Address(value)
             },
             _ => this._cp0Regs
         };
@@ -310,16 +302,9 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Instructio
     public (uint BadVAddr, uint Status, uint Cause, uint EPC) GetCP0DisplayValues() {
         return (this.ReadCP0Register(8), this.ReadCP0Register(12), this.ReadCP0Register(13), this.ReadCP0Register(14));
     }
-
-    /// <summary>
-    /// LastExceptionをクリアする．ステップの開始前に呼び出す．
-    /// </summary>
-    public void ClearLastException() {
-        this.LastException = null;
-    }
 }
 
 /// <summary>
 /// ステップ実行中に発生した例外イベントの情報
 /// </summary>
-internal record ExceptionEvent(ExcCode Code, bool IsDouble);
+internal record struct ExceptionEvent(ExcCode Code, bool IsDouble);

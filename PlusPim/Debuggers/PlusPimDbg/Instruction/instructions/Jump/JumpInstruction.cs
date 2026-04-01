@@ -23,30 +23,23 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// <summary>
     /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<InstructionIndex> _previousPCs = new();
+    private readonly Stack<Address> _previousPCs = new();
 
     public abstract void Execute(RuntimeContext context);
     public abstract void Undo(RuntimeContext context);
 
     /// <summary>
-    /// ラベル名からExecutionIndexを解決してジャンプする
+    /// ラベル名からアドレスを解決してジャンプする
     /// </summary>
     protected void JumpTo(RuntimeContext context, string name) {
-        Label label = context.ResolveLabelName(name) ?? throw new InvalidOperationException($"Label '{name}' not found.");
-        this.JumpTo(context, label);
-    }
-
-    /// <summary>
-    /// ラベルを指定してジャンプする
-    /// </summary>
-    protected void JumpTo(RuntimeContext context, Label target) {
-        this.JumpTo(context, InstructionIndex.FromAddress(target.Addr, context) ?? InstructionIndex.Invalid);
+        Label? label = context.ResolveLabelName(name);
+        this.JumpTo(context, label?.Addr ?? Address.InValid);
     }
 
     /// <summary>
     /// ProgramCounterを直接指定してジャンプする
     /// </summary>
-    protected void JumpTo(RuntimeContext context, InstructionIndex target) {
+    protected void JumpTo(RuntimeContext context, Address target) {
         this._previousPCs.Push(context.PC);
         context.PC = target;
     }

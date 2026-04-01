@@ -13,12 +13,12 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// </remarks>
 internal sealed class TextSegment(List<IInstruction> instructions, Address addr) {
     /// <summary>
-    /// 1ファイル名の(ユーザー)テキストセグメントの開始アドレス
+    /// (ユーザー)テキストセグメントの開始アドレス
     /// </summary>
     public static readonly Address TextSegmentBase = new(0x400000);
 
     /// <summary>
-    /// 1ファイル名のカーネルテキストセグメントの開始アドレス
+    /// カーネルテキストセグメントの開始アドレス
     /// </summary>
     public static readonly Address KernelTextSegmentBase = new(0x80000180);
 

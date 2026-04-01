@@ -22,8 +22,8 @@ public class TimeTravelTests {
             debugger.Step();
             (uint[] stateA_Regs, uint stateA_PC, uint stateA_HI, uint stateA_LO) = debugger.GetRegisters();
 
-            // StepBack → should return to initial
-            Assert.True(debugger.StepBack());
+            // Back → should return to initial
+            Assert.True(debugger.Back());
             (uint[] backRegs, uint backPC, uint backHI, uint backLO) = debugger.GetRegisters();
             Assert.Equal(initRegs, backRegs);
             Assert.Equal(initPC, backPC);
@@ -61,9 +61,9 @@ public class TimeTravelTests {
                 states.Add(debugger.GetRegisters());
             }
 
-            // StepBack N times, checking each intermediate state in reverse
+            // Back N times, checking each intermediate state in reverse
             for(int i = n; i >= 1; i--) {
-                Assert.True(debugger.StepBack());
+                Assert.True(debugger.Back());
 
                 (uint[] regs, uint pc, _, _) = debugger.GetRegisters();
                 Assert.Equal(states[i - 1].Regs, regs);
@@ -95,9 +95,9 @@ public class TimeTravelTests {
                 states.Add(debugger.GetRegisters());
             }
 
-            // StepBack 2
-            _ = debugger.StepBack();
-            _ = debugger.StepBack();
+            // Back 2
+            _ = debugger.Back();
+            _ = debugger.Back();
 
 
             // State should match step 3
@@ -128,7 +128,7 @@ public class TimeTravelTests {
             """;
         (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
         try {
-            Assert.False(debugger.StepBack());
+            Assert.False(debugger.Back());
         } finally {
             tempFile.Delete();
         }
@@ -157,7 +157,7 @@ public class TimeTravelTests {
 
             // Full rewind
             for(int i = 0; i < totalSteps; i++) {
-                Assert.True(debugger.StepBack());
+                Assert.True(debugger.Back());
             }
 
             // Re-execute
@@ -194,8 +194,8 @@ public class TimeTravelTests {
 
             (uint[] afterBranch, uint pcAfterBranch, uint hi1, uint lo1) = debugger.GetRegisters();
 
-            // StepBack to before beq
-            _ = debugger.StepBack();
+            // Back to before beq
+            _ = debugger.Back();
             // Re-step (beq again)
             debugger.Step();
 
@@ -230,9 +230,9 @@ public class TimeTravelTests {
                 states.Add(debugger.GetRegisters());
             }
 
-            // StepBack through entire sequence
+            // Back through entire sequence
             for(int i = 4; i >= 1; i--) {
-                Assert.True(debugger.StepBack());
+                Assert.True(debugger.Back());
 
                 (uint[] regs, uint pc, _, _) = debugger.GetRegisters();
                 Assert.Equal(states[i - 1].Regs, regs);
@@ -264,8 +264,8 @@ public class TimeTravelTests {
 
             (uint[] afterSw, uint pcAfterSw, uint hi2, uint lo2) = debugger.GetRegisters();
 
-            // StepBack (undo sw)
-            _ = debugger.StepBack();
+            // Back (undo sw)
+            _ = debugger.Back();
 
             (uint[] undoSw, uint pcUndoSw, uint hi3, uint lo3) = debugger.GetRegisters();
             Assert.Equal(beforeSw, undoSw);
@@ -307,7 +307,7 @@ public class TimeTravelTests {
                 debugger.Step();
             }
             for(int i = 0; i < n; i++) {
-                Assert.True(debugger.StepBack());
+                Assert.True(debugger.Back());
             }
 
             (uint[] cycle1Regs, uint cycle1PC, _, _) = debugger.GetRegisters();
@@ -319,7 +319,7 @@ public class TimeTravelTests {
                 debugger.Step();
             }
             for(int i = 0; i < n; i++) {
-                Assert.True(debugger.StepBack());
+                Assert.True(debugger.Back());
             }
 
             (uint[] cycle2Regs, uint cycle2PC, _, _) = debugger.GetRegisters();

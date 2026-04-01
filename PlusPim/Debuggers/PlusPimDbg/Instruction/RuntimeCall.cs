@@ -22,7 +22,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
 
 
     public void Execute(RuntimeContext context) {
-        if(!context.IsKernelMode()) {
+        if(!context.IsKernelMode) {
             // カーネル空間でないならコプロセッサ例外
             context.RaiseException(ExcCode.CpU);
             this._wasCpU.Push(true);

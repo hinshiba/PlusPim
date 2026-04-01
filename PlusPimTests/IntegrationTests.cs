@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using Xunit;
@@ -16,9 +17,9 @@ public class IntegrationTests {
             """;
         (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
         try {
-            debugger.Step();
-            debugger.Step();
-            debugger.Step();
+            _ = debugger.Step();
+            _ = debugger.Step();
+            _ = debugger.Step();
 
             (uint[] regs, uint pc, uint hi, uint lo) = debugger.GetRegisters();
             Assert.Equal(8u, regs[(int)RegisterID.T2]);
@@ -42,7 +43,7 @@ public class IntegrationTests {
         try {
             // 2 initial + 5 iterations * 2 instructions = 12 steps
             for(int i = 0; i < 12; i++) {
-                debugger.Step();
+                _ = debugger.Step();
             }
 
             (uint[] regs, _, _, _) = debugger.GetRegisters();
@@ -64,10 +65,10 @@ public class IntegrationTests {
             """;
         (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
         try {
-            debugger.Step(); // lui $sp
-            debugger.Step(); // addiu $t0
-            debugger.Step(); // sw
-            debugger.Step(); // lw
+            _ = debugger.Step(); // lui $sp
+            _ = debugger.Step(); // addiu $t0
+            _ = debugger.Step(); // sw
+            _ = debugger.Step(); // lw
 
             (uint[] regs, uint pc, uint hi, uint lo) = debugger.GetRegisters();
             Assert.Equal(42u, regs[(int)RegisterID.T1]);
@@ -98,7 +99,7 @@ public class IntegrationTests {
             // 5! = 120
             // 2 init + 5 iterations * (slti + bne + mult + mflo + addiu + j = 6) + final (slti + bne) = 2 + 30 + 2 = 34
             for(int i = 0; i < 34; i++) {
-                debugger.Step();
+                _ = debugger.Step();
             }
 
             (uint[] regs, _, _, _) = debugger.GetRegisters();
@@ -123,15 +124,15 @@ public class IntegrationTests {
             (uint[] regs0, uint pc0, uint hi0, uint lo0) = debugger.GetRegisters();
             Assert.Equal(0x00400000u, pc0);
 
-            debugger.Step();
+            _ = debugger.Step();
             (uint[] regs1, uint pc1, uint hi1, uint lo1) = debugger.GetRegisters();
             Assert.Equal(0x00400004u, pc1);
 
-            debugger.Step();
+            _ = debugger.Step();
             (uint[] regs2, uint pc2, uint hi2, uint lo2) = debugger.GetRegisters();
             Assert.Equal(0x00400008u, pc2);
 
-            debugger.Step();
+            _ = debugger.Step();
             (uint[] regs3, uint pc3, uint hi3, uint lo3) = debugger.GetRegisters();
             Assert.Equal(0x0040000Cu, pc3);
         } finally {
@@ -151,11 +152,12 @@ public class IntegrationTests {
         (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
         try {
             // main: is on line 2 (0-indexed line 1), first instruction on line 3 (1-indexed)
-            int line1 = debugger.GetCurrentLine();
-            debugger.Step();
-            int line2 = debugger.GetCurrentLine();
-            debugger.Step();
-            int line3 = debugger.GetCurrentLine();
+
+            int line1 = debugger.GetCallStack()[0].Line;
+            _ = debugger.Step();
+            int line2 = debugger.GetCallStack()[0].Line;
+            _ = debugger.Step();
+            int line3 = debugger.GetCallStack()[0].Line;
 
             // Lines should be sequential (exact values depend on source formatting)
             Assert.True(line1 > 0);
@@ -176,11 +178,8 @@ public class IntegrationTests {
             """;
         (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
         try {
-            Assert.False(debugger.IsTerminated());
-            debugger.Step();
-            Assert.False(debugger.IsTerminated());
-            debugger.Step();
-            Assert.False(debugger.IsTerminated());
+            Assert.Equal(PlusPim.Application.StopReason.Step, debugger.Step());
+            Assert.Equal(PlusPim.Application.StopReason.Step, debugger.Step());
         } finally {
             tempFile.Delete();
         }
@@ -195,20 +194,20 @@ public class IntegrationTests {
             """;
         (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
         try {
-            debugger.Step(); // addiu
+            _ = debugger.Step(); // addiu
 
             // Run off the end: RI exception → kernel handler → kernel OOB → double exception → terminated
             // Keep stepping until terminated (bounded to prevent infinite loop)
-            for(int i = 0; i < 100 && !debugger.IsTerminated(); i++) {
-                debugger.Step();
+            StopReason reason = StopReason.Step;
+            for(int i = 0; i < 100 && reason != StopReason.Terminated; i++) {
+                reason = debugger.Step();
             }
-            Assert.True(debugger.IsTerminated());
 
             // Record state after termination
             (uint[] regsBefore, uint pcBefore, uint hiBefore, uint loBefore) = debugger.GetRegisters();
 
             // Step again should be nop
-            debugger.Step();
+            _ = debugger.Step();
 
             (uint[] regsAfter, uint pcAfter, uint hiAfter, uint loAfter) = debugger.GetRegisters();
             Assert.Equal(regsBefore, regsAfter);

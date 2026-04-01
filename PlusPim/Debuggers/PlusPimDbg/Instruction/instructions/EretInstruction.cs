@@ -11,7 +11,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 internal sealed class EretInstruction(int sourceLine): IInstruction {
     public int SourceLine { get; } = sourceLine;
 
-    private readonly Stack<(InstructionIndex PrevPC, CP0RegisterFile PrevCP0)> _prevState = new();
+    private readonly Stack<(Address PrevPC, CP0RegisterFile PrevCP0)> _prevState = new();
 
     public void Execute(RuntimeContext context) {
         CP0RegisterFile cp0regs = context.GetCP0Snapshot();
@@ -25,7 +25,7 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
     }
 
     public void Undo(RuntimeContext context) {
-        (InstructionIndex prevPC, CP0RegisterFile prevCP0) = this._prevState.Pop();
+        (Address prevPC, CP0RegisterFile prevCP0) = this._prevState.Pop();
         context.PC = prevPC;
         context.RestoreCP0(prevCP0);
     }

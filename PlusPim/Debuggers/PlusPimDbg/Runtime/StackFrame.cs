@@ -5,11 +5,11 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 内部向けスタックフレームの情報
 /// </summary>
-internal sealed class StackFrame(InstructionIndex currentPC, Label label, RegisterFile registers, uint hi, uint lo) {
+internal sealed class StackFrame(Address currentPC, Label label, RegisterFile registers, uint hi, uint lo) {
     /// <summary>
     /// 現時点でのライブPCか，jalによって凍結されたPC
     /// </summary>
-    public InstructionIndex CurrentPC { get; } = currentPC;
+    public Address CurrentPC { get; } = currentPC;
 
     /// <summary>
     /// このスタックフレームが属すると考えられる関数のラベル

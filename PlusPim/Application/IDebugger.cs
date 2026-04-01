@@ -8,14 +8,14 @@ public interface IDebugger {
     /// <summary>
     /// 1ステップ実行する
     /// </summary>
-    /// <returns></returns>
+    /// <returns>停止した理由</returns>
     StopReason Step();
 
     /// <summary>
     /// 1ステップ分，実行を巻き戻す
     /// </summary>
     /// <returns>巻き戻しに成功した場合は<see langword="true"/></returns>
-    bool StepBack();
+    bool Back();
 
     /// <summary>
     /// コールスタックの情報を取得する

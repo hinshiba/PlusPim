@@ -40,6 +40,12 @@ internal record struct Address(uint Addr) {
         return lhs;
     }
 
+    public static Address operator -(Address lhs, uint rhs) {
+        lhs.Addr -= rhs;
+        return lhs;
+    }
+
+
     public static bool operator <(Address lhs, Address rhs) {
         return lhs.Addr < rhs.Addr;
     }

@@ -21,7 +21,7 @@ internal record struct InstructionIndex(int Idx) {
             return null;
         }
 
-        return context.IsKernelMode()
+        return context.IsKernelMode
             ? new(unchecked((int)(Addr - TextSegment.KernelTextSegmentBase).Addr) / 4)
             : new(unchecked((int)(Addr - TextSegment.TextSegmentBase).Addr) / 4);
     }

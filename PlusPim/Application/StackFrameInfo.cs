@@ -15,7 +15,14 @@ public sealed class StackFrameInfo {
     public required string Name { get; init; }
 
     /// <summary>
+    /// 停止中の行のあるファイル
+    /// 対応しない場合は<see langword="null"/>
+    /// </summary>
+    public required FileInfo? SrcFile { get; init; }
+
+    /// <summary>
     /// 停止中の行番号
+    /// 対応しない場合は0とすること
     /// </summary>
     public required int Line { get; init; }
 
@@ -40,8 +47,24 @@ public sealed class StackFrameInfo {
     public required uint LO { get; init; }
 
     // CP0レジスタ (ライブフレームのみ設定)
+
+    /// <summary>
+    /// AdExの例外が発生したときの例外発生アドレス
+    /// </summary>
     public uint? CP0BadVAddr { get; init; }
+
+    /// <summary>
+    /// 基本的にはカーネルモードかどうか
+    /// </summary>
     public uint? CP0Status { get; init; }
+
+    /// <summary>
+    /// 例外の発生原因
+    /// </summary>
     public uint? CP0Cause { get; init; }
+
+    /// <summary>
+    /// 例外が発生したPC
+    /// </summary>
     public uint? CP0EPC { get; init; }
 }
