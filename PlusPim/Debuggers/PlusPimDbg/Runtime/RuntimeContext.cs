@@ -238,6 +238,8 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     public void RetException() {
         // EPCの値に復帰
         this.PC = this._cp0Regs.Epc;
+        // 最後の例外を消す
+        this.LastException = null;
         // カーネルモードから脱出する
         this._cp0Regs = CP0RegisterFile.Default;
     }
