@@ -10,7 +10,7 @@ public sealed class ExceptionInfo {
     /// <summary>
     /// 例外番号
     /// </summary>
-    public required ExcCode reason { get; init; }
+    public required ExcCode Reason { get; init; }
 
     /// <summary>
     /// 例外の識別子 (ExcCode名: "AdEL", "Sys", etc.)

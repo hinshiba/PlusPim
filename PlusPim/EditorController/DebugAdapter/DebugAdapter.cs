@@ -27,7 +27,6 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
     private bool _isInit = false;
-    private readonly ExceptionInfo? _lastStoppedException;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
@@ -124,15 +123,16 @@ internal class DebugAdapter: DebugAdapterBase {
 
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments args) {
         this._logger.Debug("DebugAdapter", "ExceptionInfoRequest.");
-        return this._lastStoppedException is null
+        ExceptionInfo? exInfo = this._app.GetLastException();
+        return exInfo is null
             ? new ExceptionInfoResponse("unknown", ExceptionBreakMode.Always)
             : new ExceptionInfoResponse(
-            this._lastStoppedException.ExceptionId,
-            this._lastStoppedException.IsDouble
+            exInfo.ExceptionId,
+            exInfo.IsDouble
                 ? ExceptionBreakMode.Unhandled
                 : ExceptionBreakMode.Always
         ) {
-                Description = this._lastStoppedException.Description
+                Description = exInfo.Description
             };
     }
 
@@ -151,7 +151,7 @@ internal class DebugAdapter: DebugAdapterBase {
         List<StackFrame> dapFrames = [];
         foreach(StackFrameInfo frame in callStack) {
             dapFrames.Add(new StackFrame(frame.FrameId, frame.Name, frame.Line, 0) {
-                Source = new Source { Path = this._app.GetProgramPath() }
+                Source = new Source { Path = frame.SrcFile?.FullName ?? "" }
             });
         }
 
@@ -305,22 +305,14 @@ internal class DebugAdapter: DebugAdapterBase {
                 break;
             // フィルタはアプリケーション側で適用されるので，例外情報がある場合は常にExceptionで止める
             case StopReason.Exception:
-                if(this._lastStoppedException != null) {
-                    this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                        ThreadId = 1,
-                        AllThreadsStopped = true,
-                        Description = this._lastStoppedException.Description,
-                        Text = this._lastStoppedException.ExceptionId
-                    });
-                } else {
-                    // 例外情報がない場合でもとりあえずExceptionで止める
-                    this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                        ThreadId = 1,
-                        AllThreadsStopped = true,
-                        Description = "Unknown exception",
-                        Text = "unknown"
-                    });
-                }
+                ExceptionInfo exInfo = this._app.GetLastException() ?? throw new InvalidOperationException("PlusPim Dbg report stop by Exception. But ExceptionInfo is not set");
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true,
+                    Description = exInfo.Description,
+                    Text = exInfo.ExceptionId
+                });
+
                 break;
             default:
                 // 到達不能であるはず
