@@ -30,6 +30,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
 
     /// <summary>
     /// ラベル名からアドレスを解決してジャンプする
+    /// 未定義のラベルの場合は無効なアドレスにジャンプ
     /// </summary>
     protected void JumpTo(RuntimeContext context, string name) {
         Label? label = context.ResolveLabelName(name);
