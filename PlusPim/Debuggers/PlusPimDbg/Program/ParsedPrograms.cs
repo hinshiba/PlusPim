@@ -148,7 +148,7 @@ internal sealed class ParsedPrograms {
     public Func<string, Address, bool, Label?> CreateResolver() {
         return (name, pc, isKernel) => {
             // 実行中pcなので，かならず有効な範囲である
-            int globalIdx = (int)(pc.Addr - (isKernel ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4;
+            int globalIdx = (int)((pc.Addr - (isKernel ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
             int[] lengths = isKernel
                 ? this._kernelTextCumulativeLengths
                 : this._textCumulativeLengths;
