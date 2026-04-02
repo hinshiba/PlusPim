@@ -9,7 +9,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
     private readonly Stack<uint> _previousRaValues = new();
 
     public override void Execute(RuntimeContext context) {
-        // ラベル解決を先行して例外時の影響を最小化
+        // ラベル解決
         Label label = context.ResolveLabelName(this.TargetLabel!) ?? Label.Invalid;
 
         // $ra変更前にレジスタスナップショット等を取得
