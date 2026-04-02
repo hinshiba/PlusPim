@@ -118,6 +118,11 @@ internal sealed class ParsedPrograms {
     /// <param name="pc">アドレス</param>
     /// <returns>ファイルと1-indexの行番号</returns>
     public (FileInfo? file, int lineIndex)? GetSourceInfo(Address pc) {
+        // 有効なアドレスか確認
+        if((pc.Addr & 0b11) != 0) {
+            return null;
+        }
+
         bool isKernelMode = TextSegment.KernelTextSegmentBase <= pc;
 
         int globalIdx = (int)((pc.Addr - (isKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
