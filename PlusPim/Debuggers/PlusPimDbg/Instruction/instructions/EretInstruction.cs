@@ -17,10 +17,10 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
         CP0RegisterFile cp0regs = context.GetCP0Snapshot();
         this._prevState.Push((context.PC, cp0regs));
 
-        // EPC (InstructionIndex) を直接PCに代入
+        // EPCを直接PCに代入
         context.PC = cp0regs.Epc;
 
-        // EXLクリア (カーネルモード脱出)
+        // EXLクリア
         context.WriteCP0Register(12, 0);
     }
 

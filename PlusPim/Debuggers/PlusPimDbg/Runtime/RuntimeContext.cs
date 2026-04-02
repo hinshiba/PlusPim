@@ -106,8 +106,8 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     /// コールスタックからpopを試みる
     /// </summary>
     /// <param name="jumpTo">ジャンプ先の命令インデックス</param>
-    /// <returns>popされたスタックフレーム．ジャンプ先がスタックフレームのPC+1と一致しない場合はnull</returns>
-    /// <remarks>ジャンプ先がスタックフレームのPC+1と一致する場合にのみpopする</remarks>
+    /// <returns>popされたスタックフレーム．ジャンプ先がスタックフレームのPC+4と一致しない場合はnull</returns>
+    /// <remarks>ジャンプ先がスタックフレームのPC+4と一致する場合にのみpopする</remarks>
     public StackFrame? TryPopCallStack(Address jumpTo) {
         if(this.CallStack.Count > 0) {
             StackFrame frame = this._callStack.Peek();
