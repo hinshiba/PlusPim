@@ -476,8 +476,8 @@ public class InstructionExecuteTests {
         Assert.NotNull(instruction);
         instruction.Execute(context);
 
-        Assert.NotNull(context.LastException);
-        Assert.Equal(ExcCode.Ov, context.LastException.Code);
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.Ov, context.LastException?.Code);
     }
 
     [Fact]
@@ -490,8 +490,8 @@ public class InstructionExecuteTests {
         Assert.NotNull(instruction);
         instruction.Execute(context);
 
-        Assert.NotNull(context.LastException);
-        Assert.Equal(ExcCode.Ov, context.LastException.Code);
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.Ov, context.LastException?.Code);
     }
 
     [Fact]
@@ -503,8 +503,8 @@ public class InstructionExecuteTests {
         Assert.NotNull(instruction);
         instruction.Execute(context);
 
-        Assert.NotNull(context.LastException);
-        Assert.Equal(ExcCode.AdES, context.LastException.Code);
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.AdES, context.LastException?.Code);
     }
 
     [Fact]
@@ -516,8 +516,8 @@ public class InstructionExecuteTests {
         Assert.NotNull(instruction);
         instruction.Execute(context);
 
-        Assert.NotNull(context.LastException);
-        Assert.Equal(ExcCode.AdEL, context.LastException.Code);
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.AdEL, context.LastException?.Code);
     }
 
     [Fact]
@@ -528,8 +528,8 @@ public class InstructionExecuteTests {
         Assert.NotNull(instruction);
         instruction.Execute(context);
 
-        Assert.NotNull(context.LastException);
-        Assert.Equal(ExcCode.Sys, context.LastException.Code);
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.Sys, context.LastException?.Code);
     }
 
     [Fact]
@@ -540,7 +540,7 @@ public class InstructionExecuteTests {
         Assert.NotNull(instruction);
         instruction.Execute(context);
 
-        Assert.NotNull(context.LastException);
-        Assert.Equal(ExcCode.Bp, context.LastException.Code);
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.Bp, context.LastException?.Code);
     }
 }

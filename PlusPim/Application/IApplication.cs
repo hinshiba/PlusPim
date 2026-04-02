@@ -9,8 +9,26 @@ internal interface IApplication {
     /// </summary>
     /// <returns>成功した場合は<see langword="true"/></returns>
     bool Load();
-    (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters();
-    void Step();
+
+    /// <summary>
+    /// スタックフレームを1つ除去するまで実行する
+    /// </summary>
+    StopReason StepOut();
+
+    /// <summary>
+    /// 表示されている次の行まで実行する
+    /// </summary>
+    StopReason StepOver();
+
+    /// <summary>
+    /// 次の命令を実行する
+    /// </summary>
+    StopReason StepIn();
+
+    /// <summary>
+    /// 停止するまで実行する
+    /// </summary>
+    StopReason Continue();
 
     /// <summary>
     /// 1ステップ分，実行を巻き戻す
@@ -19,22 +37,17 @@ internal interface IApplication {
     bool StepBack();
 
     /// <summary>
-    /// 現在の実行前の行を取得する
+    /// 停止するまで実行を巻き戻す
     /// </summary>
-    /// <returns>1から始まる行番号．取得できない場合は0を返す．</returns>
-    int GetCurrentLine();
-    string GetProgramPath();
-    bool IsTerminated();
+    /// <returns>1ステップ以上巻き戻しに成功した場合は<see langword="true"/></returns>
+    bool ReverseContinue();
 
     /// <summary>
-    /// 終了まで実行する
+    /// 停止する例外を設定する
     /// </summary>
-    void Continue();
+    /// <param name="filters">例外フィルタ</param>
+    void SetExceptionFilters(List<ExceptionFilter> filters);
 
-    /// <summary>
-    /// 先頭まで巻き戻す
-    /// </summary>
-    void ReverseContinue();
 
     /// <summary>
     /// コールスタックの情報を取得する

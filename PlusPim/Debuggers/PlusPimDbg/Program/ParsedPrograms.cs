@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
@@ -80,42 +81,82 @@ internal sealed class ParsedPrograms {
     public Dictionary<Address, byte> MemoryImage { get; } = [];
 
     /// <summary>
-    /// グローバルインデックスから命令を取得する
+    /// 命令アドレスから命令を取得する
+    /// MIPS例外が発生しうる (Ri, AdEL)
     /// </summary>
-    /// <param name="pc">グローバル命令インデックス</param>
-    /// <param name="isKernelMode">カーネルモードか</param>
+    /// <param name="pc">命令アドレス</param>
+    /// <param name="context">コンテキスト</param>
     /// <returns>命令</returns>
-    public IInstruction GetInstruction(InstructionIndex pc, bool isKernelMode) {
-        int[] cumulativeLengths = isKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
-        int programIdx = FindProgramIndex(cumulativeLengths, pc.Idx);
-        int localIdx = 0 < programIdx ? pc.Idx - cumulativeLengths[programIdx - 1] : pc.Idx;
+    public IInstruction? GetInstruction(Address pc, RuntimeContext context) {
+        // 有効なアドレスか確認
+        if((pc.Addr & 0b11) != 0) {
+            context.RaiseException(ExcCode.AdEL, pc);
+            return null;
+        }
 
-        return isKernelMode
+        int globalIdx = (int)((pc.Addr - (context.IsKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
+        // 有効な範囲か確認
+        if((context.IsKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
+            // 書き込まれていない範囲は無効な命令で埋まっていると見なす
+            context.RaiseException(ExcCode.RI, pc);
+            return null;
+        }
+
+        int[] cumulativeLengths = context.IsKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
+        int programIdx = FindProgramIndex(cumulativeLengths, globalIdx);
+        int localIdx = 0 < programIdx ? globalIdx - cumulativeLengths[programIdx - 1] : globalIdx;
+
+        return context.IsKernelMode
             ? this._programs[programIdx].KernelTextSegment.Instructions[localIdx]
             : this._programs[programIdx].TextSegment.Instructions[localIdx];
+    }
+
+
+    /// <summary>
+    /// そのPCが指す命令のソースを返す
+    /// </summary>
+    /// <param name="pc">アドレス</param>
+    /// <returns>ファイルと1-indexの行番号</returns>
+    public (FileInfo? file, int lineIndex)? GetSourceInfo(Address pc) {
+        // 有効なアドレスか確認
+        if((pc.Addr & 0b11) != 0) {
+            return null;
+        }
+
+        bool isKernelMode = TextSegment.KernelTextSegmentBase <= pc;
+
+        int globalIdx = (int)((pc.Addr - (isKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
+        // 有効な範囲か確認
+        if((isKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
+            return null;
+        }
+
+        int[] cumulativeLengths = isKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
+        int programIdx = FindProgramIndex(cumulativeLengths, globalIdx);
+        int localIdx = 0 < programIdx ? globalIdx - cumulativeLengths[programIdx - 1] : globalIdx;
+
+        ParsedProgram program = this._programs[programIdx];
+
+        return isKernelMode
+            ? (program.File, program.KernelTextSegment.Instructions[localIdx].SourceLine)
+            : (program.File, program.TextSegment.Instructions[localIdx].SourceLine);
     }
 
     /// <summary>
     /// 実行時にPCとカーネルモードに基づいて所属ファイルのシンボルテーブルからラベルを解決するデリゲートを生成する
     /// </summary>
-    public Func<string, InstructionIndex, bool, Label?> CreateResolver() {
+    public Func<string, Address, bool, Label?> CreateResolver() {
         return (name, pc, isKernel) => {
+            // 実行中pcなので，かならず有効な範囲である
+            int globalIdx = (int)((pc.Addr - (isKernel ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
             int[] lengths = isKernel
                 ? this._kernelTextCumulativeLengths
                 : this._textCumulativeLengths;
-            int progIdx = FindProgramIndex(lengths, pc.Idx);
+            int progIdx = FindProgramIndex(lengths, globalIdx);
             return this._programs[progIdx].SymbolTable.Resolve(name);
         };
     }
 
-    /// <summary>
-    /// グローバルインデックスから所属プログラムのファイルパスを取得する
-    /// </summary>
-    public string GetProgramPath(InstructionIndex pc, bool isKernelMode) {
-        int[] cumulativeLengths = isKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
-        int programIdx = FindProgramIndex(cumulativeLengths, pc.Idx);
-        return this._programs[programIdx].File.FullName;
-    }
 
     /// <summary>
     /// 全プログラムからラベルを検索する

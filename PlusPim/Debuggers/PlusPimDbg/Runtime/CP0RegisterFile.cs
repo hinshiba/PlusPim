@@ -19,14 +19,14 @@ internal record class CP0RegisterFile {
     public ExcCode Exc { get; init; }
 
     /// <summary>
-    /// 例外を引き起こした命令のインデックス
+    /// 例外を引き起こした命令のPC
     /// </summary>
-    public InstructionIndex Epc { get; init; }
+    public Address Epc { get; init; }
 
     public static readonly CP0RegisterFile Default = new() {
-        BadVAddr = Address.InValid,
+        BadVAddr = null,
         Exl = false,
         Exc = ExcCode.RI,
-        Epc = InstructionIndex.Invalid
+        Epc = Address.InValid
     };
 }

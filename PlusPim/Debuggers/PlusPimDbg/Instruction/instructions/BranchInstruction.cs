@@ -21,7 +21,7 @@ internal sealed class BranchInstruction(
     /// <summary>
     /// Undo用に前のPCをスタックで管理
     /// </summary>
-    private readonly Stack<InstructionIndex> _previousPCs = new();
+    private readonly Stack<Address> _previousPCs = new();
 
     /// <summary>
     /// 分岐条件を評価する
@@ -46,11 +46,11 @@ internal sealed class BranchInstruction(
 
         if(this.EvaluateCondition(context)) {
             // 不正なラベルでも，InstructionFetchで例外が発生するべき
-            context.PC = context.ResolveLabelIndex(targetLabel) ?? InstructionIndex.Invalid;
+            context.PC = context.ResolveLabelName(targetLabel)?.Addr ?? Address.InValid;
             context.Log($"{mnemonic}: branch taken to {targetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
-            context.PC++;
+            context.PC += 4;
             context.Log($"{mnemonic}: branch not taken");
         }
     }

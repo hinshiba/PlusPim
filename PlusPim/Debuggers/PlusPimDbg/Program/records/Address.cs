@@ -36,9 +36,19 @@ internal record struct Address(uint Addr) {
     }
 
     public static Address operator -(Address lhs, Address rhs) {
-        lhs.Addr -= rhs.Addr;
+        checked {
+            lhs.Addr -= rhs.Addr;
+        }
         return lhs;
     }
+
+    public static Address operator -(Address lhs, uint rhs) {
+        checked {
+            lhs.Addr -= rhs;
+        }
+        return lhs;
+    }
+
 
     public static bool operator <(Address lhs, Address rhs) {
         return lhs.Addr < rhs.Addr;

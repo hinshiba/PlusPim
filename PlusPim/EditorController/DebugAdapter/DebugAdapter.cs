@@ -2,6 +2,8 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using PlusPim.Application;
 using PlusPim.Logging;
+using System.Diagnostics;
+using StackFrame = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.StackFrame;
 
 namespace PlusPim.EditorController.DebugAdapter;
 
@@ -25,8 +27,6 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
     private bool _isInit = false;
-    private HashSet<string> _activeExceptionFilters = [];
-    private ExceptionInfo? _lastStoppedException;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
@@ -66,14 +66,18 @@ internal class DebugAdapter: DebugAdapterBase {
             ExceptionBreakpointFilters = [
                 new ExceptionBreakpointsFilter("double", "Double Exceptions") {
                     Description = "Break when a second exception occurs in kernel mode (fatal crash)",
-                    Default = false
-                },
-                new ExceptionBreakpointsFilter("fatal", "Fatal Exceptions") {
-                    Description = "Break on non-syscall MIPS exceptions (AdEL, AdES, Bp, RI, CpU, Ov)",
                     Default = true
                 },
-                new ExceptionBreakpointsFilter("all", "All Exceptions") {
-                    Description = "Break on all MIPS exceptions including syscall",
+                new ExceptionBreakpointsFilter("fatal", "Fatal Exceptions") {
+                    Description = "Break when an (commonly) unrecoverable exception occurs (AdEL, AdES, RI, CpU, Ov)",
+                    Default = true
+                },
+                new ExceptionBreakpointsFilter("break", "Break Exceptions") {
+                    Description = "Break on break instruction (Bp)",
+                    Default = true
+                },
+                new ExceptionBreakpointsFilter("syscall", "Syscall Exceptions") {
+                    Description = "Break on syscall instruction (Sys)",
                     Default = false
                 }
             ]
@@ -106,21 +110,29 @@ internal class DebugAdapter: DebugAdapterBase {
 
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
-        this._activeExceptionFilters = [.. args.Filters];
+
+        List<ExceptionFilter> filters = new(args.Filters.Count);
+        foreach(string filter in args.Filters) {
+            if(Enum.TryParse<ExceptionFilter>(filter, ignoreCase: true, out ExceptionFilter exceptionFilter)) {
+                filters.Add(exceptionFilter);
+            }
+        }
+        this._app.SetExceptionFilters(filters);
         return new SetExceptionBreakpointsResponse();
     }
 
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments args) {
         this._logger.Debug("DebugAdapter", "ExceptionInfoRequest.");
-        return this._lastStoppedException is null
+        ExceptionInfo? exInfo = this._app.GetLastException();
+        return exInfo is null
             ? new ExceptionInfoResponse("unknown", ExceptionBreakMode.Always)
             : new ExceptionInfoResponse(
-            this._lastStoppedException.ExceptionId,
-            this._lastStoppedException.IsDouble
+            exInfo.ExceptionId,
+            exInfo.IsDouble
                 ? ExceptionBreakMode.Unhandled
                 : ExceptionBreakMode.Always
         ) {
-                Description = this._lastStoppedException.Description
+                Description = exInfo.Description
             };
     }
 
@@ -131,6 +143,7 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
+
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments args) {
         this._logger.Debug("DebugAdapter", "StackTraceRequest.");
 
@@ -138,7 +151,7 @@ internal class DebugAdapter: DebugAdapterBase {
         List<StackFrame> dapFrames = [];
         foreach(StackFrameInfo frame in callStack) {
             dapFrames.Add(new StackFrame(frame.FrameId, frame.Name, frame.Line, 0) {
-                Source = new Source { Path = this._app.GetProgramPath() }
+                Source = new Source { Path = frame.SrcFile?.FullName ?? "" }
             });
         }
 
@@ -209,46 +222,36 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
+
     protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ContinueRequest.");
 
-        while(true) {
-            this._app.Step();
-            ExceptionInfo? exc = this._app.GetLastException();
+        this.SendExecuteEvent(this._app.Continue());
 
-            if(exc is not null && this.ShouldBreakOnException(exc)) {
-                this._lastStoppedException = exc;
-                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                    ThreadId = 1,
-                    AllThreadsStopped = true,
-                    Description = exc.Description,
-                    Text = exc.ExceptionId
-                });
-                return new ContinueResponse { AllThreadsContinued = true };
-            }
-
-            if(this._app.IsTerminated()) {
-                this.Protocol.SendEvent(new TerminatedEvent());
-                return new ContinueResponse { AllThreadsContinued = true };
-            }
-        }
+        return new ContinueResponse();
     }
 
     protected override NextResponse HandleNextRequest(NextArguments args) {
         this._logger.Debug("DebugAdapter", "NextRequest.");
-        this.ExecuteSingleStep();
+
+        this.SendExecuteEvent(this._app.StepOver());
+
         return new NextResponse();
     }
 
     protected override StepInResponse HandleStepInRequest(StepInArguments args) {
         this._logger.Debug("DebugAdapter", "StepInRequest.");
-        this.ExecuteSingleStep();
+
+        this.SendExecuteEvent(this._app.StepIn());
+
         return new StepInResponse();
     }
 
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments args) {
         this._logger.Debug("DebugAdapter", "StepOutRequest.");
-        this.ExecuteSingleStep();
+
+        this.SendExecuteEvent(this._app.StepOut());
+
         return new StepOutResponse();
     }
 
@@ -273,7 +276,7 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override ReverseContinueResponse HandleReverseContinueRequest(ReverseContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ReverseContinueRequest.");
 
-        this._app.ReverseContinue();
+        _ = this._app.ReverseContinue();
 
         this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
             ThreadId = 1,
@@ -283,33 +286,38 @@ internal class DebugAdapter: DebugAdapterBase {
         return new ReverseContinueResponse();
     }
 
-    private void ExecuteSingleStep() {
-        this._app.Step();
-        ExceptionInfo? exc = this._app.GetLastException();
+    private void SendExecuteEvent(StopReason reason) {
+        switch(reason) {
+            case StopReason.Step:
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true
+                });
+                break;
+            case StopReason.Breakpoint:
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true
+                });
+                break;
+            case StopReason.Terminated:
+                this.Protocol.SendEvent(new TerminatedEvent());
+                break;
+            // フィルタはアプリケーション側で適用されるので，例外情報がある場合は常にExceptionで止める
+            case StopReason.Exception:
+                ExceptionInfo exInfo = this._app.GetLastException() ?? throw new InvalidOperationException("PlusPim Dbg report stop by Exception. But ExceptionInfo is not set");
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true,
+                    Description = exInfo.Description,
+                    Text = exInfo.ExceptionId
+                });
 
-        if(exc is not null && this.ShouldBreakOnException(exc)) {
-            this._lastStoppedException = exc;
-            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                ThreadId = 1,
-                AllThreadsStopped = true,
-                Description = exc.Description,
-                Text = exc.ExceptionId
-            });
-        } else if(this._app.IsTerminated()) {
-            this.Protocol.SendEvent(new OutputEvent {
-                Output = "debugee is terminated.\n",
-                Category = OutputEvent.CategoryValue.Console
-            });
-            this.Protocol.SendEvent(new TerminatedEvent());
-        } else {
-            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
-                ThreadId = 1,
-                AllThreadsStopped = true
-            });
+                break;
+            default:
+                // 到達不能であるはず
+                throw new UnreachableException($"Unknown stop reason: {reason}");
         }
     }
 
-    private bool ShouldBreakOnException(ExceptionInfo exc) {
-        return this._activeExceptionFilters.Contains("all") || (this._activeExceptionFilters.Contains("fatal") && (exc.IsDouble || exc.ExceptionId != "Sys")) || (this._activeExceptionFilters.Contains("double") && exc.IsDouble);
-    }
 }
