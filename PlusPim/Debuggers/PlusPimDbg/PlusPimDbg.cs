@@ -11,6 +11,7 @@ internal class PlusPimDbg: IDebugger {
     private readonly RuntimeContext _context;
     private readonly ParsedPrograms _programs;
     private readonly Stack<(IInstruction? Instruction, bool WasTerminated, bool PcAutoIncremented)> _history = new();
+    private HashSet<Address> _breakpoints = [];
 
     internal PlusPimDbg(FileInfo[] files, ILogger logger) {
         this._programs = new ParsedPrograms(files, logger);
@@ -79,8 +80,10 @@ internal class PlusPimDbg: IDebugger {
             return StopReason.Exception;
         }
 
-        // 次の行がブレークポイント
-        // todo
+        // 次の命令がブレークポイント
+        if(this._breakpoints.Contains(this._context.PC)) {
+            return StopReason.Breakpoint;
+        }
 
         // それ以外は通常のステップ
         return StopReason.Step;
@@ -130,6 +133,38 @@ internal class PlusPimDbg: IDebugger {
         }
         return null;
 
+    }
+
+    /// <summary>
+    /// ブレークポイントを設定する
+    /// </summary>
+    public BreakpointResult[] SetBreakpoints(string filePath, int[] lines) {
+        // 該当ファイルの既存ブレークポイントをクリアしてから再設定する
+        // DAP の setBreakpoints はファイル単位で全ブレークポイントを送ってくるため
+        string normalizedPath = Path.GetFullPath(filePath);
+        HashSet<Address> newBreakpoints = new(this._breakpoints);
+
+        // 既存のうち，同一ファイルに属するものを除去
+        foreach(Address addr in this._breakpoints) {
+            (FileInfo? file, int _)? info = this._programs.GetSourceInfo(addr);
+            if(info is (FileInfo f, _) && string.Equals(f.FullName, normalizedPath, StringComparison.OrdinalIgnoreCase)) {
+                newBreakpoints.Remove(addr);
+            }
+        }
+
+        BreakpointResult[] results = new BreakpointResult[lines.Length];
+        for(int i = 0; i < lines.Length; i++) {
+            Address? addr = this._programs.GetAddressForLine(filePath, lines[i]);
+            if(addr is Address a) {
+                newBreakpoints.Add(a);
+                results[i] = new BreakpointResult(lines[i], true);
+            } else {
+                results[i] = new BreakpointResult(lines[i], false);
+            }
+        }
+
+        this._breakpoints = newBreakpoints;
+        return results;
     }
 
     /// <summary>

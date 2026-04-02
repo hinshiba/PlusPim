@@ -108,6 +108,21 @@ internal class DebugAdapter: DebugAdapterBase {
         return new DisconnectResponse();
     }
 
+    protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments args) {
+        this._logger.Debug("DebugAdapter", "SetBreakpointsRequest.");
+
+        string filePath = args.Source.Path ?? "";
+        int[] lines = args.Breakpoints?.Select(bp => bp.Line).ToArray() ?? [];
+        BreakpointResult[] results = this._app.SetBreakpoints(filePath, lines);
+
+        return new SetBreakpointsResponse {
+            Breakpoints = results.Select(r => new Breakpoint {
+                Verified = r.Verified,
+                Line = r.Line
+            }).ToList()
+        };
+    }
+
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
 

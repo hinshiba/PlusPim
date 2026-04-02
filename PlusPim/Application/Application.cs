@@ -155,6 +155,12 @@ internal class Application: IApplication {
         return result;
     }
 
+    // ブレークポイント
+
+    public BreakpointResult[] SetBreakpoints(string filePath, int[] lines) {
+        return this.Debugger.SetBreakpoints(filePath, lines);
+    }
+
     // 例外系
 
     public void SetExceptionFilters(List<ExceptionFilter> filters) {

@@ -28,4 +28,12 @@ public interface IDebugger {
     /// </summary>
     /// <returns>例外情報．例外が発生していない場合はnull</returns>
     ExceptionInfo? GetLastException();
+
+    /// <summary>
+    /// ブレークポイントを設定する
+    /// </summary>
+    /// <param name="filePath">ソースファイルのフルパス</param>
+    /// <param name="lines">1-indexedの行番号の配列</param>
+    /// <returns>各行に対応するブレークポイント設定結果</returns>
+    BreakpointResult[] SetBreakpoints(string filePath, int[] lines);
 }

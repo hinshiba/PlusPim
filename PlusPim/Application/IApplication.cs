@@ -48,6 +48,14 @@ internal interface IApplication {
     /// <param name="filters">例外フィルタ</param>
     void SetExceptionFilters(List<ExceptionFilter> filters);
 
+    /// <summary>
+    /// ブレークポイントを設定する
+    /// </summary>
+    /// <param name="filePath">ソースファイルのフルパス</param>
+    /// <param name="lines">1-indexedの行番号の配列</param>
+    /// <returns>各行に対応するブレークポイント設定結果</returns>
+    BreakpointResult[] SetBreakpoints(string filePath, int[] lines);
+
 
     /// <summary>
     /// コールスタックの情報を取得する
