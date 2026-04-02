@@ -94,7 +94,7 @@ internal sealed class ParsedPrograms {
             return null;
         }
 
-        int globalIdx = (int)(pc.Addr - (context.IsKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4;
+        int globalIdx = (int)((pc.Addr - (context.IsKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
         // 有効な範囲か確認
         if((context.IsKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
             // 書き込まれていない範囲は無効な命令で埋まっていると見なす
@@ -120,7 +120,7 @@ internal sealed class ParsedPrograms {
     public (FileInfo? file, int lineIndex)? GetSourceInfo(Address pc) {
         bool isKernelMode = TextSegment.KernelTextSegmentBase <= pc;
 
-        int globalIdx = (int)(pc.Addr - (isKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4;
+        int globalIdx = (int)((pc.Addr - (isKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
         // 有効な範囲か確認
         if((isKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
             return null;
