@@ -226,7 +226,7 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
         this._logger.Debug("DebugAdapter", "ContinueRequest.");
 
-        this.SendExcecuteEvent(this._app.Continue());
+        this.SendExecuteEvent(this._app.Continue());
 
         return new ContinueResponse();
     }
@@ -234,7 +234,7 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override NextResponse HandleNextRequest(NextArguments args) {
         this._logger.Debug("DebugAdapter", "NextRequest.");
 
-        this.SendExcecuteEvent(this._app.StepOver());
+        this.SendExecuteEvent(this._app.StepOver());
 
         return new NextResponse();
     }
@@ -242,7 +242,7 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override StepInResponse HandleStepInRequest(StepInArguments args) {
         this._logger.Debug("DebugAdapter", "StepInRequest.");
 
-        this.SendExcecuteEvent(this._app.StepIn());
+        this.SendExecuteEvent(this._app.StepIn());
 
         return new StepInResponse();
     }
@@ -250,7 +250,7 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments args) {
         this._logger.Debug("DebugAdapter", "StepOutRequest.");
 
-        this.SendExcecuteEvent(this._app.StepOut());
+        this.SendExecuteEvent(this._app.StepOut());
 
         return new StepOutResponse();
     }
@@ -286,7 +286,7 @@ internal class DebugAdapter: DebugAdapterBase {
         return new ReverseContinueResponse();
     }
 
-    private void SendExcecuteEvent(StopReason reason) {
+    private void SendExecuteEvent(StopReason reason) {
         switch(reason) {
             case StopReason.Step:
                 this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
