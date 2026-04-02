@@ -17,7 +17,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
         // コールスタックからpopを試み，Undo用にフレームを保存しておく
         this._poppedFrames.Push((prevLabel, context.TryPopCallStack(target)));
 
-        context.Log($"jr ${this.Rs}: jump to 0x{target:X8}");
+        context.Log($"jr ${this.Rs}: jump to {target}");
     }
 
     public override void Undo(RuntimeContext context) {

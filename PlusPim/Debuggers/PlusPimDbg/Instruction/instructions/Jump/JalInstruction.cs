@@ -23,7 +23,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
 
         // ジャンプ
         this.JumpTo(context, label.Addr);
-        context.Log($"jal {this.TargetLabel}: $ra = 0x{returnPC:X8}");
+        context.Log($"jal {this.TargetLabel}: $ra = {returnPC}");
     }
 
     public override void Undo(RuntimeContext context) {
