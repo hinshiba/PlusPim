@@ -111,15 +111,15 @@ internal class DebugAdapter: DebugAdapterBase {
     protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetBreakpointsRequest.");
 
-        string filePath = args.Source.Path ?? "";
-        int[] lines = args.Breakpoints?.Select(bp => bp.Line).ToArray() ?? [];
-        BreakpointResult[] results = this._app.SetBreakpoints(filePath, lines);
+        FileInfo file = new(args.Source.Path);
+        int[] lines = [.. args.Breakpoints.Select(bp => bp.Line)];
+        BreakpointResult[] results = this._app.SetBreakpoints(file, lines);
 
         return new SetBreakpointsResponse {
-            Breakpoints = results.Select(r => new Breakpoint {
+            Breakpoints = [.. results.Select(r => new Breakpoint {
                 Verified = r.Verified,
                 Line = r.Line
-            }).ToList()
+            })]
         };
     }
 

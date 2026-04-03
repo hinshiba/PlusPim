@@ -157,8 +157,8 @@ internal class Application: IApplication {
 
     // ブレークポイント
 
-    public BreakpointResult[] SetBreakpoints(string filePath, int[] lines) {
-        return this.Debugger.SetBreakpoints(filePath, lines);
+    public BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines) {
+        return this.Debugger.SetBreakpoints(file, lines);
     }
 
     // 例外系
@@ -193,5 +193,9 @@ internal class Application: IApplication {
 
     private bool IsBreakException(ExceptionInfo exception) {
         return (exception.IsDouble && this._reportDoubleExceptions) || this._filters.Contains(exception.Reason);
+    }
+
+    BreakpointInfo[] IApplication.SetBreakpoints(FileInfo file, int[] lines) {
+        throw new NotImplementedException();
     }
 }

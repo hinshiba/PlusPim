@@ -32,8 +32,8 @@ public interface IDebugger {
     /// <summary>
     /// ブレークポイントを設定する
     /// </summary>
-    /// <param name="filePath">ソースファイルのフルパス</param>
+    /// <param name="file">ファイル</param>
     /// <param name="lines">1-indexedの行番号の配列</param>
     /// <returns>各行に対応するブレークポイント設定結果</returns>
-    BreakpointResult[] SetBreakpoints(string filePath, int[] lines);
+    BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines);
 }

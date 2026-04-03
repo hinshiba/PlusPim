@@ -171,30 +171,6 @@ internal sealed class ParsedPrograms {
         return null;
     }
 
-    /// <summary>
-    /// 指定ファイル・行番号に対応する先頭の命令アドレスを返す
-    /// </summary>
-    /// <param name="filePath">ソースファイルのフルパス</param>
-    /// <param name="lineIndex">1-indexedの行番号</param>
-    /// <returns>該当する命令のアドレス．見つからない場合はnull</returns>
-    public Address? GetAddressForLine(string filePath, int lineIndex) {
-        string normalizedPath = Path.GetFullPath(filePath);
-        int globalOffset = 0;
-        for(int i = 0; i < this._programs.Length; i++) {
-            ParsedProgram program = this._programs[i];
-            if(string.Equals(program.File.FullName, normalizedPath, StringComparison.OrdinalIgnoreCase)) {
-                ReadOnlySpan<IInstruction> instructions = program.TextSegment.Instructions;
-                for(int j = 0; j < instructions.Length; j++) {
-                    if(instructions[j].SourceLine == lineIndex) {
-                        return Address.FromInstructionIndex(new InstructionIndex(globalOffset + j), TextSegment.TextSegmentBase);
-                    }
-                }
-                return null;
-            }
-            globalOffset += program.TextSegment.Instructions.Length;
-        }
-        return null;
-    }
 
     /// <summary>
     /// 累積長配列を二分探索し、グローバルインデックスが属するプログラムのインデックスを返す
