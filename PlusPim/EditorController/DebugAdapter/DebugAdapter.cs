@@ -166,7 +166,7 @@ internal class DebugAdapter: DebugAdapterBase {
         List<StackFrame> dapFrames = [];
         foreach(StackFrameInfo frame in callStack) {
             dapFrames.Add(new StackFrame(frame.FrameId, frame.Name, frame.Line, 0) {
-                Source = new Source { Path = frame.SrcFile?.FullName ?? "" }
+                Source = frame.SrcFile is not null ? new Source { Path = frame.SrcFile.FullName } : null
             });
         }
 

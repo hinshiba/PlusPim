@@ -195,7 +195,4 @@ internal class Application: IApplication {
         return (exception.IsDouble && this._reportDoubleExceptions) || this._filters.Contains(exception.Reason);
     }
 
-    BreakpointInfo[] IApplication.SetBreakpoints(FileInfo file, int[] lines) {
-        throw new NotImplementedException();
-    }
 }

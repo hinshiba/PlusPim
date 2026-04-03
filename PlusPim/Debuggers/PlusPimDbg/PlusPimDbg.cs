@@ -11,7 +11,7 @@ internal class PlusPimDbg: IDebugger {
     private readonly RuntimeContext _context;
     private readonly ParsedPrograms _programs;
     private readonly Stack<(IInstruction? Instruction, bool WasTerminated, bool PcAutoIncremented)> _history = new();
-    private Dictionary<FileInfo, HashSet<int>> _breakpoints = [];
+    private readonly HashSet<Address> _breakpoints = [];
 
     internal PlusPimDbg(FileInfo[] files, ILogger logger) {
         this._programs = new ParsedPrograms(files, logger);
@@ -47,8 +47,9 @@ internal class PlusPimDbg: IDebugger {
             return StopReason.Step;
         }
 
-        // 実行前のPCを保存
+        // 実行前の状態を保存
         Address pcBeforeExec = this._context.PC;
+        bool wasTerminatedBefore = this._context.IsTerminated;
         bool pcAutoIncremented = false;
         // 命令を取得
         IInstruction? inst_ = this._programs.GetInstruction(this._context.PC, this._context);
@@ -66,7 +67,7 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // 履歴に保存
-        this._history.Push((inst_, this._context.IsTerminated, pcAutoIncremented));
+        this._history.Push((inst_, wasTerminatedBefore, pcAutoIncremented));
 
 
         // 戻り値を決定する
@@ -81,8 +82,7 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // 次の命令がブレークポイント
-        IInstruction? nextInst = this._programs.GetInstruction(this._context.PC, this._context);
-        if(nextInst is not null && this._breakpoints.TryGetValue()) {
+        if(this._breakpoints.Contains(this._context.PC)) {
             return StopReason.Breakpoint;
         }
 
@@ -143,29 +143,20 @@ internal class PlusPimDbg: IDebugger {
     public BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines) {
         // 該当ファイルの既存ブレークポイントをクリアしてから再設定する
         // DAP の setBreakpoints はファイル単位で全ブレークポイントを送ってくるため
-        HashSet<Address> newBreakpoints = [.. this._breakpoints];
+        HashSet<Address> oldAddresses = this._programs.GetAllAddressesForFile(file);
+        this._breakpoints.ExceptWith(oldAddresses);
 
-        // 既存のうち，同一ファイルに属するものを除去
-        foreach(Address addr in this._breakpoints) {
-            (FileInfo? file, int _)? info = this._programs.GetSourceInfo(addr);
-            if(info is (FileInfo f, _) && string.Equals(f.FullName, file.FullName, StringComparison.OrdinalIgnoreCase)) {
-                _ = newBreakpoints.Remove(addr);
-            }
-        }
-
-        BreakpointResult[] results = new BreakpointResult[lines.Length];
+        BreakpointResult[] result = new BreakpointResult[lines.Length];
         for(int i = 0; i < lines.Length; i++) {
-            Address? addr = this._programs.GetAddressForLine(file, lines[i]);
-            if(addr is Address a) {
-                _ = newBreakpoints.Add(a);
-                results[i] = new BreakpointResult(lines[i], true);
+            Address? addr_ = this._programs.GetAddressForLine(file, lines[i]);
+            if(addr_ is Address addr) {
+                _ = this._breakpoints.Add(addr);
+                result[i] = new BreakpointResult { Line = lines[i], Verified = true };
             } else {
-                results[i] = new BreakpointResult(lines[i], false);
+                result[i] = new BreakpointResult { Line = lines[i], Verified = false };
             }
         }
-
-        this._breakpoints = newBreakpoints;
-        return results;
+        return result;
     }
 
     /// <summary>
@@ -176,7 +167,7 @@ internal class PlusPimDbg: IDebugger {
 
         (uint badVAddr, uint status, uint cause, uint epc) = this._context.GetCP0DisplayValues();
         // 例外発生なら次の命令ではなく，例外発生の命令の情報にする
-        (FileInfo? file, int lineIndex) = this._programs.GetSourceInfo((this._context.LastException is null) ? this._context.PC : new Address(epc)) ?? (null, 0);
+        (FileInfo? file, int lineIndex) = this._programs.GetSourceInfo((this._context.LastException is null) ? this._context.PC : new Address(epc));
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = this._context.CurrentLabel.Name,
@@ -195,7 +186,7 @@ internal class PlusPimDbg: IDebugger {
         // CallStackの各フレーム
         int frameId = 2;
         foreach(StackFrame frame in this._context.CallStack) {
-            (file, lineIndex) = this._programs.GetSourceInfo(frame.CurrentPC) ?? (null, 0);
+            (file, lineIndex) = this._programs.GetSourceInfo(frame.CurrentPC);
             frames.Add(new StackFrameInfo {
                 FrameId = frameId,
                 Name = frame.Label.Name,

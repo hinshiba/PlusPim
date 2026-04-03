@@ -7,7 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
 
 internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstruction(null, lineIndex) {
     private RegisterID Rs { get; } = rs;
-    private readonly Stack<(Label, StackFrame?)> _poppedFrames = new();
+    private readonly Stack<(Label, StackFrame?, bool)> _poppedFrames = new();
 
     public override void Execute(RuntimeContext context) {
         Label prevLabel = context.CurrentLabel;
@@ -15,7 +15,17 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
         this.JumpTo(context, target);
 
         // コールスタックからpopを試み，Undo用にフレームを保存しておく
-        this._poppedFrames.Push((prevLabel, context.TryPopCallStack(target)));
+        StackFrame? poppedFrame = context.TryPopCallStack(target);
+
+        // mainからのjr $raでプログラムを終了する
+        bool terminatedByThis = this.Rs == RegisterID.Ra
+            && context.CallStack.Count == 0
+            && poppedFrame is null;
+        if(terminatedByThis) {
+            context.IsTerminated = true;
+        }
+
+        this._poppedFrames.Push((prevLabel, poppedFrame, terminatedByThis));
 
         context.Log($"jr ${this.Rs}: jump to {target}");
     }
@@ -25,8 +35,11 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
 
         // popしたフレームを復元
         if(this._poppedFrames.Count > 0) {
-            (Label prevLabel, StackFrame? frame) = this._poppedFrames.Pop();
+            (Label prevLabel, StackFrame? frame, bool terminatedByThis) = this._poppedFrames.Pop();
             context.UndoTryPopCallStack(prevLabel, frame);
+            if(terminatedByThis) {
+                context.IsTerminated = false;
+            }
         }
     }
 }
