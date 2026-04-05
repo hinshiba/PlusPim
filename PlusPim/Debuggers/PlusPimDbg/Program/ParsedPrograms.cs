@@ -117,10 +117,10 @@ internal sealed class ParsedPrograms {
     /// </summary>
     /// <param name="pc">アドレス</param>
     /// <returns>ファイルと1-indexの行番号</returns>
-    public (FileInfo? file, int lineIndex)? GetSourceInfo(Address pc) {
+    public (FileInfo? file, int lineIndex) GetSourceInfo(Address pc) {
         // 有効なアドレスか確認
         if((pc.Addr & 0b11) != 0) {
-            return null;
+            return (null, 0);
         }
 
         bool isKernelMode = TextSegment.KernelTextSegmentBase <= pc;
@@ -128,7 +128,7 @@ internal sealed class ParsedPrograms {
         int globalIdx = (int)((pc.Addr - (isKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
         // 有効な範囲か確認
         if((isKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
-            return null;
+            return (null, 0);
         }
 
         int[] cumulativeLengths = isKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
@@ -169,6 +169,69 @@ internal sealed class ParsedPrograms {
             }
         }
         return null;
+    }
+
+
+    /// <summary>
+    /// 指定ファイル・行番号に対応する先頭の命令アドレスを返す
+    /// </summary>
+    /// <param name="file">ソースファイル</param>
+    /// <param name="lineIndex">1-indexedの行番号</param>
+    /// <returns>該当する命令のアドレス．見つからない場合はnull</returns>
+    public Address? GetAddressForLine(FileInfo file, int lineIndex) {
+        bool isFound = false;
+        int fileIndex;
+        for(fileIndex = 0; fileIndex < this._programs.Length; fileIndex++) {
+            if(string.Equals(this._programs[fileIndex].File.FullName, file.FullName, StringComparison.OrdinalIgnoreCase)) {
+                isFound = true;
+                break;
+            }
+        }
+
+        if(isFound) {
+            // まずはユーザーテキストセグメントを検索
+            ReadOnlySpan<IInstruction> instructions = this._programs[fileIndex].TextSegment.Instructions;
+            for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
+                if(instructions[localIndex].SourceLine == lineIndex) {
+                    return new Address((uint)((fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.TextSegmentBase;
+                }
+
+            }
+            // 次にカーネルテキストセグメントを検索
+            instructions = this._programs[fileIndex].KernelTextSegment.Instructions;
+            for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
+                if(instructions[localIndex].SourceLine == lineIndex) {
+                    return new Address((uint)((fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.KernelTextSegmentBase;
+                }
+
+            }
+
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 指定ファイルに属する全命令のアドレスを返す
+    /// </summary>
+    public HashSet<Address> GetAllAddressesForFile(FileInfo file) {
+        HashSet<Address> addresses = [];
+        for(int fileIndex = 0; fileIndex < this._programs.Length; fileIndex++) {
+            if(!string.Equals(this._programs[fileIndex].File.FullName, file.FullName, StringComparison.OrdinalIgnoreCase)) {
+                continue;
+            }
+
+            int textBase = fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1];
+            for(int i = 0; i < this._programs[fileIndex].TextSegment.Instructions.Length; i++) {
+                addresses.Add(new Address((uint)(textBase + i) * 4) + TextSegment.TextSegmentBase);
+            }
+
+            int kernelBase = fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1];
+            for(int i = 0; i < this._programs[fileIndex].KernelTextSegment.Instructions.Length; i++) {
+                addresses.Add(new Address((uint)(kernelBase + i) * 4) + TextSegment.KernelTextSegmentBase);
+            }
+            break;
+        }
+        return addresses;
     }
 
     /// <summary>

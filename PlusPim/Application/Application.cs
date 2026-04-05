@@ -155,6 +155,12 @@ internal class Application: IApplication {
         return result;
     }
 
+    // ブレークポイント
+
+    public BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines) {
+        return this.Debugger.SetBreakpoints(file, lines);
+    }
+
     // 例外系
 
     public void SetExceptionFilters(List<ExceptionFilter> filters) {
@@ -188,4 +194,5 @@ internal class Application: IApplication {
     private bool IsBreakException(ExceptionInfo exception) {
         return (exception.IsDouble && this._reportDoubleExceptions) || this._filters.Contains(exception.Reason);
     }
+
 }
