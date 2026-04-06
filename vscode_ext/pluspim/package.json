@@ -21,10 +21,30 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "breakpoints": [
+      {
+        "language": "mips"
+      }
+    ],
+    "languages": [
+      {
+        "id": "mips",
+        "extensions": [
+          ".asm",
+          ".s"
+        ],
+        "aliases": [
+          "MIPS Assembly"
+        ]
+      }
+    ],
     "debuggers": [
       {
         "type": "pluspim",
         "label": "PlusPim Debugger",
+        "languages": [
+          "mips"
+        ],
         "configurationAttributes": {
           "launch": {
             "required": [

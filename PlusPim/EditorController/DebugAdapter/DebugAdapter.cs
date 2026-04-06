@@ -108,6 +108,21 @@ internal class DebugAdapter: DebugAdapterBase {
         return new DisconnectResponse();
     }
 
+    protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments args) {
+        this._logger.Debug("DebugAdapter", "SetBreakpointsRequest.");
+
+        FileInfo file = new(args.Source.Path);
+        int[] lines = [.. args.Breakpoints.Select(bp => bp.Line)];
+        BreakpointResult[] results = this._app.SetBreakpoints(file, lines);
+
+        return new SetBreakpointsResponse {
+            Breakpoints = [.. results.Select(r => new Breakpoint {
+                Verified = r.Verified,
+                Line = r.Line
+            })]
+        };
+    }
+
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) {
         this._logger.Debug("DebugAdapter", "SetExceptionBreakpointsRequest.");
 
@@ -151,7 +166,7 @@ internal class DebugAdapter: DebugAdapterBase {
         List<StackFrame> dapFrames = [];
         foreach(StackFrameInfo frame in callStack) {
             dapFrames.Add(new StackFrame(frame.FrameId, frame.Name, frame.Line, 0) {
-                Source = new Source { Path = frame.SrcFile?.FullName ?? "" }
+                Source = frame.SrcFile is not null ? new Source { Path = frame.SrcFile.FullName } : null
             });
         }
 
