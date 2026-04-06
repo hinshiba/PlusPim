@@ -173,40 +173,46 @@ internal sealed class ParsedPrograms {
 
 
     /// <summary>
+    /// ファイル名でプログラム配列を検索し，一致するインデックスを返す
+    /// </summary>
+    private bool TryFindProgramIndexByFile(FileInfo file, out int fileIndex) {
+        for(fileIndex = 0; fileIndex < this._programs.Length; fileIndex++) {
+            if(string.Equals(this._programs[fileIndex].File.FullName, file.FullName, StringComparison.OrdinalIgnoreCase)) {
+                return true;
+            }
+        }
+        fileIndex = -1;
+        return false;
+    }
+
+    /// <summary>
     /// 指定ファイル・行番号に対応する先頭の命令アドレスを返す
     /// </summary>
     /// <param name="file">ソースファイル</param>
     /// <param name="lineIndex">1-indexedの行番号</param>
     /// <returns>該当する命令のアドレス．見つからない場合はnull</returns>
     public Address? GetAddressForLine(FileInfo file, int lineIndex) {
-        bool isFound = false;
-        int fileIndex;
-        for(fileIndex = 0; fileIndex < this._programs.Length; fileIndex++) {
-            if(string.Equals(this._programs[fileIndex].File.FullName, file.FullName, StringComparison.OrdinalIgnoreCase)) {
-                isFound = true;
-                break;
-            }
+        if(!this.TryFindProgramIndexByFile(file, out int fileIndex)) {
+            return null;
         }
 
-        if(isFound) {
-            // まずはユーザーテキストセグメントを検索
-            ReadOnlySpan<IInstruction> instructions = this._programs[fileIndex].TextSegment.Instructions;
-            for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
-                if(instructions[localIndex].SourceLine == lineIndex) {
-                    return new Address((uint)((fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.TextSegmentBase;
-                }
-
-            }
-            // 次にカーネルテキストセグメントを検索
-            instructions = this._programs[fileIndex].KernelTextSegment.Instructions;
-            for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
-                if(instructions[localIndex].SourceLine == lineIndex) {
-                    return new Address((uint)((fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.KernelTextSegmentBase;
-                }
-
+        // まずはユーザーテキストセグメントを検索
+        ReadOnlySpan<IInstruction> instructions = this._programs[fileIndex].TextSegment.Instructions;
+        for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
+            if(instructions[localIndex].SourceLine == lineIndex) {
+                return new Address((uint)((fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.TextSegmentBase;
             }
 
         }
+        // 次にカーネルテキストセグメントを検索
+        instructions = this._programs[fileIndex].KernelTextSegment.Instructions;
+        for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
+            if(instructions[localIndex].SourceLine == lineIndex) {
+                return new Address((uint)((fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.KernelTextSegmentBase;
+            }
+
+        }
+
         return null;
     }
 
@@ -215,21 +221,18 @@ internal sealed class ParsedPrograms {
     /// </summary>
     public HashSet<Address> GetAllAddressesForFile(FileInfo file) {
         HashSet<Address> addresses = [];
-        for(int fileIndex = 0; fileIndex < this._programs.Length; fileIndex++) {
-            if(!string.Equals(this._programs[fileIndex].File.FullName, file.FullName, StringComparison.OrdinalIgnoreCase)) {
-                continue;
-            }
+        if(!this.TryFindProgramIndexByFile(file, out int fileIndex)) {
+            return addresses;
+        }
 
-            int textBase = fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1];
-            for(int i = 0; i < this._programs[fileIndex].TextSegment.Instructions.Length; i++) {
-                addresses.Add(new Address((uint)(textBase + i) * 4) + TextSegment.TextSegmentBase);
-            }
+        int textBase = fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1];
+        for(int i = 0; i < this._programs[fileIndex].TextSegment.Instructions.Length; i++) {
+            addresses.Add(new Address((uint)(textBase + i) * 4) + TextSegment.TextSegmentBase);
+        }
 
-            int kernelBase = fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1];
-            for(int i = 0; i < this._programs[fileIndex].KernelTextSegment.Instructions.Length; i++) {
-                addresses.Add(new Address((uint)(kernelBase + i) * 4) + TextSegment.KernelTextSegmentBase);
-            }
-            break;
+        int kernelBase = fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1];
+        for(int i = 0; i < this._programs[fileIndex].KernelTextSegment.Instructions.Length; i++) {
+            addresses.Add(new Address((uint)(kernelBase + i) * 4) + TextSegment.KernelTextSegmentBase);
         }
         return addresses;
     }
