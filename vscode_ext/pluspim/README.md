@@ -40,12 +40,12 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 ## Launch Configuration
 
-| Property  | Type                 | Default       | Description                                                              |
-| --------- | -------------------- | ------------- | ------------------------------------------------------------------------ |
-| `program` | `string \| string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths. |
-| `port`    | `number`             | `4711`        | TCP port used for the DAP connection.                                    |
-| `args`    | `string[]`           | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).      |
-| `trace`   | `boolean`            | `false`       | Show DAP protocol messages in the output channel.                        |
+| Property  | Type       | Default       | Description                                                              |
+| --------- | ---------- | ------------- | ------------------------------------------------------------------------ |
+| `program` | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths. |
+| `port`    | `number`   | `4711`        | TCP port used for the DAP connection.                                    |
+| `args`    | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).      |
+| `trace`   | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                        |
 
 ## How It Works
 
