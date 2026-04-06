@@ -2,6 +2,8 @@
 
 DAPに対応したMIPSアセンブリ言語デバッガ
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hinshiba/PlusPim)
+
 ## 概要
 
 PlusPimは，Debug Adapter Protocolに対応したMIPSアセンブリコード用のデバッグツールです．`.NET`で書かれたバックエンドと，フロントエンドのVS Code拡張機能を組み合わせることで，便利なデバッグ体験を提供します．
