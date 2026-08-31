@@ -437,6 +437,89 @@ public class InstructionExecuteTests {
         Assert.Equal(0x12345678u, context.Registers[RegisterID.T0]);
     }
 
+    [Fact]
+    public void Execute_Lb_SignExtends() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryByte(new Address(0x10000000), 0x80);
+        context.Registers[RegisterID.Sp] = 0x10000000;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("lb $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Equal(0xFFFFFF80u, context.Registers[RegisterID.T0]);
+    }
+
+    [Fact]
+    public void Execute_Lbu_ZeroExtends() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryByte(new Address(0x10000000), 0x80);
+        context.Registers[RegisterID.Sp] = 0x10000000;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("lbu $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Equal(0x00000080u, context.Registers[RegisterID.T0]);
+    }
+
+    [Fact]
+    public void Execute_Lh_SignExtends() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryBytes(new Address(0x10000000), 0x8000, 2);
+        context.Registers[RegisterID.Sp] = 0x10000000;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("lh $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Equal(0xFFFF8000u, context.Registers[RegisterID.T0]);
+    }
+
+    [Fact]
+    public void Execute_Lhu_ZeroExtends() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryBytes(new Address(0x10000000), 0x8000, 2);
+        context.Registers[RegisterID.Sp] = 0x10000000;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("lhu $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Equal(0x00008000u, context.Registers[RegisterID.T0]);
+    }
+
+    [Fact]
+    public void Execute_Sb_WritesOnlyOneByte() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryBytes(new Address(0x10000000), 0xFFFFFFFF, 4);
+        context.Registers[RegisterID.T0] = 0xDEADBE12;
+        context.Registers[RegisterID.Sp] = 0x10000000;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("sb $t0, 1($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        // 1バイト目だけが書き換わり，前後のバイトは保持される
+        uint value = context.ReadMemoryBytes(new Address(0x10000000), 4, false);
+        Assert.Equal(0xFFFF12FFu, value);
+    }
+
+    [Fact]
+    public void Execute_Sh_WritesOnlyTwoBytes() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryBytes(new Address(0x10000000), 0xFFFFFFFF, 4);
+        context.Registers[RegisterID.T0] = 0xDEAD1234;
+        context.Registers[RegisterID.Sp] = 0x10000000;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("sh $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        uint value = context.ReadMemoryBytes(new Address(0x10000000), 4, false);
+        Assert.Equal(0xFFFF1234u, value);
+    }
+
     // ===== $zero protection =====
 
     [Fact]
@@ -494,6 +577,119 @@ public class InstructionExecuteTests {
         Assert.Equal(ExcCode.Ov, context.LastException?.Code);
     }
 
+    // ===== Overflow (Ov) の境界 =====
+    // uint -> int の変換は「符号付きとしての解釈」であってオーバーフローではない．
+    // 変換をcheckedの内側で行うと，負のオペランドだけで誤ってOvになる
+
+    [Fact]
+    public void Execute_Sub_NegativeOperand_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T0] = unchecked((uint)-1); // 0xFFFFFFFF
+        context.Registers[RegisterID.T1] = 3;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("sub $a0, $t1, $t0");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(4u, context.Registers[RegisterID.A0]);
+    }
+
+    [Fact]
+    public void Execute_Subu_NegativeOperand_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T0] = unchecked((uint)-1); // 0xFFFFFFFF
+        context.Registers[RegisterID.T1] = 3;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("subu $a0, $t1, $t0");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(4u, context.Registers[RegisterID.A0]);
+    }
+
+    [Fact]
+    public void Execute_Add_NegativeOperands_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T0] = unchecked((uint)-1);
+        context.Registers[RegisterID.T1] = unchecked((uint)-1);
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("add $t2, $t0, $t1");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(unchecked((uint)-2), context.Registers[RegisterID.T2]);
+    }
+
+    [Fact]
+    public void Execute_Sub_MinValueMinusMinValue_NoException() {
+        // 両オペランドが「負」でも結果が範囲内ならOvにならない
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T0] = unchecked((uint)int.MinValue);
+        context.Registers[RegisterID.T1] = unchecked((uint)int.MinValue);
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("sub $t2, $t0, $t1");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(0u, context.Registers[RegisterID.T2]);
+    }
+
+    [Fact]
+    public void Execute_Addi_NegativeRs_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T1] = unchecked((uint)-1);
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("addi $t0, $t1, 1");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(0u, context.Registers[RegisterID.T0]);
+    }
+
+    [Fact]
+    public void Execute_Addi_Overflow_RaisesException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T1] = int.MaxValue; // 0x7FFFFFFF
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("addi $t0, $t1, 1");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.Ov, context.LastException?.Code);
+    }
+
+    [Fact]
+    public void Execute_Addi_NegativeImmOverflow_RaisesException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T1] = unchecked((uint)int.MinValue); // 0x80000000
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("addi $t0, $t1, -1");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.Ov, context.LastException?.Code);
+    }
+
+    [Fact]
+    public void Execute_Addiu_Overflow_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T1] = int.MaxValue;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("addiu $t0, $t1, 1");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(unchecked((uint)int.MinValue), context.Registers[RegisterID.T0]);
+    }
+
     [Fact]
     public void Execute_Sw_Misaligned_RaisesException() {
         RuntimeContext context = TestHelpers.CreateRuntimeContext();
@@ -518,6 +714,60 @@ public class InstructionExecuteTests {
 
         _ = Assert.NotNull(context.LastException);
         Assert.Equal(ExcCode.AdEL, context.LastException?.Code);
+    }
+
+    [Fact]
+    public void Execute_Sh_Misaligned_RaisesException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.Sp] = 0x10000001; // misaligned
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("sh $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.AdES, context.LastException?.Code);
+    }
+
+    [Fact]
+    public void Execute_Lh_Misaligned_RaisesException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.Sp] = 0x10000001; // misaligned
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("lh $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        _ = Assert.NotNull(context.LastException);
+        Assert.Equal(ExcCode.AdEL, context.LastException?.Code);
+    }
+
+    [Fact]
+    public void Execute_Lb_OddAddress_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.WriteMemoryByte(new Address(0x10000001), 0x7F);
+        context.Registers[RegisterID.Sp] = 0x10000001; // バイトアクセスにアラインメント制約はない
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("lb $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(0x0000007Fu, context.Registers[RegisterID.T0]);
+    }
+
+    [Fact]
+    public void Execute_Sb_OddAddress_NoException() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.T0] = 0x7F;
+        context.Registers[RegisterID.Sp] = 0x10000001;
+
+        IInstruction? instruction = TestHelpers.ParseInstruction("sb $t0, 0($sp)");
+        Assert.NotNull(instruction);
+        instruction.Execute(context);
+
+        Assert.Null(context.LastException);
+        Assert.Equal(0x7F, context.ReadMemoryByte(new Address(0x10000001)));
     }
 
     [Fact]

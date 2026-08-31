@@ -137,7 +137,13 @@ internal sealed partial class InstructionRegistry {
         this.Register("mtlo", LoHiRegisterInstruction.CreateParser(false, false));
 
         // Memory
+        this.Register("lb", MemoryInstruction.CreateParser(byteNum: 1, isWrite: false, isSign: true));
+        this.Register("lbu", MemoryInstruction.CreateParser(byteNum: 1, isWrite: false));
+        this.Register("lh", MemoryInstruction.CreateParser(byteNum: 2, isWrite: false, isSign: true));
+        this.Register("lhu", MemoryInstruction.CreateParser(byteNum: 2, isWrite: false));
         this.Register("lw", MemoryInstruction.CreateParser(byteNum: 4, isWrite: false));
+        this.Register("sb", MemoryInstruction.CreateParser(byteNum: 1, isWrite: true));
+        this.Register("sh", MemoryInstruction.CreateParser(byteNum: 2, isWrite: true));
         this.Register("sw", MemoryInstruction.CreateParser(byteNum: 4, isWrite: true));
 
         // Syscall等

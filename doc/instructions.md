@@ -91,18 +91,18 @@
 
 ### ロード
 
-- [ ] `lb` — Load Byte (符号拡張)
-- [ ] `lbu` — Load Byte Unsigned (ゼロ拡張)
-- [ ] `lh` — Load Halfword (符号拡張)
-- [ ] `lhu` — Load Halfword Unsigned (ゼロ拡張)
+- [x] `lb` — Load Byte (符号拡張)
+- [x] `lbu` — Load Byte Unsigned (ゼロ拡張)
+- [x] `lh` — Load Halfword (符号拡張)
+- [x] `lhu` — Load Halfword Unsigned (ゼロ拡張)
 - [x] `lw` — Load Word
 - [ ] `lwl` — Load Word Left
 - [ ] `lwr` — Load Word Right
 
 ### ストア
 
-- [ ] `sb` — Store Byte
-- [ ] `sh` — Store Halfword
+- [x] `sb` — Store Byte
+- [x] `sh` — Store Halfword
 - [x] `sw` — Store Word
 - [ ] `swl` — Store Word Left
 - [ ] `swr` — Store Word Right
@@ -198,7 +198,7 @@
 ### データ定義
 
 - [x] `.byte` — バイトデータ定義
-- [ ] `.half` — ハーフワード(2バイト)データ定義
+- [x] `.half` — ハーフワード(2バイト)データ定義
 - [x] `.word` — ワード(4バイト)データ定義
 - [x] `.ascii` — ASCII文字列 (NULLなし)
 - [x] `.asciiz` — ASCII文字列 (NULL終端)

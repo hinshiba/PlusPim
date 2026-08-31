@@ -164,6 +164,50 @@ public class InstructionUndoTests {
     }
 
     [Fact]
+    public void ExecuteUndo_Sh_RestoresMemory() {
+        RuntimeContext ctx = TestHelpers.CreateRuntimeContext();
+        ctx.WriteMemoryBytes(new Address(0x10000000), 0xDEADBEEF, 4);
+        ctx.Registers[RegisterID.T0] = 0x00001234;
+        ctx.Registers[RegisterID.Sp] = 0x10000000;
+
+        // 書き込み範囲外のバイトも監視する
+        Address[] memoryAddresses = [
+            new Address(0x10000000),
+            new Address(0x10000001),
+            new Address(0x10000002),
+            new Address(0x10000003),
+        ];
+        ContextSnapshot snapshot = TestHelpers.TakeSnapshot(ctx, memoryAddresses);
+
+        bool parsed = InstructionRegistry.Default.TryParse("sh $t0, 0($sp)", 1, out IInstruction? instruction);
+        Assert.True(parsed);
+        Assert.NotNull(instruction);
+
+        instruction.Execute(ctx);
+        instruction.Undo(ctx);
+
+        TestHelpers.AssertSnapshotEqual(snapshot, ctx, memoryAddresses);
+    }
+
+    [Fact]
+    public void ExecuteUndo_Lb_RestoresRegister() {
+        RuntimeContext ctx = TestHelpers.CreateRuntimeContext();
+        ctx.WriteMemoryByte(new Address(0x10000000), 0x80);
+        ctx.Registers[RegisterID.Sp] = 0x10000000;
+        ctx.Registers[RegisterID.T0] = 0x12345678;
+        ContextSnapshot snapshot = TestHelpers.TakeSnapshot(ctx);
+
+        bool parsed = InstructionRegistry.Default.TryParse("lb $t0, 0($sp)", 1, out IInstruction? instruction);
+        Assert.True(parsed);
+        Assert.NotNull(instruction);
+
+        instruction.Execute(ctx);
+        instruction.Undo(ctx);
+
+        TestHelpers.AssertSnapshotEqual(snapshot, ctx);
+    }
+
+    [Fact]
     public void ExecuteUndo_WriteToZero_StillRestores() {
         RuntimeContext ctx = TestHelpers.CreateRuntimeContext();
         TestHelpers.SeedRegisters(ctx, 11);
