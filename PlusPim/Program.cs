@@ -55,11 +55,20 @@ internal class Program {
             DefaultValueFactory = (_) => false
         };
 
+        Option<bool> stdioArg = new(
+            name: "--stdio"
+            ) {
+            Required = false,
+            Description = "Use stdin/stdout for DAP transport instead of TCP (default: false)",
+            DefaultValueFactory = (_) => false
+        };
+
         cmd.Arguments.Add(fileArg);
         cmd.Options.Add(verboseArg);
         cmd.Options.Add(debugArg);
         cmd.Options.Add(portArg);
         cmd.Options.Add(attachArg);
+        cmd.Options.Add(stdioArg);
 
 
         // 実際に解析
@@ -94,30 +103,46 @@ internal class Program {
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
             Application.Application app = new(true, files, logger);
 
-            Socket dapSocket = new(SocketType.Stream, ProtocolType.Tcp);
-            dapSocket.Bind(new IPEndPoint(IPAddress.Loopback, parseResult.GetValue(portArg)));
-            dapSocket.Listen();
-            logger.Debug("Program", "Socket created");
+            if(parseResult.GetValue(stdioArg)) {
+                // stdio経由でDAPを話す．DAPに渡す前に元のstdin/stdoutストリームを確保する
+                Stream stdin = Console.OpenStandardInput();
+                Stream stdout = Console.OpenStandardOutput();
+                logger.Debug("Program", "Using stdio transport for DAP");
 
-            // プローブ接続（waitForPort）を読み飛ばし，本番DAP接続を待つ
-            Socket clientSocket;
-            while(true) {
-                clientSocket = await dapSocket.AcceptAsync();
-                await Task.Delay(50);
-                if(clientSocket.Poll(0, SelectMode.SelectRead) && clientSocket.Available == 0) {
-                    clientSocket.Dispose();
-                    logger.Debug("Program", "Probe connection discarded");
-                    continue;
+                DebugAdapter adapter = new(stdin, stdout, app, logger);
+
+                // デバッギのConsole.WriteがDAPストリームを汚染しないようにOutputEventへ転送
+                Console.SetOut(new DebuggeeOutputWriter(adapter));
+                // stdinはDAPが占有するため，デバッギからの読み取りは空文字列扱いに劣化させる
+                Console.SetIn(TextReader.Null);
+
+                await adapter.WaitForSessionEnd();
+            } else {
+                Socket dapSocket = new(SocketType.Stream, ProtocolType.Tcp);
+                dapSocket.Bind(new IPEndPoint(IPAddress.Loopback, parseResult.GetValue(portArg)));
+                dapSocket.Listen();
+                logger.Debug("Program", "Socket created");
+
+                // プローブ接続（waitForPort）を読み飛ばし，本番DAP接続を待つ
+                Socket clientSocket;
+                while(true) {
+                    clientSocket = await dapSocket.AcceptAsync();
+                    await Task.Delay(50);
+                    if(clientSocket.Poll(0, SelectMode.SelectRead) && clientSocket.Available == 0) {
+                        clientSocket.Dispose();
+                        logger.Debug("Program", "Probe connection discarded");
+                        continue;
+                    }
+                    break;
                 }
-                break;
+
+                await using NetworkStream stream = new(clientSocket, ownsSocket: true);
+
+                logger.Debug("Program", "Socket connected");
+
+                DebugAdapter adapter = new(stream, stream, app, logger);
+                await adapter.WaitForSessionEnd();
             }
-
-            await using NetworkStream stream = new(clientSocket, ownsSocket: true);
-
-            logger.Debug("Program", "Socket connected");
-
-            DebugAdapter adapter = new(stream, stream, app, logger);
-            await adapter.WaitForSessionEnd();
         } else {
             // 実行するだけ
             throw new NotImplementedException("Non-debug mode is not implemented yet");
