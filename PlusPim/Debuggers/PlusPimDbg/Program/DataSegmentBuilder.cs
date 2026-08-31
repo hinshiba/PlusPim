@@ -12,12 +12,46 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     private readonly Dictionary<Address, byte> _memoryImage = [];
 
     /// <summary>
+    /// アドレス未確定のラベル
+    /// </summary>
+    private readonly List<(string Name, int LineIndex)> _pendingLabels = [];
+
+    private readonly List<(Label Label, int LineIndex)> _resolvedLabels = [];
+
+    /// <summary>
+    /// アドレスが確定したラベル．Build後に確定する
+    /// </summary>
+    public IReadOnlyList<(Label Label, int LineIndex)> ResolvedLabels => this._resolvedLabels;
+
+    /// <summary>
     /// 空き領域の先頭を示す
     /// </summary>
     public Address NextDataAddress { get; private set; } = baseAddr;
 
     private readonly Address _baseAddr = baseAddr;
 
+
+    /// <summary>
+    /// ラベルを登録する．アドレスは直後に配置される実データの先頭で確定する
+    /// </summary>
+    /// <param name="name">ラベル名</param>
+    /// <param name="lineIndex">0-indexedの行番号</param>
+    public void AddLabel(string name, int lineIndex) {
+        this._pendingLabels.Add((name, lineIndex));
+    }
+
+    /// <summary>
+    /// 未確定ラベルを現在のカーソル位置で確定させる
+    /// </summary>
+    private void ResolvePendingLabels() {
+        if(this._pendingLabels.Count == 0) {
+            return;
+        }
+        foreach((string name, int lineIndex) in this._pendingLabels) {
+            this._resolvedLabels.Add((new Label(name, this.NextDataAddress), lineIndex));
+        }
+        this._pendingLabels.Clear();
+    }
 
     /// <summary>
     /// データセグメントの1行を処理する
@@ -49,6 +83,9 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
             case ".byte":
                 this.ProcessByte(operands);
                 break;
+            case ".half":
+                this.ProcessHalf(operands);
+                break;
             case ".word":
                 this.ProcessWord(operands);
                 break;
@@ -71,6 +108,8 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// パース結果をDataSegmentとして返す
     /// </summary>
     public DataSegment Build() {
+        // .dataの末尾に置かれたラベルを確定させる
+        this.ResolvePendingLabels();
         return new DataSegment(this._memoryImage, this._baseAddr, this.NextDataAddress.Addr - this._baseAddr.Addr);
     }
 
@@ -82,6 +121,7 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
                 logger.Warning("DataSegmentBuilder", $".space value cannot be negative or zero: {n}");
                 return;
             }
+            this.ResolvePendingLabels();
             this.NextDataAddress += n;
         } else {
             logger.Warning("DataSegmentBuilder", $"Invalid .space value: {trimmed}");
@@ -98,6 +138,23 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
                 this.WriteByte((byte)(hexVal & 0xFF));
             } else {
                 logger.Warning("DataSegmentBuilder", $"Invalid .byte value: {trimmedVal}");
+            }
+        }
+    }
+
+    private void ProcessHalf(string operands) {
+        string[] values = operands.Split(',');
+        foreach(string val in values) {
+            string trimmedVal = val.Trim();
+            // 2バイトアラインメント
+            this.ProcessAlign("1");
+
+            if(int.TryParse(trimmedVal, out int intVal)) {
+                this.WriteHalf(intVal);
+            } else if(this.TryParseHex(trimmedVal, out int hexVal)) {
+                this.WriteHalf(hexVal);
+            } else {
+                logger.Warning("DataSegmentBuilder", $"Invalid .half value: {trimmedVal}");
             }
         }
     }
@@ -195,8 +252,16 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     }
 
     private void WriteByte(byte value) {
+        // 整列後の書き込み先でラベルを確定させる
+        this.ResolvePendingLabels();
         this._memoryImage[this.NextDataAddress] = value;
         this.NextDataAddress++;
+    }
+
+    private void WriteHalf(int value) {
+        // リトルエンディアン
+        this.WriteByte((byte)(value & 0xFF));
+        this.WriteByte((byte)((value >> 8) & 0xFF));
     }
 
     private void WriteWord(int value) {

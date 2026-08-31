@@ -101,15 +101,19 @@ internal class ParsedProgram {
         DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
         foreach((string trimmed, int lineIndex) in dataLines) {
             if(IsLabel(trimmed)) {
-                string labelName = trimmed[..^1];
-                Label label = new(labelName, dataSegmentBuilder.NextDataAddress);
-                if(this.SymbolTable.Add(label)) {
-                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineIndex + 1}. The previous definition will be overwritten.");
-                }
-                logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
+                dataSegmentBuilder.AddLabel(trimmed[..^1], lineIndex);
             } else {
                 dataSegmentBuilder.AddLine(trimmed);
             }
+        }
+        this.DataSegment = dataSegmentBuilder.Build();
+
+        // ラベルのアドレスは直後のデータの配置位置で確定するため，Build後にシンボルテーブルへ登録する
+        foreach((Label label, int lineIndex) in dataSegmentBuilder.ResolvedLabels) {
+            if(this.SymbolTable.Add(label)) {
+                logger.Warning("ParsedProgram", $"Duplicate label '{label.Name}' at line {lineIndex + 1}. The previous definition will be overwritten.");
+            }
+            logger.Debug("ParsedProgram", $"Line{lineIndex + 1} {label}");
         }
 
 
@@ -131,7 +135,6 @@ internal class ParsedProgram {
         }
 
         this.TextSegment = textSegmentBuilder.Build();
-        this.DataSegment = dataSegmentBuilder.Build();
         this.KernelTextSegment = kernelTextSegmentBuilder.Build();
     }
 

@@ -104,6 +104,60 @@ public class IntegrationTests {
     }
 
     [Fact]
+    public void Step_ByteHalfwordAccess_LoadsAndStoresCorrectly() {
+        // .half のデータ配置から lb/lbu/lh/lhu/sb/sh までを通しで確認する
+        string asm = """
+            .data
+            tbl:
+              .half 0x1234, -1
+            buf:
+              .space 4
+            .text
+            main:
+              la $t0, tbl
+              lh $t1, 0($t0)
+              lhu $t2, 2($t0)
+              lh $t3, 2($t0)
+              lb $t4, 0($t0)
+              lbu $t5, 1($t0)
+              la $t6, buf
+              sb $t5, 0($t6)
+              sh $t1, 2($t6)
+              lw $t7, 0($t6)
+            """;
+        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
+        try {
+            (uint[] initial, uint initialPc, _, _) = debugger.GetRegisters();
+
+            // la は lui + ori の2命令に展開されるため，全体で12命令
+            for(int i = 0; i < 12; i++) {
+                Assert.Equal(StopReason.Step, debugger.Step());
+            }
+
+            (uint[] regs, _, _, _) = debugger.GetRegisters();
+            Assert.Equal(0x00001234u, regs[(int)RegisterID.T1]); // lh 正の値
+            Assert.Equal(0x0000FFFFu, regs[(int)RegisterID.T2]); // lhu ゼロ拡張
+            Assert.Equal(0xFFFFFFFFu, regs[(int)RegisterID.T3]); // lh 符号拡張
+            Assert.Equal(0x00000034u, regs[(int)RegisterID.T4]); // lb リトルエンディアン下位バイト
+            Assert.Equal(0x00000012u, regs[(int)RegisterID.T5]); // lbu 上位バイト
+            // sb で 0x12 を buf+0 に，sh で 0x1234 を buf+2 に書いた結果
+            Assert.Equal(0x12340012u, regs[(int)RegisterID.T7]);
+            Assert.Null(debugger.GetLastException());
+
+            // バックステップで初期状態まで巻き戻せること
+            for(int i = 0; i < 12; i++) {
+                Assert.True(debugger.Back());
+            }
+
+            (uint[] restored, uint restoredPc, _, _) = debugger.GetRegisters();
+            Assert.Equal(initial, restored);
+            Assert.Equal(initialPc, restoredPc);
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    [Fact]
     public void Step_Factorial_CorrectResult() {
         string asm = """
             .text
