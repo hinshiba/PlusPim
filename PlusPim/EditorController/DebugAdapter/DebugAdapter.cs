@@ -56,6 +56,20 @@ internal class DebugAdapter: DebugAdapterBase {
         return this._sessionEnded.Task;
     }
 
+    /// <summary>
+    /// デバッギの標準出力をDAPのOutputEventとしてエディタへ送る
+    /// </summary>
+    internal void SendDebuggeeOutput(string text) {
+        if(!this._isInit) {
+            // Launch前や終了後は破棄
+            return;
+        }
+        this.Protocol.SendEvent(new OutputEvent {
+            Output = text,
+            Category = OutputEvent.CategoryValue.Stdout
+        });
+    }
+
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
         this._logger.Debug("DebugAdapter", "InitializeRequest.");
         // InitializeRequestに対してResponseを返す前は，イベントを送信してはならない
