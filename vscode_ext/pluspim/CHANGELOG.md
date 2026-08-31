@@ -1,8 +1,22 @@
 # Change Log
 
-All notable changes to the "pluspim" extension will be documented in this file.
+## [0.2.0] - 2026-08-31
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+### Added
+
+- Byte and halfword memory instructions: `lb`, `lbu`, `lh`, `lhu`, `sb`, `sh`
+- `.half` data directive for 16-bit values
+- `--stdio` transport for the debug adapter (DAP over stdin/stdout as an alternative to TCP)
+- Example MIPS programs (sum, Fibonacci, GCD, strlen, array, bubble sort)
+
+### Fixed
+
+- Arithmetic overflow in I-type instructions (e.g. `addi`) no longer terminates
+  the emulator; it now raises the `Ov` exception
+- R-type arithmetic instructions (`add`, `sub`) no longer raise a spurious `Ov`
+  exception when no overflow occurred
+- `.align` is now honored correctly (labels are resolved after the following
+  data is aligned and placed, instead of before)
 
 ## [0.1.0] - 2026-04-06
 
