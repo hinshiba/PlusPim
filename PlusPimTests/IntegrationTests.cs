@@ -29,6 +29,32 @@ public class IntegrationTests {
     }
 
     [Fact]
+    public void Step_SubWithNegativeOperand_NoOverflowException() {
+        // li で作った負値を含む sub/subu が誤って Ov を起こさないことの回帰テスト
+        string asm = """
+            .text
+            main:
+              li $t0, -1
+              li $t1, 3
+              sub $a0, $t1, $t0
+              subu $a1, $t1, $t0
+            """;
+        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
+        try {
+            // li $t0, -1 は lui + ori の2命令に展開される
+            for(int i = 0; i < 5; i++) {
+                Assert.Equal(StopReason.Step, debugger.Step());
+            }
+
+            (uint[] regs, _, _, _) = debugger.GetRegisters();
+            Assert.Equal(4u, regs[(int)RegisterID.A0]);
+            Assert.Equal(4u, regs[(int)RegisterID.A1]);
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    [Fact]
     public void Step_Loop_CorrectCounter() {
         string asm = """
             .text

@@ -55,37 +55,59 @@ internal sealed partial class InstructionRegistry {
         this._parsers[mnemonic] = factory(mnemonic);
     }
 
+    /// <summary>
+    /// 符号付き加算．結果が32bit符号付きの範囲を超えた場合のみ<see cref="OverflowException"/>を投げる
+    /// </summary>
+    /// <remarks>
+    /// <see langword="uint"/>から<see langword="int"/>への変換で例外が発生するのを防ぐため，変換は<c>unchecked</c>で行う
+    /// </remarks>
+    private static uint AddSigned(uint lhs, uint rhs) {
+        int l = unchecked((int)lhs);
+        int r = unchecked((int)rhs);
+        return unchecked((uint)checked(l + r));
+    }
+
+    /// <summary>
+    /// 符号付き減算．結果が32bit符号付きの範囲を超えた場合のみ<see cref="OverflowException"/>を投げる
+    /// </summary>
+    /// <remarks><see cref="AddSigned"/>と同様の理由</remarks>
+    private static uint SubSigned(uint lhs, uint rhs) {
+        int l = unchecked((int)lhs);
+        int r = unchecked((int)rhs);
+        return unchecked((uint)checked(l - r));
+    }
+
     private void RegisterLambdaInstructions() {
         // R-Type 3レジスタ
-        this.Register("add", RType3RegInstruction.CreateParser((rs, rt) => (uint)checked((int)rs + (int)rt)));
-        this.Register("addu", RType3RegInstruction.CreateParser((rs, rt) => rs + rt));
-        this.Register("sub", RType3RegInstruction.CreateParser((rs, rt) => (uint)checked((int)rs - (int)rt)));
-        this.Register("subu", RType3RegInstruction.CreateParser((rs, rt) => rs - rt));
+        this.Register("add", RType3RegInstruction.CreateParser(AddSigned));
+        this.Register("addu", RType3RegInstruction.CreateParser((rs, rt) => unchecked(rs + rt)));
+        this.Register("sub", RType3RegInstruction.CreateParser(SubSigned));
+        this.Register("subu", RType3RegInstruction.CreateParser((rs, rt) => unchecked(rs - rt)));
         this.Register("and", RType3RegInstruction.CreateParser((rs, rt) => rs & rt));
         this.Register("or", RType3RegInstruction.CreateParser((rs, rt) => rs | rt));
         this.Register("xor", RType3RegInstruction.CreateParser((rs, rt) => rs ^ rt));
         this.Register("nor", RType3RegInstruction.CreateParser((rs, rt) => ~(rs | rt)));
-        this.Register("slt", RType3RegInstruction.CreateParser((rs, rt) => (int)rs < (int)rt ? 1u : 0u));
+        this.Register("slt", RType3RegInstruction.CreateParser((rs, rt) => unchecked((int)rs) < unchecked((int)rt) ? 1u : 0u));
         this.Register("sltu", RType3RegInstruction.CreateParser((rs, rt) => rs < rt ? 1u : 0u));
 
         // R-Type シフト即値
         this.Register("sll", RTypeShiftImmInstruction.CreateParser((rt, shamt) => rt << shamt));
         this.Register("srl", RTypeShiftImmInstruction.CreateParser((rt, shamt) => rt >> shamt));
-        this.Register("sra", RTypeShiftImmInstruction.CreateParser((rt, shamt) => (uint)((int)rt >> shamt)));
+        this.Register("sra", RTypeShiftImmInstruction.CreateParser((rt, shamt) => unchecked((uint)((int)rt >> shamt))));
 
         // R-Type シフト可変
         this.Register("sllv", RTypeShiftVarInstruction.CreateParser((rt, shift) => rt << shift));
         this.Register("srlv", RTypeShiftVarInstruction.CreateParser((rt, shift) => rt >> shift));
-        this.Register("srav", RTypeShiftVarInstruction.CreateParser((rt, shift) => (uint)((int)rt >> shift)));
+        this.Register("srav", RTypeShiftVarInstruction.CreateParser((rt, shift) => unchecked((uint)((int)rt >> shift))));
 
         // I-Type
-        this.Register("addi", ITypeInstruction.CreateParser((rs, imm) => (uint)checked((int)rs + imm.ToSInt())));
-        this.Register("addiu", ITypeInstruction.CreateParser((rs, imm) => (uint)((int)rs + imm.ToSInt())));
+        this.Register("addi", ITypeInstruction.CreateParser((rs, imm) => AddSigned(rs, unchecked((uint)imm.ToSInt()))));
+        this.Register("addiu", ITypeInstruction.CreateParser((rs, imm) => unchecked((uint)((int)rs + imm.ToSInt()))));
         this.Register("andi", ITypeInstruction.CreateParser((rs, imm) => rs & imm.ToUInt()));
         this.Register("ori", ITypeInstruction.CreateParser((rs, imm) => rs | imm.ToUInt()));
         this.Register("xori", ITypeInstruction.CreateParser((rs, imm) => rs ^ imm.ToUInt()));
-        this.Register("slti", ITypeInstruction.CreateParser((rs, imm) => (uint)((int)rs < imm.ToSInt() ? 1 : 0)));
-        this.Register("sltiu", ITypeInstruction.CreateParser((rs, imm) => rs < (uint)imm.ToSInt() ? 1u : 0u));
+        this.Register("slti", ITypeInstruction.CreateParser((rs, imm) => unchecked((int)rs) < imm.ToSInt() ? 1u : 0u));
+        this.Register("sltiu", ITypeInstruction.CreateParser((rs, imm) => rs < unchecked((uint)imm.ToSInt()) ? 1u : 0u));
         this.Register("lui", ITypeInstruction.CreateRegImmParser(imm => unchecked(imm.ToUInt() << 16)));
 
         // Branch
@@ -94,18 +116,18 @@ internal sealed partial class InstructionRegistry {
 
         // MulDiv
         this.Register("mult", MulDivInstruction.CreateParser((rs, rt) => {
-            long result = (long)(int)rs * (int)rt;
-            return ((uint)(result >> 32), (uint)(result & 0xFFFFFFFF));
+            long result = unchecked((long)(int)rs * (int)rt);
+            return unchecked(((uint)(result >> 32), (uint)(result & 0xFFFFFFFF)));
         }));
         this.Register("multu", MulDivInstruction.CreateParser((rs, rt) => {
-            ulong result = (ulong)rs * rt;
-            return ((uint)(result >> 32), (uint)(result & 0xFFFFFFFF));
+            ulong result = unchecked((ulong)rs * rt);
+            return unchecked(((uint)(result >> 32), (uint)(result & 0xFFFFFFFF)));
         }));
 
-        this.Register("div", MulDivInstruction.CreateParser((rs, rt) =>
-            ((uint)((int)rs % (int)rt), (uint)((int)rs / (int)rt))));
-        this.Register("divu", MulDivInstruction.CreateParser((rs, rt) =>
-            (rs % rt, rs / rt)));
+        this.Register("div", MulDivInstruction.CreateParser((rs, rt) => unchecked(
+            ((uint)((int)rs % (int)rt), (uint)((int)rs / (int)rt)))));
+        this.Register("divu", MulDivInstruction.CreateParser((rs, rt) => unchecked(
+            (rs % rt, rs / rt))));
 
         // LoHi
         this.Register("mfhi", LoHiRegisterInstruction.CreateParser(true, true));

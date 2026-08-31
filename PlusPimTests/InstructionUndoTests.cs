@@ -233,4 +233,22 @@ public class InstructionUndoTests {
 
         TestHelpers.AssertSnapshotEqual(snapshot, ctx);
     }
+
+    [Fact]
+    public void ExecuteUndo_AddiOverflow_RestoresState() {
+        RuntimeContext ctx = TestHelpers.CreateRuntimeContext();
+        ctx.Registers[RegisterID.T1] = int.MaxValue;
+        ContextSnapshot snapshot = TestHelpers.TakeSnapshot(ctx);
+
+        bool parsed = InstructionRegistry.Default.TryParse("addi $t0, $t1, 1", 1, out IInstruction? instruction);
+        Assert.True(parsed);
+        Assert.NotNull(instruction);
+
+        instruction.Execute(ctx);
+        Assert.Equal(ExcCode.Ov, ctx.LastException?.Code);
+
+        instruction.Undo(ctx);
+
+        TestHelpers.AssertSnapshotEqual(snapshot, ctx);
+    }
 }
