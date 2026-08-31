@@ -13,7 +13,7 @@
                 "${workspaceFolder}/kseg.asm"
             ],
             "args": [
-                "-d",
+                "-d"
             ],
             "trace": false
         }

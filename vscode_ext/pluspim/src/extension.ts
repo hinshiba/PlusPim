@@ -44,7 +44,7 @@ export function deactivate() { }
 class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	private terminal: vscode.Terminal | undefined;
 
-	constructor(private readonly context: vscode.ExtensionContext) {}
+	constructor(private readonly context: vscode.ExtensionContext) { }
 
 	async createDebugAdapterDescriptor(
 		session: vscode.DebugSession

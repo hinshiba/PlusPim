@@ -13,5 +13,5 @@ testfolder/**
 scripts/**
 out/**
 !out/extension.js
-bin/win-x64/**
-bin/linux-x64/*.pdb
+bin/linux-x64/**
+bin/win-x64/*.pdb
