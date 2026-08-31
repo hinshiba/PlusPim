@@ -6,7 +6,11 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 /// <summary>
 /// MIPSにおいてI形式の命令のほとんどを表すクラス
 /// </summary>
-/// <remarks>メモリアクセス命令, ブランチ命令, トラップ命令を含まない</remarks>
+/// <remarks>
+/// メモリアクセス命令, ブランチ命令, トラップ命令を含まない．
+/// ラムダ内で <c>checked</c> を使えば算術オーバーフロー時に
+/// <see cref="OverflowException"/> が発生し，MIPS例外 <see cref="ExcCode.Ov"/> として処理される．
+/// </remarks>
 internal sealed class ITypeInstruction(
     RegisterID rt, RegisterID rs, Immediate imm, int sourceLine,
     string mnemonic, Func<uint, Immediate, uint> compute
@@ -23,7 +27,15 @@ internal sealed class ITypeInstruction(
 
     public void Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
-        uint result = compute(rsVal, imm);
+        uint result;
+        try {
+            result = compute(rsVal, imm);
+        } catch(OverflowException) {
+            // Rtは変更しないが，Undoスタックの整合性のために現在値でWriteRtを呼ぶ
+            this.WriteRt(context, context.Registers[rt]);
+            context.RaiseException(ExcCode.Ov);
+            return;
+        }
         this.WriteRt(context, result);
         context.Log($"{mnemonic} ${rt}, ${rs}, {imm}: 0x{rsVal:X8}, {imm} => 0x{result:X8}");
     }
