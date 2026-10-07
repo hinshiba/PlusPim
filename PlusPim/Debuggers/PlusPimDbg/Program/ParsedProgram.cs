@@ -42,7 +42,7 @@ internal class ParsedProgram {
 
 
         // 前処理: 各行をトリムして，セグメントごとに分割する
-        // 現在のファイルでの
+        // 行番号はこのファイルでの0始まりの値
         List<(string Trimmed, int LineIndex)> textLines = [];
         List<(string Trimmed, int LineIndex)> dataLines = [];
 

@@ -4,9 +4,6 @@ import * as net from "net";
 import * as path from "path";
 
 export function activate(context: vscode.ExtensionContext) {
-
-	// console.log
-	// console.error
 	console.log("PlusPim Extension was loaded.");
 
 	// 情報を設定
@@ -35,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 				return undefined; // トラッキングしない
 			}
-		}))
+		}));
 }
 
 export function deactivate() { }

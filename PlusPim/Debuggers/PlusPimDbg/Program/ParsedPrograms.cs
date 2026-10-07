@@ -6,7 +6,7 @@ using PlusPim.Logging;
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 /// <summary>
-/// 複数の<see cref="ParsedProgram"/>を管理するクラス"/>
+/// 複数の<see cref="ParsedProgram"/>を管理するクラス
 /// </summary>
 internal sealed class ParsedPrograms {
 
