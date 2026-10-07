@@ -1,5 +1,7 @@
 # MIPS 命令 対応状況チェックリスト
 
+ハイフンの入ったチェックリストは実装予定がないことを示す．
+
 ## R形式命令
 
 ### 算術・論理演算
@@ -44,21 +46,31 @@
 ### ジャンプ (レジスタ)
 
 - [x] `jr` — Jump Register (PC = rs)
-- [ ] `jalr` — Jump and Link Register (rd = PC+8, PC = rs)
+- [-] `jalr` — Jump and Link Register (rd = PC+4, PC = rs. 遅延スロットなし)
 
 ### システム
 
 - [x] `syscall` — System Call
 - [x] `break` — Breakpoint
 
+### コプロセッサ0 (例外処理)
+
+- [x] `mfc0` — Move From Coprocessor 0 (rt = CP0[rd])
+- [x] `mtc0` — Move To Coprocessor 0 (CP0[rd] = rt)
+- [x] `eret` — Exception Return (PC = EPC, ユーザーモードへ復帰)
+
+### PlusPim 独自
+
+- [x] `runtime_call!` — `$v0` で指定した syscall の機能を実行する (カーネルモード専用)
+
 ### トラップ
 
-- [ ] `tge` — Trap if Greater or Equal (符号付き)
-- [ ] `tgeu` — Trap if Greater or Equal Unsigned
-- [ ] `tlt` — Trap if Less Than (符号付き)
-- [ ] `tltu` — Trap if Less Than Unsigned
-- [ ] `teq` — Trap if Equal
-- [ ] `tne` — Trap if Not Equal
+- [-] `tge` — Trap if Greater or Equal (符号付き)
+- [-] `tgeu` — Trap if Greater or Equal Unsigned
+- [-] `tlt` — Trap if Less Than (符号付き)
+- [-] `tltu` — Trap if Less Than Unsigned
+- [-] `teq` — Trap if Equal
+- [-] `tne` — Trap if Not Equal
 
 ---
 
@@ -86,8 +98,8 @@
 - [ ] `bgtz` — Branch on Greater Than Zero (if rs > 0)
 - [ ] `blez` — Branch on Less or Equal Zero (if rs <= 0)
 - [ ] `bltz` — Branch on Less Than Zero (if rs < 0)
-- [ ] `bgezal` — Branch on >= Zero and Link
-- [ ] `bltzal` — Branch on < Zero and Link
+- [-] `bgezal` — Branch on >= Zero and Link
+- [-] `bltzal` — Branch on < Zero and Link
 
 ### ロード
 
@@ -121,7 +133,7 @@
 ## J形式命令 (Jump)
 
 - [x] `j` — Jump (PC = target)
-- [x] `jal` — Jump and Link (ra = PC+8, PC = target)
+- [x] `jal` — Jump and Link (ra = PC+4, PC = target. 遅延スロットなし)
 
 ---
 
