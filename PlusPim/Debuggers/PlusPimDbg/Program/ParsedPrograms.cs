@@ -2,6 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
@@ -82,33 +83,39 @@ internal sealed class ParsedPrograms {
 
     /// <summary>
     /// 命令アドレスから命令を取得する
-    /// MIPS例外が発生しうる (Ri, AdEL)
+    /// MIPS例外が発生しうる (RI, AdEL) が，例外の適用は呼び出し側が行う
     /// </summary>
     /// <param name="pc">命令アドレス</param>
-    /// <param name="context">コンテキスト</param>
-    /// <returns>命令</returns>
-    public IInstruction? GetInstruction(Address pc, RuntimeContext context) {
+    /// <param name="isKernelMode">カーネルモードかどうか</param>
+    /// <param name="instruction">取得できた場合は命令</param>
+    /// <param name="fault">取得できなかった場合は発生させる例外</param>
+    /// <returns>取得できた場合は<see langword="true"/></returns>
+    public bool TryGetInstruction(Address pc, bool isKernelMode, [NotNullWhen(true)] out IInstruction? instruction, out ExceptionRequest fault) {
+        instruction = null;
+        fault = default;
+
         // 有効なアドレスか確認
         if((pc.Addr & 0b11) != 0) {
-            context.RaiseException(ExcCode.AdEL, pc);
-            return null;
+            fault = new ExceptionRequest(ExcCode.AdEL, pc);
+            return false;
         }
 
-        int globalIdx = (int)((pc.Addr - (context.IsKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
+        int globalIdx = (int)((pc.Addr - (isKernelMode ? TextSegment.KernelTextSegmentBase.Addr : TextSegment.TextSegmentBase.Addr)) / 4);
         // 有効な範囲か確認
-        if((context.IsKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
-            // 書き込まれていない範囲は無効な命令で埋まっていると見なす
-            context.RaiseException(ExcCode.RI, pc);
-            return null;
+        if((isKernelMode ? this.KernelInstructionCount : this.UserInstructionCount) <= globalIdx) {
+            // 書き込まれていない範囲は無効な命令で埋まっていると見なす．アドレス例外ではないので BadVAddr は変えない
+            fault = new ExceptionRequest(ExcCode.RI, null);
+            return false;
         }
 
-        int[] cumulativeLengths = context.IsKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
+        int[] cumulativeLengths = isKernelMode ? this._kernelTextCumulativeLengths : this._textCumulativeLengths;
         int programIdx = FindProgramIndex(cumulativeLengths, globalIdx);
         int localIdx = 0 < programIdx ? globalIdx - cumulativeLengths[programIdx - 1] : globalIdx;
 
-        return context.IsKernelMode
+        instruction = isKernelMode
             ? this._programs[programIdx].KernelTextSegment.Instructions[localIdx]
             : this._programs[programIdx].TextSegment.Instructions[localIdx];
+        return true;
     }
 
 

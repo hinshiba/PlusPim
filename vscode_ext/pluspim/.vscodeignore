@@ -2,16 +2,18 @@
 .vscode-test/**
 src/**
 .gitignore
-.yarnrc
 vsc-extension-quickstart.md
 **/tsconfig.json
-**/.eslintrc.json
+eslint.config.mjs
 **/*.ts
 node_modules/**
-pnpm-lock.yaml
+bun.lock
+package-lock.json
 testfolder/**
 scripts/**
 out/**
 !out/extension.js
-bin/linux-x64/**
-bin/win-x64/*.pdb
+# Debug builds (dotnet:debug:win) must never ship
+bin/debug/**
+# Debug symbols for any platform
+**/*.pdb

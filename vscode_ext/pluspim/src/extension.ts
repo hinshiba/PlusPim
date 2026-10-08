@@ -37,6 +37,26 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() { }
 
+// 実行権限がなければ付与する (VSIXをWindowsで作ると実行ビットが落ちるため)
+// 失敗時は理由を文字列で返す．成功時は undefined
+function ensureExecutable(binPath: string): string | undefined {
+	if (process.platform === "win32") { return undefined; }
+	try {
+		fs.accessSync(binPath, fs.constants.X_OK);
+		return undefined;
+	} catch (e) {
+		if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+			return `PlusPim binary not found: ${binPath}`;
+		}
+	}
+	try {
+		fs.chmodSync(binPath, 0o755);
+		return undefined;
+	} catch {
+		return `PlusPim binary is not executable and could not be fixed automatically. Run: chmod +x "${binPath}"`;
+	}
+}
+
 
 class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	private terminal: vscode.Terminal | undefined;
@@ -61,10 +81,20 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
 		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
-		// 開発用(dotnet build)を優先，なければリリース用(dotnet publish)にフォールバック
+		// 開発モードのときだけ開発用(dotnet build)を優先，なければリリース用(dotnet publish)にフォールバック
+		const preferDebug = this.context.extensionMode === vscode.ExtensionMode.Development;
 		const debugBinPath = this.context.asAbsolutePath(`bin/debug/${exe}`);
 		const releaseBinPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
-		const binPath = fs.existsSync(debugBinPath) ? debugBinPath : releaseBinPath;
+		const useDebug = preferDebug && fs.existsSync(debugBinPath);
+		if (preferDebug && !useDebug) {
+			vscode.window.showWarningMessage("Debugビルドが見つからないため，リリースビルドを使用します．`bun run dotnet:debug:win` でビルドできます．");
+		}
+		const binPath = useDebug ? debugBinPath : releaseBinPath;
+		const execError = ensureExecutable(binPath);
+		if (execError) {
+			vscode.window.showErrorMessage(execError);
+			throw new Error(execError);
+		}
 
 		// ターミナルで呼んでもらう
 		const args = ["-d", "--port", String(port), ...extraArgs, ...programs];

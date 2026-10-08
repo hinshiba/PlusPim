@@ -23,20 +23,19 @@ internal sealed class RType3RegInstruction(
 
     private readonly Stack<uint> _previousRdValues = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
         uint rtVal = context.Registers[rt];
         uint result;
         try {
             result = compute(rsVal, rtVal);
         } catch(OverflowException) {
-            // Rdは変更しないが，Undoスタックの整合性のために現在値でWriteRdを呼ぶ
-            this.WriteRd(context, context.Registers[rd]);
-            context.RaiseException(ExcCode.Ov);
-            return;
+            // Rdは変更せず，Undo用の情報も積まない
+            return ExecuteResult.Raise(ExcCode.Ov);
         }
         this.WriteRd(context, result);
         context.Log($"{mnemonic} ${rd}, ${rs}, ${rt}: 0x{rsVal:X8}, 0x{rtVal:X8} => 0x{result:X8}");
+        return ExecuteResult.Next;
     }
 
     public void Undo(RuntimeContext context) {

@@ -13,7 +13,12 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
 
     private readonly Stack<(Address PrevPC, CP0RegisterFile PrevCP0)> _prevState = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
+        if(!context.IsKernelMode) {
+            // カーネル空間でないならコプロセッサ例外．Undo用の情報も積まない
+            return ExecuteResult.Raise(ExcCode.CpU);
+        }
+
         CP0RegisterFile cp0regs = context.GetCP0Snapshot();
         this._prevState.Push((context.PC, cp0regs));
 
@@ -22,6 +27,7 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
 
         // EXLクリア
         context.WriteCP0Register(12, 0);
+        return ExecuteResult.PcSet;
     }
 
     public void Undo(RuntimeContext context) {

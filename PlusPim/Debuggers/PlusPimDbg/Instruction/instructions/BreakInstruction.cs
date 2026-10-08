@@ -10,12 +10,15 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 internal sealed class BreakInstruction(int sourceLine): IInstruction {
     public int SourceLine { get; } = sourceLine;
 
-    public void Execute(RuntimeContext context) {
-        context.RaiseException(ExcCode.Bp);
+    public ExecuteResult Execute(RuntimeContext context) {
+        return ExecuteResult.Raise(ExcCode.Bp);
     }
 
+    /// <summary>
+    /// 常に例外を要求するので，Undo が呼ばれることはない
+    /// </summary>
     public void Undo(RuntimeContext context) {
-        context.RetException();
+        throw new InvalidOperationException("break always raises an exception, so it has nothing to undo.");
     }
 
     internal static Func<string, IInstructionParser> CreateParser() {

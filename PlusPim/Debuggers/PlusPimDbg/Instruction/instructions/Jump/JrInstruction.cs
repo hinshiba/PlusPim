@@ -9,7 +9,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
     private RegisterID Rs { get; } = rs;
     private readonly Stack<(Label, StackFrame?, bool)> _poppedFrames = new();
 
-    public override void Execute(RuntimeContext context) {
+    public override ExecuteResult Execute(RuntimeContext context) {
         Label prevLabel = context.CurrentLabel;
         Address target = new(context.Registers[this.Rs]);
         this.JumpTo(context, target);
@@ -28,6 +28,7 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
         this._poppedFrames.Push((prevLabel, poppedFrame, terminatedByThis));
 
         context.Log($"jr ${this.Rs}: jump to {target}");
+        return ExecuteResult.PcSet;
     }
 
     public override void Undo(RuntimeContext context) {

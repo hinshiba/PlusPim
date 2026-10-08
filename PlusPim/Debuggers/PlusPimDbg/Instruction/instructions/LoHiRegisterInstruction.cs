@@ -17,12 +17,13 @@ internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool is
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
     private readonly Stack<uint> _prevRegValues = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         if(isFrom) {
             this.ExecuteFrom(context);
         } else {
             this.ExecuteTo(context);
         }
+        return ExecuteResult.Next;
     }
 
     private void ExecuteFrom(RuntimeContext context) {

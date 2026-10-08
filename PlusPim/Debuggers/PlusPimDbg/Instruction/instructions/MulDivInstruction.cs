@@ -6,9 +6,11 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 /// <summary>
 /// MIPSにおいて乗除算の命令を表すクラス
 /// </summary>
+/// <remarks><c>check</c> は計算前に入力を検査し，ランタイムエラーとなる場合はその種類を返す．<see langword="null"/>なら検査しない</remarks>
 internal sealed class MulDivInstruction(
     RegisterID rs, RegisterID rt, int sourceLine,
-    string mnemonic, Func<uint, uint, (uint hi, uint lo)> compute
+    string mnemonic, Func<uint, uint, (uint hi, uint lo)> compute,
+    Func<uint, uint, RuntimeErrorKind?>? check
 ): IInstruction {
 
     /// <summary>
@@ -21,12 +23,17 @@ internal sealed class MulDivInstruction(
     // (Hi, Lo)である．
     private readonly Stack<(uint, uint)> _prevHiLoValues = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
         uint rtVal = context.Registers[rt];
+        if(check?.Invoke(rsVal, rtVal) is RuntimeErrorKind kind) {
+            // ランタイムエラー．HI/LO は以前の値のままで，Undo用の情報も積まない
+            return ExecuteResult.Fail(kind, this.ErrorMessage(kind, rsVal, rtVal));
+        }
         (uint hi, uint lo) = compute(rsVal, rtVal);
         this.WriteHiLo(context, hi, lo);
         context.Log($"{mnemonic} ${rs}, ${rt}: 0x{rsVal:X8}, 0x{rtVal:X8} => HI=0x{hi:X8}, LO=0x{lo:X8}");
+        return ExecuteResult.Next;
     }
 
     /// <summary>
@@ -48,12 +55,31 @@ internal sealed class MulDivInstruction(
     }
 
     /// <summary>
+    /// ランタイムエラーの説明文 (例: <c>div $t0, $t1: division by zero ($t0 = 0x00000007, $t1 = 0x00000000)</c>)
+    /// </summary>
+    private string ErrorMessage(RuntimeErrorKind kind, uint rsVal, uint rtVal) {
+        string reason = kind switch {
+            RuntimeErrorKind.DivisionByZero => "division by zero",
+            RuntimeErrorKind.DivisionOverflow => "quotient overflow (0x80000000 / -1)",
+            _ => kind.ToString()
+        };
+        string rsName = $"${rs.ToString().ToLowerInvariant()}";
+        string rtName = $"${rt.ToString().ToLowerInvariant()}";
+        return $"{mnemonic} {rsName}, {rtName}: {reason} ({rsName} = 0x{rsVal:X8}, {rtName} = 0x{rtVal:X8})";
+    }
+
+    /// <summary>
     /// 乗除算命令のパーサーを生成するファクトリ (mult, div)
     /// </summary>
-    internal static Func<string, IInstructionParser> CreateParser(Func<uint, uint, (uint hi, uint lo)> compute) {
+    /// <param name="compute">(rs, rt) から (HI, LO) を計算する</param>
+    /// <param name="check">計算前の入力の検査．ランタイムエラーとなる場合はその種類を返す</param>
+    internal static Func<string, IInstructionParser> CreateParser(
+        Func<uint, uint, (uint hi, uint lo)> compute,
+        Func<uint, uint, RuntimeErrorKind?>? check = null
+    ) {
         return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
             return OperandParser.TryParse2RegOperands(operands, out RegisterID rs, out RegisterID rt)
-                ? new MulDivInstruction(rs, rt, lineIndex, mnemonic, compute)
+                ? new MulDivInstruction(rs, rt, lineIndex, mnemonic, compute, check)
                 : (IInstruction?)null;
         });
     }

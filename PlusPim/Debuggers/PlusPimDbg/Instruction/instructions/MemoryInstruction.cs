@@ -25,11 +25,6 @@ internal sealed class MemoryInstruction(
     public int SourceLine { get; } = sourceLine;
 
     /// <summary>
-    /// 例外が発生したかの履歴
-    /// </summary>
-    private readonly Stack<bool> _prevException = new();
-
-    /// <summary>
     /// 逆操作のためのスタック．書き込み命令なら元のメモリの値，読み込み命令なら元のレジスタの値を保存する
     /// </summary>
     private readonly Stack<uint> _prevVal = new();
@@ -38,31 +33,31 @@ internal sealed class MemoryInstruction(
     /// 実効アドレスを計算する
     /// </summary>
     private Address ComputeAddress(RuntimeContext context) {
-        return new Address(context.Registers[rs] + offset.ToUInt());
+        return ComputeEffectiveAddress(context, rs, offset);
     }
 
-    public void Execute(RuntimeContext context) {
+    /// <summary>
+    /// 実効アドレスを計算する．オフセットは符号拡張し，加算は32bitでラップアラウンドする
+    /// </summary>
+    internal static Address ComputeEffectiveAddress(RuntimeContext context, RegisterID rs, Immediate offset) {
+        return new Address(unchecked(context.Registers[rs] + (uint)offset.ToSInt()));
+    }
+
+    public ExecuteResult Execute(RuntimeContext context) {
         Address addr = this.ComputeAddress(context);
 
         // アライメントの確認
         if(addr % byteNum != 0) {
-            // MIPS例外を発生させる
-            this._prevException.Push(true);
-            if(isWrite) {
-                context.RaiseException(ExcCode.AdES, addr);
-            } else {
-                context.RaiseException(ExcCode.AdEL, addr);
-            }
-            return;
+            // MIPS例外を発生させる．メモリもレジスタも変更せず，Undo用の情報も積まない
+            return ExecuteResult.Raise(isWrite ? ExcCode.AdES : ExcCode.AdEL, addr);
         }
 
-        this._prevException.Push(false);
         if(isWrite) {
             this.ExecuteWrite(context, addr);
         } else {
             this.ExecuteRead(context, addr);
         }
-
+        return ExecuteResult.Next;
     }
 
     private void ExecuteWrite(RuntimeContext context, Address addr) {
@@ -86,11 +81,6 @@ internal sealed class MemoryInstruction(
     }
 
     public void Undo(RuntimeContext context) {
-        if(this._prevException.Pop()) {
-            // 例外が発生していた場合は何もしない
-            return;
-        }
-
         Address addr = this.ComputeAddress(context);
         if(isWrite) {
             context.WriteMemoryBytes(addr, this._prevVal.Pop(), byteNum);

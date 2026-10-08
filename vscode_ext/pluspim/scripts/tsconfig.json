@@ -1,0 +1,20 @@
+{
+	// Editor type-checking only. Bun runs scripts/*.ts directly; nothing is emitted.
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"target": "ES2022",
+		"lib": [
+			"ES2022"
+		],
+		"types": [
+			"bun"
+		],
+		"strict": true,
+		"noEmit": true,
+		"skipLibCheck": true
+	},
+	"include": [
+		"*.ts"
+	]
+}

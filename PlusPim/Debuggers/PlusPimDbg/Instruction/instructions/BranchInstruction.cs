@@ -40,7 +40,7 @@ internal sealed class BranchInstruction(
     /// <remarks>
     /// ラベルが解決できなくても例外は発生しない．その場合は-1にジャンプする．
     /// </remarks>
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         // Undoのために現在のPCを保存
         this._previousPCs.Push(context.PC);
 
@@ -53,6 +53,8 @@ internal sealed class BranchInstruction(
             context.PC += 4;
             context.Log($"{mnemonic}: branch not taken");
         }
+        // 成立・不成立どちらでもPCはこの命令が設定する
+        return ExecuteResult.PcSet;
     }
 
     public void Undo(RuntimeContext context) {
@@ -69,6 +71,18 @@ internal sealed class BranchInstruction(
         return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
             return OperandParser.TryParseBranchOperands(operands, out RegisterID rs, out RegisterID rt, out string? label)
                 ? new BranchInstruction(rs, rt, label, lineIndex, mnemonic, condition)
+                : (IInstruction?)null;
+        });
+    }
+
+    /// <summary>
+    /// ゼロとの符号付き比較を行う条件分岐命令 (bgez, bgtz, blez, bltz) のパーサーを生成するファクトリ
+    /// </summary>
+    /// <remarks>rtには<see cref="RegisterID.Zero"/>を渡して既存の実装を再利用する</remarks>
+    internal static Func<string, IInstructionParser> CreateZeroParser(Func<int, bool> condition) {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+            return OperandParser.TryParseBranchZeroOperands(operands, out RegisterID rs, out string? label)
+                ? new BranchInstruction(rs, RegisterID.Zero, label, lineIndex, mnemonic, (rsVal, _) => condition(unchecked((int)rsVal)))
                 : (IInstruction?)null;
         });
     }

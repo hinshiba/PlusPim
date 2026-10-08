@@ -25,19 +25,18 @@ internal sealed class ITypeInstruction(
     // ループ内では複数回書き込まれる可能性があるためスタックで管理
     private readonly Stack<uint> _prevRtValues = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
         uint result;
         try {
             result = compute(rsVal, imm);
         } catch(OverflowException) {
-            // Rtは変更しないが，Undoスタックの整合性のために現在値でWriteRtを呼ぶ
-            this.WriteRt(context, context.Registers[rt]);
-            context.RaiseException(ExcCode.Ov);
-            return;
+            // Rtは変更せず，Undo用の情報も積まない
+            return ExecuteResult.Raise(ExcCode.Ov);
         }
         this.WriteRt(context, result);
         context.Log($"{mnemonic} ${rt}, ${rs}, {imm}: 0x{rsVal:X8}, {imm} => 0x{result:X8}");
+        return ExecuteResult.Next;
     }
 
     /// <summary>

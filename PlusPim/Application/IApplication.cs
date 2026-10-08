@@ -75,4 +75,10 @@ internal interface IApplication {
     /// </summary>
     /// <returns>例外情報．例外が発生していない場合はnull</returns>
     ExceptionInfo? GetLastException();
+
+    /// <summary>
+    /// 発生しているランタイムエラーの情報を取得する
+    /// </summary>
+    /// <returns>ランタイムエラーの情報．発生していない場合はnull</returns>
+    RuntimeErrorInfo? GetRuntimeError();
 }

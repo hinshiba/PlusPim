@@ -30,6 +30,12 @@ public interface IDebugger {
     ExceptionInfo? GetLastException();
 
     /// <summary>
+    /// 発生しているランタイムエラーの情報を取得する
+    /// </summary>
+    /// <returns>ランタイムエラーの情報．発生していない場合はnull</returns>
+    RuntimeErrorInfo? GetRuntimeError();
+
+    /// <summary>
     /// ブレークポイントを設定する
     /// </summary>
     /// <param name="file">ファイル</param>
