@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
@@ -9,7 +10,24 @@ using Xunit;
 
 namespace PlusPimTests;
 
-internal record ContextSnapshot(uint[] Registers, uint HI, uint LO, Address PC, Dictionary<Address, byte>? Memory);
+/// <summary>
+/// デバッガから観測できる状態 (ライブフレームのレジスタ・PC・HI/LO・CP0，コールスタックと直前の例外，ランタイムエラー)
+/// </summary>
+internal sealed record DebuggerSnapshot(
+    uint[] Registers,
+    uint PC,
+    uint HI,
+    uint LO,
+    uint? BadVAddr,
+    uint? Status,
+    uint? Cause,
+    uint? EPC,
+    string FrameName,
+    int CallStackDepth,
+    ExcCode? ExceptionCode,
+    bool? ExceptionIsDouble,
+    RuntimeErrorKind? RuntimeError
+);
 
 internal static class TestHelpers {
     /// <summary>
@@ -54,39 +72,53 @@ internal static class TestHelpers {
     }
 
     /// <summary>
-    /// RuntimeContextの現在の状態をスナップショットとして取得する
+    /// デバッガの現在の状態をスナップショットとして取得する
     /// </summary>
-    public static ContextSnapshot TakeSnapshot(RuntimeContext context, Address[]? memoryAddresses = null) {
-        Dictionary<Address, byte>? memory = null;
-        if(memoryAddresses is not null) {
-            memory = new Dictionary<Address, byte>();
-            foreach(Address addr in memoryAddresses) {
-                memory[addr] = context.ReadMemoryByte(addr);
-            }
-        }
-        return new ContextSnapshot(
-            context.Registers.ToArray(),
-            context.HI,
-            context.LO,
-            context.PC,
-            memory
+    public static DebuggerSnapshot TakeSnapshot(PlusPimDbg debugger) {
+        StackFrameInfo[] frames = debugger.GetCallStack();
+        StackFrameInfo live = frames[0];
+        ExceptionInfo? exception = debugger.GetLastException();
+        return new DebuggerSnapshot(
+            live.Registers,
+            live.PC,
+            live.HI,
+            live.LO,
+            live.CP0BadVAddr,
+            live.CP0Status,
+            live.CP0Cause,
+            live.CP0EPC,
+            live.Name,
+            frames.Length,
+            exception?.Reason,
+            exception?.IsDouble,
+            debugger.GetRuntimeError()?.Kind
         );
     }
 
     /// <summary>
-    /// スナップショットと現在のRuntimeContextの状態が一致するかをアサートする
+    /// スナップショットとデバッガの現在の状態が一致するかをアサートする
     /// </summary>
-    public static void AssertSnapshotEqual(ContextSnapshot expected, RuntimeContext actual, Address[]? memoryAddresses = null) {
-        Assert.Equal(expected.Registers, actual.Registers.ToArray());
-        Assert.Equal(expected.HI, actual.HI);
-        Assert.Equal(expected.LO, actual.LO);
-        Assert.Equal(expected.PC, actual.PC);
+    public static void AssertSnapshotEqual(DebuggerSnapshot expected, PlusPimDbg actual) {
+        AssertSnapshotEqual(expected, TakeSnapshot(actual));
+    }
 
-        if(expected.Memory is not null && memoryAddresses is not null) {
-            foreach(Address addr in memoryAddresses) {
-                Assert.Equal(expected.Memory[addr], actual.ReadMemoryByte(addr));
-            }
-        }
+    /// <summary>
+    /// 2つのスナップショットが一致するかをアサートする
+    /// </summary>
+    public static void AssertSnapshotEqual(DebuggerSnapshot expected, DebuggerSnapshot current) {
+        Assert.Equal(expected.Registers, current.Registers);
+        Assert.Equal(expected.PC, current.PC);
+        Assert.Equal(expected.HI, current.HI);
+        Assert.Equal(expected.LO, current.LO);
+        Assert.Equal(expected.BadVAddr, current.BadVAddr);
+        Assert.Equal(expected.Status, current.Status);
+        Assert.Equal(expected.Cause, current.Cause);
+        Assert.Equal(expected.EPC, current.EPC);
+        Assert.Equal(expected.FrameName, current.FrameName);
+        Assert.Equal(expected.CallStackDepth, current.CallStackDepth);
+        Assert.Equal(expected.ExceptionCode, current.ExceptionCode);
+        Assert.Equal(expected.ExceptionIsDouble, current.ExceptionIsDouble);
+        Assert.Equal(expected.RuntimeError, current.RuntimeError);
     }
 
     /// <summary>

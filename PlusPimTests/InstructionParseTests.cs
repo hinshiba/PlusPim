@@ -138,6 +138,28 @@ public class InstructionParseTests {
         Assert.False(result);
     }
 
+    [Theory]
+    [InlineData("bgez $t0, lbl")]
+    [InlineData("bgtz $8, lbl")]
+    [InlineData("blez $t0,lbl")]
+    [InlineData("bltz $zero, lbl")]
+    public void TryParse_BranchZero_Succeeds(string assemblyLine) {
+        Assert.True(InstructionRegistry.Default.TryParse(assemblyLine, 1, out IInstruction? instruction));
+        Assert.NotNull(instruction);
+        Assert.Equal(1, InstructionRegistry.Default.GetInstructionCount(assemblyLine));
+    }
+
+    [Theory]
+    [InlineData("bgez $t0")]
+    [InlineData("bgez $t0, $t1, lbl")]
+    [InlineData("bgez t0, lbl")]
+    [InlineData("bltz $nosuch, lbl")]
+    [InlineData("bgtz lbl")]
+    [InlineData("blez")]
+    public void TryParse_BranchZero_Malformed_ReturnsFalse(string assemblyLine) {
+        Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
     [Fact]
     public void GetInstructionCount_UnknownInstruction_ReturnsZero() {
         int count = InstructionRegistry.Default.GetInstructionCount("xyz");
