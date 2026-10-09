@@ -189,10 +189,13 @@ internal class PlusPimDbg: IDebugger {
     public RuntimeErrorInfo? GetRuntimeError() {
         if(this._context.RuntimeError is RuntimeError error) {
             // ランタイムエラーではPCを進めないので，PCが発生した命令のアドレスである
+            (FileInfo? file, int lineNumber) = this._programs.GetSourceInfo(this._context.PC);
             return new RuntimeErrorInfo {
                 Kind = error.Kind,
                 Description = error.Message,
-                Address = this._context.PC.Addr
+                Address = this._context.PC.Addr,
+                SourceFile = file,
+                Line = lineNumber
             };
         }
         return null;

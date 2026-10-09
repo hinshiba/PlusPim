@@ -26,4 +26,14 @@ public sealed class RuntimeErrorInfo {
     /// ランタイムエラーを起こした命令のアドレス
     /// </summary>
     public required uint Address { get; init; }
+
+    /// <summary>
+    /// ランタイムエラーを起こした命令のソースファイル (不明なら <see langword="null"/>)
+    /// </summary>
+    public FileInfo? SourceFile { get; init; }
+
+    /// <summary>
+    /// ランタイムエラーを起こした命令のソースの行番号 (1始まり．不明なら0以下)
+    /// </summary>
+    public int Line { get; init; }
 }

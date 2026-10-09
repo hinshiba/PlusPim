@@ -120,6 +120,24 @@ MIPS の例外と異なり CP0 と例外ハンドラを使わず，カーネル�
 ランタイムエラーが発生した後は実行を続けられない．
 `StepBack` によって実行前の状態に戻るか，終了すること．
 
+### 表示
+
+ランタイムエラーでも MIPS の例外でも，VS Code の例外ウィジェットを表示するために DAP の停止理由は `exception` とする．
+両者は次の表示で区別する．
+
+| 表示                       | ランタイムエラー                                                 | MIPS の例外                                                    |
+| -------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| コールスタックの状態       | `Paused on PlusPim runtime error`                                | `Paused on MIPS exception` / `Paused on MIPS double exception` |
+| 例外ウィジェットのタイトル | `PlusPim runtime error (DivisionByZero)`                         | `MIPS exception (Ov)` / `MIPS double exception (Ov)`           |
+| 例外ウィジェットの本文     | 説明文と，MIPS の例外ではなく続行できないこと，`StepBack` の案内 | 説明文                                                         |
+| デバッグコンソール(stderr) | 種類，アドレス，ソースの位置，説明文                             | なし                                                           |
+
+デバッグコンソールへの出力は，たとえば次のようになり，ソースの位置へのリンクになる．
+
+```text
+[PlusPim runtime error] DivisionByZero at 0x00400010 (main.asm:12): <説明文>. Execution cannot continue; use Step Back.
+```
+
 
 ### 発生条件
 

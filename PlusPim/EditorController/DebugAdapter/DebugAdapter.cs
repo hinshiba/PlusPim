@@ -155,8 +155,8 @@ internal class DebugAdapter: DebugAdapterBase {
         // ランタイムエラーは続行できないので，未処理の例外として報告する
         RuntimeErrorInfo? runtimeError = this._app.GetRuntimeError();
         if(runtimeError is not null) {
-            return new ExceptionInfoResponse(runtimeError.Id, ExceptionBreakMode.Unhandled) {
-                Description = runtimeError.Description
+            return new ExceptionInfoResponse(RuntimeErrorDisplay.ExceptionId(runtimeError), ExceptionBreakMode.Unhandled) {
+                Description = RuntimeErrorDisplay.WidgetDescription(runtimeError)
             };
         }
 
@@ -164,7 +164,7 @@ internal class DebugAdapter: DebugAdapterBase {
         return exInfo is null
             ? new ExceptionInfoResponse("unknown", ExceptionBreakMode.Always)
             : new ExceptionInfoResponse(
-            exInfo.ExceptionId,
+            RuntimeErrorDisplay.MipsExceptionId(exInfo),
             exInfo.IsDouble
                 ? ExceptionBreakMode.Unhandled
                 : ExceptionBreakMode.Always
@@ -346,23 +346,26 @@ internal class DebugAdapter: DebugAdapterBase {
                 this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
                     ThreadId = 1,
                     AllThreadsStopped = true,
-                    Description = exInfo.Description,
-                    Text = exInfo.ExceptionId
+                    Description = RuntimeErrorDisplay.MipsExceptionStateLabel(exInfo),
+                    Text = RuntimeErrorDisplay.MipsExceptionId(exInfo)
                 });
 
                 break;
             // ランタイムエラーはセッションを終了させずに停止する (StepBack で戻れるようにするため)
+            // 例外ウィジェットを表示するために停止理由は exception とし，表示する文字列で MIPS の例外と区別する
             case StopReason.RuntimeError:
                 RuntimeErrorInfo errorInfo = this._app.GetRuntimeError() ?? throw new InvalidOperationException("PlusPim Dbg report stop by RuntimeError. But RuntimeErrorInfo is not set");
                 this.Protocol.SendEvent(new OutputEvent {
-                    Output = $"Runtime error at 0x{errorInfo.Address:X8}: {errorInfo.Description}\n",
-                    Category = OutputEvent.CategoryValue.Stderr
+                    Output = RuntimeErrorDisplay.ConsoleLine(errorInfo),
+                    Category = OutputEvent.CategoryValue.Stderr,
+                    Source = errorInfo.SourceFile is not null ? new Source { Path = errorInfo.SourceFile.FullName } : null,
+                    Line = 0 < errorInfo.Line ? errorInfo.Line : null
                 });
                 this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
                     ThreadId = 1,
                     AllThreadsStopped = true,
-                    Description = errorInfo.Description,
-                    Text = errorInfo.Id
+                    Description = RuntimeErrorDisplay.StateLabel,
+                    Text = RuntimeErrorDisplay.ExceptionId(errorInfo)
                 });
                 break;
             default:
