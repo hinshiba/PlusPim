@@ -68,9 +68,9 @@ internal sealed class BranchInstruction(
     /// 条件分岐命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(Func<uint, uint, bool> condition) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseBranchOperands(operands, out RegisterID rs, out RegisterID rt, out string? label)
-                ? new BranchInstruction(rs, rt, label, lineIndex, mnemonic, condition)
+                ? new BranchInstruction(rs, rt, label, lineNumber, mnemonic, condition)
                 : (IInstruction?)null;
         });
     }
@@ -80,9 +80,9 @@ internal sealed class BranchInstruction(
     /// </summary>
     /// <remarks>rtには<see cref="RegisterID.Zero"/>を渡して既存の実装を再利用する</remarks>
     internal static Func<string, IInstructionParser> CreateZeroParser(Func<int, bool> condition) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseBranchZeroOperands(operands, out RegisterID rs, out string? label)
-                ? new BranchInstruction(rs, RegisterID.Zero, label, lineIndex, mnemonic, (rsVal, _) => condition(unchecked((int)rsVal)))
+                ? new BranchInstruction(rs, RegisterID.Zero, label, lineNumber, mnemonic, (rsVal, _) => condition(unchecked((int)rsVal)))
                 : (IInstruction?)null;
         });
     }

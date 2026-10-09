@@ -22,8 +22,8 @@ internal sealed class BreakInstruction(int sourceLine): IInstruction {
     }
 
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new BreakInstruction(lineIndex) : null;
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new BreakInstruction(lineNumber) : null;
         });
     }
 }

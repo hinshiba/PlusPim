@@ -25,8 +25,8 @@ internal sealed class SyscallInstruction(int sourceLine): IInstruction {
     /// 命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new SyscallInstruction(lineIndex) : null;
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new SyscallInstruction(lineNumber) : null;
         });
     }
 

@@ -12,14 +12,14 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 /// パーサー側でrs/rtを入れ替えて渡す。ここではRsがシフト量、Rtがシフト対象。
 /// </remarks>
 internal sealed class RTypeShiftVarInstruction(
-    RegisterID rd, RegisterID rs, RegisterID rt, int lineIndex,
+    RegisterID rd, RegisterID rs, RegisterID rt, int lineNumber,
     string mnemonic, Func<uint, int, uint> compute
 ): IInstruction {
 
     /// <summary>
     /// 行番号
     /// </summary>
-    public int SourceLine { get; } = lineIndex;
+    public int SourceLine { get; } = lineNumber;
 
     private readonly Stack<uint> _previousRdValues = new();
 
@@ -52,9 +52,9 @@ internal sealed class RTypeShiftVarInstruction(
     /// rs/rt を入れ替えて渡す
     /// </remarks>
     internal static Func<string, IInstructionParser> CreateParser(Func<uint, int, uint> compute) {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParse3RegOperands(operands, out RegisterID rd, out RegisterID parsedRs, out RegisterID parsedRt)
-                ? new RTypeShiftVarInstruction(rd, parsedRt, parsedRs, lineIndex, mnemonic, compute)
+                ? new RTypeShiftVarInstruction(rd, parsedRt, parsedRs, lineNumber, mnemonic, compute)
                 : (IInstruction?)null;
         });
     }

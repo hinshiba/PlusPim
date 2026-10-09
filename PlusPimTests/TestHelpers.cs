@@ -133,8 +133,8 @@ internal static class TestHelpers {
     /// <summary>
     /// 命令を1つパースして返す．パース失敗時はnullを返す
     /// </summary>
-    public static IInstruction? ParseInstruction(string assemblyLine, int lineIndex = 1) {
-        return InstructionRegistry.Default.TryParse(assemblyLine, lineIndex, out IInstruction? instruction)
+    public static IInstruction? ParseInstruction(string assemblyLine, int lineNumber = 1) {
+        return InstructionRegistry.Default.TryParse(assemblyLine, lineNumber, out IInstruction? instruction)
             ? instruction
             : null;
     }

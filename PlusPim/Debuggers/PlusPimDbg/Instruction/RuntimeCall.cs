@@ -201,8 +201,8 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
     /// 命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new RuntimeCall(lineIndex) : null;
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new RuntimeCall(lineNumber) : null;
         });
     }
 
