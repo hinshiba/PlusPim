@@ -7,8 +7,13 @@ import { DebuggeeTerminal } from "./debuggeeTerminal";
 export function activate(context: vscode.ExtensionContext) {
 	console.log("PlusPim Extension was loaded.");
 
+	// 起動にかかる時間の計測
+	const log = vscode.window.createOutputChannel("PlusPim", { log: true });
+	context.subscriptions.push(log);
+	const startup = new StartupLog(log);
+
 	// 情報を設定
-	const factory = new PlusPimDescriptorFactory(context);
+	const factory = new PlusPimDescriptorFactory(context, startup);
 	context.subscriptions.push(
 		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory),
 		// 無効化されたときに実行中の PlusPim を終了する
@@ -26,17 +31,55 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.debug.registerDebugAdapterTrackerFactory("pluspim", {
 			createDebugAdapterTracker(session) {
-				// trace有効時のみ
-				if (session.configuration.trace) {
-					output.show(true);
-					return new PlusPimTracker(output);
-				}
-				return undefined; // トラッキングしない
+				// 通信内容の出力は trace 有効時のみ
+				const trace = session.configuration.trace ? new PlusPimTracker(output) : undefined;
+				if (trace) { output.show(true); }
+				let stopped = false;
+				return {
+					onWillReceiveMessage: (m: any) => trace?.onWillReceiveMessage(m),
+					onDidSendMessage(message: any) {
+						trace?.onDidSendMessage(message);
+						if (message.type === "response" && (message.command === "initialize" || message.command === "launch")) {
+							startup.mark(session.id, `${message.command} response`);
+						} else if (message.type === "event" && message.event === "stopped" && !stopped) {
+							stopped = true;
+							startup.mark(session.id, "first stopped");
+							startup.end(session.id);
+						}
+					},
+					onError: (e: Error) => trace?.onError(e),
+					onExit: (c: number | undefined, s: string | undefined) => {
+						trace?.onExit(c, s);
+						startup.end(session.id);
+					},
+				};
 			}
 		}));
 }
 
 export function deactivate() { }
+
+/** セッションの起動の各段階を，デバッグアダプタの要求からの経過時間 [+<ms>ms] とともに記録する */
+class StartupLog {
+	private readonly starts = new Map<string, number>();
+
+	constructor(private readonly channel: vscode.LogOutputChannel) { }
+
+	begin(sessionId: string): void {
+		this.starts.set(sessionId, performance.now());
+		this.mark(sessionId, "descriptor requested");
+	}
+
+	mark(sessionId: string, phase: string): void {
+		const start = this.starts.get(sessionId);
+		if (start === undefined) { return; }
+		this.channel.info(`[+${Math.round(performance.now() - start)}ms] ${phase}`);
+	}
+
+	end(sessionId: string): void {
+		this.starts.delete(sessionId);
+	}
+}
 
 // 実行権限がなければ付与する (VSIXをWindowsで作ると実行ビットが落ちるため)
 // 失敗時は理由を文字列で返す．成功時は undefined
@@ -77,12 +120,16 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory, 
 	private readonly runs = new Map<number, SessionRun>();
 	private nextRunId = 0;
 
-	constructor(private readonly context: vscode.ExtensionContext) { }
+	constructor(
+		private readonly context: vscode.ExtensionContext,
+		private readonly startup: StartupLog,
+	) { }
 
 	async createDebugAdapterDescriptor(
 		session: vscode.DebugSession
 	): Promise<vscode.DebugAdapterDescriptor> {
 		// 明示されたときだけ固定のポート．既定は 0 (OS が空いているポートを選ぶ)
+		this.startup.begin(session.id);
 		const port = Number(session.configuration.port ?? 0);
 		// vscode.DebugConfigurationの[key: string]: any
 		// Normalize program paths defensively
@@ -136,6 +183,7 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory, 
 		terminal.show();
 
 		try {
+			this.startup.mark(session.id, "spawn");
 			const adapter = await launchAdapter({
 				binPath,
 				args: ["-d", "--port", String(port), ...extraArgs, ...programs],
@@ -144,6 +192,7 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory, 
 				onStdout: t => pty.write(t),
 				onStderr: t => pty.write(t),
 			});
+			this.startup.mark(session.id, `handshake (port ${adapter.port})`);
 			run.adapter = adapter;
 			const stdin = adapter.child.stdin;
 			pty.attach({
@@ -158,9 +207,12 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory, 
 				throw new AdapterLaunchError("The PlusPim terminal was closed.");
 			}
 			// 待ち受けは IPv4 のみ．localhost は ::1 に解決されうるため 127.0.0.1 を明示する
+			this.startup.mark(session.id, "descriptor returned");
 			return new vscode.DebugAdapterServer(adapter.port, "127.0.0.1");
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
+			this.startup.mark(session.id, `launch failed: ${msg}`);
+			this.startup.end(session.id);
 			pty.write(`\n${msg}\n`);
 			pty.markExited(null);
 			vscode.window.showErrorMessage(msg);

@@ -9,6 +9,7 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 - **Register view** — Inspect all 32 MIPS registers, `HI`, `LO`, and `PC` during a debug session.
 - **Label resolution** — Jump targets and branch labels are resolved automatically.
 - **DAP trace** — Optional DAP communication logging to the *PlusPim DAP Trace* output channel.
+- **Startup timing** — The *PlusPim* output channel logs how long each startup phase of a session took (spawn, port handshake, `initialize` and `launch` responses, first stop).
 
 ## Requirements
 

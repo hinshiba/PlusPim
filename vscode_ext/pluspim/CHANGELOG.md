@@ -6,6 +6,8 @@
 
 - `stopOnEntry` launch option (default `true`). When `false`, the program runs
   until a breakpoint, an exception or the end
+- *PlusPim* output channel with the elapsed time of each startup phase
+  (`[+<ms>ms] <phase>`), and elapsed times in the `--verbose` log
 
 ### Changed
 
