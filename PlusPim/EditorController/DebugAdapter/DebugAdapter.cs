@@ -27,6 +27,7 @@ internal class DebugAdapter: DebugAdapterBase {
 
     private readonly IApplication _app;
     private readonly ILogger _logger;
+    private readonly ExecutionCoordinator _execution = new();
     private readonly TaskCompletionSource _sessionEnded = new();
     private volatile bool _isInit = false;
 
@@ -149,21 +150,23 @@ internal class DebugAdapter: DebugAdapterBase {
             return;
         }
 
-        responder.SetResponse(new ConfigurationDoneResponse());
         if(this._stopOnEntry) {
+            responder.SetResponse(new ConfigurationDoneResponse());
             // StoppedEventを送信してVariablesペインを有効化
             this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
                 ThreadId = 1,
                 AllThreadsStopped = true
             });
         } else {
-            this.SendExecuteEvent(this._app.Continue());
+            this.StartExecution(responder, new ConfigurationDoneResponse(), this._app.Continue);
         }
     }
 
     protected override void HandleDisconnectRequestAsync(IRequestResponder<DisconnectArguments> responder) {
         this._logger.Debug("DebugAdapter", "DisconnectRequest.");
 
+        // 実行中なら止めてから終える
+        this._execution.Shutdown(TimeSpan.FromSeconds(2));
         this._isInit = false;
 
         // 応答を書いてからセッションを終える．先に終えると Main がストリームを閉じ，応答が届かない
@@ -311,67 +314,76 @@ internal class DebugAdapter: DebugAdapterBase {
     }
 
 
-    protected override ContinueResponse HandleContinueRequest(ContinueArguments args) {
+    // 実行の要求は応答を先に送り，ワーカーで実行して停止したら stopped を送る
+    // 実行中に届いた実行の要求はエラーにする (待たせない)
+
+    protected override void HandleContinueRequestAsync(IRequestResponder<ContinueArguments, ContinueResponse> responder) {
         this._logger.Debug("DebugAdapter", "ContinueRequest.");
-
-        this.SendExecuteEvent(this._app.Continue());
-
-        return new ContinueResponse();
+        this.StartExecution(responder, new ContinueResponse { AllThreadsContinued = true }, this._app.Continue);
     }
 
-    protected override NextResponse HandleNextRequest(NextArguments args) {
+    protected override void HandleNextRequestAsync(IRequestResponder<NextArguments> responder) {
         this._logger.Debug("DebugAdapter", "NextRequest.");
-
-        this.SendExecuteEvent(this._app.StepOver());
-
-        return new NextResponse();
+        this.StartExecution(responder, new NextResponse(), this._app.StepOver);
     }
 
-    protected override StepInResponse HandleStepInRequest(StepInArguments args) {
+    protected override void HandleStepInRequestAsync(IRequestResponder<StepInArguments> responder) {
         this._logger.Debug("DebugAdapter", "StepInRequest.");
-
-        this.SendExecuteEvent(this._app.StepIn());
-
-        return new StepInResponse();
+        this.StartExecution(responder, new StepInResponse(), this._app.StepIn);
     }
 
-    protected override StepOutResponse HandleStepOutRequest(StepOutArguments args) {
+    protected override void HandleStepOutRequestAsync(IRequestResponder<StepOutArguments> responder) {
         this._logger.Debug("DebugAdapter", "StepOutRequest.");
-
-        this.SendExecuteEvent(this._app.StepOut());
-
-        return new StepOutResponse();
+        this.StartExecution(responder, new StepOutResponse(), this._app.StepOut);
     }
 
-    protected override StepBackResponse HandleStepBackRequest(StepBackArguments args) {
+    protected override void HandleStepBackRequestAsync(IRequestResponder<StepBackArguments> responder) {
         this._logger.Debug("DebugAdapter", "StepBackRequest.");
-
-        if(!this._app.StepBack()) {
-            this.Protocol.SendEvent(new OutputEvent {
-                Output = "Already at the beginning of the program.\n",
-                Category = OutputEvent.CategoryValue.Console
-            });
-
-        }
-        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
-            ThreadId = 1,
-            AllThreadsStopped = true
-        });
-
-        return new StepBackResponse();
+        this.StartExecution(responder, new StepBackResponse(), _ => this._app.StepBack() ? StopReason.Step : StopReason.HistoryStart);
     }
 
-    protected override ReverseContinueResponse HandleReverseContinueRequest(ReverseContinueArguments args) {
+    protected override void HandleReverseContinueRequestAsync(IRequestResponder<ReverseContinueArguments> responder) {
         this._logger.Debug("DebugAdapter", "ReverseContinueRequest.");
+        this.StartExecution(responder, new ReverseContinueResponse(), this._app.ReverseContinue);
+    }
 
-        _ = this._app.ReverseContinue();
+    /// <remarks>停止中の pause は何もせずに成功する</remarks>
+    protected override void HandlePauseRequestAsync(IRequestResponder<PauseArguments> responder) {
+        this._logger.Debug("DebugAdapter", "PauseRequest.");
+        responder.SetResponse(new PauseResponse());
+        _ = this._execution.RequestPause();
+    }
 
-        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Step) {
-            ThreadId = 1,
-            AllThreadsStopped = true
+    /// <summary>
+    /// 実行の操作をワーカーで始める．始められなければ要求をエラーにする
+    /// </summary>
+    /// <param name="responder">実行の要求</param>
+    /// <param name="response">始める前に送る応答</param>
+    /// <param name="operation">実行の操作</param>
+    private void StartExecution(IRequestResponder responder, ResponseBody response, Func<CancellationToken, StopReason> operation) {
+        if(!this._app.IsLoaded) {
+            responder.SetError(new ProtocolException("Program is not loaded."));
+            return;
+        }
+        if(!this._execution.TryStart(operation, () => responder.SetResponse(response), this.SendExecuteEvent, this.OnExecutionFaulted)) {
+            responder.SetError(new ProtocolException("The debuggee is running. Pause it first."));
+        }
+    }
+
+    /// <summary>
+    /// 実行の操作が例外を投げたときに，UIが実行中のままにならないよう例外で停止したことにする
+    /// </summary>
+    private void OnExecutionFaulted(Exception ex) {
+        this._logger.Error("DebugAdapter", $"Execution failed: {ex}");
+        this.Protocol.SendEvent(new OutputEvent {
+            Output = $"[PlusPim internal error] {ex.GetType().Name}: {ex.Message}\n",
+            Category = OutputEvent.CategoryValue.Stderr
         });
-
-        return new ReverseContinueResponse();
+        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+            ThreadId = 1,
+            AllThreadsStopped = true,
+            Text = ex.GetType().Name
+        });
     }
 
     private void SendExecuteEvent(StopReason reason) {
@@ -384,6 +396,22 @@ internal class DebugAdapter: DebugAdapterBase {
                 break;
             case StopReason.Breakpoint:
                 this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true
+                });
+                break;
+            case StopReason.Pause:
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Pause) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true
+                });
+                break;
+            case StopReason.HistoryStart:
+                this.Protocol.SendEvent(new OutputEvent {
+                    Output = "Reached the beginning of the execution history.\n",
+                    Category = OutputEvent.CategoryValue.Console
+                });
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
                     ThreadId = 1,
                     AllThreadsStopped = true
                 });

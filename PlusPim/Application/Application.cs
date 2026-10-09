@@ -9,6 +9,17 @@ namespace PlusPim.Application;
 /// アプリケーションの主要な機能を提供するクラス
 /// </summary>
 internal class Application: IApplication {
+    /// <summary>
+    /// 長い実行でロックを解放するまでのステップ数．実行中の要求 (スタックトレースなど) は最大でこの分だけ待つ
+    /// </summary>
+    private const int BatchSize = 4096;
+
+    /// <summary>
+    /// デバッガの状態を守るロック．公開するメンバーはすべてこのロックの中でデバッガを操作する
+    /// </summary>
+    /// <remarks>ランタイムコールの入出力も同期されていないので，ステップ実行は必ずこのロックの中で行う</remarks>
+    private readonly Lock _gate = new();
+
     private IDebugger? _debugger;
     private IDebugger Debugger => this._debugger ?? throw new InvalidOperationException("Debugger is not initialized");
     private readonly ILogger _logger;
@@ -39,16 +50,27 @@ internal class Application: IApplication {
     /// <returns>成功した場合<see langword="true"/></returns>
     /// <exception cref="Debuggers.PlusPimDbg.Program.AssemblyException">アセンブルに失敗した場合</exception>
     public bool Load() {
-        this._debugger = new PlusPimDbg(this._files, this._logger, this._strict);
+        PlusPimDbg debugger = new(this._files, this._logger, this._strict);
+        lock(this._gate) {
+            this._debugger = debugger;
+        }
         // メソッドで操作されるのを待つ
         this._logger.Info("Application", "Load success");
         return true;
     }
 
-    public bool IsLoaded => this._debugger is not null;
+    public bool IsLoaded {
+        get {
+            lock(this._gate) {
+                return this._debugger is not null;
+            }
+        }
+    }
 
     public StackFrameInfo[] GetCallStack() {
-        return this._debugger?.GetCallStack() ?? [];
+        lock(this._gate) {
+            return this._debugger?.GetCallStack() ?? [];
+        }
     }
 
     public StackFrameInfo? GetStackFrame(int frameId) {
@@ -62,48 +84,72 @@ internal class Application: IApplication {
     }
 
     public ExceptionInfo? GetLastException() {
-        return this._debugger?.GetLastException();
+        lock(this._gate) {
+            return this._debugger?.GetLastException();
+        }
     }
 
     public RuntimeErrorInfo? GetRuntimeError() {
-        return this._debugger?.GetRuntimeError();
+        lock(this._gate) {
+            return this._debugger?.GetRuntimeError();
+        }
     }
 
     // 順方向実行
 
-    public StopReason StepOut() {
-        int startFrameNum = this.Debugger.GetCallStack().Length;
-        do {
-            // デバッガにステップ実行させる
-            StopReason reason = this.Debugger.Step();
-            // ブレークポイント，キャッチする例外，終了は停止する
-            if(this.CanContinue(reason)) {
-                continue;
-            } else {
-                return reason;
-            }
-        } while(startFrameNum <= this.Debugger.GetCallStack().Length);
-        // ステップアウトが完了したので停止する
-        return StopReason.Step;
+    public StopReason StepOut(CancellationToken ct = default) {
+        int startDepth = this.GetCallStackDepth();
+        // 呼び出し元のフレームに戻ったら完了
+        return this.RunForward(ct, () => this.Debugger.CallStackDepth < startDepth);
     }
 
+    public StopReason StepOver(CancellationToken ct = default) {
+        int startDepth = this.GetCallStackDepth();
+        // サブルーチン呼出しでなければ1ステップで完了．サブルーチン呼出しであれば戻ってきたら完了
+        return this.RunForward(ct, () => this.Debugger.CallStackDepth <= startDepth);
+    }
 
-    public StopReason StepOver() {
-        int startFrameNum = this.Debugger.GetCallStack().Length;
-        do {
-            // デバッガにステップ実行させる
-            StopReason reason = this.Debugger.Step();
+    public StopReason StepIn(CancellationToken ct = default) {
+        return this.RunForward(ct, () => true);
+    }
 
-            if(this.CanContinue(reason)) {
-                continue;
-            } else {
-                return reason;
+    public StopReason Continue(CancellationToken ct = default) {
+        // どこかで停止するまでデバッガに実行させる
+        return this.RunForward(ct, () => false);
+    }
+
+    private int GetCallStackDepth() {
+        lock(this._gate) {
+            return this.Debugger.CallStackDepth;
+        }
+    }
+
+    /// <summary>
+    /// 停止する理由が起きるか，<paramref name="isDone"/>が成り立つまで1ステップずつ実行する
+    /// </summary>
+    /// <remarks><see cref="BatchSize"/>ステップごとにロックを解放し，実行中も他の要求に応えられるようにする</remarks>
+    /// <param name="ct">取り消されたら<see cref="StopReason.Pause"/>で停止する</param>
+    /// <param name="isDone">各ステップの後に呼ぶ．成り立てば<see cref="StopReason.Step"/>で停止する</param>
+    private StopReason RunForward(CancellationToken ct, Func<bool> isDone) {
+        while(true) {
+            lock(this._gate) {
+                IDebugger debugger = this.Debugger;
+                for(int i = 0; i < BatchSize; i++) {
+                    if(ct.IsCancellationRequested) {
+                        return StopReason.Pause;
+                    }
+
+                    StopReason reason = debugger.Step();
+                    // ブレークポイント，キャッチする例外，終了，ランタイムエラーは停止する
+                    if(!this.CanContinue(reason)) {
+                        return reason;
+                    }
+                    if(isDone()) {
+                        return StopReason.Step;
+                    }
+                }
             }
-            // ステップアウトとの違いは条件が以下になっているだけ
-            // サブルーチン呼出しでなければ==で．サブルーチン呼出しであればステップアウトと同じ挙動
-        } while(startFrameNum < this.Debugger.GetCallStack().Length);
-        // ステップオーバーが完了したので停止する
-        return StopReason.Step;
+        }
     }
 
     private bool CanContinue(StopReason reason) {
@@ -112,68 +158,54 @@ internal class Application: IApplication {
             StopReason.Step => true,
             StopReason.Breakpoint => false,
             StopReason.Terminated => false,
-            StopReason.Exception => !this.IsBreakException(this.GetLastException() ?? throw new InvalidOperationException("Debugger reported an exception but GetLastException() returned null.")),
+            StopReason.Exception => !this.IsBreakException(this.Debugger.GetLastException() ?? throw new InvalidOperationException("Debugger reported an exception but GetLastException() returned null.")),
             // ランタイムエラーは続行できないので，例外フィルタによらず常に停止する
             StopReason.RuntimeError => false,
             _ => throw new UnreachableException("StopReason val is not defined."),
         };
     }
 
+    // 逆方向実行
 
-    public StopReason StepIn() {
-        // デバッガにステップ実行させる
-        StopReason reason = this.Debugger.Step();
-        // どのような結果でも停止する
-        return reason switch {
-            StopReason.Step => reason,
-            StopReason.Breakpoint => reason,
-            StopReason.Terminated => reason,
-            StopReason.Exception => this.IsBreakException(this.GetLastException() ?? throw new InvalidOperationException("Debugger reported an exception but GetLastException() returned null."))
-                                ? reason
-                                : StopReason.Step,
-            StopReason.RuntimeError => reason,
-            _ => throw new UnreachableException("StopReason val is not defined."),
-        };
-    }
-
-    public StopReason Continue() {
-        // どこかで停止するまでデバッガに実行させる
-        while(true) {
-            StopReason reason = this.Debugger.Step();
-            if(!this.CanContinue(reason)) {
-                return reason;
-            }
-
+    public bool StepBack() {
+        lock(this._gate) {
+            return this.Debugger.Back();
         }
     }
 
-
-    public bool StepBack() {
-        return this.Debugger.Back();
-    }
-
-    public bool ReverseContinue() {
-        // 一回でも成功すればtrueなので
-        bool result = this.Debugger.Back();
-        while(this.Debugger.Back()) { }
-        return result;
+    public StopReason ReverseContinue(CancellationToken ct = default) {
+        while(true) {
+            lock(this._gate) {
+                IDebugger debugger = this.Debugger;
+                for(int i = 0; i < BatchSize; i++) {
+                    if(ct.IsCancellationRequested) {
+                        return StopReason.Pause;
+                    }
+                    if(!debugger.Back()) {
+                        return StopReason.HistoryStart;
+                    }
+                }
+            }
+        }
     }
 
     // ブレークポイント
 
     public BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines) {
-        return this.Debugger.SetBreakpoints(file, lines);
+        lock(this._gate) {
+            return this.Debugger.SetBreakpoints(file, lines);
+        }
     }
 
     // 例外系
 
     public void SetExceptionFilters(List<ExceptionFilter> filters) {
-        this._reportDoubleExceptions = false;
+        bool reportDoubleExceptions = false;
         HashSet<ExcCode> newFilters = [];
         foreach(ExceptionFilter filter in filters) {
             switch(filter) {
                 case ExceptionFilter.Double:
-                    this._reportDoubleExceptions = true;
+                    reportDoubleExceptions = true;
                     break;
                 case ExceptionFilter.Fatal:
                     _ = newFilters.Add(ExcCode.AdEL);
@@ -192,7 +224,11 @@ internal class Application: IApplication {
                     throw new UnreachableException("ExceptionFilter val is not defined.");
             }
         }
-        this._filters = newFilters;
+        // 実行中のループも参照するので，ロックの中で置き換える
+        lock(this._gate) {
+            this._reportDoubleExceptions = reportDoubleExceptions;
+            this._filters = newFilters;
+        }
     }
 
     private bool IsBreakException(ExceptionInfo exception) {

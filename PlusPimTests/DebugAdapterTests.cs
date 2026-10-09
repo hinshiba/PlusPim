@@ -134,7 +134,114 @@ public class DebugAdapterTests {
 
             JsonElement response = client.Request("disconnect", new { });
             Assert.True(response.GetProperty("success").GetBoolean());
-            Assert.True(client.Adapter.WaitForSessionEnd().IsCompleted);
+            Assert.True(client.WaitForSessionEnd());
+        });
+    }
+
+    internal static string StoppedReason(JsonElement stopped) {
+        return stopped.GetProperty("body").GetProperty("reason").GetString()!;
+    }
+
+    internal static int TopLine(DapClient client) {
+        JsonElement stackTrace = client.RequestOk("stackTrace", new { threadId = 1 });
+        return stackTrace.GetProperty("body").GetProperty("stackFrames")[0].GetProperty("line").GetInt32();
+    }
+
+    /// <summary>
+    /// ライブフレームの Registers スコープの変数を名前から値への辞書にする
+    /// </summary>
+    internal static Dictionary<string, JsonElement> Registers(DapClient client) {
+        JsonElement scopes = client.RequestOk("scopes", new { frameId = 1 });
+        int reference = scopes.GetProperty("body").GetProperty("scopes")[0].GetProperty("variablesReference").GetInt32();
+        JsonElement variables = client.RequestOk("variables", new { variablesReference = reference });
+        return variables.GetProperty("body").GetProperty("variables").EnumerateArray()
+            .ToDictionary(v => v.GetProperty("name").GetString()!, v => v);
+    }
+
+    internal static uint RegisterValue(DapClient client, string name) {
+        string value = Registers(client)[name].GetProperty("value").GetString()!;
+        return Convert.ToUInt32(value, 16);
+    }
+
+    [Fact]
+    public void Pause_StopsInfiniteLoop() {
+        WithClient(ApplicationExecutionTests.InfiniteLoop, (client, file) => {
+            LaunchAndStopOnEntry(client);
+
+            int mark = client.Mark;
+            JsonElement cont = client.RequestOk("continue", new { threadId = 1 });
+            Assert.True(cont.GetProperty("body").GetProperty("allThreadsContinued").GetBoolean());
+
+            // 実行中も応答する
+            _ = client.RequestOk("threads");
+
+            // 実行中の実行の要求は待たせずにエラーにする
+            foreach(string command in new[] { "next", "stepIn", "stepOut", "stepBack", "reverseContinue", "continue" }) {
+                JsonElement rejected = client.Request(command, new { threadId = 1 });
+                Assert.False(rejected.GetProperty("success").GetBoolean(), command);
+                Assert.Contains("running", rejected.GetProperty("message").GetString());
+            }
+            Assert.DoesNotContain(client.Messages[mark..], m => DapClient.IsEvent(m, "stopped"));
+
+            _ = client.RequestOk("pause", new { threadId = 1 });
+            JsonElement stopped = client.WaitForEvent("stopped", mark);
+            Assert.Equal("pause", StoppedReason(stopped));
+
+            // ループの中で止まり，ループが回っている
+            Assert.InRange(TopLine(client), 5, 6);
+            Assert.True(0 < RegisterValue(client, "$t0 ($8)"));
+
+            // 止めた後もステップ実行できる
+            mark = client.Mark;
+            _ = client.RequestOk("stepIn", new { threadId = 1 });
+            Assert.Equal("step", StoppedReason(client.WaitForEvent("stopped", mark)));
+        });
+    }
+
+    [Fact]
+    public void Pause_WhileStopped_IsNoOp() {
+        WithClient(Straight, (client, file) => {
+            LaunchAndStopOnEntry(client);
+
+            int mark = client.Mark;
+            _ = client.RequestOk("pause", new { threadId = 1 });
+            // 後続の要求の応答までに停止イベントは届かない
+            _ = client.RequestOk("threads");
+            Assert.DoesNotContain(client.Messages[mark..], m => DapClient.IsEvent(m, "stopped"));
+        });
+    }
+
+    [Fact]
+    public void StepBack_AtHistoryStart_ReportsEntry() {
+        WithClient(Straight, (client, file) => {
+            LaunchAndStopOnEntry(client);
+
+            int mark = client.Mark;
+            _ = client.RequestOk("stepBack", new { threadId = 1 });
+            Assert.Equal("entry", StoppedReason(client.WaitForEvent("stopped", mark)));
+            Assert.Contains(client.Messages[mark..], m => DapClient.IsEvent(m, "output")
+                && m.GetProperty("body").GetProperty("output").GetString() == "Reached the beginning of the execution history.\n");
+
+            // 1ステップ進めて戻ると step で止まる
+            mark = client.Mark;
+            _ = client.RequestOk("stepIn", new { threadId = 1 });
+            _ = client.WaitForEvent("stopped", mark);
+            mark = client.Mark;
+            _ = client.RequestOk("stepBack", new { threadId = 1 });
+            Assert.Equal("step", StoppedReason(client.WaitForEvent("stopped", mark)));
+            Assert.Equal(3, TopLine(client));
+        });
+    }
+
+    [Fact]
+    public void Disconnect_WhileRunning_StopsAndResponds() {
+        WithClient(ApplicationExecutionTests.InfiniteLoop, (client, file) => {
+            LaunchAndStopOnEntry(client);
+            _ = client.RequestOk("continue", new { threadId = 1 });
+
+            JsonElement response = client.Request("disconnect", new { });
+            Assert.True(response.GetProperty("success").GetBoolean());
+            Assert.True(client.WaitForSessionEnd());
         });
     }
 }

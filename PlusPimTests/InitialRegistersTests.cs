@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
@@ -84,7 +85,7 @@ public class InitialRegistersTests {
                 _ = app.StepIn();
             }
 
-            Assert.True(app.ReverseContinue());
+            Assert.Equal(StopReason.HistoryStart, app.ReverseContinue());
 
             uint[] registers = app.GetCallStack()[0].Registers;
             Assert.Equal(StackPointer, registers[(int)RegisterID.Sp]);

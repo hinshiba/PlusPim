@@ -138,6 +138,14 @@ internal sealed class DapClient: IDisposable {
         }
     }
 
+    /// <summary>
+    /// アダプタのセッションが終わるのを待つ
+    /// </summary>
+    /// <returns>終わった場合は<see langword="true"/></returns>
+    public bool WaitForSessionEnd() {
+        return this.Adapter.WaitForSessionEnd().Wait(Timeout);
+    }
+
     public static bool IsResponseTo(JsonElement message, int requestSeq) {
         return message.GetProperty("type").GetString() == "response"
             && message.GetProperty("request_seq").GetInt32() == requestSeq;
