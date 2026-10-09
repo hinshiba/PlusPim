@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import * as net from "net";
 import * as path from "path";
+import { AdapterLaunchError, AdapterProcess, launchAdapter } from "./adapterProcess";
+import { DebuggeeTerminal } from "./debuggeeTerminal";
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("PlusPim Extension was loaded.");
@@ -9,12 +10,12 @@ export function activate(context: vscode.ExtensionContext) {
 	// 情報を設定
 	const factory = new PlusPimDescriptorFactory(context);
 	context.subscriptions.push(
-		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory)
-	);
-	context.subscriptions.push(
+		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory),
+		// 無効化されたときに実行中の PlusPim を終了する
+		factory,
 		vscode.debug.onDidTerminateDebugSession((session) => {
 			if (session.type === "pluspim") {
-				factory.dispose();
+				factory.onSessionTerminated(session);
 			}
 		})
 	);
@@ -58,15 +59,31 @@ function ensureExecutable(binPath: string): string | undefined {
 }
 
 
-class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
-	private terminal: vscode.Terminal | undefined;
+/** 1回の起動で使う端末と PlusPim のプロセス */
+interface SessionRun {
+	sessionId: string;
+	terminal: vscode.Terminal;
+	pty: DebuggeeTerminal;
+	adapter?: AdapterProcess;
+}
+
+/** セッションの終了後，PlusPim が自分で終了するのを待つ時間 */
+const EXIT_GRACE_MS = 3000;
+/** PlusPim が待ち受けのポートを通知するまで待つ時間 */
+const HANDSHAKE_TIMEOUT_MS = 15000;
+
+class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory, vscode.Disposable {
+	// 再起動では同じセッション ID で再び呼ばれることがあるため，起動ごとの番号で管理する
+	private readonly runs = new Map<number, SessionRun>();
+	private nextRunId = 0;
 
 	constructor(private readonly context: vscode.ExtensionContext) { }
 
 	async createDebugAdapterDescriptor(
 		session: vscode.DebugSession
 	): Promise<vscode.DebugAdapterDescriptor> {
-		const port = session.configuration.port ?? 4711;
+		// 明示されたときだけ固定のポート．既定は 0 (OS が空いているポートを選ぶ)
+		const port = Number(session.configuration.port ?? 0);
 		// vscode.DebugConfigurationの[key: string]: any
 		// Normalize program paths defensively
 		const programInput = session.configuration.program;
@@ -96,48 +113,78 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 			throw new Error(execError);
 		}
 
-		// ターミナルで呼んでもらう
-		const args = ["-d", "--port", String(port), ...extraArgs, ...programs];
-		this.terminal = vscode.window.createTerminal({
+		// 終了したセッションの端末は，新しいセッションを始めるときに閉じる
+		for (const [id, old] of this.runs) {
+			if (old.pty.hasExited) {
+				old.terminal.dispose();
+				this.runs.delete(id);
+			}
+		}
+
+		// PlusPim の標準入出力を表示する端末．プロセスは拡張機能が持つ
+		const runId = this.nextRunId++;
+		const pty = new DebuggeeTerminal();
+		const terminal = vscode.window.createTerminal({
 			name: `Debug: ${programs.length > 0 ? programs.map(p => path.basename(p)).join(", ") : "PlusPim"}`,
-			shellPath: binPath,
-			shellArgs: args,
+			pty,
+			// 疑似端末はウィンドウの再読み込みで復元できない
+			isTransient: true,
 		});
-		this.terminal.show();
+		const run: SessionRun = { sessionId: session.id, terminal, pty };
+		this.runs.set(runId, run);
+		pty.onUserClosed.event(() => this.runs.delete(runId));
+		terminal.show();
 
-		await waitForPort(port, 5000);
+		try {
+			const adapter = await launchAdapter({
+				binPath,
+				args: ["-d", "--port", String(port), ...extraArgs, ...programs],
+				cwd: session.workspaceFolder?.uri.fsPath,
+				timeoutMs: HANDSHAKE_TIMEOUT_MS,
+				onStdout: t => pty.write(t),
+				onStderr: t => pty.write(t),
+			});
+			run.adapter = adapter;
+			const stdin = adapter.child.stdin;
+			pty.attach({
+				writeStdin: t => { if (stdin.writable) { stdin.write(t); } },
+				endStdin: () => stdin.end(),
+				kill: () => adapter.child.kill(),
+			});
+			void adapter.exited.then(code => pty.markExited(code));
+			if (pty.isClosed) {
+				// 起動を待つ間に端末が閉じられた
+				adapter.child.kill();
+				throw new AdapterLaunchError("The PlusPim terminal was closed.");
+			}
+			// 待ち受けは IPv4 のみ．localhost は ::1 に解決されうるため 127.0.0.1 を明示する
+			return new vscode.DebugAdapterServer(adapter.port, "127.0.0.1");
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : String(e);
+			pty.write(`\n${msg}\n`);
+			pty.markExited(null);
+			vscode.window.showErrorMessage(msg);
+			throw e;
+		}
+	}
 
-		// TCPであることも設定
-		return new vscode.DebugAdapterServer(port);
+	/** セッションの終了後，PlusPim が終了しなければ強制終了する */
+	onSessionTerminated(session: vscode.DebugSession): void {
+		for (const run of this.runs.values()) {
+			const adapter = run.adapter;
+			if (run.sessionId !== session.id || !adapter || run.pty.hasExited) { continue; }
+			// PlusPim は disconnect の後に自分で終了する．終了しないときだけ強制終了する
+			const timer = setTimeout(() => adapter.child.kill(), EXIT_GRACE_MS);
+			void adapter.exited.then(() => clearTimeout(timer));
+		}
 	}
 
 	dispose(): void {
-		this.terminal?.dispose();
-		this.terminal = undefined;
-	}
-}
-
-
-function waitForPort(port: number, timeoutMs: number): Promise<void> {
-	return new Promise((resolve, reject) => {
-		const deadline = Date.now() + timeoutMs;
-
-		function tryConnect() {
-			const socket = net.createConnection(port, "127.0.0.1");
-			socket.on("connect", () => {
-				socket.destroy();
-				resolve();
-			});
-			socket.on("error", () => {
-				if (deadline <= Date.now()) {
-					reject(new Error(`DA did not listen on port ${port} within ${timeoutMs}ms`));
-				} else {
-					setTimeout(tryConnect, 100);
-				}
-			});
+		for (const run of this.runs.values()) {
+			run.adapter?.child.kill();
 		}
-		tryConnect();
-	});
+		this.runs.clear();
+	}
 }
 
 class PlusPimTracker implements vscode.DebugAdapterTracker {

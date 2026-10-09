@@ -44,7 +44,7 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 | ------------- | ---------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
 | `program`     | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                    |
 | `stopOnEntry` | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end. |
-| `port`        | `number`   | `4711`        | TCP port used for the DAP connection.                                                                       |
+| `port`        | `number`   | (none)        | Fixed TCP port for the DAP connection. When omitted, the OS picks a free port (recommended).               |
 | `args`        | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                         |
 | `trace`       | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                           |
 
@@ -52,11 +52,18 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 When a debug session starts, the extension:
 
-1. Spawns the bundled `PlusPim` binary in a VS Code terminal, passing the target file and options.
-2. Waits for the debug adapter to start listening on the configured TCP port (default `4711`).
+1. Spawns the bundled `PlusPim` binary with `--port 0`, passing the target file and options.
+2. Reads the port that the OS picked from the first line PlusPim prints (`PLUSPIM_DAP_LISTENING 127.0.0.1:<port>`).
 3. Connects VS Code to the adapter via `DebugAdapterServer` over TCP.
 
-On session termination, the terminal is automatically disposed.
+The program's output is shown in a terminal named `Debug: <file>`, and input typed there
+(followed by Enter) is sent to `read_int`, `read_string` and `read_char`.
+The terminal is line-based: Backspace works, arrow keys and history do not.
+`Ctrl+C` stops PlusPim and `Ctrl+D` on an empty line closes its input.
+
+When the session ends, the terminal stays open so the output can still be read.
+Press any key in it to close it. Terminals of finished sessions are closed when the next session starts.
+Closing the terminal while the session runs ends the session.
 
 ## Known Limitations
 

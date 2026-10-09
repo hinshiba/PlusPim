@@ -76,8 +76,7 @@
               },
               "port": {
                 "type": "number",
-                "description": "DAP TCP port",
-                "default": 4711
+                "description": "Fixed TCP port for the DAP connection. Omit it to let the OS pick a free port (recommended)."
               },
               "args": {
                 "type": "array",

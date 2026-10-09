@@ -10,6 +10,24 @@
 ### Changed
 
 - Display name is now "PlusPim for VS Code"
+- The debug adapter listens on a free port chosen by the OS, so a session
+  starts even when port 4711 is in use and several sessions can run at once.
+  The `port` launch option no longer has a default and only fixes the port
+  when set
+- The extension starts PlusPim itself and shows its input and output in a
+  terminal that stays open after the session ends (press any key to close it)
+
+### Fixed
+
+- The program's output no longer disappears with its terminal when the
+  session ends
+- A debug client that sends nothing within 50ms of connecting is no longer
+  dropped as a readiness probe
+- Non-ASCII program output and input (e.g. Japanese) are no longer garbled on
+  Windows
+- A fixed port that is already in use now reports
+  `Port N is already in use. Use --port 0 to pick a free port.` (exit code 2)
+  instead of crashing
 
 ## [0.2.0] - 2026-08-31
 
