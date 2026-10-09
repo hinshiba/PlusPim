@@ -155,7 +155,7 @@
   - [ ] グローバルシンボルの重複をエラーにする
   - [ ] テスト: ファイルをまたぐ `jal`
 
-- [ ] 命令と同じ行のラベル `loop: addi ...` (`ParsedProgram.cs:182`)
+- [x] 命令と同じ行のラベル `loop: addi ...` (`ParsedProgram.cs:182`)
 
 
 - [x] オフセットを省略したメモリオペランド `sw $t0, ($sp)` (#7, `OperandParser.cs:32`)
