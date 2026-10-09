@@ -3,7 +3,6 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 
@@ -17,11 +16,8 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 /// ori $rt, $rt, lower16(addr)
 /// </code>
 /// </remarks>
-internal sealed partial class LaInstructionParser: IPseudoInstructionParser {
+internal sealed class LaInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "la";
-
-    [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<label>\w+)$")]
-    private static partial Regex LaOperandsPattern();
 
     public int GetExpansionSize(string operands) {
         return 2;
@@ -31,16 +27,10 @@ internal sealed partial class LaInstructionParser: IPseudoInstructionParser {
                           [MaybeNullWhen(false)] out IInstruction[] instructions) {
         instructions = null;
 
-        Match match = LaOperandsPattern().Match(operands);
-        if(!match.Success) {
+        if(!OperandParser.TryParseRegTokenOperands(operands, out RegisterID rt, out string? labelName)) {
             return false;
         }
 
-        if(!Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rt)) {
-            return false;
-        }
-
-        string labelName = match.Groups["label"].Value;
         if(symbolTable.Resolve(labelName) is not { } label) {
             return false;
         }
