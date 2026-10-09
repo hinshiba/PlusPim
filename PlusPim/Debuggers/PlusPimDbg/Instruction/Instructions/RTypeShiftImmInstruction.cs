@@ -17,27 +17,19 @@ internal sealed class RTypeShiftImmInstruction(
     /// </summary>
     public int SourceLine { get; } = lineNumber;
 
-    private readonly Stack<uint> _previousRdValues = new();
+    private readonly RegisterWriteHistory _rd = new(rd);
 
     public ExecuteResult Execute(RuntimeContext context) {
         uint rtVal = context.Registers[rt];
         int shamtVal = shamt.ToSInt();
         uint result = compute(rtVal, shamtVal);
-        this.WriteRd(context, result);
+        this._rd.Write(context, result);
         context.Log($"{mnemonic} ${rd}, ${rt}, {shamt}: 0x{rtVal:X8}, {shamtVal} => 0x{result:X8}");
         return ExecuteResult.Next;
     }
 
     public void Undo(RuntimeContext context) {
-        if(this._previousRdValues.Count == 0) {
-            throw new InvalidOperationException("No previous value to undo.");
-        }
-        context.Registers[rd] = this._previousRdValues.Pop();
-    }
-
-    private void WriteRd(RuntimeContext context, uint value) {
-        this._previousRdValues.Push(context.Registers[rd]);
-        context.Registers[rd] = value;
+        this._rd.Undo(context);
     }
 
     /// <summary>
