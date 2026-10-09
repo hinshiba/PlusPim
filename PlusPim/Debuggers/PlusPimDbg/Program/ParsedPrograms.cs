@@ -96,6 +96,7 @@ internal sealed class ParsedPrograms {
         }
 
         this._programs = [.. programList];
+        this.DataSegmentSize = (uint)programList.Sum(program => (long)program.DataSegmentSize.Addr);
         this._textCumulativeLengths = [.. textCumulativeLengths];
         this._kernelTextCumulativeLengths = [.. kernelTextCumulativeLengths];
         this._resolvers = [.. programList.Select(program => new ScopedSymbolResolver(program.SymbolTable, this.GlobalSymbols))];
@@ -139,6 +140,12 @@ internal sealed class ParsedPrograms {
     /// カーネル空間の総命令数
     /// </summary>
     public int KernelInstructionCount => 0 < this._kernelTextCumulativeLengths.Length ? this._kernelTextCumulativeLengths[^1] : 0;
+
+    /// <summary>
+    /// 全ファイルのデータセグメントのバイト数の合計 (<c>.space</c>による空き領域を含む)
+    /// </summary>
+    /// <remarks>データセグメントは<see cref="DataSegment.DataSegmentBase"/>から連続して配置される</remarks>
+    public uint DataSegmentSize { get; }
 
     /// <summary>
     /// 統合されたデータセグメントのメモリイメージ

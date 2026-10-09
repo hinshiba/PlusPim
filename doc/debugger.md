@@ -54,6 +54,29 @@ read_int，read_string，read_char は入力の1行が届くまで標準入力�
 この間は実行を止められないため，`pause` は入力が届いた後に効く．
 また，この間はプログラムの状態を読む要求 (`stackTrace`，`variables`，`setBreakpoints` など) も入力が届くまで待たされる．
 
+## メモリビュー
+
+DAP の `readMemory` に対応する (`supportsReadMemoryRequest`)．
+VS Code では `memoryReference` を持つ変数の View Binary Data からメモリビューを開ける．表示には Hex Editor 拡張機能が必要である．
+
+`memoryReference` を持つ変数は次の通りである．メモリ参照は `0x%08X` の形式とする．
+
+- Registers スコープの各汎用レジスタ．値をアドレスとする
+- Memory スコープの `.data`．データセグメントの先頭 `0x10000000` で，値にバイト数を示す
+- Memory スコープの `stack ($sp)`．そのフレームの `$sp` の値
+
+スタックフレームの `instructionPointerReference` は PC である．
+
+`readMemory` は次のように読む．
+
+- `memoryReference` は `0x` から始まる16進数か10進数とし，`offset` (負でもよい) を加える
+- `count` は 64 KiB までに切り詰める
+- アドレス空間 `[0, 2^32)` と重なる部分だけを読む．`address` は実際に返す最初のバイトのアドレスで，0 より前の部分は `address` を進めて表す
+- `unreadableBytes` は `0xFFFFFFFF` を超える末尾の部分のバイト数である
+- 書き込まれていないメモリは実行時と同じく 0 である
+
+`readMemory` は実行中にも応答する．メモリの書き込み (`writeMemory`) には対応しない．
+
 ## セッションの終了
 
 `disconnect` は実行中なら実行を止め，応答の送信が終わってからセッションを終える．

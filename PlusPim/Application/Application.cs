@@ -204,6 +204,22 @@ internal class Application: IApplication {
         }
     }
 
+    // メモリ
+
+    public byte[] ReadMemory(uint address, int count) {
+        lock(this._gate) {
+            return this.Debugger.ReadMemory(address, count);
+        }
+    }
+
+    public (uint Start, uint Size) DataSegmentRange {
+        get {
+            lock(this._gate) {
+                return this.Debugger.DataSegmentRange;
+            }
+        }
+    }
+
     // 例外系
 
     public void SetExceptionFilters(List<ExceptionFilter> filters) {

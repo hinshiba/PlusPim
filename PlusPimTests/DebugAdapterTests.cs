@@ -174,6 +174,7 @@ public class DebugAdapterTests {
 
             // 実行中も応答する
             _ = client.RequestOk("threads");
+            _ = client.RequestOk("readMemory", new { memoryReference = "0x10000000", count = 4 });
 
             // 実行中の実行の要求は待たせずにエラーにする
             foreach(string command in new[] { "next", "stepIn", "stepOut", "stepBack", "reverseContinue", "continue" }) {
@@ -276,6 +277,89 @@ public class DebugAdapterTests {
 
             Assert.Equal("entry", StoppedReason(RunAndWaitStopped(client, "reverseContinue")));
             Assert.Equal(3, TopLine(client));
+        });
+    }
+
+    private const string DataProgram = """
+        .data
+        value:
+          .word 0x11223344
+          .word 0x55667788
+        .text
+        main:
+          la $t0, value
+        """;
+
+    private static JsonElement ReadMemory(DapClient client, object arguments) {
+        return client.RequestOk("readMemory", arguments).GetProperty("body");
+    }
+
+    [Fact]
+    public void ReadMemory_ReturnsDataSegment() {
+        WithClient(DataProgram, (client, file) => {
+            JsonElement initialize = client.RequestOk("initialize", new { adapterID = "pluspim" });
+            Assert.True(initialize.GetProperty("body").GetProperty("supportsReadMemoryRequest").GetBoolean());
+            int mark = client.Mark;
+            _ = client.RequestOk("launch", new { });
+            _ = client.WaitForEvent("initialized", mark);
+
+            JsonElement body = ReadMemory(client, new { memoryReference = "0x10000000", count = 8 });
+            Assert.Equal("0x10000000", body.GetProperty("address").GetString());
+            // 44 33 22 11 88 77 66 55 (リトルエンディアン)
+            Assert.Equal(Convert.ToBase64String([0x44, 0x33, 0x22, 0x11, 0x88, 0x77, 0x66, 0x55]), body.GetProperty("data").GetString());
+            Assert.False(body.TryGetProperty("unreadableBytes", out _));
+
+            // 10進数の参照と，書き込まれていない領域
+            body = ReadMemory(client, new { memoryReference = "268435460", offset = 4, count = 4 });
+            Assert.Equal("0x10000008", body.GetProperty("address").GetString());
+            Assert.Equal("AAAAAA==", body.GetProperty("data").GetString());
+        });
+    }
+
+    [Fact]
+    public void ReadMemory_ClipsToAddressSpace() {
+        WithClient(DataProgram, (client, file) => {
+            Launch(client);
+
+            // 0xFFFFFFFF を超える末尾は unreadableBytes
+            JsonElement body = ReadMemory(client, new { memoryReference = "0xFFFFFFFC", count = 8 });
+            Assert.Equal("0xFFFFFFFC", body.GetProperty("address").GetString());
+            Assert.Equal(4, Convert.FromBase64String(body.GetProperty("data").GetString()!).Length);
+            Assert.Equal(4, body.GetProperty("unreadableBytes").GetInt32());
+
+            // 0 より前の部分は address を進めて表す
+            body = ReadMemory(client, new { memoryReference = "0x00000002", offset = -4, count = 8 });
+            Assert.Equal("0x00000000", body.GetProperty("address").GetString());
+            Assert.Equal(6, Convert.FromBase64String(body.GetProperty("data").GetString()!).Length);
+            Assert.False(body.TryGetProperty("unreadableBytes", out _));
+
+            JsonElement invalid = client.Request("readMemory", new { memoryReference = "sp", count = 4 });
+            Assert.False(invalid.GetProperty("success").GetBoolean());
+        });
+    }
+
+    [Fact]
+    public void Variables_CarryMemoryReferences() {
+        WithClient(DataProgram, (client, file) => {
+            LaunchAndStopOnEntry(client);
+
+            JsonElement stackTrace = client.RequestOk("stackTrace", new { threadId = 1 });
+            Assert.Equal("0x00400000", stackTrace.GetProperty("body").GetProperty("stackFrames")[0].GetProperty("instructionPointerReference").GetString());
+
+            Dictionary<string, JsonElement> registers = Registers(client);
+            Assert.Equal("0x7FFFEFFC", registers["$sp ($29)"].GetProperty("memoryReference").GetString());
+            Assert.Equal("0x10008000", registers["$gp ($28)"].GetProperty("memoryReference").GetString());
+
+            JsonElement scopes = client.RequestOk("scopes", new { frameId = 1 }).GetProperty("body").GetProperty("scopes");
+            JsonElement memoryScope = scopes.EnumerateArray().Single(scope => scope.GetProperty("name").GetString() == "Memory");
+            JsonElement variables = client.RequestOk("variables", new { variablesReference = memoryScope.GetProperty("variablesReference").GetInt32() })
+                .GetProperty("body").GetProperty("variables");
+
+            Assert.Equal(".data", variables[0].GetProperty("name").GetString());
+            Assert.Equal("0x10000000 (8 bytes)", variables[0].GetProperty("value").GetString());
+            Assert.Equal("0x10000000", variables[0].GetProperty("memoryReference").GetString());
+            Assert.Equal("stack ($sp)", variables[1].GetProperty("name").GetString());
+            Assert.Equal("0x7FFFEFFC", variables[1].GetProperty("memoryReference").GetString());
         });
     }
 }

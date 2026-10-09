@@ -5,6 +5,7 @@ using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Logging;
 using System.Diagnostics;
+using System.Globalization;
 using StackFrame = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.StackFrame;
 
 namespace PlusPim.EditorController.DebugAdapter;
@@ -13,6 +14,17 @@ internal class DebugAdapter: DebugAdapterBase {
     private const int SCOPE_REGISTERS = 1;
     private const int SCOPE_SPECIAL_REGISTERS = 2;
     private const int SCOPE_CP0_REGISTERS = 3;
+    private const int SCOPE_MEMORY = 4;
+
+    /// <summary>
+    /// readMemory で一度に読む最大のバイト数
+    /// </summary>
+    private const int MaxReadMemoryBytes = 64 * 1024;
+
+    /// <summary>
+    /// <c>$sp</c> の番号
+    /// </summary>
+    private const int StackPointerIndex = 29;
 
     private static readonly string[] RegisterNames = [
         "$zero ($0)", "$at ($1)", "$v0 ($2)", "$v1 ($3)",
@@ -84,6 +96,7 @@ internal class DebugAdapter: DebugAdapterBase {
         // 返さないといけないレスポンスに，戻り値の型が設定されているので便利
         return new InitializeResponse {
             SupportsConfigurationDoneRequest = true,
+            SupportsReadMemoryRequest = true,
             SupportsStepBack = true,
             SupportsExceptionInfoRequest = true,
             ExceptionBreakpointFilters = [
@@ -242,7 +255,8 @@ internal class DebugAdapter: DebugAdapterBase {
         List<StackFrame> dapFrames = [];
         foreach(StackFrameInfo frame in callStack) {
             dapFrames.Add(new StackFrame(frame.FrameId, frame.Name, frame.Line, 0) {
-                Source = frame.SrcFile is not null ? new Source { Path = frame.SrcFile.FullName } : null
+                Source = frame.SrcFile is not null ? new Source { Path = frame.SrcFile.FullName } : null,
+                InstructionPointerReference = MemoryReference(frame.PC)
             });
         }
 
@@ -263,6 +277,7 @@ internal class DebugAdapter: DebugAdapterBase {
         int registersRef = (frameId << 16) | SCOPE_REGISTERS;
         int specialRegistersRef = (frameId << 16) | SCOPE_SPECIAL_REGISTERS;
         int cp0RegistersRef = (frameId << 16) | SCOPE_CP0_REGISTERS;
+        int memoryRef = (frameId << 16) | SCOPE_MEMORY;
 
         return new ScopesResponse {
             Scopes = [
@@ -274,7 +289,9 @@ internal class DebugAdapter: DebugAdapterBase {
                 },
                 new Scope("CP0 Registers", cp0RegistersRef, false) {
                     PresentationHint = Scope.PresentationHintValue.Registers
-                }
+                },
+                // メモリビュー (View Binary Data) を開くための変数
+                new Scope("Memory", memoryRef, false)
             ]
         };
     }
@@ -294,7 +311,10 @@ internal class DebugAdapter: DebugAdapterBase {
         if(targetFrame != null) {
             if(scopeType == SCOPE_REGISTERS) {
                 for(int i = 0; i < 32 && i < targetFrame.Registers.Length; i++) {
-                    variables.Add(new Variable(RegisterNames[i], $"0x{targetFrame.Registers[i]:X8}", 0));
+                    // 値をアドレスとしてメモリビューを開けるようにする
+                    variables.Add(new Variable(RegisterNames[i], $"0x{targetFrame.Registers[i]:X8}", 0) {
+                        MemoryReference = MemoryReference(targetFrame.Registers[i])
+                    });
                 }
             } else if(scopeType == SCOPE_SPECIAL_REGISTERS) {
                 variables.Add(new Variable("PC", $"0x{targetFrame.PC:X8}", 0));
@@ -305,6 +325,15 @@ internal class DebugAdapter: DebugAdapterBase {
                 variables.Add(new Variable("Status ($12)", $"0x{targetFrame.CP0Status!.Value:X8}", 0));
                 variables.Add(new Variable("Cause ($13)", $"0x{targetFrame.CP0Cause!.Value:X8}", 0));
                 variables.Add(new Variable("EPC ($14)", $"0x{targetFrame.CP0EPC!.Value:X8}", 0));
+            } else if(scopeType == SCOPE_MEMORY) {
+                (uint dataStart, uint dataSize) = this._app.DataSegmentRange;
+                variables.Add(new Variable(".data", $"0x{dataStart:X8} ({dataSize} bytes)", 0) {
+                    MemoryReference = MemoryReference(dataStart)
+                });
+                uint sp = targetFrame.Registers[StackPointerIndex];
+                variables.Add(new Variable("stack ($sp)", $"0x{sp:X8}", 0) {
+                    MemoryReference = MemoryReference(sp)
+                });
             }
         }
 
@@ -313,6 +342,58 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
+
+    /// <remarks>
+    /// <c>address</c> は実際に返す最初のバイトのアドレスとし，アドレス 0 より前の部分は <c>address</c> を進めて表す．
+    /// <c>unreadableBytes</c> は <c>0xFFFFFFFF</c> を超える末尾の部分だけである
+    /// </remarks>
+    protected override ReadMemoryResponse HandleReadMemoryRequest(ReadMemoryArguments args) {
+        this._logger.Debug("DebugAdapter", "ReadMemoryRequest.");
+
+        if(!this._app.IsLoaded) {
+            throw new ProtocolException("Program is not loaded.");
+        }
+        if(!TryParseMemoryReference(args.MemoryReference, out uint reference)) {
+            throw new ProtocolException($"Invalid memory reference: {args.MemoryReference}");
+        }
+
+        const long AddressSpaceEnd = 0x1_0000_0000L;
+        long start = reference + (long)(args.Offset ?? 0);
+        long end = start + Math.Clamp(args.Count, 0, MaxReadMemoryBytes);
+        // アドレス空間 [0, 2^32) と重なる部分だけを読む
+        long readStart = Math.Clamp(start, 0, AddressSpaceEnd);
+        long readEnd = Math.Clamp(end, readStart, AddressSpaceEnd);
+
+        byte[] data = readStart < readEnd
+            ? this._app.ReadMemory((uint)readStart, (int)(readEnd - readStart))
+            : [];
+        return new ReadMemoryResponse {
+            Address = $"0x{readStart:X8}",
+            Data = Convert.ToBase64String(data),
+            UnreadableBytes = readEnd < end ? (int)(end - readEnd) : null
+        };
+    }
+
+    /// <summary>
+    /// メモリ参照の文字列 (<c>0x</c> から始まる16進数か10進数) を解析する
+    /// </summary>
+    private static bool TryParseMemoryReference(string? text, out uint address) {
+        address = 0;
+        if(string.IsNullOrWhiteSpace(text)) {
+            return false;
+        }
+        text = text.Trim();
+        return text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+            ? uint.TryParse(text.AsSpan(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out address)
+            : uint.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out address);
+    }
+
+    /// <summary>
+    /// アドレスを DAP のメモリ参照の文字列にする
+    /// </summary>
+    private static string MemoryReference(uint address) {
+        return $"0x{address:X8}";
+    }
 
     // 実行の要求は応答を先に送り，ワーカーで実行して停止したら stopped を送る
     // 実行中に届いた実行の要求はエラーにする (待たせない)
