@@ -1,6 +1,8 @@
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using Newtonsoft.Json.Linq;
 using PlusPim.Application;
+using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Logging;
 using System.Diagnostics;
 using StackFrame = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.StackFrame;
@@ -26,19 +28,24 @@ internal class DebugAdapter: DebugAdapterBase {
     private readonly IApplication _app;
     private readonly ILogger _logger;
     private readonly TaskCompletionSource _sessionEnded = new();
-    private bool _isInit = false;
+    private volatile bool _isInit = false;
+
+    /// <summary>
+    /// launch の <c>stopOnEntry</c>．<see langword="false"/> なら configurationDone の後に実行を始める
+    /// </summary>
+    private volatile bool _stopOnEntry = true;
 
     internal DebugAdapter(Stream input, Stream output, IApplication app, ILogger logger) {
         this._app = app;
         this._logger = logger;
         this.InitializeProtocolClient(input, output);
-        this.Protocol.Run();
-        this._logger.Debug("DebugAdapter", "Protocol client initialized and running.");
-        // エラー時の終了処理の登録
+        // エラー時の終了処理の登録．Run より前に登録しないと，直後のエラーを取りこぼす
         this.Protocol.DispatcherError += (_, _) => {
             _ = this._sessionEnded.TrySetResult();
             this._isInit = false;
         };
+        this.Protocol.Run();
+        this._logger.Debug("DebugAdapter", "Protocol client initialized and running.");
 
         this._logger.AddSink((LogLevel level, string source, string msg) => {
             if(!this._isInit) {
@@ -75,6 +82,7 @@ internal class DebugAdapter: DebugAdapterBase {
         // InitializeRequestに対してResponseを返す前は，イベントを送信してはならない
         // 返さないといけないレスポンスに，戻り値の型が設定されているので便利
         return new InitializeResponse {
+            SupportsConfigurationDoneRequest = true,
             SupportsStepBack = true,
             SupportsExceptionInfoRequest = true,
             ExceptionBreakpointFilters = [
@@ -98,28 +106,69 @@ internal class DebugAdapter: DebugAdapterBase {
         };
     }
 
-    protected override LaunchResponse HandleLaunchRequest(LaunchArguments args) {
+    /// <remarks>
+    /// DAP の順序に従い，読み込みに成功したら launch に応答してから initialized を送る．
+    /// 実行 (stopOnEntry の停止を含む) は configurationDone の後に始める
+    /// </remarks>
+    protected override void HandleLaunchRequestAsync(IRequestResponder<LaunchArguments> responder) {
         this._isInit = true;
         this._logger.Debug("DebugAdapter", "LaunchRequest.");
 
-        _ = this._app.Load();
+        this._stopOnEntry = ReadStopOnEntry(responder.Arguments);
 
-        // StoppedEventを送信してVariablesペインを有効化
-        this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
-            ThreadId = 1,
-            AllThreadsStopped = true
-        });
+        try {
+            _ = this._app.Load();
+        } catch(AssemblyException ex) {
+            responder.SetError(new ProtocolException($"Failed to load program:\n{string.Join("\n", ex.Errors)}"));
+            return;
+        } catch(Exception ex) when(ex is IOException or UnauthorizedAccessException) {
+            responder.SetError(new ProtocolException($"Failed to load program: {ex.Message}"));
+            return;
+        }
+
+        responder.SetResponse(new LaunchResponse());
+        // 応答の後でないと，クライアントが構成要求を送る前提が崩れる
         this.Protocol.SendEvent(new InitializedEvent());
-        return new LaunchResponse();
     }
 
-    protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments args) {
+    /// <summary>
+    /// launch の構成から <c>stopOnEntry</c> を読む．指定がなければ <see langword="true"/>
+    /// </summary>
+    private static bool ReadStopOnEntry(LaunchArguments args) {
+        return args.ConfigurationProperties is null
+            || !args.ConfigurationProperties.TryGetValue("stopOnEntry", out JToken? token)
+            || token.Type != JTokenType.Boolean
+            || token.Value<bool>();
+    }
+
+    protected override void HandleConfigurationDoneRequestAsync(IRequestResponder<ConfigurationDoneArguments> responder) {
+        this._logger.Debug("DebugAdapter", "ConfigurationDoneRequest.");
+
+        if(!this._app.IsLoaded) {
+            responder.SetError(new ProtocolException("Program is not loaded."));
+            return;
+        }
+
+        responder.SetResponse(new ConfigurationDoneResponse());
+        if(this._stopOnEntry) {
+            // StoppedEventを送信してVariablesペインを有効化
+            this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Entry) {
+                ThreadId = 1,
+                AllThreadsStopped = true
+            });
+        } else {
+            this.SendExecuteEvent(this._app.Continue());
+        }
+    }
+
+    protected override void HandleDisconnectRequestAsync(IRequestResponder<DisconnectArguments> responder) {
         this._logger.Debug("DebugAdapter", "DisconnectRequest.");
-        _ = this._sessionEnded.TrySetResult();
 
         this._isInit = false;
 
-        return new DisconnectResponse();
+        // 応答を書いてからセッションを終える．先に終えると Main がストリームを閉じ，応答が届かない
+        responder.SetResponse(new DisconnectResponse());
+        _ = this._sessionEnded.TrySetResult();
     }
 
     protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments args) {
