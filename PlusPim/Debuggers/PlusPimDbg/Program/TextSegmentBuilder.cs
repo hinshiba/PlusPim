@@ -1,12 +1,11 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 
-internal sealed class TextSegmentBuilder(Address baseAddr, ILogger logger) {
+internal sealed class TextSegmentBuilder(ILogger logger) {
     private readonly List<IInstruction> _instructions = [];
     private readonly List<string> _errors = [];
 
@@ -34,7 +33,7 @@ internal sealed class TextSegmentBuilder(Address baseAddr, ILogger logger) {
     }
 
     public TextSegment Build() {
-        return new TextSegment(this._instructions, baseAddr);
+        return new TextSegment(this._instructions);
     }
 
 

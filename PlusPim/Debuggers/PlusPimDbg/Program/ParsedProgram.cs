@@ -80,8 +80,6 @@ internal partial class ParsedProgram {
     private readonly List<(string Name, int LineNumber)> _globalDeclarations = [];
     private readonly List<(ParsedLine Line, int LineNumber)> _parsedTextLines;
     private readonly List<(ParsedLine Line, int LineNumber)> _parsedKernelTextLines;
-    private readonly Address _textSegmentBase;
-    private readonly Address _kernelTextSegmentBase;
     private readonly ILogger _logger;
     private TextSegment? _textSegment;
     private TextSegment? _kernelTextSegment;
@@ -93,8 +91,6 @@ internal partial class ParsedProgram {
     public ParsedProgram(FileInfo file, Address textSegmentBase, Address dataSegmentBase, Address kernelTextSegmentBase, ILogger logger, bool strict) {
         this.File = file;
         this.SymbolTable = new SymbolTable();
-        this._textSegmentBase = textSegmentBase;
-        this._kernelTextSegmentBase = kernelTextSegmentBase;
         this._logger = logger;
 
 
@@ -203,15 +199,15 @@ internal partial class ParsedProgram {
     /// <param name="globals">全ファイルのグローバルシンボル</param>
     public void Assemble(SymbolTable globals) {
         ScopedSymbolResolver symbols = new(this.SymbolTable, globals);
-        this._textSegment = this.Materialize(this._parsedTextLines, this._textSegmentBase, symbols);
-        this._kernelTextSegment = this.Materialize(this._parsedKernelTextLines, this._kernelTextSegmentBase, symbols);
+        this._textSegment = this.Materialize(this._parsedTextLines, symbols);
+        this._kernelTextSegment = this.Materialize(this._parsedKernelTextLines, symbols);
     }
 
     /// <summary>
     /// パス1で解析した行のシンボルを解決してテキスト系セグメントを作る
     /// </summary>
-    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber)> lines, Address segmentBase, ISymbolResolver symbols) {
-        TextSegmentBuilder builder = new(segmentBase, this._logger);
+    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber)> lines, ISymbolResolver symbols) {
+        TextSegmentBuilder builder = new(this._logger);
         foreach((ParsedLine line, int lineNumber) in lines) {
             builder.Add(line, lineNumber, symbols, this.File.Name);
         }
