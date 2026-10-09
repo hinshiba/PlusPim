@@ -48,7 +48,7 @@
 
 #### 例外とランタイムエラー関連
 
-- [ ] ランタイムエラーの表示を確認
+- [ ] ランタイムエラーだとわかるような表示に変更
 
 ### 前処理系
 
@@ -65,6 +65,25 @@
   - [ ] 32bit 即値のパーサを用意し, 10進 / 負数 / `0x` に対応する
   - [ ] `0x80000000` 以上 (`int` の範囲外) も受け付ける
   - [ ] テスト
+- [ ] `.kdata` がセグメント指令として認識されない (`ParsedProgram.cs:71` 付近)
+  - [ ] `doc/instructions.md` は `.kdata` を実装済みとしているため，実装するか未実装に直す
+  - [ ] 実装する場合は `.kdata` の開始アドレスを決め (MARS は `0x90000000`)，カーネルデータのセグメントを追加する
+  - [ ] テスト: `.kdata` の `kx:` `.word 1` でラベルのアドレスとメモリが正しい
+- [ ] `.ascii`/`.asciiz` が UTF-16 の下位1バイトだけを書く (`DataSegmentBuilder.cs:244`, `248`)
+  - `"あ"` が `0x42` になる．print_string は UTF-8 として出力するため不整合
+  - [ ] 文字列を UTF-8 のバイト列にして書く．エスケープは ASCII のまま処理する
+  - [ ] テスト: `.asciiz "あ"` が `E3 81 82 00`
+- [ ] 文字列の直後が `\\"` のとき，行末のコメントが除去されない (`ParsedProgram.cs:149`)
+  - `.asciiz "a\\" # c "q"` で文字列が `a\\" # c "q` になる．引用符の直前の `\` の個数の偶奇で判定する
+  - [ ] テスト
+- [ ] マクロ定義の本体が定義の位置に命令として配置され，`main` などのアドレスがずれる (`ParsedProgram.cs:171`, `TextSegmentBuilder.cs:19`)
+  - `.macro` 行は `.` で始まるため無視されるが，本体の行は通常の命令として数えられる
+  - [ ] マクロの実装まで，`.macro` から `.end_macro` の本体を読み飛ばす (上のパース失敗の項目の方針と合わせる)
+  - [ ] テスト: 定義の後の `main:` が `T+0`
+- [ ] `la` が `$` を含むラベルを参照できない (`LaInstructionParser.cs:23`)
+  - 分岐とジャンプは `(\w|\$)+` を受け付けるが，`la` は `\w+` のみ
+  - [ ] ラベルのパターンを共通化する
+  - [ ] テスト: `la $t0, $ret`
 
 ### VS Code 拡張
 
@@ -90,6 +109,9 @@
   - [ ] 未実装の一覧 (`README.md:29-31`) を更新する
   - [ ] ステップ実行はソース行単位ではなく機械命令単位であることを書く. 擬似命令 (`la`, `li` など) は複数命令に展開されるため, 1行に複数回のステップが必要
   - [ ] syscall を StepIn / StepOver するとカーネルハンドラに入ることを書く
+- [ ] `vscode_ext/pluspim/testfolder/syscall.asm` が `kseg.asm` と実行すると終了しない
+  - 末尾の `nop` の後で命令の範囲外になり `RI` が起き，`kseg.asm` が `EPC + 4` へ復帰するため繰り返す
+  - [ ] 末尾に exit (`li $v0, 10` と `syscall`) を加える．結合テストには `syscall_exit.asm` として同じ内容を置く
 
 - [ ] `doc/おおまかな設計.puml` を現状に合わせる
 - [ ] CHANGELOGを作成
@@ -138,6 +160,18 @@
 
 - [ ] オフセットを省略したメモリオペランド `sw $t0, ($sp)` (#7, `OperandParser.cs:32`)
 
+- [ ] アドレス引数付きのセグメント指令 `.data 0x10010000`
+  - 現在はセグメント指令として認識されず，後続の行がテキストとして扱われる
+
+- [ ] 文字リテラル `.byte 'a'`
+
+- [ ] ラベルとオフセット `la $t0, d+4`
+
+- [ ] マクロ (`.macro`, `.end_macro`, `.eqv`, `.include`)
+  - 仕様の未決定事項は `doc/tests/assembler/macro_model.md`
+
+- [ ] 未実装の疑似命令 (`mul`, `b`, `beqz`, `not` など．一覧は `doc/instructions.md`)
+
 
 ## コード品質
 
@@ -153,7 +187,6 @@
   - [ ] テストからしか使われていない `PlusPimDbg.GetRegisters`, `ParsedProgram.InstructionCount` の扱いを決める
 - [ ] 重複の共通化
   - [ ] `Stack<uint>` + `WriteRd` + `Undo` の重複 (`RType3Reg`, `RTypeShiftImm`, `RTypeShiftVar`, `IType`)
-  - [x] 「Undoスタックの整合性のために現在値でWriteRtを呼ぶ」回避策 (`ITypeInstruction.cs:34`, `RType3RegInstruction.cs:33`). 例外を起こす実行は何も積まないことにして削除した
 - [ ] 命名を統一する
   - [ ] `Address.InValid` と `Label.Invalid`
   - [ ] 名前空間の大文字小文字 (`…Instruction.instructions`, `Program.records`)
@@ -162,14 +195,14 @@
 
 ### テストと CI
 
-- [ ] テストの追加 (#17)
-  - [ ] `Application`: StepOver, StepOut, Continue, ReverseContinue
-  - [ ] `DebugAdapter`: DAP の要求と応答
-  - [ ] 複数ファイル
-  - [ ] ブレークポイント
-  - [x] カーネルハンドラを経由する流れ (syscall → ハンドラ → `eret`) (`ExceptionTimeTravelTests`)
-  - [ ] `testfolder` の例題を実行し, 出力を照合する
-
+- [ ] テストの追加
+  - [ ] アセンブラ
+    - [ ] パース
+    - [ ] 疑似命令展開
+    - [ ] マクロ
+    - [ ] アドレス配置
+  - [ ] 結合テスト
+    - [ ] テスト用アセンブリディレクトリの自動実行
 
 ## 低優先度
 
@@ -177,6 +210,5 @@
   - [ ] Debug ログが無効なときにログ文字列を組み立てない (`ITypeInstruction.cs:40` など)
   - [ ] 計測用のベンチマークを用意する
 
-## 検討中
-
 - [ ] Emacs, Vim, Neovim, Zed への拡張機能提供
+
