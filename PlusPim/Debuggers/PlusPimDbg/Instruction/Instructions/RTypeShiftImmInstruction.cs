@@ -1,8 +1,8 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// シフト即値R形式命令の汎用実装（sll, srl, sra）

@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 internal sealed class SyscallInstruction(int sourceLine): IInstruction {
     /// <summary>

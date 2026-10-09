@@ -3,7 +3,7 @@ using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
 internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstruction(null, lineIndex) {
     private RegisterID Rs { get; } = rs;

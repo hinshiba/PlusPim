@@ -3,7 +3,7 @@ using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
 internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpInstruction(targetLabel, lineIndex) {
     private readonly Stack<uint> _previousRaValues = new();
