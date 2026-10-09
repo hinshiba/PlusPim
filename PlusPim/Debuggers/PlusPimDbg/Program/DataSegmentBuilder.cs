@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
+using System.Text;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
@@ -214,41 +215,45 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
         this.NextDataAddress = new((this.NextDataAddress.Addr + mask) & ~mask);
     }
 
+    /// <summary>
+    /// エスケープを解釈し，文字列を UTF-8 のバイト列にする
+    /// </summary>
+    /// <remarks>エスケープはすべて ASCII の文字になるため，解釈後の文字列をまとめて符号化する</remarks>
     private byte[] ProcessEscapeSequences(string input) {
-        List<byte> result = [];
+        StringBuilder result = new();
         for(int i = 0; i < input.Length; i++) {
             if(input[i] == '\\' && i + 1 < input.Length) {
                 char next = input[i + 1];
                 switch(next) {
                     case 'n':
-                        result.Add((byte)'\n');
+                        _ = result.Append('\n');
                         i++;
                         break;
                     case 't':
-                        result.Add((byte)'\t');
+                        _ = result.Append('\t');
                         i++;
                         break;
                     case '0':
-                        result.Add(0);
+                        _ = result.Append('\0');
                         i++;
                         break;
                     case '\\':
-                        result.Add((byte)'\\');
+                        _ = result.Append('\\');
                         i++;
                         break;
                     case '"':
-                        result.Add((byte)'"');
+                        _ = result.Append('"');
                         i++;
                         break;
                     default:
-                        result.Add((byte)input[i]);
+                        _ = result.Append(input[i]);
                         break;
                 }
             } else {
-                result.Add((byte)input[i]);
+                _ = result.Append(input[i]);
             }
         }
-        return result.ToArray();
+        return Encoding.UTF8.GetBytes(result.ToString());
     }
 
     private void WriteByte(byte value) {

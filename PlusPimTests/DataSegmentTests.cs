@@ -208,6 +208,22 @@ public class DataSegmentTests {
     }
 
     [Fact]
+    public void Asciiz_NonAscii_WritesUtf8() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "あ\n"
+            """);
+
+        Address s = Resolve(program, "s");
+        byte[] expected = [0xE3, 0x81, 0x82, (byte)'\n', 0x00];
+        for(int i = 0; i < expected.Length; i++) {
+            Assert.Equal(expected[i], program.DataSegment.MemoryImage[s + i]);
+        }
+        Assert.Equal((uint)expected.Length, program.DataSegment.Size);
+    }
+
+    [Fact]
     public void Half_WritesLittleEndian() {
         ParsedProgram program = Parse("""
             .data
