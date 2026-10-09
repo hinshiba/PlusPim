@@ -25,6 +25,9 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>PlusPimTests</_Parameter1>
     </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>PlusPimBenchmarks</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

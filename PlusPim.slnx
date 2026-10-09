@@ -4,6 +4,9 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/benchmarks/">
+    <Project Path="PlusPimBenchmarks/PlusPimBenchmarks.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="PlusPimTests/PlusPimTests.csproj" />
   </Folder>
