@@ -96,9 +96,9 @@
 - 起動に時間がかかる
   - プロファイリング
 
-- [ ] Debug ビルドが VSIX に入る (#18)
-  - [ ] Debug バイナリを優先するのは開発モード (`ExtensionMode.Development`) のときだけにする (`extension.ts:67-70`)
-- [ ] 表示名の変更: PlusPim for VS Code
+- [x] Debug ビルドが VSIX に入る (#18)
+  - [x] Debug バイナリを優先するのは開発モード (`ExtensionMode.Development`) のときだけにする (`extension.ts:67-70`)
+- [x] 表示名の変更: PlusPim for VS Code
 
 ### ドキュメンテーション
 

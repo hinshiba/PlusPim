@@ -87,7 +87,7 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 		const releaseBinPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
 		const useDebug = preferDebug && fs.existsSync(debugBinPath);
 		if (preferDebug && !useDebug) {
-			vscode.window.showWarningMessage("Debugビルドが見つからないため，リリースビルドを使用します．`bun run dotnet:debug:win` でビルドできます．");
+			vscode.window.showWarningMessage("Debugビルドが見つからないため，リリースビルドを使用します．リポジトリのルートで `dotnet build` を実行するとビルドできます．");
 		}
 		const binPath = useDebug ? debugBinPath : releaseBinPath;
 		const execError = ensureExecutable(binPath);
