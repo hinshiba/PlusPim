@@ -191,7 +191,7 @@
   - [x] `Address.InValid` と `Label.Invalid`
   - [x] 名前空間の大文字小文字 (`…Instruction.instructions`, `Program.records`)
   - [x] `lineIndex` が 0 始まり (`TextSegmentBuilder`) と 1 始まり (命令のコンストラクタ) で混在
-  - [ ] 末尾のアンダースコア (`_debugger_`, `inst_`, `maxLength_`)
+  - [x] 末尾のアンダースコア (`_debugger_`, `inst_`, `maxLength_`)
 
 ### テストと CI
 
