@@ -2,6 +2,7 @@ using PlusPim.EditorController.DebugAdapter;
 using PlusPim.Logging;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -104,7 +105,11 @@ internal class Program {
         Logger logger = new(minLevel);
         // stderrはデバッギーのものなので，verboseモードのときだけログを出す
         if(parseResult.GetValue(verboseArg)) {
-            logger.AddSink((LogLevel level, string source, string msg) => Console.Error.WriteLine($"[{level}][{source}] {msg}"));
+            // 起動の計測のため，各行にプロセスの開始からの経過時間 [+<ms>ms] を付ける
+            TimeSpan sinceStart = DateTime.Now - Process.GetCurrentProcess().StartTime;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            logger.AddSink((LogLevel level, string source, string msg) =>
+                Console.Error.WriteLine($"[+{(long)(sinceStart + stopwatch.Elapsed).TotalMilliseconds}ms][{level}][{source}] {msg}"));
         }
         logger.Debug("Program", "Verbose mode enabled");
         string version = Assembly.GetExecutingAssembly()
