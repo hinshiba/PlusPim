@@ -1,6 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
