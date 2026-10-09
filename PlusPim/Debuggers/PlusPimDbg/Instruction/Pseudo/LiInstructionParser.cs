@@ -38,12 +38,12 @@ internal sealed class LiInstructionParser: IPseudoInstructionParser {
             return false;
         }
 
-        // 32bitの可能性があるため，Immediate.TryParseではなくint.TryParseを使う
-        if(!int.TryParse(token, null, out int imm)) {
+        // 32bitの可能性があるため，Immediate.TryParseではなくImmediate.TryParse32を使う
+        if(!Immediate.TryParse32(token, out uint imm)) {
             return false;
         }
 
-        ushort upper = (ushort)((uint)imm >> 16);
+        ushort upper = (ushort)(imm >> 16);
         ushort lower = (ushort)(imm & 0xFFFF);
 
         instructions =

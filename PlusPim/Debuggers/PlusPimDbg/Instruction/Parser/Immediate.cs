@@ -23,55 +23,80 @@ internal class Immediate {
     }
 
     /// <summary>
-    /// 0xから始まる16進数か10進数文字列から即値への変換
+    /// 0xから始まる16進数か10進数文字列から16bit即値への変換
     /// </summary>
     /// <remarks>
-    /// 正規表現によってマッチした値を処理する前提であるので，前後の空白は取り除かれていることを想定している
+    /// 書式は<see cref="TryParseInteger"/>に従い，<c>-32768</c> から <c>65535</c> を受け付ける．
+    /// <paramref name="provider"/>は使わない (常にInvariantCulture)
     /// </remarks>
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Immediate result) {
         result = null;
-        // null または 空文字のチェック
-        if(string.IsNullOrWhiteSpace(s)) {
+        if(!TryParseInteger(s, out long value) || value is < short.MinValue or > ushort.MaxValue) {
             return false;
         }
 
-        ushort parseResult;
-        bool isSuccess;
-        // 0x で始まる場合は16進数として処理
-        if(s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
-            // 2文字目以降を渡す
-            // NumberStyles.HexNumberは空白を許可するが，trimしている前提なのでAllowHexSpecifierを使用
-            isSuccess = ushort.TryParse(
-                s[2..],
-                NumberStyles.AllowHexSpecifier,
-                provider,
-                out parseResult
-            );
-        } else if(s.StartsWith('-')) {
-            // 符号あり
-            isSuccess = short.TryParse(
-                s,
-                NumberStyles.Integer,
-                provider,
-                out short signedResult
-            );
-            // 符号ありで成功した場合は，符号なしの値に変換して格納
-            // フラグに依存させないために，uncheckedを用いる
-            parseResult = unchecked((ushort)signedResult);
-        } else {
-            // それ以外は通常の10進数として処理
-            isSuccess = ushort.TryParse(
-                s,
-                NumberStyles.Integer,
-                provider,
-                out parseResult
-            );
+        // 負数は2の補数のビット列として格納する
+        result = new Immediate(unchecked((ushort)value));
+        return true;
+    }
+
+    /// <summary>
+    /// 0xから始まる16進数か10進数文字列から32bit値への変換
+    /// </summary>
+    /// <remarks>
+    /// 書式は<see cref="TryParseInteger"/>に従い，<c>-2147483648</c> から <c>4294967295</c> を受け付ける
+    /// </remarks>
+    /// <param name="s">対象の文字列</param>
+    /// <param name="value">成功した場合は値のビット列</param>
+    /// <returns>成功なら<see langword="true"/></returns>
+    public static bool TryParse32([NotNullWhen(true)] string? s, out uint value) {
+        value = 0;
+        if(!TryParseInteger(s, out long parsed) || parsed is < int.MinValue or > uint.MaxValue) {
+            return false;
         }
 
-        if(isSuccess) {
-            result = new Immediate(parseResult);
+        value = unchecked((uint)parsed);
+        return true;
+    }
+
+    /// <summary>
+    /// 整数リテラルを解析する
+    /// </summary>
+    /// <remarks>
+    /// 省略可能な符号 (<c>+</c>/<c>-</c>) に続けて，10進数 (10桁まで) か <c>0x</c>/<c>0X</c> で始まる16進数 (8桁まで) を受け付ける．
+    /// 正規表現によってマッチした値を処理する前提であるので，前後の空白は取り除かれていることを想定している
+    /// </remarks>
+    /// <param name="s">対象の文字列</param>
+    /// <param name="value">成功した場合は値</param>
+    /// <returns>成功なら<see langword="true"/></returns>
+    internal static bool TryParseInteger([NotNullWhen(true)] string? s, out long value) {
+        value = 0;
+        if(string.IsNullOrEmpty(s)) {
+            return false;
         }
-        return isSuccess;
+
+        ReadOnlySpan<char> span = s;
+        bool isNegative = span[0] == '-';
+        if(span[0] is '+' or '-') {
+            span = span[1..];
+        }
+
+        long magnitude;
+        if(2 <= span.Length && span[0] == '0' && span[1] is 'x' or 'X') {
+            // AllowHexSpecifierは16進数字のみを受け付ける
+            span = span[2..];
+            if(span.Length is 0 or > 8
+                || !long.TryParse(span, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out magnitude)) {
+                return false;
+            }
+        } else if(span.Length is 0 or > 10
+            || !long.TryParse(span, NumberStyles.None, CultureInfo.InvariantCulture, out magnitude)) {
+            // NumberStylesNoneは10進数字のみを受け付ける
+            return false;
+        }
+
+        value = isNegative ? -magnitude : magnitude;
+        return true;
     }
 
     public override string ToString() {
