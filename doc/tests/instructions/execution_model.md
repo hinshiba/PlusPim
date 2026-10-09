@@ -5,7 +5,7 @@
 - 汎用レジスタ32本
 - 特殊なレジスタ: `HI`，`LO`，PC
 - CP0の状態: (`BadVAddr`，`Status` の EXL，`Cause` の ExcCode，`EPC`)
-- ランタイムの内部状態: `LastException`，`IsTerminated`，`RuntimeError`
+- ランタイムの内部状態: `LastException`，`IsTerminated`，`RuntimeError`，入力バッファ(標準入力から読み込んだが消費されていない入力)
 - デバッガの状態: コールスタックの深さ，現在のラベル
 - 命令が読み書きしうる範囲のメモリ
 

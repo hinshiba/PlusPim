@@ -11,7 +11,7 @@ using Xunit;
 namespace PlusPimTests;
 
 /// <summary>
-/// デバッガから観測できる状態 (ライブフレームのレジスタ・PC・HI/LO・CP0，コールスタックと直前の例外，ランタイムエラー)
+/// デバッガから観測できる状態 (ライブフレームのレジスタ・PC・HI/LO・CP0，コールスタックと直前の例外，ランタイムエラー，未消費の入力)
 /// </summary>
 internal sealed record DebuggerSnapshot(
     uint[] Registers,
@@ -26,7 +26,8 @@ internal sealed record DebuggerSnapshot(
     int CallStackDepth,
     ExcCode? ExceptionCode,
     bool? ExceptionIsDouble,
-    RuntimeErrorKind? RuntimeError
+    RuntimeErrorKind? RuntimeError,
+    string PendingInput
 );
 
 internal static class TestHelpers {
@@ -91,7 +92,8 @@ internal static class TestHelpers {
             frames.Length,
             exception?.Reason,
             exception?.IsDouble,
-            debugger.GetRuntimeError()?.Kind
+            debugger.GetRuntimeError()?.Kind,
+            debugger.GetPendingInput()
         );
     }
 
@@ -119,6 +121,7 @@ internal static class TestHelpers {
         Assert.Equal(expected.ExceptionCode, current.ExceptionCode);
         Assert.Equal(expected.ExceptionIsDouble, current.ExceptionIsDouble);
         Assert.Equal(expected.RuntimeError, current.RuntimeError);
+        Assert.Equal(expected.PendingInput, current.PendingInput);
     }
 
     /// <summary>

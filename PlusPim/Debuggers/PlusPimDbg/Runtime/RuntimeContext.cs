@@ -52,6 +52,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     public RuntimeError? RuntimeError { get; private set; }
 
     /// <summary>
+    /// 標準入力のうち，読み込んだが消費されていない入力．ランタイムコールの読み取りで共有する
+    /// </summary>
+    /// <remarks>同期していない．ステップ実行は単一スレッドで行うこと</remarks>
+    public PendingInput Input { get; } = new();
+
+    /// <summary>
     /// 現在実行中の命令に属すると考えられるラベル
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;

@@ -209,6 +209,18 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         return [.. inputBytes[..length], 0];
     }
 
+    /// <summary>
+    /// read_string が入力バッファに残す入力．<c>$a1 = 0</c> なら入力を読まないので空
+    /// </summary>
+    private static string ExpectedReadStringRemainder(string input, uint a1) {
+        if(a1 == 0) {
+            return "";
+        }
+        string line = input + "\n";
+        int length = (int)Math.Min((uint)line.Length, a1 - 1);
+        return line[length..];
+    }
+
     // ---- ユーザーモード (異常系: CpU) ----
 
     [Theory]
@@ -358,7 +370,8 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         ExecutionRecord record = Processor.Execute(context, inst);
         Processor.Undo(context, record);
 
-        MachineState.AssertEqual(before, Capture(context));
+        // 消費した1行は入力バッファの先頭に戻る
+        MachineState.AssertEqual(before.WithPendingInput($"{line}\n"), Capture(context));
         // undo は入力を読まない
         Assert.Equal("next\n", this._console.ReadRemainingInput());
         Assert.Equal("", this._console.Output);
@@ -384,7 +397,9 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         _ = Processor.Execute(context, inst);
 
         // バッファ以外 (メモリ窓の残りを含む) は変化しない
-        MachineState expected = before.WithMemory(BufferAddress, ExpectedReadStringBytes(input, a1));
+        MachineState expected = before
+            .WithMemory(BufferAddress, ExpectedReadStringBytes(input, a1))
+            .WithPendingInput(ExpectedReadStringRemainder(input, a1));
         MachineState.AssertEqual(expected, Capture(context));
         // $a1 = 0 では入力を読まない
         Assert.Equal(a1 == 0 ? $"{input}\nnext\n" : "next\n", this._console.ReadRemainingInput());
@@ -402,7 +417,8 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         ExecutionRecord record = Processor.Execute(context, inst);
         Processor.Undo(context, record);
 
-        MachineState.AssertEqual(before, Capture(context));
+        // 読んだ1行はすべて入力バッファの先頭に戻る
+        MachineState.AssertEqual(before.WithPendingInput(a1 == 0 ? "" : $"{input}\n"), Capture(context));
         Assert.Equal(a1 == 0 ? $"{input}\nnext\n" : "next\n", this._console.ReadRemainingInput());
         Assert.Equal("", this._console.Output);
     }
@@ -484,7 +500,7 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
 
         ExecutionRecord record = Processor.Execute(context, inst);
         Processor.Undo(context, record);
-        MachineState.AssertEqual(before, Capture(context));
+        MachineState.AssertEqual(before.WithPendingInput("x"), Capture(context));
 
         // 再実行すると同じ文字が読める
         _ = Processor.Execute(context, inst);
@@ -545,7 +561,7 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
 
         context.Registers[RegisterID.A1] = 1;
         _ = Processor.Execute(context, inst);
-        MachineState.AssertEqual(before.WithRegister(RegisterID.A1, 1).WithMemory(BufferAddress, [0]), Capture(context));
+        MachineState.AssertEqual(before.WithRegister(RegisterID.A1, 1).WithMemory(BufferAddress, [0]).WithPendingInput("abc\n"), Capture(context));
     }
 
     [Fact]
@@ -560,7 +576,7 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         MachineState.AssertEqual(before.WithMemory(BufferAddress, [(byte)'a', (byte)'b', (byte)'\n', 0]), Capture(context));
 
         Processor.Undo(context, record);
-        MachineState.AssertEqual(before, Capture(context));
+        MachineState.AssertEqual(before.WithPendingInput("ab\n"), Capture(context));
     }
 
     [Fact]
@@ -571,8 +587,9 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         MachineState before = Capture(context);
 
         ExecutionRecord record = Processor.Execute(context, inst);
+        Assert.Equal("cd\n", context.Input.Buffered);
         Processor.Undo(context, record);
-        MachineState.AssertEqual(before, Capture(context));
+        MachineState.AssertEqual(before.WithPendingInput("abcd\n"), Capture(context));
 
         // 再実行すると同じ入力が読める
         _ = Processor.Execute(context, inst);
@@ -583,7 +600,7 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
     /// 未消費の入力(PendingInput と標準入力の残り)をすべて取り出して，同じ状態に戻す
     /// </summary>
     private static string PeekRemainingInput(RuntimeContext context) {
-        PendingInput pending = PendingInput.For(context);
+        PendingInput pending = context.Input;
         StringBuilder sb = new();
         for(int c; (c = pending.ReadChar()) >= 0;) {
             sb.Append((char)c);
@@ -604,6 +621,8 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         IInstruction inst = Parse();
         RuntimeContext context = SetupReadString(3);
         this._console.SetInput(input);
+        // undo は消費した入力を入力バッファへ戻すので，1回目と2回目で同じ状態になるように最初からすべて入力バッファに読み込んでおく
+        Assert.Equal(input, PeekRemainingInput(context));
         MachineState initial = Capture(context);
 
         List<(MachineState State, string Remaining)> RunAll(List<ExecutionRecord> records) {
@@ -738,7 +757,8 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
     public void RepeatedExecute_ReadIntCpUReadInt_UndoesInReverseOrder() {
         IInstruction inst = Parse();
         RuntimeContext context = CreateKernel(ReadInt);
-        this._console.SetInput("17\n-3\n");
+        // undo は消費した入力を入力バッファへ戻すので，実行前と同じ状態になるように入力バッファに置く
+        context.Input.Restore("17\n-3\n");
 
         IReadOnlyList<(MachineState BeforeExecute, MachineState AfterExecute)> results = RepeatedExecution.RunWithMemory(
             inst, context, WindowBase, WindowSize,
@@ -757,14 +777,13 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
             }
         );
 
-        MachineState.AssertEqual(results[0].BeforeExecute.WithRegister(RegisterID.V0, 17), results[0].AfterExecute);
+        MachineState.AssertEqual(results[0].BeforeExecute.WithRegister(RegisterID.V0, 17).WithPendingInput("-3\n"), results[0].AfterExecute);
+        // CpU の実行は入力を消費しない
         MachineState.AssertEqual(
             results[1].BeforeExecute.WithException(ExcCode.CpU, InstructionHarness.InstructionAddress),
             results[1].AfterExecute
         );
-        MachineState.AssertEqual(results[2].BeforeExecute.WithRegister(RegisterID.V0, 0xfffffffd), results[2].AfterExecute);
-        // CpU の実行は入力を消費しないので，2行がちょうど読まれる
-        Assert.Equal("", this._console.ReadRemainingInput());
+        MachineState.AssertEqual(results[2].BeforeExecute.WithRegister(RegisterID.V0, 0xfffffffd).WithPendingInput(""), results[2].AfterExecute);
         Assert.Equal("", this._console.Output);
     }
 }

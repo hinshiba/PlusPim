@@ -59,6 +59,13 @@ internal class PlusPimDbg: IDebugger {
     }
 
     /// <summary>
+    /// 標準入力から読み込んだが，まだ消費されていない入力を返す
+    /// </summary>
+    internal string GetPendingInput() {
+        return this._context.Input.Buffered;
+    }
+
+    /// <summary>
     /// 命令を1ステップ実行する
     /// </summary>
     /// <remarks>終了状態，またはランタイムエラーが発生している場合は何もせず，履歴にも積まない</remarks>

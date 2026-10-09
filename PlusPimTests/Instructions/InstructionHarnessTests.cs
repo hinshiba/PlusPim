@@ -68,6 +68,7 @@ public class InstructionHarnessTests {
             .WithLastException(hasException ? new ExceptionEvent(ExcCode.Ov, isDouble) : null)
             .WithTerminated()
             .WithRuntimeError(hasException ? null : RuntimeErrorKind.DivisionByZero)
+            .WithPendingInput("pending\n")
             .WithMemoryValue(MachineState.SeededMemoryBase + 4, 0x11223344, 4);
 
         target.ApplyTo(context);

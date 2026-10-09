@@ -73,7 +73,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 this._prevV0.Push(context.Registers[RegisterID.V0]);
 
                 // ユーザーからの入力を1行読み，整数として解釈する
-                string? intLine = PendingInput.For(context).ReadLine();
+                string? intLine = context.Input.ReadLine();
                 // Undoのために消費した入力を保存
                 this._consumedReadInt.Push(intLine ?? "");
                 if(int.TryParse(intLine?.TrimEnd('\r', '\n'), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)) {
@@ -89,7 +89,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
 
                 Address writeAddr = new(context.Registers[RegisterID.A0]);
                 uint maxLength = context.Registers[RegisterID.A1];
-                PendingInput pending = PendingInput.For(context);
+                PendingInput pending = context.Input;
 
                 if(maxLength == 0) {
                     // 何も書き込まず，入力も読まない
@@ -143,7 +143,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 this._prevV0.Push(context.Registers[RegisterID.V0]);
 
                 // 1文字だけ消費する．EOFなら-1
-                int ch = PendingInput.For(context).ReadChar();
+                int ch = context.Input.ReadChar();
                 this._prevReadChar.Push(ch);
                 context.Registers[RegisterID.V0] = (uint)ch;
                 break;
@@ -167,7 +167,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
             case SyscallCode.ReadInt:
                 // レジスタの値の復元と，消費した入力の返却
                 context.Registers[RegisterID.V0] = this._prevV0.Pop();
-                PendingInput.For(context).PushFront(this._consumedReadInt.Pop());
+                context.Input.PushFront(this._consumedReadInt.Pop());
                 break;
 
             case SyscallCode.ReadChar:
@@ -175,7 +175,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 context.Registers[RegisterID.V0] = this._prevV0.Pop();
                 int ch = this._prevReadChar.Pop();
                 if(0 <= ch) {
-                    PendingInput.For(context).PushFront(((char)ch).ToString());
+                    context.Input.PushFront(((char)ch).ToString());
                 }
                 break;
 
@@ -187,7 +187,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                     context.WriteMemoryByte(addr++, b);
                 }
                 // 消費した入力の返却(後続の命令はUndo済みなので，残りは先頭にある)
-                PendingInput.For(context).PushFront(rec.Consumed);
+                context.Input.PushFront(rec.Consumed);
                 break;
 
             case SyscallCode.Exit:
@@ -216,52 +216,4 @@ internal enum SyscallCode {
     Exit = 10,
     PrintChar = 11,
     ReadChar = 12,
-}
-
-/// <summary>
-/// 標準入力のうち，消費されずに残っている文字．read_int/read_char/read_stringで共有する
-/// </summary>
-/// <remarks>実行(RuntimeContext)ごとに1つ持つ</remarks>
-internal sealed class PendingInput {
-    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<RuntimeContext, PendingInput> Table = new();
-
-    private string _pending = "";
-
-    public static PendingInput For(RuntimeContext context) {
-        return Table.GetValue(context, _ => new PendingInput());
-    }
-
-    /// <summary>
-    /// 1文字読む．EOFなら-1
-    /// </summary>
-    public int ReadChar() {
-        if(this._pending.Length == 0) {
-            return Console.In.Read();
-        }
-        char c = this._pending[0];
-        this._pending = this._pending[1..];
-        return c;
-    }
-
-    /// <summary>
-    /// 改行を含む1行を読む．何も読めない(EOF)なら <c>null</c>
-    /// </summary>
-    public string? ReadLine() {
-        System.Text.StringBuilder sb = new();
-        int c;
-        while((c = this.ReadChar()) >= 0) {
-            sb.Append((char)c);
-            if(c == '\n') {
-                break;
-            }
-        }
-        return sb.Length == 0 ? null : sb.ToString();
-    }
-
-    /// <summary>
-    /// 読み取り位置の手前に文字列を戻す
-    /// </summary>
-    public void PushFront(string text) {
-        this._pending = text + this._pending;
-    }
 }
