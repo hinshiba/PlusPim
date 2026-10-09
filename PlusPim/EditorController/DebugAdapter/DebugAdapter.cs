@@ -57,6 +57,8 @@ internal class DebugAdapter: DebugAdapterBase {
             _ = this._sessionEnded.TrySetResult();
             this._isInit = false;
         };
+        // カスタム要求も Run より前に登録する
+        this.Protocol.RegisterRequestType<PseudoExpansionsRequest, PseudoExpansionsArguments, PseudoExpansionsResponse>(this.HandlePseudoExpansionsRequest);
         this.Protocol.Run();
         this._logger.Debug("DebugAdapter", "Protocol client initialized and running.");
 
@@ -372,6 +374,31 @@ internal class DebugAdapter: DebugAdapterBase {
             Data = Convert.ToBase64String(data),
             UnreadableBytes = readEnd < end ? (int)(end - readEnd) : null
         };
+    }
+
+    /// <summary>
+    /// カスタム要求 <c>pluspimPseudoExpansions</c>．ファイルの疑似命令の行と展開先の命令を返す
+    /// </summary>
+    private void HandlePseudoExpansionsRequest(IRequestResponder<PseudoExpansionsArguments, PseudoExpansionsResponse> responder) {
+        this._logger.Debug("DebugAdapter", "PseudoExpansionsRequest.");
+
+        if(!this._app.IsLoaded) {
+            responder.SetError(new ProtocolException("Program is not loaded."));
+            return;
+        }
+
+        string? path = responder.Arguments.Source?.Path;
+        PseudoExpansionInfo[] expansions = string.IsNullOrEmpty(path) ? [] : this._app.GetPseudoExpansions(new FileInfo(path));
+        responder.SetResponse(new PseudoExpansionsResponse {
+            Lines = [.. expansions.Select(expansion => new PseudoExpansionLine {
+                Line = expansion.Line,
+                Mnemonic = expansion.Mnemonic,
+                Instructions = [.. expansion.Instructions.Select(instruction => new PseudoExpansionInstruction {
+                    Address = MemoryReference(instruction.Address),
+                    Text = instruction.Text
+                })]
+            })]
+        });
     }
 
     /// <summary>

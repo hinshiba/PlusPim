@@ -220,6 +220,14 @@ internal class Application: IApplication {
         }
     }
 
+    // 疑似命令
+
+    public PseudoExpansionInfo[] GetPseudoExpansions(FileInfo file) {
+        lock(this._gate) {
+            return this.Debugger.GetPseudoExpansions(file);
+        }
+    }
+
     // 例外系
 
     public void SetExceptionFilters(List<ExceptionFilter> filters) {

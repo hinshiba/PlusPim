@@ -172,6 +172,19 @@ internal sealed partial class InstructionRegistry {
     }
 
     /// <summary>
+    /// 行が疑似命令ならそのニーモニックを返す
+    /// </summary>
+    /// <param name="assemblyLine">アセンブリ行</param>
+    /// <returns>疑似命令のニーモニック (小文字)．疑似命令でなければ<see langword="null"/></returns>
+    /// <remarks>オペランドは解析しない</remarks>
+    public string? GetPseudoMnemonic(string assemblyLine) {
+        Match match = AssemblyLinePattern().Match(assemblyLine);
+        return match.Success && this._pseudoParsers.TryGetValue(match.Groups["op"].Value, out IPseudoInstructionParser? pseudo)
+            ? pseudo.Mnemonic
+            : null;
+    }
+
+    /// <summary>
     /// 指定された行の展開後の命令数を返す
     /// </summary>
     /// <param name="assemblyLine">アセンブリ行</param>

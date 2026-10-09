@@ -103,4 +103,11 @@ internal interface IApplication {
     /// データセグメントの先頭のアドレスとバイト数
     /// </summary>
     (uint Start, uint Size) DataSegmentRange { get; }
+
+    /// <summary>
+    /// ファイルの疑似命令の行と展開先の命令を返す
+    /// </summary>
+    /// <param name="file">ソースファイル</param>
+    /// <returns>行の順の配列．読み込んでいないファイルなら空</returns>
+    PseudoExpansionInfo[] GetPseudoExpansions(FileInfo file);
 }

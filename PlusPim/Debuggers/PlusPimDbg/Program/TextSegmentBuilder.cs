@@ -7,6 +7,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 internal sealed class TextSegmentBuilder(ILogger logger) {
     private readonly List<IInstruction> _instructions = [];
+    private readonly List<PseudoExpansion> _pseudoExpansions = [];
     private readonly List<string> _errors = [];
 
     /// <summary>
@@ -22,10 +23,15 @@ internal sealed class TextSegmentBuilder(ILogger logger) {
     /// <param name="lineNumber">1-basedの行番号</param>
     /// <param name="symbols">シンボルの解決に使う</param>
     /// <param name="fileName">エラーメッセージに使うファイル名</param>
-    public void Add(ParsedLine line, int lineNumber, ISymbolResolver symbols, string fileName) {
+    /// <param name="pseudoMnemonic">疑似命令の行ならそのニーモニック．展開先を<see cref="TextSegment.PseudoExpansions"/>に記録する</param>
+    public void Add(ParsedLine line, int lineNumber, ISymbolResolver symbols, string fileName, string? pseudoMnemonic = null) {
         IInstruction[] instructions = line.Materialize(symbols, out string? unresolved);
         if(unresolved is not null) {
             this._errors.Add($"{fileName}:{lineNumber} Undefined label '{unresolved}'");
+        }
+
+        if(pseudoMnemonic is not null) {
+            this._pseudoExpansions.Add(new PseudoExpansion(lineNumber, pseudoMnemonic, this._instructions.Count, instructions.Length));
         }
 
         this._instructions.AddRange(instructions);
@@ -33,7 +39,7 @@ internal sealed class TextSegmentBuilder(ILogger logger) {
     }
 
     public TextSegment Build() {
-        return new TextSegment(this._instructions);
+        return new TextSegment(this._instructions, this._pseudoExpansions);
     }
 
 

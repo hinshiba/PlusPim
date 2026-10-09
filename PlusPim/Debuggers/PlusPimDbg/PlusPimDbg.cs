@@ -181,6 +181,10 @@ internal class PlusPimDbg: IDebugger {
 
     public (uint Start, uint Size) DataSegmentRange => (DataSegment.DataSegmentBase.Addr, this._programs.DataSegmentSize);
 
+    public PseudoExpansionInfo[] GetPseudoExpansions(FileInfo file) {
+        return this._programs.GetPseudoExpansions(file);
+    }
+
     public bool IsAtBreakpoint => this._context.LastException is null && this._breakpoints.Contains(this._context.PC);
 
     public ExceptionInfo? GetLastException() {

@@ -77,6 +77,30 @@ VS Code では `memoryReference` を持つ変数の View Binary Data からメ�
 
 `readMemory` は実行中にも応答する．メモリの書き込み (`writeMemory`) には対応しない．
 
+## 疑似命令の展開先
+
+カスタム要求 `pluspimPseudoExpansions` で，ファイルの疑似命令の行と展開先の機械命令を返す．
+拡張機能のインレイヒントに使う．
+
+- `initialized` イベントの後から有効である．それより前は `Program is not loaded.` で失敗する
+- 引数は `{ "source": { "path": "<絶対パス>" } }` で，パスは `setBreakpoints` と同じである
+- 応答の本体は次の形である．`line` は1始まり，`address` は `0x%08X` の形式である
+
+```json
+{ "lines": [
+  { "line": 6, "mnemonic": "la",
+    "instructions": [ { "address": "0x00400000", "text": "lui $t0, 0x1000" },
+                      { "address": "0x00400004", "text": "ori $t0, $t0, 0x0000" } ] },
+  { "line": 8, "mnemonic": "move", "instructions": [ { "address": "0x00400008", "text": "addu $t2, $t1, $zero" } ] }
+] }
+```
+
+- 解析できた疑似命令の行をすべて含む．1命令に展開される行 (`move`，`nop`，小さな値の `li`) も含む
+- 解析できなかった行は含まない
+- 読み込んでいないファイルは `lines: []` を返す
+- `text` は即値を解決した命令の表記である．表記に未対応の命令は `?` とする
+- セッション中にプログラムは変わらないので，クライアントはファイルごとに結果を保持してよい
+
 ## セッションの終了
 
 `disconnect` は実行中なら実行を止め，応答の送信が終わってからセッションを終える．

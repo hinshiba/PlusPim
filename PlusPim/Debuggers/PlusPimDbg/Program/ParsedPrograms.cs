@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
@@ -296,6 +297,43 @@ internal sealed class ParsedPrograms {
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// 指定ファイルの疑似命令の行と，展開先の命令のアドレスと表記を返す
+    /// </summary>
+    /// <param name="file">ソースファイル</param>
+    /// <returns>行の順の配列．読み込んでいないファイルなら空</returns>
+    public PseudoExpansionInfo[] GetPseudoExpansions(FileInfo file) {
+        if(!this.TryFindProgramIndexByFile(file, out int fileIndex)) {
+            return [];
+        }
+
+        ParsedProgram program = this._programs[fileIndex];
+        int textBase = fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1];
+        int kernelBase = fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1];
+        return [
+            .. MapPseudoExpansions(program.TextSegment, TextSegment.TextSegmentBase, textBase),
+            .. MapPseudoExpansions(program.KernelTextSegment, TextSegment.KernelTextSegmentBase, kernelBase)
+        ];
+    }
+
+    /// <summary>
+    /// セグメント内のインデックスをアドレスにして，展開先の命令の表記と組にする
+    /// </summary>
+    /// <param name="segment">ファイルのテキスト系セグメント</param>
+    /// <param name="segmentBase">セグメントの開始アドレス</param>
+    /// <param name="globalBase">このファイルより前のファイルの命令数</param>
+    private static IEnumerable<PseudoExpansionInfo> MapPseudoExpansions(TextSegment segment, Address segmentBase, int globalBase) {
+        foreach(PseudoExpansion expansion in segment.PseudoExpansions) {
+            PseudoExpandedInstruction[] instructions = new PseudoExpandedInstruction[expansion.Count];
+            for(int i = 0; i < expansion.Count; i++) {
+                int localIndex = expansion.FirstIndex + i;
+                Address address = new Address((uint)(globalBase + localIndex) * 4) + segmentBase;
+                instructions[i] = new PseudoExpandedInstruction(address.Addr, segment.Instructions[localIndex].Disassembly ?? "?");
+            }
+            yield return new PseudoExpansionInfo(expansion.SourceLine, expansion.Mnemonic, instructions);
+        }
     }
 
     /// <summary>

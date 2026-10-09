@@ -362,4 +362,49 @@ public class DebugAdapterTests {
             Assert.Equal("0x7FFFEFFC", variables[1].GetProperty("memoryReference").GetString());
         });
     }
+
+    [Fact]
+    public void PseudoExpansions_ReturnsExpandedInstructions() {
+        const string program = """
+            .data
+            msg:
+              .asciiz "hi"
+            .text
+            main:
+              la $t0, msg
+              # move の前のコメント
+              move $t2, $t1
+              nop
+              addu $t3, $t2, $zero
+            """;
+        WithClient(program, (client, file) => {
+            _ = client.RequestOk("initialize", new { adapterID = "pluspim" });
+
+            // 読み込み前は失敗する
+            JsonElement early = client.Request("pluspimPseudoExpansions", new { source = new { path = file.FullName } });
+            Assert.False(early.GetProperty("success").GetBoolean());
+            Assert.Contains("Program is not loaded.", early.GetProperty("message").GetString());
+
+            int mark = client.Mark;
+            _ = client.RequestOk("launch", new { });
+            _ = client.WaitForEvent("initialized", mark);
+
+            // initialized の後 (configurationDone の前) から有効
+            JsonElement body = client.RequestOk("pluspimPseudoExpansions", new { source = new { path = file.FullName } }).GetProperty("body");
+            string expected = JsonSerializer.Serialize(new {
+                lines = new object[] {
+                    new { line = 6, mnemonic = "la", instructions = new[] {
+                        new { address = "0x00400000", text = "lui $t0, 0x1000" },
+                        new { address = "0x00400004", text = "ori $t0, $t0, 0x0000" } } },
+                    new { line = 8, mnemonic = "move", instructions = new[] { new { address = "0x00400008", text = "addu $t2, $t1, $zero" } } },
+                    new { line = 9, mnemonic = "nop", instructions = new[] { new { address = "0x0040000C", text = "sll $zero, $zero, 0" } } },
+                }
+            });
+            Assert.Equal(expected, JsonSerializer.Serialize(body));
+
+            // 読み込んでいないファイルは空
+            JsonElement unknown = client.RequestOk("pluspimPseudoExpansions", new { source = new { path = Path.Combine(Path.GetTempPath(), "not-loaded.s") } });
+            Assert.Equal(0, unknown.GetProperty("body").GetProperty("lines").GetArrayLength());
+        });
+    }
 }

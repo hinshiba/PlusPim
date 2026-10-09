@@ -138,7 +138,8 @@
   - [x] テスト
 
 - [ ] 擬似命令の展開先をインレイヒントで表示する (#11)
-  - [ ] 展開結果を拡張機能に渡す方法を決める (カスタム DAP 要求 / CLI / LSP)
+  - [x] 展開結果を拡張機能に渡す方法を決める (カスタム DAP 要求 / CLI / LSP)
+    - カスタム DAP 要求 `pluspimPseudoExpansions` (`doc/debugger.md`)
   - [ ] `InlayHintsProvider` で `la` → `lui` + `ori` などを表示する
 
 - [ ] 既定のカーネルハンドラを同梱する (#3)
