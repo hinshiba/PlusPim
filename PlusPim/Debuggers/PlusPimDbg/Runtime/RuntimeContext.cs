@@ -58,6 +58,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     public PendingInput Input { get; } = new();
 
     /// <summary>
+    /// デバッギの標準出力．ランタイムコールの出力で共有する UTF-8 のストリーム
+    /// </summary>
+    /// <remarks>同期していない．ステップ実行は単一スレッドで行うこと</remarks>
+    public DebuggeeOutput Output { get; } = new();
+
+    /// <summary>
     /// 現在実行中の命令に属すると考えられるラベル
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;

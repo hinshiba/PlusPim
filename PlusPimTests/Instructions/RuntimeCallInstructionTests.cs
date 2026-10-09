@@ -464,6 +464,204 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         Assert.Equal(expected, this._console.Output);
     }
 
+    // ---- UTF-8 のバイト単位の出力 ----
+
+    /// <summary>
+    /// <c>$v0</c> と <c>$a0</c> を設定して実行する
+    /// </summary>
+    private static ExecutionRecord Call(IInstruction inst, RuntimeContext context, uint code, uint a0 = 0) {
+        context.Registers[RegisterID.V0] = code;
+        context.Registers[RegisterID.A0] = a0;
+        return Processor.Execute(context, inst);
+    }
+
+    [Fact]
+    public void Execute_PrintChar_Utf8BytesOneAtATime_PrintsCompletedCharacters() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+
+        List<string> outputs = [];
+        foreach(byte b in Encoding.UTF8.GetBytes("aあ😀")) {
+            _ = Call(inst, context, PrintChar, b);
+            outputs.Add(this._console.Output);
+        }
+
+        // 多バイト文字は最後のバイトを書いたときに出力される
+        Assert.Equal(["a", "a", "a", "aあ", "aあ", "aあ", "aあ", "aあ😀"], outputs);
+        Assert.Empty(context.Output.Pending.ToArray());
+    }
+
+    [Fact]
+    public void Execute_PrintChar_IncompleteSequenceIsPendingAndPrintsNothing() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+        context.Registers[RegisterID.A0] = 0xdeadbee3; // 上位ビットは無視する
+        MachineState before = Capture(context);
+
+        ExecutionRecord record = Processor.Execute(context, inst);
+
+        MachineState.AssertEqual(before.WithPendingOutput(0xe3), Capture(context));
+        Assert.Equal("", this._console.Output);
+
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before, Capture(context));
+    }
+
+    [Theory]
+    [InlineData(new byte[] { 0x80 }, "�")] // 先頭にならない継続バイト
+    [InlineData(new byte[] { 0xff }, "�")] // UTF-8 に現れないバイト
+    [InlineData(new byte[] { 0xe3, 0x41 }, "�A")] // 多バイト文字の途中で ASCII
+    [InlineData(new byte[] { 0xe3, 0x81, 0x41 }, "�A")] // 最大の不正な部分列ごとに1つの U+FFFD
+    [InlineData(new byte[] { 0xc0, 0x80 }, "��")] // 冗長な表現
+    [InlineData(new byte[] { 0xed, 0xa0, 0x80 }, "���")] // サロゲートの符号化
+    [InlineData(new byte[] { 0x41, 0x80, 0xe3, 0x81, 0x82 }, "A�あ")] // 不正なバイトの後も復号を続ける
+    public void Execute_PrintChar_InvalidBytesPrintReplacementCharacter(byte[] bytes, string expected) {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+
+        foreach(byte b in bytes) {
+            _ = Call(inst, context, PrintChar, b);
+        }
+
+        Assert.Equal(expected, this._console.Output);
+        Assert.Empty(context.Output.Pending.ToArray());
+    }
+
+    [Fact]
+    public void Execute_PrintString_ContinuesSequenceStartedByPrintChar() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+        byte[] rest = [0x81, 0x82, (byte)'b', 0];
+        for(int i = 0; i < rest.Length; i++) {
+            context.WriteMemoryByte(BufferAddress + i, rest[i]);
+        }
+
+        _ = Call(inst, context, PrintChar, 0xe3);
+        _ = Call(inst, context, PrintString, BufferAddress.Addr);
+
+        Assert.Equal("あb", this._console.Output);
+    }
+
+    [Fact]
+    public void Execute_PrintChar_CompletesSequenceStartedByPrintString() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintString);
+        byte[] head = [(byte)'x', 0xe3, 0x81, 0];
+        for(int i = 0; i < head.Length; i++) {
+            context.WriteMemoryByte(BufferAddress + i, head[i]);
+        }
+
+        _ = Call(inst, context, PrintString, BufferAddress.Addr);
+        Assert.Equal("x", this._console.Output);
+        _ = Call(inst, context, PrintChar, 0x82);
+
+        Assert.Equal("xあ", this._console.Output);
+    }
+
+    [Fact]
+    public void Execute_PrintInt_AfterIncompleteSequencePrintsReplacementFirst() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+
+        _ = Call(inst, context, PrintChar, 0xe3);
+        _ = Call(inst, context, PrintInt, unchecked((uint)-5));
+
+        Assert.Equal("�-5", this._console.Output);
+    }
+
+    [Fact]
+    public void Undo_PrintChar_MidSequence_ReExecuteDecodesOnce() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+        _ = Call(inst, context, PrintChar, 0xe3);
+        context.Registers[RegisterID.A0] = 0x81;
+        MachineState before = Capture(context);
+
+        ExecutionRecord record = Processor.Execute(context, inst);
+        MachineState.AssertEqual(before.WithPendingOutput(0xe3, 0x81), Capture(context));
+
+        // undo で途中までのバイト列が戻るので，同じバイトを再実行しても2回分にならない
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before, Capture(context));
+        _ = Processor.Execute(context, inst);
+        MachineState.AssertEqual(before.WithPendingOutput(0xe3, 0x81), Capture(context));
+
+        _ = Call(inst, context, PrintChar, 0x82);
+        Assert.Equal("あ", this._console.Output);
+    }
+
+    [Fact]
+    public void Undo_PrintString_RestoresPendingOutput() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+        byte[] rest = [0x81, 0x82, 0xe3, 0];
+        for(int i = 0; i < rest.Length; i++) {
+            context.WriteMemoryByte(BufferAddress + i, rest[i]);
+        }
+        _ = Call(inst, context, PrintChar, 0xe3);
+        context.Registers[RegisterID.V0] = PrintString;
+        context.Registers[RegisterID.A0] = BufferAddress.Addr;
+        MachineState before = Capture(context);
+
+        ExecutionRecord record = Processor.Execute(context, inst);
+        MachineState.AssertEqual(before.WithPendingOutput(0xe3), Capture(context));
+        Assert.Equal("あ", this._console.Output);
+
+        // 出力済みの文字は消えず，途中までのバイト列だけが戻る
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before, Capture(context));
+        Assert.Equal("あ", this._console.Output);
+    }
+
+    [Fact]
+    public void Execute_PrintChar_WritesSurrogatePairInOneWrite() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+        RecordingWriter writer = new();
+        Console.SetOut(writer);
+
+        foreach(byte b in Encoding.UTF8.GetBytes("a😀")) {
+            _ = Call(inst, context, PrintChar, b);
+        }
+
+        // DAP の OutputEvent でサロゲートペアが分かれないように，1文字は1回で書く
+        Assert.Equal(["a", "😀"], writer.Writes);
+    }
+
+    [Fact]
+    public void ReadCharThenPrintChar_RoundTripsMultibyteText() {
+        const string text = "aあ😀\n";
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(ReadChar);
+        this._console.SetInput(text);
+
+        for(int i = 0; i < Encoding.UTF8.GetByteCount(text); i++) {
+            _ = Call(inst, context, ReadChar);
+            _ = Call(inst, context, PrintChar, context.Registers[RegisterID.V0]);
+        }
+
+        Assert.Equal(text, this._console.Output);
+    }
+
+    /// <summary>
+    /// 書き込みの呼び出しごとの文字列を記録する
+    /// </summary>
+    private sealed class RecordingWriter: TextWriter {
+        public List<string> Writes { get; } = [];
+
+        public override Encoding Encoding => Encoding.UTF8;
+
+        public override void Write(char value) {
+            this.Writes.Add(value.ToString());
+        }
+
+        public override void Write(string? value) {
+            if(value is not null) {
+                this.Writes.Add(value);
+            }
+        }
+    }
+
     [Fact]
     public void Execute_ReadChar_ConsumesOneCharIntoV0() {
         IInstruction inst = Parse();
@@ -763,6 +961,26 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         MachineState.AssertEqual(before.WithTerminated(), Capture(context));
         Assert.Equal("", this._console.Output);
         Assert.Equal(UntouchedInput, this._console.ReadRemainingInput());
+    }
+
+    [Fact]
+    public void Execute_Exit_FlushesIncompleteSequenceAsOneReplacement() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(PrintChar);
+        _ = Call(inst, context, PrintChar, 0xe3);
+        _ = Call(inst, context, PrintChar, 0x81);
+        context.Registers[RegisterID.V0] = Exit;
+        MachineState before = Capture(context);
+
+        ExecutionRecord record = Processor.Execute(context, inst);
+
+        MachineState.AssertEqual(before.WithTerminated().WithPendingOutput(), Capture(context));
+        Assert.Equal("�", this._console.Output);
+
+        // undo で途中までのバイト列が戻る．出力済みの U+FFFD は消えない
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before, Capture(context));
+        Assert.Equal("�", this._console.Output);
     }
 
     [Fact]

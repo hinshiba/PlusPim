@@ -11,6 +11,7 @@ namespace PlusPimTests.Instructions;
 /// </summary>
 /// <param name="CallStack">コールスタック．先頭 (index 0) がスタックトップ．要素は参照で比較する</param>
 /// <param name="PendingInput">標準入力から読み込んだが消費されていない入力の UTF-8 のバイト列</param>
+/// <param name="PendingOutput">標準出力に書いたが，途中までのため出力されていない多バイト文字のバイト列</param>
 /// <param name="MemoryBase">記録したメモリ窓の先頭アドレス</param>
 /// <param name="Memory">メモリ窓 <c>[MemoryBase, MemoryBase + Memory.Length)</c> のバイト列</param>
 internal sealed record MachineState(
@@ -28,6 +29,7 @@ internal sealed record MachineState(
     StackFrame[] CallStack,
     Label CurrentLabel,
     byte[] PendingInput,
+    byte[] PendingOutput,
     Address MemoryBase,
     byte[] Memory
 ) {
@@ -73,6 +75,7 @@ internal sealed record MachineState(
             context.CallStack.ToArray(),
             context.CurrentLabel,
             context.Input.Buffered.ToArray(),
+            context.Output.CapturePending(),
             memoryBase,
             memory
         );
@@ -200,6 +203,13 @@ internal sealed record MachineState(
     }
 
     /// <summary>
+    /// 出力を待っている多バイト文字のバイト列を書き換えた状態を返す
+    /// </summary>
+    public MachineState WithPendingOutput(params byte[] pendingOutput) {
+        return this with { PendingOutput = pendingOutput };
+    }
+
+    /// <summary>
     /// コールスタックを置き換えた状態を返す (index 0 がスタックトップ)
     /// </summary>
     public MachineState WithCallStack(params StackFrame[] callStack) {
@@ -250,6 +260,7 @@ internal sealed record MachineState(
         RuntimeError? runtimeError = this.RuntimeError is RuntimeErrorKind kind ? new RuntimeError(kind, "") : null;
         context.RestoreExceptionState(new ExceptionState(cp0, this.LastException, this.IsTerminated, runtimeError));
         context.Input.Restore(this.PendingInput);
+        context.Output.RestorePending(this.PendingOutput);
 
         for(int i = 0; i < this.Memory.Length; i++) {
             context.WriteMemoryByte(this.MemoryBase + i, this.Memory[i]);
@@ -289,6 +300,7 @@ internal sealed record MachineState(
         AssertSameCallStack(expected.CallStack, actual.CallStack);
         Assert.Equal(expected.CurrentLabel, actual.CurrentLabel);
         Assert.Equal(expected.PendingInput, actual.PendingInput);
+        Assert.Equal(expected.PendingOutput, actual.PendingOutput);
         Assert.Equal(expected.MemoryBase, actual.MemoryBase);
         Assert.Equal(expected.Memory, actual.Memory);
     }

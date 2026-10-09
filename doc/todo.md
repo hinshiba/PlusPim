@@ -38,8 +38,8 @@
 
 #### ランタイム系
 
-- [ ] char関連システムコール
-  - [ ] print_char が生のバイトを書かない
+- [x] char関連システムコール
+  - [x] print_char が生のバイトを書かない
     - `Console.Write((char)(a0 & 0xFF))` は U+00XX を書くため UTF-8 出力では 0x80 以上のバイトが 2バイトになり, UTF-8 文字列を1バイトずつ print_char で出すと文字化けする. 対応案: 状態を持つ UTF-8 デコーダ経由で生バイトを出力する, または仕様を Latin-1 (MARS 互換) と明記する. 0x80 以上のバイトのテストも追加する.
 - [x] 入力バッファ (PendingInput) が MachineState / デバッガのスナップショットから見えない
   - RuntimeContext に明示的な PendingInput プロパティを持たせ, テストのスナップショットに含める. PendingInput 自体は同期されていない (ステップ実行が単一スレッドなので許容) ことをコメントに書く.

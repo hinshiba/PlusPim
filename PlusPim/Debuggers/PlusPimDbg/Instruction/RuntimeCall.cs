@@ -21,6 +21,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
     private readonly Stack<byte[]> _consumedReadInt = new();
     private readonly Stack<int> _prevReadChar = new();
     private readonly Stack<ReadStringRecord> _prevReadString = new();
+    private readonly Stack<byte[]> _prevOutputPending = new();
 
     /// <summary>
     /// read_stringのUndo用の情報
@@ -51,7 +52,8 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 context.Log($"RuntimeCall: print_int {context.Registers[RegisterID.A0]}");
 
                 // 符号付き32bit整数として出力する
-                Console.Write(((int)context.Registers[RegisterID.A0]).ToString(CultureInfo.InvariantCulture));
+                this._prevOutputPending.Push(context.Output.CapturePending());
+                context.Output.Write(System.Text.Encoding.ASCII.GetBytes(((int)context.Registers[RegisterID.A0]).ToString(CultureInfo.InvariantCulture)));
                 break;
 
             case SyscallCode.PrintString:
@@ -63,7 +65,9 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 for(byte b; (b = context.ReadMemoryByte(readAddr++)) != 0;) {
                     bytes.Add(b);
                 }
-                Console.Write(System.Text.Encoding.UTF8.GetString([.. bytes]));
+                // 出力のストリームを共有するので，print_char 等で途中まで出力した多バイト文字の続きにもなる
+                this._prevOutputPending.Push(context.Output.CapturePending());
+                context.Output.Write([.. bytes]);
                 break;
 
             case SyscallCode.ReadInt:
@@ -123,8 +127,9 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
             case SyscallCode.PrintChar:
                 context.Log($"RuntimeCall: print_char 0x{context.Registers[RegisterID.A0] & 0xFF:X2}");
 
-                // $a0の下位1バイトをそのまま文字として出力する
-                Console.Write((char)(context.Registers[RegisterID.A0] & 0xFF));
+                // $a0の下位1バイトを UTF-8 のバイトとしてそのまま出力する
+                this._prevOutputPending.Push(context.Output.CapturePending());
+                context.Output.Write([(byte)(context.Registers[RegisterID.A0] & 0xFF)]);
                 break;
 
             case SyscallCode.ReadChar:
@@ -141,6 +146,9 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
 
             case SyscallCode.Exit:
                 context.Log("RuntimeCall: exit");
+                // 途中までの多バイト文字が残っていれば U+FFFD として出力する
+                this._prevOutputPending.Push(context.Output.CapturePending());
+                context.Output.Flush();
                 context.IsTerminated = true;
                 break;
         }
@@ -152,7 +160,8 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
             case SyscallCode.PrintInt:
             case SyscallCode.PrintString:
             case SyscallCode.PrintChar:
-                // 画面に出力した内容は消せないので無視
+                // 画面に出力した内容は消せないので，途中までの多バイト文字のバイト列だけを戻す
+                context.Output.RestorePending(this._prevOutputPending.Pop());
                 break;
 
             case SyscallCode.ReadInt:
@@ -182,8 +191,9 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 break;
 
             case SyscallCode.Exit:
-                // フラグの復元
+                // フラグと，途中までの多バイト文字のバイト列の復元
                 context.IsTerminated = false;
+                context.Output.RestorePending(this._prevOutputPending.Pop());
                 break;
         }
     }

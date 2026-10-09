@@ -23,6 +23,8 @@ public sealed class RuntimeIOTimeTravelTests: IDisposable {
           eret
         """;
 
+    private const uint KernelTextBase = 0x80000180;
+
     private readonly ConsoleRedirect _console = new();
 
     public void Dispose() {
@@ -90,6 +92,40 @@ public sealed class RuntimeIOTimeTravelTests: IDisposable {
             // 再実行すると同じ入力を読む
             _ = debugger.Step();
             TestHelpers.AssertSnapshotEqual(snapshots[readStep], debugger);
+        });
+    }
+
+    [Fact]
+    public void StepBack_MidUtf8Sequence_ThenReStep_PrintsCharacterOnce() {
+        string asm = $"""
+            .text
+            main:
+              addiu $v0, $zero, 11
+              addiu $a0, $zero, 0xe3
+              syscall
+              addiu $a0, $zero, 0x81
+              syscall
+              addiu $a0, $zero, 0x82
+              syscall
+              addiu $v0, $zero, 10
+              syscall
+            {Handler}
+            """;
+        WithDebugger(asm, debugger => {
+            List<DebuggerSnapshot> snapshots = RunToEnd(debugger);
+            Assert.Equal("あ", this._console.Output);
+
+            // 2回目の print_char (0x81) の runtime_call! を実行する前まで戻す
+            List<int> runtimeCallSteps = [.. Enumerable.Range(0, snapshots.Count - 1).Where(i => snapshots[i].PC == KernelTextBase)];
+            Assert.Equal(4, runtimeCallSteps.Count); // print_char 3回と exit
+            for(int i = snapshots.Count - 1; i > runtimeCallSteps[1]; i--) {
+                Assert.True(debugger.Back());
+            }
+            TestHelpers.AssertSnapshotEqual(snapshots[runtimeCallSteps[1]], debugger);
+
+            // 再実行しても 0xe3 0x81 0x82 が1回ずつ復号される
+            _ = RunToEnd(debugger);
+            Assert.Equal("ああ", this._console.Output);
         });
     }
 }
