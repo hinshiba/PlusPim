@@ -167,7 +167,9 @@ internal class DebugAdapter: DebugAdapterBase {
         this._isInit = false;
 
         // 応答を書いてからセッションを終える．先に終えると Main がストリームを閉じ，応答が届かない
+        // 応答は別のスレッドで書かれるので，Stop で送信キューが空になるのを待つ
         responder.SetResponse(new DisconnectResponse());
+        this.Protocol.Stop(2000);
         _ = this._sessionEnded.TrySetResult();
     }
 
