@@ -46,7 +46,7 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // コンテキスト設定
-        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startAddr, (Label)mainLabel);
+        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startAddr, (Label)mainLabel, logger.IsEnabled(LogLevel.Debug));
         this._context.LoadMemoryImage(this._programs.MemoryImage);
     }
 

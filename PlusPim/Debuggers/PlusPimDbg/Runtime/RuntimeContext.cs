@@ -1,12 +1,13 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class RuntimeContext(Action<string> log, Func<string, Address, bool, Label?> resolveLabel, Address startAddr, Label startLabel) {
+internal sealed class RuntimeContext(Action<string> log, Func<string, Address, bool, Label?> resolveLabel, Address startAddr, Label startLabel, bool isLogEnabled = true) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
@@ -205,10 +206,29 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
 
 
     /// <summary>
+    /// ログが有効かどうか．無効な場合はログの文字列を組み立てない
+    /// </summary>
+    public bool IsLogEnabled { get; } = isLogEnabled;
+
+    /// <summary>
     /// 最も基礎的なログ機能．EditorController経由で出力される
     /// </summary>
     public void Log(string message) {
-        log.Invoke(message);
+        if(this.IsLogEnabled) {
+            log.Invoke(message);
+        }
+    }
+
+    /// <summary>
+    /// 補間文字列によるログ．ログが無効な場合は文字列を組み立てない
+    /// </summary>
+    /// <remarks>
+    /// ログが無効な場合は補間式が評価されないため，補間式に副作用のある式を書いてはならない
+    /// </remarks>
+    public void Log([InterpolatedStringHandlerArgument("")] ref RuntimeLogHandler handler) {
+        if(handler.IsEnabled) {
+            log.Invoke(handler.ToStringAndClear());
+        }
     }
 
 

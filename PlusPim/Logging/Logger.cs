@@ -9,6 +9,11 @@ internal interface ILogger {
     void AddSink(Action<LogLevel, string, string> sink);
 
     /// <summary>
+    /// 指定したレベルのログが出力されるかどうか
+    /// </summary>
+    bool IsEnabled(LogLevel level);
+
+    /// <summary>
     /// <see cref="Action{String}"/>ブリッジを返す．指定されたソース名でDebugレベルのログを出力する．
     /// </summary>
     Action<string> ToAction(string source);
@@ -46,6 +51,10 @@ internal sealed class Logger(LogLevel minLevel): ILogger {
         this._sinks.Add(sink);
     }
 
+    public bool IsEnabled(LogLevel level) {
+        return minLevel <= level;
+    }
+
     public Action<string> ToAction(string source) {
         return message => this.Debug(source, message);
     }
@@ -62,6 +71,9 @@ internal sealed class Logger(LogLevel minLevel): ILogger {
         public void Warning(string source, string message) { }
         public void Error(string source, string message) { }
         public void AddSink(Action<LogLevel, string, string> sink) { }
+        public bool IsEnabled(LogLevel level) {
+            return false;
+        }
         public Action<string> ToAction(string source) {
             return _ => { };
         }
