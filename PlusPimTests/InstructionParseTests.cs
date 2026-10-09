@@ -2,6 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using Xunit;
 
 namespace PlusPimTests;
@@ -220,6 +221,42 @@ public class InstructionParseTests {
     [InlineData("mfc0 $K0, $14")]
     public void TryParse_Cp0InvalidOperand_ReturnsFalse(string assemblyLine) {
         Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    // ===== Memory operands =====
+
+    [Theory]
+    [InlineData("sw $t0, ($sp)")]
+    [InlineData("lw $t0, ( $sp )")]
+    [InlineData("lw $t0, -0x4($sp)")]
+    [InlineData("lb $t0, 4( $t1)")]
+    [InlineData("lwl $t0, ($t1)")]
+    [InlineData("swr $t0, ($t1 )")]
+    public void TryParse_MemoryOperand_Succeeds(string assemblyLine) {
+        Assert.True(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Theory]
+    [InlineData("sw $t0, $sp")]
+    [InlineData("sw $t0, ()")]
+    [InlineData("sw $t0, 4 ($sp)")]
+    [InlineData("sw $t0, 0x10000($sp)")]
+    [InlineData("sw $t0, ($sp")]
+    public void TryParse_MemoryOperand_Malformed_ReturnsFalse(string assemblyLine) {
+        Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Fact]
+    public void Execute_MemoryOperandWithoutOffset_UsesBaseAddress() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.Sp] = 0x10000010;
+        context.Registers[RegisterID.T0] = 0x12345678;
+
+        _ = TestHelpers.ParseInstruction("sw $t0, ($sp)")!.Execute(context);
+        _ = TestHelpers.ParseInstruction("lw $t1, ( $sp )")!.Execute(context);
+
+        Assert.Equal(0x12345678u, context.ReadMemoryBytes(new Address(0x10000010), 4, false));
+        Assert.Equal(0x12345678u, context.Registers[RegisterID.T1]);
     }
 
     [Fact]

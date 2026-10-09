@@ -32,7 +32,7 @@ internal static partial class OperandParser {
     [GeneratedRegex(@"^\$(?<rs>\w+),\s*(?<label>(\w|\$)+)$")]
     private static partial Regex BranchZeroOperandsPattern();
 
-    [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<offset>\S+)\(\$(?<rs>\w+)\)$")]
+    [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<offset>[^\s(]*)\(\s*\$(?<rs>\w+)\s*\)$")]
     private static partial Regex MemoryOperandPattern();
 
     [GeneratedRegex(@"^(?<label>(\w|\$)+)$")]
@@ -289,6 +289,7 @@ internal static partial class OperandParser {
     /// <summary>
     /// メモリ命令のオペランド ($rt, offset($rs)) を解析する (lw, sw等)
     /// </summary>
+    /// <remarks>offsetは省略でき，括弧の内側に空白を置ける</remarks>
     internal static bool TryParseMemoryOperands(
         string operands,
         [MaybeNullWhen(false)] out RegisterID rt,
@@ -306,7 +307,7 @@ internal static partial class OperandParser {
 
         if(RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)
             && RegisterParser.TryParse(match.Groups["rs"].Value, out RegisterID rsParsed)
-            && Immediate.TryParse(match.Groups["offset"].Value, null, out Immediate? offsetParsed)) {
+            && TryParseOffset(match.Groups["offset"].Value, out Immediate? offsetParsed)) {
             rt = rtParsed;
             rs = rsParsed;
             offset = offsetParsed;
@@ -314,6 +315,17 @@ internal static partial class OperandParser {
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// メモリオペランドのオフセットを解析する．省略された場合は0とする
+    /// </summary>
+    private static bool TryParseOffset(string offset, [MaybeNullWhen(false)] out Immediate result) {
+        if(offset.Length == 0) {
+            result = new Immediate(0);
+            return true;
+        }
+        return Immediate.TryParse(offset, null, out result);
     }
 
     /// <summary>
