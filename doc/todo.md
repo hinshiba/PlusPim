@@ -180,7 +180,7 @@
   - [ ] `Application._isDebug` とランタイムモードの経路
   - [ ] `InstructionIndex.FromAddress` (両オーバーロード)
   - [ ] `Address.FromInstructionIndex(…, bool)`
-  - [ ] `TextSegmentBuilder.CurrentInstructionIndex` / `CurrentAddr`
+  - [x] `TextSegmentBuilder.CurrentInstructionIndex` / `CurrentAddr`
   - [ ] `TextSegment.BaseAddress`, `DataSegment.BaseAddress`
   - [ ] `ParsedProgram.GetInstruction`
   - [ ] `Immediate.Parse`
