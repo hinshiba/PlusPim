@@ -16,6 +16,8 @@
   starts even when port 4711 is in use and several sessions can run at once.
   The `port` launch option no longer has a default and only fixes the port
   when set
+- The bundled PlusPim binary is published with ReadyToRun, which shortens
+  session startup (about 226ms to 158ms on Windows, warm)
 - The extension starts PlusPim itself and shows its input and output in a
   terminal that stays open after the session ends (press any key to close it)
 
