@@ -249,6 +249,36 @@ public class IntegrationTests {
     }
 
     [Fact]
+    public void LineNumbers_StackFrameAndBreakpoints_AreExact1Based() {
+        // 空行，ラベル行，2命令に展開される疑似命令を含むソースで行番号を固定する
+        string asm = """
+            .text
+            main:
+              addiu $t0, $zero, 1
+
+              li $t1, -1
+            next:
+              addiu $t2, $zero, 3
+              addiu $t3, $zero, 4
+            """;
+        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
+        try {
+            List<int> lines = [debugger.GetCallStack()[0].Line];
+            for(int i = 0; i < 4; i++) {
+                Assert.Equal(StopReason.Step, debugger.Step());
+                lines.Add(debugger.GetCallStack()[0].Line);
+            }
+            Assert.Equal([3, 5, 5, 7, 8], lines);
+
+            BreakpointResult[] results = debugger.SetBreakpoints(tempFile, [1, 2, 3, 4, 5, 6, 7, 8]);
+            Assert.Equal([1, 2, 3, 4, 5, 6, 7, 8], results.Select(r => r.Line));
+            Assert.Equal([false, false, true, false, true, false, true, true], results.Select(r => r.Verified));
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    [Fact]
     public void Step_IsTerminated_FalseUntilEnd() {
         string asm = """
             .text
