@@ -46,9 +46,9 @@ internal interface IApplication {
     bool StepBack();
 
     /// <summary>
-    /// 停止するまで実行を巻き戻す
+    /// ブレークポイントか履歴の先頭に達するまで実行を巻き戻す．例外では止まらない
     /// </summary>
-    /// <returns>停止した理由．履歴の先頭に達した場合は<see cref="StopReason.HistoryStart"/></returns>
+    /// <returns>停止した理由．ブレークポイントなら<see cref="StopReason.Breakpoint"/>，履歴の先頭に達した場合は<see cref="StopReason.HistoryStart"/></returns>
     StopReason ReverseContinue(CancellationToken ct = default);
 
     /// <summary>

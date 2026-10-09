@@ -244,4 +244,38 @@ public class DebugAdapterTests {
             Assert.True(client.WaitForSessionEnd());
         });
     }
+
+    /// <summary>
+    /// 実行の要求を送り，停止イベントを待つ
+    /// </summary>
+    internal static JsonElement RunAndWaitStopped(DapClient client, string command) {
+        int mark = client.Mark;
+        _ = client.RequestOk(command, new { threadId = 1 });
+        return client.WaitForEvent("stopped", mark);
+    }
+
+    [Fact]
+    public void ReverseContinue_StopsAtBreakpointsThenEntry() {
+        WithClient(ApplicationExecutionTests.CountingLoop, (client, file) => {
+            Launch(client);
+            _ = client.RequestOk("setBreakpoints", Breakpoints(file, 5));
+            int mark = client.Mark;
+            _ = client.RequestOk("configurationDone");
+            _ = client.WaitForEvent("stopped", mark);
+
+            for(uint i = 0; i < 3; i++) {
+                Assert.Equal("breakpoint", StoppedReason(RunAndWaitStopped(client, "continue")));
+                Assert.Equal(i, RegisterValue(client, "$t0 ($8)"));
+            }
+
+            foreach(uint expected in new uint[] { 1, 0 }) {
+                Assert.Equal("breakpoint", StoppedReason(RunAndWaitStopped(client, "reverseContinue")));
+                Assert.Equal(expected, RegisterValue(client, "$t0 ($8)"));
+                Assert.Equal(5, TopLine(client));
+            }
+
+            Assert.Equal("entry", StoppedReason(RunAndWaitStopped(client, "reverseContinue")));
+            Assert.Equal(3, TopLine(client));
+        });
+    }
 }

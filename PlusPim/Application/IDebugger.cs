@@ -18,6 +18,15 @@ public interface IDebugger {
     bool Back();
 
     /// <summary>
+    /// 次に実行する命令にブレークポイントがあり，例外が保留されていないかどうか
+    /// </summary>
+    /// <remarks>
+    /// 順方向の実行がブレークポイントで止まる状態 (命令の実行前) と同じときに<see langword="true"/>となる．
+    /// 例外ハンドラへの遷移を戻した直後は，例外を起こした命令は実行済みなので<see langword="false"/>となる
+    /// </remarks>
+    bool IsAtBreakpoint { get; }
+
+    /// <summary>
     /// コールスタックの情報を取得する
     /// </summary>
     /// <returns><see cref="StackFrameInfo"/>の配列．ライブフレームが先頭である</returns>

@@ -168,6 +168,8 @@ internal class PlusPimDbg: IDebugger {
         return true;
     }
 
+    public bool IsAtBreakpoint => this._context.LastException is null && this._breakpoints.Contains(this._context.PC);
+
     public ExceptionInfo? GetLastException() {
         ExceptionEvent? lastException = this._context.LastException;
         if(lastException is ExceptionEvent exc) {

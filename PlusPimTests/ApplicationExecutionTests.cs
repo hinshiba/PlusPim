@@ -150,4 +150,79 @@ public class ApplicationExecutionTests {
             Assert.Equal(TextBase + 8, app.GetCallStack()[0].PC);
         });
     }
+
+    /// <summary>
+    /// 5行目 (ループの先頭) にブレークポイントを置くループ
+    /// </summary>
+    internal const string CountingLoop = """
+        .text
+        main:
+          addiu $t0, $zero, 0
+        loop:
+          addiu $t1, $t1, 1
+          addiu $t0, $t0, 1
+          j loop
+        """;
+
+    [Fact]
+    public Task ReverseContinue_StopsAtBreakpoints() {
+        return WithApplication(CountingLoop, (app, file) => {
+            Assert.True(app.SetBreakpoints(file, [5])[0].Verified);
+            for(uint i = 0; i < 3; i++) {
+                Assert.Equal(StopReason.Breakpoint, app.Continue());
+                Assert.Equal(i, T0(app));
+            }
+
+            Assert.Equal(StopReason.Breakpoint, app.ReverseContinue());
+            Assert.Equal(1u, T0(app));
+            Assert.Equal(TextBase + 4, app.GetCallStack()[0].PC);
+
+            Assert.Equal(StopReason.Breakpoint, app.ReverseContinue());
+            Assert.Equal(0u, T0(app));
+            Assert.Equal(TextBase + 4, app.GetCallStack()[0].PC);
+
+            Assert.Equal(StopReason.HistoryStart, app.ReverseContinue());
+            Assert.Equal(TextBase, app.GetCallStack()[0].PC);
+            return Task.CompletedTask;
+        });
+    }
+
+    [Fact]
+    public Task ReverseContinue_DoesNotStopAtExceptionsOrPendingExceptionState() {
+        // break は Bp の例外を起こす．例外ハンドラに入った後から巻き戻すと，
+        // 例外が保留された状態 (break は実行済み) では止まらず，break の実行前で止まる
+        const string program = """
+            .text
+            main:
+              addiu $t0, $zero, 1
+              break
+              addiu $t0, $zero, 2
+            .ktext
+              addiu $k0, $zero, 1
+            """;
+        return WithApplication(program, (app, file) => {
+            // 例外フィルタに Bp を含めても，巻き戻しは例外では止まらない
+            app.SetExceptionFilters([ExceptionFilter.Break]);
+            Assert.Equal(StopReason.Step, app.StepIn()); // addiu
+            Assert.Equal(StopReason.Exception, app.StepIn()); // break
+            Assert.Equal(StopReason.Step, app.StepIn()); // 例外ハンドラへ
+            Assert.Equal(StopReason.Step, app.StepIn()); // addiu $k0
+
+            Assert.Equal(StopReason.HistoryStart, app.ReverseContinue());
+
+            // break の行にブレークポイントを置くと，break の実行前で止まる
+            app.SetExceptionFilters([]);
+            Assert.True(app.SetBreakpoints(file, [4])[0].Verified);
+            for(int i = 0; i < 4; i++) {
+                _ = app.StepIn();
+            }
+            Assert.Equal(0x80000184u, app.GetCallStack()[0].PC);
+
+            Assert.Equal(StopReason.Breakpoint, app.ReverseContinue());
+            Assert.Equal(TextBase + 4, app.GetCallStack()[0].PC);
+            Assert.Null(app.GetLastException());
+            Assert.Equal(1u, T0(app));
+            return Task.CompletedTask;
+        });
+    }
 }

@@ -38,6 +38,16 @@ Continue，StepOver (`next`)，StepIn，StepOut，StepBack，Reverse Continue �
 
 履歴の先頭に達した場合は，デバッグコンソールに `Reached the beginning of the execution history.` を出力する．
 
+### 逆方向の実行
+
+StepBack は1ステップだけ戻し，停止理由は `step` とする．
+
+Reverse Continue はブレークポイントのある命令の実行前の状態に戻るか，履歴の先頭に達するまで巻き戻す．
+例外フィルタに該当する例外では止まらない．例外の発生地点に戻るには，その行にブレークポイントを置くか StepBack を使う．
+
+例外ハンドラへの遷移を戻した直後は，例外を起こした命令を実行済みで例外が保留された状態なので，その命令にブレークポイントがあっても止まらない．
+さらに1ステップ戻った，その命令の実行前の状態で止まる．
+
 ### 入力を待っている間の制限
 
 read_int，read_string，read_char は入力の1行が届くまで標準入力の読み取りで待つ．
