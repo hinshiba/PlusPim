@@ -19,31 +19,32 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 internal sealed class LaInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "la";
 
-    public int GetExpansionSize(string operands) {
-        return 2;
-    }
-
-    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                          [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = null;
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
         if(!OperandParser.TryParseRegTokenOperands(operands, out RegisterID rt, out string? labelName)) {
             return false;
         }
 
-        if(symbolTable.Resolve(labelName) is not { } label) {
-            return false;
-        }
+        // 前方参照があるため，ラベルはパス2で解決する．未定義でも配置をずらさないよう常に2命令にする
+        line = ParsedLine.Deferred(2, (ISymbolResolver symbols, out string? unresolved) => {
+            uint addr = 0;
+            if(symbols.Resolve(labelName) is { } label) {
+                addr = label.Addr.Addr;
+                unresolved = null;
+            } else {
+                unresolved = labelName;
+            }
 
-        uint addr = label.Addr.Addr;
-        ushort upper = (ushort)(addr >>> 16);
-        ushort lower = (ushort)(addr & 0xFFFF);
+            ushort upper = (ushort)(addr >>> 16);
+            ushort lower = (ushort)(addr & 0xFFFF);
 
-        instructions = [
-            // lui命令は下位ビットを0にするため先行する必要がある
-            InstructionFactory.Lui(rt, new Immediate(upper), lineNumber),
-            InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber),
-        ];
+            return [
+                // lui命令は下位ビットを0にするため先行する必要がある
+                InstructionFactory.Lui(rt, new Immediate(upper), lineNumber),
+                InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber),
+            ];
+        });
         return true;
     }
 }

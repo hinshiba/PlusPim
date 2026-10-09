@@ -1,6 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
@@ -23,16 +22,8 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 internal sealed class LiInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "li";
 
-    public int GetExpansionSize(string operands) {
-        // TryExpandを呼び出して展開サイズを計算する
-        // falseならinstructionsはnullになるため，結果を確認しなくてもよい
-        _ = this.TryExpand(operands, 0, new SymbolTable(), out IInstruction[]? instructions);
-        return instructions?.Length ?? 0;
-    }
-
-    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                          [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = null;
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
         if(!OperandParser.TryParseRegTokenOperands(operands, out RegisterID rt, out string? token)) {
             return false;
@@ -46,16 +37,14 @@ internal sealed class LiInstructionParser: IPseudoInstructionParser {
         ushort upper = (ushort)(imm >> 16);
         ushort lower = (ushort)(imm & 0xFFFF);
 
-        instructions =
-            (upper == 0) ?
-            [
-                InstructionFactory.Ori(rt, RegisterID.Zero, new Immediate(lower), lineNumber),
-            ] :
-            [
+        // 命令数は値だけで決まる
+        line = (upper == 0)
+            ? ParsedLine.Fixed(
+                InstructionFactory.Ori(rt, RegisterID.Zero, new Immediate(lower), lineNumber))
+            : ParsedLine.Fixed(
                 // lui命令は下位ビットを0にするため先行する必要がある
                 InstructionFactory.Lui(rt, new Immediate(upper), lineNumber),
-                InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber),
-        ];
+                InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber));
         return true;
     }
 }

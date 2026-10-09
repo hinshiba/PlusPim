@@ -1,4 +1,3 @@
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
@@ -16,20 +15,11 @@ internal interface IPseudoInstructionParser {
     string Mnemonic { get; }
 
     /// <summary>
-    /// 展開後の命令数を返す
-    /// </summary>
-    /// <param name="operands">オペランド文字列</param>
-    /// <returns>展開後の実命令数</returns>
-    int GetExpansionSize(string operands);
-
-    /// <summary>
-    /// 疑似命令を実命令列に展開する
+    /// 疑似命令のオペランドを解析する
     /// </summary>
     /// <param name="operands">オペランド文字列</param>
     /// <param name="lineNumber">ソースファイル上の行番号(1-based)</param>
-    /// <param name="symbolTable">解決済みのシンボルテーブル</param>
-    /// <param name="instructions">展開後の命令列</param>
+    /// <param name="line">成功の場合は展開後の命令数が確定した行</param>
     /// <returns>成功なら<see langword="true"/></returns>
-    bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                   [MaybeNullWhen(false)] out IInstruction[] instructions);
+    bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line);
 }
