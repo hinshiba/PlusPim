@@ -29,4 +29,10 @@ internal interface IInstruction {
     /// その命令のファイル上での行番号(1-index)
     /// </summary>
     int SourceLine { get; }
+
+    /// <summary>
+    /// 命令のアセンブリでの表記 (<c>lui $t0, 0x1000</c> など)．即値は解決済みの値である
+    /// </summary>
+    /// <remarks>表記に未対応の命令は<see langword="null"/></remarks>
+    string? Disassembly => null;
 }

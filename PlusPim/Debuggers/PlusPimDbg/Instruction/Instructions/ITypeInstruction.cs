@@ -13,7 +13,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 /// </remarks>
 internal sealed class ITypeInstruction(
     RegisterID rt, RegisterID rs, Immediate imm, int sourceLine,
-    string mnemonic, Func<uint, Immediate, uint> compute
+    string mnemonic, Func<uint, Immediate, uint> compute, bool isRegImm = false
 ): IInstruction {
 
     /// <summary>
@@ -22,6 +22,11 @@ internal sealed class ITypeInstruction(
     public int SourceLine { get; } = sourceLine;
 
     private readonly RegisterWriteHistory _rt = new(rt);
+
+    /// <remarks><c>isRegImm</c> はレジスタ+即値のみの形式 (lui) かどうかで，表記にのみ使う</remarks>
+    public string Disassembly => isRegImm
+        ? $"{mnemonic} {RegisterParser.Format(rt)}, {imm}"
+        : $"{mnemonic} {RegisterParser.Format(rt)}, {RegisterParser.Format(rs)}, {imm}";
 
     public ExecuteResult Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
@@ -62,7 +67,7 @@ internal sealed class ITypeInstruction(
         return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseRegImmOperands(operands, out RegisterID rt, out Immediate? imm)
                 ? new ITypeInstruction(rt, RegisterID.Zero, imm, lineNumber, mnemonic,
-                    (_, immVal) => compute(immVal))
+                    (_, immVal) => compute(immVal), isRegImm: true)
                 : (IInstruction?)null;
         });
     }

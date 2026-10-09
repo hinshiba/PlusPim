@@ -19,6 +19,8 @@ internal sealed class RTypeShiftImmInstruction(
 
     private readonly RegisterWriteHistory _rd = new(rd);
 
+    public string Disassembly => $"{mnemonic} {RegisterParser.Format(rd)}, {RegisterParser.Format(rt)}, {shamt.ToUInt()}";
+
     public ExecuteResult Execute(RuntimeContext context) {
         uint rtVal = context.Registers[rt];
         int shamtVal = shamt.ToSInt();
