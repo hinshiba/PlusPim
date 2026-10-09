@@ -5,12 +5,6 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program.Records;
 /// </summary>
 /// <param name="Addr">アドレスとなる<see langword="int"/></param>
 internal record struct Address(uint Addr) {
-    public static Address FromInstructionIndex(InstructionIndex iIdx, bool isKernelMode) {
-        return isKernelMode
-            ? new Address((uint)iIdx.Idx * 4) + TextSegment.KernelTextSegmentBase
-            : new Address((uint)iIdx.Idx * 4) + TextSegment.TextSegmentBase;
-    }
-
     public static Address FromInstructionIndex(InstructionIndex iIdx, Address offset) {
         return new Address((uint)iIdx.Idx * 4) + offset;
 
