@@ -1,5 +1,16 @@
 # Change Log
 
+## [Unreleased]
+
+### Added
+
+- `stopOnEntry` launch option (default `true`). When `false`, the program runs
+  until a breakpoint, an exception or the end
+
+### Changed
+
+- Display name is now "PlusPim for VS Code"
+
 ## [0.2.0] - 2026-08-31
 
 ### Added

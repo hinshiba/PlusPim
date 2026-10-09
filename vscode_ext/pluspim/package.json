@@ -64,6 +64,11 @@
                   "${file}"
                 ]
               },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Stop at the first instruction after the program is loaded. When false, the program runs until a breakpoint, an exception or the end.",
+                "default": true
+              },
               "trace": {
                 "type": "boolean",
                 "description": "Enable DAP communication trace",
