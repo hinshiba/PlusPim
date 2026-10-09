@@ -13,3 +13,14 @@ internal interface ISymbolResolver {
     /// <returns>解決できた場合はラベル．そうでない場合は<see langword="null"/></returns>
     Label? Resolve(string name);
 }
+
+/// <summary>
+/// ローカル，グローバルの順にラベルを解決する
+/// </summary>
+/// <param name="local">ファイルのシンボルテーブル</param>
+/// <param name="global">全ファイルのグローバルシンボル</param>
+internal sealed class ScopedSymbolResolver(SymbolTable local, SymbolTable global): ISymbolResolver {
+    public Label? Resolve(string name) {
+        return local.Resolve(name) ?? global.Resolve(name);
+    }
+}

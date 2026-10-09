@@ -26,12 +26,25 @@ internal sealed class ParsedPrograms {
     /// </summary>
     private readonly int[] _kernelTextCumulativeLengths;
 
+    /// <summary>
+    /// 各プログラムのローカル，グローバルの順にラベルを解決するリゾルバ
+    /// </summary>
+    private readonly ScopedSymbolResolver[] _resolvers;
+
+    /// <summary>
+    /// 全ファイルの<c>.globl</c>で宣言されたシンボル
+    /// </summary>
+    public SymbolTable GlobalSymbols { get; } = new();
+
+    /// <summary>
+    /// 全ファイルのパス1を行ってグローバルシンボルを集め，その後に各ファイルのパス2を行う
+    /// </summary>
     /// <param name="files">すべての実行するファイル</param>
     /// <param name="logger">ロガー</param>
     /// <param name="strict">解析できない行と未対応の指令をエラーにするかどうか</param>
     /// <exception cref="AssemblyException">アセンブルに失敗した場合</exception>
     public ParsedPrograms(FileInfo[] files, ILogger logger, bool strict = false) {
-        // まず全部解析
+        // フェーズ1: 全ファイルのパス1，データセグメント，ローカルのシンボルテーブル
         List<ParsedProgram> programList = [];
         Address textSegmentOffset = TextSegment.TextSegmentBase;
         Address kernelTextSegmentOffset = TextSegment.KernelTextSegmentBase;
@@ -49,9 +62,9 @@ internal sealed class ParsedPrograms {
             dataSegmentOffset += program.DataSegmentSize;
 
             // 累積命令数の記録
-            textTotal += program.TextSegment.Instructions.Length;
+            textTotal += program.TextInstructionCount;
             textCumulativeLengths.Add(textTotal);
-            kernelTextTotal += program.KernelTextSegment.Instructions.Length;
+            kernelTextTotal += program.KernelTextInstructionCount;
             kernelTextCumulativeLengths.Add(kernelTextTotal);
 
             // データセグメントの結合
@@ -65,8 +78,16 @@ internal sealed class ParsedPrograms {
             programList.Add(program);
         }
 
+        // グローバルシンボルの表を作る
+        List<string> errors = this.BuildGlobalSymbols(programList, logger);
+
+        // フェーズ2: 全ファイルのパス2
+        foreach(ParsedProgram program in programList) {
+            program.Assemble(this.GlobalSymbols);
+        }
+
         // すべてのファイルを処理してからエラーをまとめて報告する
-        List<string> errors = [.. programList.SelectMany(program => program.Errors)];
+        errors.AddRange(programList.SelectMany(program => program.Errors));
         if(errors.Count != 0) {
             foreach(string error in errors) {
                 logger.Error("ParsedPrograms", error);
@@ -77,6 +98,36 @@ internal sealed class ParsedPrograms {
         this._programs = [.. programList];
         this._textCumulativeLengths = [.. textCumulativeLengths];
         this._kernelTextCumulativeLengths = [.. kernelTextCumulativeLengths];
+        this._resolvers = [.. programList.Select(program => new ScopedSymbolResolver(program.SymbolTable, this.GlobalSymbols))];
+    }
+
+    /// <summary>
+    /// <c>.globl</c>の宣言から<see cref="GlobalSymbols"/>を作る
+    /// </summary>
+    /// <remarks>宣言したファイルで定義されていない名前は警告を出して無視する</remarks>
+    /// <returns>複数のファイルで同じグローバルシンボルを定義していた場合のエラー</returns>
+    private List<string> BuildGlobalSymbols(List<ParsedProgram> programs, ILogger logger) {
+        List<string> errors = [];
+        Dictionary<string, ParsedProgram> owners = [];
+        foreach(ParsedProgram program in programs) {
+            foreach((string name, int lineNumber) in program.GlobalDeclarations) {
+                if(program.SymbolTable.Resolve(name) is not { } label) {
+                    logger.Warning("ParsedPrograms", $"{program.File.Name}:{lineNumber} Global symbol '{name}' is not defined in this file.");
+                    continue;
+                }
+
+                if(owners.TryGetValue(name, out ParsedProgram? owner)) {
+                    if(owner != program) {
+                        errors.Add($"{program.File.Name}:{lineNumber} Duplicate global symbol '{name}' (already defined in {owner.File.Name})");
+                    }
+                    continue;
+                }
+
+                owners[name] = program;
+                _ = this.GlobalSymbols.Add(label);
+            }
+        }
+        return errors;
     }
 
     /// <summary>
@@ -163,7 +214,7 @@ internal sealed class ParsedPrograms {
     }
 
     /// <summary>
-    /// 実行時にPCとカーネルモードに基づいて所属ファイルのシンボルテーブルからラベルを解決するデリゲートを生成する
+    /// 実行時にPCとカーネルモードに基づいて，所属ファイルのシンボルテーブル，グローバルシンボルの順にラベルを解決するデリゲートを生成する
     /// </summary>
     public Func<string, Address, bool, Label?> CreateResolver() {
         return (name, pc, isKernel) => {
@@ -173,7 +224,7 @@ internal sealed class ParsedPrograms {
                 ? this._kernelTextCumulativeLengths
                 : this._textCumulativeLengths;
             int progIdx = FindProgramIndex(lengths, globalIdx);
-            return this._programs[progIdx].SymbolTable.Resolve(name);
+            return this._resolvers[progIdx].Resolve(name);
         };
     }
 
@@ -181,7 +232,11 @@ internal sealed class ParsedPrograms {
     /// <summary>
     /// 全プログラムからラベルを検索する
     /// </summary>
+    /// <remarks>グローバルシンボルを優先し，なければ指定順で最初に見つかったファイルのラベルを返す</remarks>
     public Label? ResolveFromAll(string name) {
+        if(this.GlobalSymbols.Resolve(name) is { } global) {
+            return global;
+        }
         foreach(ParsedProgram program in this._programs) {
             Label? label = program.SymbolTable.Resolve(name);
             if(label is not null) {

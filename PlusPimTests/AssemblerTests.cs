@@ -1,7 +1,9 @@
+using PlusPim.Debuggers.PlusPimDbg;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
 using Xunit;
 
@@ -250,6 +252,170 @@ public class AssemblerTests {
             """);
 
         Assert.Equal(T + 4, a.Resolve("$ret"));
+    }
+
+    // ===== .globl =====
+
+    private const string CallerSource = """
+        .text
+        main:
+            la $a1, shared
+            jal func
+            addi $t0, $zero, 1
+        """;
+
+    private const string CalleeSource = """
+        .globl func, shared
+        .text
+        func:
+            li $v0, 42
+            jr $ra
+        .data
+        shared: .word 5
+        """;
+
+    [Fact]
+    public void Globl_CrossFileJalAndLa_ResolveAndExecute() {
+        FileInfo caller = TestHelpers.WriteTempAsm(CallerSource);
+        FileInfo callee = TestHelpers.WriteTempAsm(CalleeSource);
+        try {
+            PlusPimDbg debugger = new([caller, callee], Logger.Null);
+
+            // la (2命令)，jal，li，jr
+            for(int i = 0; i < 5; i++) {
+                _ = debugger.Step();
+            }
+
+            (uint[] registers, uint pc, _, _) = debugger.GetRegisters();
+            Assert.Equal(42u, registers[(int)RegisterID.V0]);
+            Assert.Equal((T + 12).Addr, pc);
+            Assert.Equal(DataSegment.DataSegmentBase.Addr, registers[(int)RegisterID.A1]);
+        } finally {
+            caller.Delete();
+            callee.Delete();
+        }
+    }
+
+    [Fact]
+    public void Globl_LocalShadowsGlobal() {
+        using Assembled a = Assemble(
+            """
+            .text
+            main:
+                la $t0, func
+            func:
+                nop
+            """,
+            CalleeSource);
+
+        Func<string, Address, bool, Label?> resolver = a.Programs.CreateResolver();
+        Assert.Equal(T + 8, resolver("func", T, false)?.Addr);
+        // 2つ目のファイルからはグローバルの定義が見える
+        Assert.Equal(T + 12, resolver("func", T + 12, false)?.Addr);
+        Assert.Equal(T + 12, a.Programs.GlobalSymbols.Resolve("func")?.Addr);
+    }
+
+    [Fact]
+    public void Globl_NonGlobalLabelInOtherFile_IsInvisible() {
+        using Assembled a = Assemble(
+            """
+            .text
+            main:
+                nop
+            """,
+            """
+            .text
+            hidden:
+                nop
+            """);
+
+        Func<string, Address, bool, Label?> resolver = a.Programs.CreateResolver();
+        Assert.Null(resolver("hidden", T, false));
+        Assert.Equal(T + 4, resolver("hidden", T + 4, false)?.Addr);
+    }
+
+    [Fact]
+    public void Globl_LaToNonGlobalLabelInOtherFile_ThrowsAssemblyException() {
+        AssemblyException ex = AssembleFails(
+            """
+            .text
+            main:
+                la $t0, hidden
+            """,
+            """
+            .text
+            hidden:
+                nop
+            """);
+
+        Assert.Contains("hidden", Assert.Single(ex.Errors));
+    }
+
+    [Fact]
+    public void Globl_DuplicateGlobal_ThrowsAssemblyException() {
+        AssemblyException ex = AssembleFails(
+            """
+            .globl dup
+            .text
+            dup:
+                nop
+            """,
+            """
+            .text
+            .global dup
+            dup:
+                nop
+            """);
+
+        string error = Assert.Single(ex.Errors);
+        Assert.Contains("dup", error);
+        Assert.Contains(":2", error);
+    }
+
+    [Fact]
+    public void Globl_MainPrefersGlobalDefinition() {
+        using Assembled a = Assemble(
+            """
+            .text
+            main:
+                nop
+            """,
+            """
+            .text
+            .globl main
+            main:
+                nop
+            """);
+
+        Assert.Equal(T + 4, a.Resolve("main"));
+    }
+
+    [Fact]
+    public void Globl_AliasesAndSeparators_AreAccepted() {
+        using Assembled a = Assemble("""
+            .GLOBL x
+            .text
+            x: nop
+            y: .global  y	z
+            z: nop
+            """);
+
+        Assert.Equal(T, a.Programs.GlobalSymbols.Resolve("x")?.Addr);
+        Assert.Equal(T + 4, a.Programs.GlobalSymbols.Resolve("y")?.Addr);
+        Assert.Equal(T + 4, a.Programs.GlobalSymbols.Resolve("z")?.Addr);
+        Assert.DoesNotContain(a.Logs, log => log.Level >= LogLevel.Warning);
+    }
+
+    [Fact]
+    public void Globl_UndefinedName_LogsWarning() {
+        using Assembled a = Assemble("""
+            .text
+            .globl missing
+            main: nop
+            """);
+
+        Assert.Null(a.Programs.GlobalSymbols.Resolve("missing"));
+        Assert.Contains(a.Logs, log => log.Level == LogLevel.Warning && log.Message.Contains("missing") && log.Message.Contains(":2"));
     }
 
     // ===== ParsedLine =====

@@ -23,11 +23,17 @@ internal partial class ParsedProgram {
     [GeneratedRegex(@"^(?<label>[A-Za-z_.$][\w.$]*):\s*")]
     private static partial Regex LabelPrefixPattern();
 
+    /// <summary>
+    /// <c>.globl</c> 指令 (別名 <c>.global</c>)．名前は <c>,</c> か空白で区切る
+    /// </summary>
+    [GeneratedRegex(@"^\.globa?l\s+(?<names>.+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex GlobalDirectivePattern();
 
     /// <summary>
     /// .textセグメント
     /// </summary>
-    public TextSegment TextSegment { get; }
+    /// <exception cref="InvalidOperationException"><see cref="Assemble"/>の前に参照した場合</exception>
+    public TextSegment TextSegment => this._textSegment ?? throw new InvalidOperationException("Assemble has not been called.");
 
     /// <summary>
     /// .dataセグメント
@@ -37,7 +43,8 @@ internal partial class ParsedProgram {
     /// <summary>
     /// .ktextセグメント
     /// </summary>
-    public TextSegment KernelTextSegment { get; }
+    /// <exception cref="InvalidOperationException"><see cref="Assemble"/>の前に参照した場合</exception>
+    public TextSegment KernelTextSegment => this._kernelTextSegment ?? throw new InvalidOperationException("Assemble has not been called.");
 
     /// <summary>
     /// シンボルテーブル
@@ -60,15 +67,35 @@ internal partial class ParsedProgram {
     public int KernelTextInstructionCount { get; }
 
     /// <summary>
+    /// <c>.globl</c> で宣言された名前と1始まりの行番号
+    /// </summary>
+    public IReadOnlyList<(string Name, int LineNumber)> GlobalDeclarations => this._globalDeclarations;
+
+    /// <summary>
     /// アセンブルを失敗させるエラー
     /// </summary>
     public IReadOnlyList<string> Errors => this._errors;
 
     private readonly List<string> _errors = [];
+    private readonly List<(string Name, int LineNumber)> _globalDeclarations = [];
+    private readonly List<(ParsedLine Line, int LineNumber)> _parsedTextLines;
+    private readonly List<(ParsedLine Line, int LineNumber)> _parsedKernelTextLines;
+    private readonly Address _textSegmentBase;
+    private readonly Address _kernelTextSegmentBase;
+    private readonly ILogger _logger;
+    private TextSegment? _textSegment;
+    private TextSegment? _kernelTextSegment;
 
+    /// <summary>
+    /// ファイルを読み込み，パス1 (行の解析とローカルのシンボルテーブルの構築) とデータセグメントの配置を行う
+    /// </summary>
+    /// <remarks>テキスト系セグメントの命令列は<see cref="Assemble"/>で作る</remarks>
     public ParsedProgram(FileInfo file, Address textSegmentBase, Address dataSegmentBase, Address kernelTextSegmentBase, ILogger logger, bool strict = false) {
         this.File = file;
         this.SymbolTable = new SymbolTable();
+        this._textSegmentBase = textSegmentBase;
+        this._kernelTextSegmentBase = kernelTextSegmentBase;
+        this._logger = logger;
 
 
         // 前処理: 各行をトリムして，セグメントごとに分割する
@@ -116,6 +143,14 @@ internal partial class ParsedProgram {
                     continue;
                 }
 
+                // .globl はどのセグメントでも受け付け，セグメントには渡さない
+                if(GlobalDirectivePattern().Match(processed) is { Success: true } global) {
+                    foreach(string name in global.Groups["names"].Value.Split([',', ' ', '	'], StringSplitOptions.RemoveEmptyEntries)) {
+                        this._globalDeclarations.Add((name, lineNumber));
+                    }
+                    continue;
+                }
+
                 // セグメント切替判定
                 if(processed.Equals(".data", StringComparison.OrdinalIgnoreCase)) {
                     currentSegment = SegmentType.Data;
@@ -136,10 +171,10 @@ internal partial class ParsedProgram {
 
         // パス1: 各行を解析してシンボルテーブルを構築する
         // 解析した行の命令数はここで確定するため，ラベルのアドレスもここで確定する
-        List<(ParsedLine Line, int LineNumber)> parsedTextLines = this.ParseTextLines(textLines, textSegmentBase, logger, strict);
-        List<(ParsedLine Line, int LineNumber)> parsedKernelTextLines = this.ParseTextLines(kernelTextLines, kernelTextSegmentBase, logger, strict);
-        this.TextInstructionCount = parsedTextLines.Sum(parsed => parsed.Line.Size);
-        this.KernelTextInstructionCount = parsedKernelTextLines.Sum(parsed => parsed.Line.Size);
+        this._parsedTextLines = this.ParseTextLines(textLines, textSegmentBase, logger, strict);
+        this._parsedKernelTextLines = this.ParseTextLines(kernelTextLines, kernelTextSegmentBase, logger, strict);
+        this.TextInstructionCount = this._parsedTextLines.Sum(parsed => parsed.Line.Size);
+        this.KernelTextInstructionCount = this._parsedKernelTextLines.Sum(parsed => parsed.Line.Size);
 
         // データセグメント
         DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
@@ -159,20 +194,26 @@ internal partial class ParsedProgram {
             }
             logger.Debug("ParsedProgram", $"Line{lineNumber} {label}");
         }
+    }
 
-
-        // パス2: 完成したシンボルテーブルを使ってシンボルを解決する
-        this.TextSegment = this.Materialize(parsedTextLines, textSegmentBase, logger);
-        this.KernelTextSegment = this.Materialize(parsedKernelTextLines, kernelTextSegmentBase, logger);
+    /// <summary>
+    /// パス2: ローカル，グローバルの順にシンボルを解決してテキスト系セグメントを作る
+    /// </summary>
+    /// <remarks>解決できなかったシンボルは<see cref="Errors"/>に記録する</remarks>
+    /// <param name="globals">全ファイルのグローバルシンボル</param>
+    public void Assemble(SymbolTable globals) {
+        ScopedSymbolResolver symbols = new(this.SymbolTable, globals);
+        this._textSegment = this.Materialize(this._parsedTextLines, this._textSegmentBase, symbols);
+        this._kernelTextSegment = this.Materialize(this._parsedKernelTextLines, this._kernelTextSegmentBase, symbols);
     }
 
     /// <summary>
     /// パス1で解析した行のシンボルを解決してテキスト系セグメントを作る
     /// </summary>
-    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber)> lines, Address segmentBase, ILogger logger) {
-        TextSegmentBuilder builder = new(segmentBase, logger);
+    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber)> lines, Address segmentBase, ISymbolResolver symbols) {
+        TextSegmentBuilder builder = new(segmentBase, this._logger);
         foreach((ParsedLine line, int lineNumber) in lines) {
-            builder.Add(line, lineNumber, this.SymbolTable, this.File.Name);
+            builder.Add(line, lineNumber, symbols, this.File.Name);
         }
         this._errors.AddRange(builder.Errors);
         return builder.Build();
