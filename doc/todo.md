@@ -105,6 +105,12 @@
 
 ## コード品質
 
+- [ ] デッドコードを削除する
+  - [ ] `Program.cs:148-150` の `throw` より後のコード (CS0162)
+  - [ ] `Application._isDebug` とランタイムモードの経路
+  - [ ] `InstructionIndex.FromAddress` (両オーバーロード)
+  - [ ] `Address.FromInstructionIndex(…, bool)`
+
 ### テストと CI
 
 - [ ] テストの追加 (#17)

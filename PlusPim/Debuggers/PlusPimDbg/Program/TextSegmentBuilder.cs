@@ -33,14 +33,6 @@ internal sealed class TextSegmentBuilder(Address baseAddr, ILogger logger) {
         logger.Debug("TextSegmentBuilder", $"{fileName}:{lineNumber} {instructions.Length} instruction(s)");
     }
 
-    public InstructionIndex CurrentInstructionIndex() {
-        return new(this._instructions.Count);
-    }
-
-    public Address CurrentAddr() {
-        return Address.FromInstructionIndex(this.CurrentInstructionIndex(), baseAddr);
-    }
-
     public TextSegment Build() {
         return new TextSegment(this._instructions, baseAddr);
     }
