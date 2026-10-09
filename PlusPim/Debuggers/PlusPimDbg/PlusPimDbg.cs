@@ -59,10 +59,10 @@ internal class PlusPimDbg: IDebugger {
     }
 
     /// <summary>
-    /// 標準入力から読み込んだが，まだ消費されていない入力を返す
+    /// 標準入力から読み込んだが，まだ消費されていない入力の UTF-8 のバイト列を返す
     /// </summary>
-    internal string GetPendingInput() {
-        return this._context.Input.Buffered;
+    internal byte[] GetPendingInput() {
+        return this._context.Input.Buffered.ToArray();
     }
 
     /// <summary>

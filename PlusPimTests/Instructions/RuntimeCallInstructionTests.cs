@@ -210,15 +210,15 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
     }
 
     /// <summary>
-    /// read_string が入力バッファに残す入力．<c>$a1 = 0</c> なら入力を読まないので空
+    /// read_string が入力バッファに残すバイト列．<c>$a1 = 0</c> なら入力を読まないので空
     /// </summary>
-    private static string ExpectedReadStringRemainder(string input, uint a1) {
+    private static byte[] ExpectedReadStringRemainder(string input, uint a1) {
         if(a1 == 0) {
-            return "";
+            return [];
         }
-        string line = input + "\n";
-        int length = (int)Math.Min((uint)line.Length, a1 - 1);
-        return line[length..];
+        byte[] inputBytes = Encoding.UTF8.GetBytes(input + "\n");
+        int length = (int)Math.Min((uint)inputBytes.Length, a1 - 1);
+        return inputBytes[length..];
     }
 
     // ---- ユーザーモード (異常系: CpU) ----
@@ -587,7 +587,7 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         MachineState before = Capture(context);
 
         ExecutionRecord record = Processor.Execute(context, inst);
-        Assert.Equal("cd\n", context.Input.Buffered);
+        Assert.Equal("cd\n"u8.ToArray(), context.Input.Buffered.ToArray());
         Processor.Undo(context, record);
         MachineState.AssertEqual(before.WithPendingInput("abcd\n"), Capture(context));
 
@@ -597,16 +597,17 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
     }
 
     /// <summary>
-    /// 未消費の入力(PendingInput と標準入力の残り)をすべて取り出して，同じ状態に戻す
+    /// 未消費の入力(PendingInput と標準入力の残り)をすべて入力バッファに読み込み，UTF-8 として返す
     /// </summary>
     private static string PeekRemainingInput(RuntimeContext context) {
         PendingInput pending = context.Input;
-        StringBuilder sb = new();
-        for(int c; (c = pending.ReadChar()) >= 0;) {
-            sb.Append((char)c);
+        List<byte> bytes = [];
+        for(int b; (b = pending.ReadChar()) != PendingInput.Eof;) {
+            bytes.Add((byte)b);
         }
-        pending.PushFront(sb.ToString());
-        return sb.ToString();
+        byte[] remaining = [.. bytes];
+        pending.PushFront(remaining);
+        return Encoding.UTF8.GetString(remaining);
     }
 
     /// <summary>
@@ -657,6 +658,95 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
             Assert.Equal(first[i].Remaining, second[i].Remaining);
         }
         Assert.Equal(firstOutput, this._console.Output);
+    }
+
+    // ---- UTF-8 のバイト単位の入力 ----
+
+    [Fact]
+    public void Execute_ReadChar_MultibyteGivesUtf8BytesOneByOne() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(ReadChar);
+        this._console.SetInput("aあ😀\n");
+
+        List<uint> read = [];
+        for(int i = 0; i < 10; i++) {
+            context.Registers[RegisterID.V0] = ReadChar;
+            _ = Processor.Execute(context, inst);
+            read.Add(context.Registers[RegisterID.V0]);
+        }
+
+        // 1回に1バイトずつ読み，最後は EOF
+        uint[] expected = [.. Encoding.UTF8.GetBytes("aあ😀\n").Select(b => (uint)b), 0xffffffff];
+        Assert.Equal(expected, read);
+    }
+
+    [Fact]
+    public void Undo_ReadChar_MidSequence_PushesByteBack() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(ReadChar);
+        this._console.SetInput("あ");
+
+        _ = Processor.Execute(context, inst);
+        Assert.Equal(0xe3u, context.Registers[RegisterID.V0]);
+        context.Registers[RegisterID.V0] = ReadChar;
+        MachineState before = Capture(context);
+        ExecutionRecord record = Processor.Execute(context, inst);
+        Assert.Equal(0x81u, context.Registers[RegisterID.V0]);
+
+        // 読んだ1バイトだけが入力バッファの先頭に戻る
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before.WithPendingInput(0x81, 0x82), Capture(context));
+
+        _ = Processor.Execute(context, inst);
+        MachineState.AssertEqual(before.WithRegister(RegisterID.V0, 0x81).WithPendingInput(0x82), Capture(context));
+    }
+
+    [Fact]
+    public void Execute_ReadString_SplitsMultibyteCharacterAndKeepsRestForNextRead() {
+        IInstruction inst = Parse();
+        RuntimeContext context = SetupReadString(5);
+        this._console.SetInput("あい\nnext\n");
+        MachineState before = Capture(context);
+
+        ExecutionRecord record = Processor.Execute(context, inst);
+
+        // 4バイト + NUL．"い" の途中で切れ，残りのバイトは入力バッファに残る
+        MachineState.AssertEqual(
+            before.WithMemory(BufferAddress, 0xe3, 0x81, 0x82, 0xe3, 0).WithPendingInput(0x81, 0x84, (byte)'\n'),
+            Capture(context)
+        );
+        Assert.Equal("next\n", this._console.ReadRemainingInput());
+
+        // undo で読んだ1行がすべて戻る
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before.WithPendingInput("あい\n"), Capture(context));
+
+        // 再実行後，残りは次の read_char で読まれる
+        _ = Processor.Execute(context, inst);
+        context.Registers[RegisterID.V0] = ReadChar;
+        _ = Processor.Execute(context, inst);
+        Assert.Equal(0x81u, context.Registers[RegisterID.V0]);
+        byte[] rest = [0x84, (byte)'\n'];
+        Assert.Equal(rest, context.Input.Buffered.ToArray());
+    }
+
+    [Fact]
+    public void Execute_ReadInt_AfterPartialCharacterConsumesRawBytes() {
+        IInstruction inst = Parse();
+        RuntimeContext context = CreateKernel(ReadChar);
+        this._console.SetInput("あ\n7\n");
+        _ = Processor.Execute(context, inst);
+
+        // 残りの 81 82 と改行を1行として読み，整数として解釈できないので 0
+        context.Registers[RegisterID.V0] = ReadInt;
+        MachineState before = Capture(context);
+        ExecutionRecord record = Processor.Execute(context, inst);
+        MachineState.AssertEqual(before.WithRegister(RegisterID.V0, 0).WithPendingInput(""), Capture(context));
+
+        // undo で読んだバイト列がそのまま入力バッファに戻る
+        Processor.Undo(context, record);
+        MachineState.AssertEqual(before.WithPendingInput(0x81, 0x82, (byte)'\n'), Capture(context));
+        Assert.Equal("7\n", this._console.ReadRemainingInput());
     }
 
     // ---- exit ----
@@ -758,7 +848,7 @@ public sealed class RuntimeCallInstructionTests: IDisposable {
         IInstruction inst = Parse();
         RuntimeContext context = CreateKernel(ReadInt);
         // undo は消費した入力を入力バッファへ戻すので，実行前と同じ状態になるように入力バッファに置く
-        context.Input.Restore("17\n-3\n");
+        context.Input.Restore("17\n-3\n"u8);
 
         IReadOnlyList<(MachineState BeforeExecute, MachineState AfterExecute)> results = RepeatedExecution.RunWithMemory(
             inst, context, WindowBase, WindowSize,

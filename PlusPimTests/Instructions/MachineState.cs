@@ -1,6 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Buffers.Binary;
+using System.Text;
 using Xunit;
 
 namespace PlusPimTests.Instructions;
@@ -9,7 +10,7 @@ namespace PlusPimTests.Instructions;
 /// 命令レベルテストで検証する状態 (doc/tests/instructions/execution_model.md)
 /// </summary>
 /// <param name="CallStack">コールスタック．先頭 (index 0) がスタックトップ．要素は参照で比較する</param>
-/// <param name="PendingInput">標準入力から読み込んだが消費されていない入力</param>
+/// <param name="PendingInput">標準入力から読み込んだが消費されていない入力の UTF-8 のバイト列</param>
 /// <param name="MemoryBase">記録したメモリ窓の先頭アドレス</param>
 /// <param name="Memory">メモリ窓 <c>[MemoryBase, MemoryBase + Memory.Length)</c> のバイト列</param>
 internal sealed record MachineState(
@@ -26,7 +27,7 @@ internal sealed record MachineState(
     RuntimeErrorKind? RuntimeError,
     StackFrame[] CallStack,
     Label CurrentLabel,
-    string PendingInput,
+    byte[] PendingInput,
     Address MemoryBase,
     byte[] Memory
 ) {
@@ -71,7 +72,7 @@ internal sealed record MachineState(
             context.RuntimeError?.Kind,
             context.CallStack.ToArray(),
             context.CurrentLabel,
-            context.Input.Buffered,
+            context.Input.Buffered.ToArray(),
             memoryBase,
             memory
         );
@@ -187,8 +188,15 @@ internal sealed record MachineState(
     /// <summary>
     /// 未消費の入力を書き換えた状態を返す
     /// </summary>
-    public MachineState WithPendingInput(string pendingInput) {
+    public MachineState WithPendingInput(params byte[] pendingInput) {
         return this with { PendingInput = pendingInput };
+    }
+
+    /// <summary>
+    /// 未消費の入力を <paramref name="pendingInput"/> の UTF-8 のバイト列に書き換えた状態を返す
+    /// </summary>
+    public MachineState WithPendingInput(string pendingInput) {
+        return this.WithPendingInput(Encoding.UTF8.GetBytes(pendingInput));
     }
 
     /// <summary>

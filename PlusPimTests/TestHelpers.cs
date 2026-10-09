@@ -27,7 +27,7 @@ internal sealed record DebuggerSnapshot(
     ExcCode? ExceptionCode,
     bool? ExceptionIsDouble,
     RuntimeErrorKind? RuntimeError,
-    string PendingInput
+    byte[] PendingInput
 );
 
 internal static class TestHelpers {

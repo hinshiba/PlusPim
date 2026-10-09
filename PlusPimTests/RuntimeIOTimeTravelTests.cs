@@ -71,10 +71,11 @@ public sealed class RuntimeIOTimeTravelTests: IDisposable {
             List<DebuggerSnapshot> snapshots = RunToEnd(debugger);
 
             // read_string は "ab" を書き込み，残りの "cdef\n" を入力バッファに残す
-            int readStep = snapshots.FindIndex(s => s.PendingInput == "cdef\n");
+            byte[] remainder = "cdef\n"u8.ToArray();
+            int readStep = snapshots.FindIndex(s => s.PendingInput.SequenceEqual(remainder));
             Assert.True(readStep > 0);
-            Assert.Equal("", snapshots[readStep - 1].PendingInput);
-            Assert.Equal("cdef\n", snapshots[^1].PendingInput);
+            Assert.Empty(snapshots[readStep - 1].PendingInput);
+            Assert.Equal(remainder, snapshots[^1].PendingInput);
 
             // read_string の後まで戻す
             for(int i = snapshots.Count - 2; i >= readStep; i--) {
@@ -84,7 +85,7 @@ public sealed class RuntimeIOTimeTravelTests: IDisposable {
 
             // read_string を戻すと，消費した入力が入力バッファの先頭に戻る
             Assert.True(debugger.Back());
-            TestHelpers.AssertSnapshotEqual(snapshots[readStep - 1] with { PendingInput = "abcdef\n" }, debugger);
+            TestHelpers.AssertSnapshotEqual(snapshots[readStep - 1] with { PendingInput = "abcdef\n"u8.ToArray() }, debugger);
 
             // 再実行すると同じ入力を読む
             _ = debugger.Step();
