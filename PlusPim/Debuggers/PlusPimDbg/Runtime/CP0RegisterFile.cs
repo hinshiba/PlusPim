@@ -27,7 +27,7 @@ internal record class CP0RegisterFile {
         BadVAddr = null,
         Exl = false,
         Exc = ExcCode.RI,
-        Epc = Address.InValid
+        Epc = Address.Invalid
     };
 
     /// <summary>

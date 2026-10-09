@@ -34,7 +34,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// </summary>
     protected void JumpTo(RuntimeContext context, string name) {
         Label? label = context.ResolveLabelName(name);
-        this.JumpTo(context, label?.Addr ?? Address.InValid);
+        this.JumpTo(context, label?.Addr ?? Address.Invalid);
     }
 
     /// <summary>

@@ -46,7 +46,7 @@ internal sealed class BranchInstruction(
 
         if(this.EvaluateCondition(context)) {
             // 不正なラベルでも，InstructionFetchで例外が発生するべき
-            context.PC = context.ResolveLabelName(targetLabel)?.Addr ?? Address.InValid;
+            context.PC = context.ResolveLabelName(targetLabel)?.Addr ?? Address.Invalid;
             context.Log($"{mnemonic}: branch taken to {targetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
