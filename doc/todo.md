@@ -181,7 +181,7 @@
   - [ ] `InstructionIndex.FromAddress` (両オーバーロード)
   - [ ] `Address.FromInstructionIndex(…, bool)`
   - [x] `TextSegmentBuilder.CurrentInstructionIndex` / `CurrentAddr`
-  - [ ] `TextSegment.BaseAddress`, `DataSegment.BaseAddress`
+  - [x] `TextSegment.BaseAddress`, `DataSegment.BaseAddress`
   - [ ] `ParsedProgram.GetInstruction`
   - [ ] `Immediate.Parse`
   - [ ] テストからしか使われていない `PlusPimDbg.GetRegisters`, `ParsedProgram.InstructionCount` の扱いを決める
