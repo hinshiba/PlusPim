@@ -6,6 +6,9 @@
 
 - `stopOnEntry` launch option (default `true`). When `false`, the program runs
   until a breakpoint, an exception or the end
+- Inlay hints that show the machine instructions each pseudo-instruction
+  expands to, during a debug session (setting
+  `pluspim.inlayHints.pseudoInstructions`, default `true`)
 - *PlusPim* output channel with the elapsed time of each startup phase
   (`[+<ms>ms] <phase>`), and elapsed times in the `--verbose` log
 

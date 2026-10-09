@@ -21,6 +21,16 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "PlusPim",
+      "properties": {
+        "pluspim.inlayHints.pseudoInstructions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the machine instructions that each pseudo-instruction (e.g. `la`, `li`) expands to as inlay hints while a PlusPim debug session is active."
+        }
+      }
+    },
     "breakpoints": [
       {
         "language": "mips"

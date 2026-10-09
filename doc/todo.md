@@ -137,10 +137,10 @@
   - [x] `stopped` イベントの reason を `breakpoint` にする
   - [x] テスト
 
-- [ ] 擬似命令の展開先をインレイヒントで表示する (#11)
+- [x] 擬似命令の展開先をインレイヒントで表示する (#11)
   - [x] 展開結果を拡張機能に渡す方法を決める (カスタム DAP 要求 / CLI / LSP)
     - カスタム DAP 要求 `pluspimPseudoExpansions` (`doc/debugger.md`)
-  - [ ] `InlayHintsProvider` で `la` → `lui` + `ori` などを表示する
+  - [x] `InlayHintsProvider` で `la` → `lui` + `ori` などを表示する
 
 - [ ] 既定のカーネルハンドラを同梱する (#3)
   - [ ] `kseg.asm` 相当を同梱する (拡張機能のファイル, または PlusPim の埋め込みリソース)

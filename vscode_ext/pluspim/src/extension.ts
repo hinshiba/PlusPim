@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { AdapterLaunchError, AdapterProcess, launchAdapter } from "./adapterProcess";
 import { DebuggeeTerminal } from "./debuggeeTerminal";
+import { DapExpansionSource, PseudoExpansionHintsProvider } from "./inlayHints";
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("PlusPim Extension was loaded.");
@@ -25,6 +26,22 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	// 疑似命令の展開先のインレイヒント．デバッグセッション中だけ表示する
+	const expansions = new DapExpansionSource();
+	const hints = new PseudoExpansionHintsProvider(expansions);
+	context.subscriptions.push(
+		vscode.languages.registerInlayHintsProvider({ language: "mips" }, hints),
+		vscode.debug.onDidTerminateDebugSession((session) => {
+			if (session.type === "pluspim") {
+				expansions.forget(session.id);
+				hints.invalidate();
+			}
+		}),
+		vscode.debug.onDidChangeActiveDebugSession(() => hints.invalidate()),
+		vscode.workspace.onDidChangeConfiguration((e) => {
+			if (e.affectsConfiguration("pluspim.inlayHints")) { hints.invalidate(); }
+		})
+	);
 
 	const output = vscode.window.createOutputChannel("PlusPim DAP Trace");
 	context.subscriptions.push(output);
@@ -41,6 +58,11 @@ export function activate(context: vscode.ExtensionContext) {
 						trace?.onDidSendMessage(message);
 						if (message.type === "response" && (message.command === "initialize" || message.command === "launch")) {
 							startup.mark(session.id, `${message.command} response`);
+							// プログラムは launch でアセンブルされるため，その後にヒントを取り直す
+							if (message.command === "launch" && message.success) {
+								expansions.markReady(session.id);
+								hints.invalidate();
+							}
 						} else if (message.type === "event" && message.event === "stopped" && !stopped) {
 							stopped = true;
 							startup.mark(session.id, "first stopped");
