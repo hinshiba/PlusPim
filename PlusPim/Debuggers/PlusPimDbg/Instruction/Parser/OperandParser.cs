@@ -44,7 +44,7 @@ internal static partial class OperandParser {
     internal static bool TryParseSingleRegOperand(string operands, [MaybeNullWhen(false)] out RegisterID rs) {
         rs = default;
         Match match = SingleRegPattern().Match(operands);
-        return match.Success && Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out rs);
+        return match.Success && RegisterParser.TryParse(match.Groups["rs"].Value, out rs);
     }
 
     /// <summary>
@@ -63,14 +63,45 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["r1"].Value, true, out RegisterID r1Parsed)
-            && Enum.TryParse<RegisterID>(match.Groups["r2"].Value, true, out RegisterID r2Parsed)) {
+        if(RegisterParser.TryParse(match.Groups["r1"].Value, out RegisterID r1Parsed)
+            && RegisterParser.TryParse(match.Groups["r2"].Value, out RegisterID r2Parsed)) {
             r1 = r1Parsed;
             r2 = r2Parsed;
             return true;
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// CP0転送命令のオペランド ($rt, $n) を解析する (mfc0, mtc0)
+    /// </summary>
+    /// <remarks>CP0レジスタは番号 (<c>$0</c>-<c>$31</c>) のみ受け付ける</remarks>
+    internal static bool TryParseCp0Operands(string operands, out RegisterID rt, out int cp0Reg) {
+        rt = default;
+        cp0Reg = 0;
+
+        Match match = Operands2RegPattern().Match(operands);
+        return match.Success
+            && RegisterParser.TryParse(match.Groups["r1"].Value, out rt)
+            && RegisterParser.TryParseNumber(match.Groups["r2"].Value, out cp0Reg);
+    }
+
+    /// <summary>
+    /// レジスタと任意のトークンのオペランド ($rt, token) を解析する (li, la)
+    /// </summary>
+    /// <remarks>トークンの解釈は呼び出し側が行う</remarks>
+    internal static bool TryParseRegTokenOperands(string operands, out RegisterID rt, [MaybeNullWhen(false)] out string token) {
+        token = null;
+
+        Match match = RegImmPattern().Match(operands);
+        if(!match.Success || !RegisterParser.TryParse(match.Groups["rt"].Value, out rt)) {
+            rt = default;
+            return false;
+        }
+
+        token = match.Groups["imm"].Value;
+        return true;
     }
 
     /// <summary>
@@ -96,9 +127,9 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rd"].Value, true, out RegisterID rdParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)) {
+        if(RegisterParser.TryParse(match.Groups["rd"].Value, out RegisterID rdParsed)
+            && RegisterParser.TryParse(match.Groups["rs"].Value, out RegisterID rsParsed)
+            && RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)) {
             rd = rdParsed;
             rs = rsParsed;
             rt = rtParsed;
@@ -131,8 +162,8 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rd"].Value, true, out RegisterID rdParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)
+        if(RegisterParser.TryParse(match.Groups["rd"].Value, out RegisterID rdParsed)
+            && RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)
             && Immediate.TryParse(match.Groups["shamt"].Value, null, out Immediate? shamtParsed)) {
             rd = rdParsed;
             rt = rtParsed;
@@ -163,7 +194,7 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)
+        if(RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)
             && Immediate.TryParse(match.Groups["imm"].Value, null, out Immediate? immParsed)) {
             rt = rtParsed;
             imm = immParsed;
@@ -191,8 +222,8 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)
+        if(RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)
+            && RegisterParser.TryParse(match.Groups["rs"].Value, out RegisterID rsParsed)
             && Immediate.TryParse(match.Groups["imm"].Value, null, out Immediate? immParsed)) {
             rt = rtParsed;
             rs = rsParsed;
@@ -221,8 +252,8 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)) {
+        if(RegisterParser.TryParse(match.Groups["rs"].Value, out RegisterID rsParsed)
+            && RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)) {
             rs = rsParsed;
             rt = rtParsed;
             label = match.Groups["label"].Value;
@@ -247,7 +278,7 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)) {
+        if(RegisterParser.TryParse(match.Groups["rs"].Value, out RegisterID rsParsed)) {
             rs = rsParsed;
             label = match.Groups["label"].Value;
             return true;
@@ -273,8 +304,8 @@ internal static partial class OperandParser {
             return false;
         }
 
-        if(Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)
-            && Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)
+        if(RegisterParser.TryParse(match.Groups["rt"].Value, out RegisterID rtParsed)
+            && RegisterParser.TryParse(match.Groups["rs"].Value, out RegisterID rsParsed)
             && Immediate.TryParse(match.Groups["offset"].Value, null, out Immediate? offsetParsed)) {
             rt = rtParsed;
             rs = rsParsed;

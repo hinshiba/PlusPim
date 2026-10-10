@@ -9,7 +9,6 @@
   "languages.xml.general.wordWrapVisualGlyphs": false,
   "languages.defaults.general.wordWrapVisualGlyphs": true,
   "windowsFormsDesigner.general.refactoring.enableRefactoringOnRename": true,
-
   "projectsAndSolutions.general.showOutputWindow": true,
   "projectsAndSolutions.general.promptBeforeMove": true,
   "environment.visualExperience.colorTheme": "moonlight-glow",
@@ -22,5 +21,6 @@
   "textEditor.advanced.textRendering": "clearType",
   "environment.tabs.documentTabs.colorization": "none",
   "environment.documents.saveWithSpecificEncoding": true,
-  "environment.documents.saveEncoding": "utf-8-nobom;65001"
+  "environment.documents.saveEncoding": "utf-8-nobom;65001",
+  "environment.terminal.profiles+defaultItemIndex": 0
 }
