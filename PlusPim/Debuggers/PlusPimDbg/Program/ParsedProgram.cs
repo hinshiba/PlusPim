@@ -1,4 +1,3 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
@@ -183,20 +182,6 @@ internal class ParsedProgram {
         return line.EndsWith(':') && !line.Contains(' ');
     }
 
-
-    /// <summary>
-    /// その行の命令を取得する
-    /// </summary>
-    /// <param name="index">命令インデックス</param>
-    /// <returns>命令</returns>
-    public IInstruction GetInstruction(InstructionIndex index) {
-        return this.TextSegment.Instructions[index.Idx];
-    }
-
-    /// <summary>
-    /// 命令数
-    /// </summary>
-    public int InstructionCount => this.TextSegment.Instructions.Length;
 
     /// <summary>
     /// テキストセグメントのバイト数

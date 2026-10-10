@@ -110,7 +110,7 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     public DataSegment Build() {
         // .dataの末尾に置かれたラベルを確定させる
         this.ResolvePendingLabels();
-        return new DataSegment(this._memoryImage, this._baseAddr, this.NextDataAddress.Addr - this._baseAddr.Addr);
+        return new DataSegment(this._memoryImage, this.NextDataAddress.Addr - this._baseAddr.Addr);
     }
 
 
