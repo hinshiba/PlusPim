@@ -6,7 +6,7 @@
 		{
 			"label": "watch",
 			"type": "shell",
-			"command": "pnpm run watch",
+			"command": "bun run watch",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"presentation": {

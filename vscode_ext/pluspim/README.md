@@ -61,6 +61,28 @@ On session termination, the terminal is automatically disposed.
 
 - Only Windows (x64) and Linux (x64) are supported. macOS is not available.
 
+## Development
+
+Prerequisites:
+
+- [Bun](https://bun.sh/) 1.3 or later
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+
+Run the following in `vscode_ext/pluspim`:
+
+```sh
+bun install
+bun run compile
+```
+
+| Command                        | Description                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| `bun run package:win32-x64`    | Publish the PlusPim binary for `win-x64` and build a platform-specific VSIX. |
+| `bun run package:linux-x64`    | Same for `linux-x64`.                                                        |
+| `bun run dotnet:publish:win`   | Publish the `win-x64` binary to `bin/win-x64` only (no VSIX).                |
+| `bun run dotnet:publish:linux` | Publish the `linux-x64` binary to `bin/linux-x64` only (no VSIX).            |
+| `bun run dotnet:debug:win`     | Build a Debug binary to `bin/debug` (never included in a VSIX).              |
+
 ## License
 
 MIT
