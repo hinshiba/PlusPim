@@ -19,9 +19,7 @@
 			"options": {
 				"shell": {
 					"executable": "cmd.exe",
-					"args": [
-						"/c"
-					]
+					"args": ["/c"]
 				}
 			}
 		}
