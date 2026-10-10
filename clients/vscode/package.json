@@ -1,6 +1,6 @@
 {
   "name": "pluspim",
-  "displayName": "PlusPim",
+  "displayName": "PlusPim for VS Code",
   "publisher": "hinshiba",
   "description": "MIPS assembly time-travel debugger",
   "version": "0.2.0",
