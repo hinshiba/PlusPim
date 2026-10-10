@@ -99,6 +99,6 @@ MIPS の例外と異なり CP0 と例外ハンドラを使わず，カーネル�
 | `UnsupportedCP0Register` | `mfc0`，`mtc0`  | CP0 レジスタ番号が 8，12，13，14 以外          |
 | `UnknownRuntimeCall`     | `runtime_call!` | `$v0` が 1，4，5，8，10，11，12 以外           |
 
-- ユーザーモードの `mfc0`/`mtc0`/`runtime_call!` では，番号によらず `CpU` 例外を優先される
+- ユーザーモードの `mfc0`/`mtc0`/`runtime_call!` では，番号によらず `CpU` 例外が優先される
 
 
