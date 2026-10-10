@@ -37,6 +37,26 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() { }
 
+// Linux 向けに実行権限がなければ付与する
+// 失敗時は理由を文字列で返す．成功時は undefined
+function ensureExecutable(binPath: string): string | undefined {
+	if (process.platform === "win32") { return undefined; }
+	try {
+		fs.accessSync(binPath, fs.constants.X_OK);
+		return undefined;
+	} catch (e) {
+		if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+			return `PlusPim binary not found: ${binPath}`;
+		}
+	}
+	try {
+		fs.chmodSync(binPath, 0o755);
+		return undefined;
+	} catch {
+		return `PlusPim binary is not executable and could not be fixed automatically. Run: chmod +x "${binPath}"`;
+	}
+}
+
 
 class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	private terminal: vscode.Terminal | undefined;
