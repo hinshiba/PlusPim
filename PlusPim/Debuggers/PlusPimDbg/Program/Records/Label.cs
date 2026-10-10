@@ -10,5 +10,5 @@ internal readonly record struct Label(string Name, Address Addr) {
         return $"{this.Name}: @ 0x{this.Addr.Addr:X}";
     }
 
-    public static readonly Label Invalid = new("<invalid>", Address.InValid);
+    public static readonly Label Invalid = new("<invalid>", Address.Invalid);
 }

@@ -74,5 +74,5 @@ internal record struct Address(uint Addr) {
         return $"0x{this.Addr:X}";
     }
 
-    public static readonly Address InValid = new(0);
+    public static readonly Address Invalid = new(0);
 }
