@@ -5,10 +5,11 @@
 	"description": "MIPS assembly time-travel debugger",
 	"version": "0.2.0",
 	"license": "MIT",
+	"type": "module",
 	"icon": "images/icon.png",
 	"repository": {
 		"type": "git",
-		"url": "git@github.com:hinshiba/PlusPim.git"
+		"url": "https://github.com/hinshiba/PlusPim.git"
 	},
 	"engines": {
 		"vscode": "^1.108.0"

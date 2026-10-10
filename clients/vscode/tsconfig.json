@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "nodenext",
 		"target": "ES2022",
 		"outDir": "out",
 		"lib": ["ES2022"],
@@ -16,7 +16,8 @@
 		"noUncheckedIndexedAccess": true,
 		"noImplicitOverride": true,
 		"exactOptionalPropertyTypes": true,
-		"isolatedModules": true
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true
 	},
 	"include": ["src"]
 }
