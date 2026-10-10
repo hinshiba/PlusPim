@@ -76,9 +76,9 @@ internal sealed class MulDivInstruction(
         Func<uint, uint, (uint hi, uint lo)> compute,
         Func<uint, uint, RuntimeErrorKind?>? check = null
     ) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParse2RegOperands(operands, out RegisterID rs, out RegisterID rt)
-                ? new MulDivInstruction(rs, rt, lineIndex, mnemonic, compute, check)
+                ? new MulDivInstruction(rs, rt, lineNumber, mnemonic, compute, check)
                 : (IInstruction?)null;
         });
     }

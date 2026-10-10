@@ -67,9 +67,9 @@ internal sealed class UnalignedMemoryInstruction(
     /// lwl, lwr, swl, swr のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(bool isWrite, bool isLeft) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseMemoryOperands(operands, out RegisterID rt, out RegisterID rs, out Immediate? offset)
-                ? new UnalignedMemoryInstruction(rt, rs, offset, isWrite, isLeft, lineIndex)
+                ? new UnalignedMemoryInstruction(rt, rs, offset, isWrite, isLeft, lineNumber)
                 : (IInstruction?)null;
         });
     }

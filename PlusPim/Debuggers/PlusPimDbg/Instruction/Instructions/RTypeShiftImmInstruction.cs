@@ -8,14 +8,14 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 /// シフト即値R形式命令の汎用実装（sll, srl, sra）
 /// </summary>
 internal sealed class RTypeShiftImmInstruction(
-    RegisterID rd, RegisterID rt, Immediate shamt, int lineIndex,
+    RegisterID rd, RegisterID rt, Immediate shamt, int lineNumber,
     string mnemonic, Func<uint, int, uint> compute
 ): IInstruction {
 
     /// <summary>
     /// 行番号
     /// </summary>
-    public int SourceLine { get; } = lineIndex;
+    public int SourceLine { get; } = lineNumber;
 
     private readonly Stack<uint> _previousRdValues = new();
 
@@ -44,9 +44,9 @@ internal sealed class RTypeShiftImmInstruction(
     /// シフト即値R形式命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(Func<uint, int, uint> compute) {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParse2RegShamtOperands(operands, out RegisterID rd, out RegisterID rt, out Immediate? shamt)
-                ? 31 < shamt.ToUInt() ? null : (IInstruction)new RTypeShiftImmInstruction(rd, rt, shamt, lineIndex, mnemonic, compute)
+                ? 31 < shamt.ToUInt() ? null : (IInstruction)new RTypeShiftImmInstruction(rd, rt, shamt, lineNumber, mnemonic, compute)
                 : null;
         });
     }

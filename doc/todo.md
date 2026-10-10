@@ -124,7 +124,6 @@
 - [ ] 重複の共通化
   - [ ] `Stack<uint>` + `WriteRd` + `Undo` の重複 (`RType3Reg`, `RTypeShiftImm`, `RTypeShiftVar`, `IType`)
 - [ ] 命名を統一する
-  - [ ] `lineIndex` が 0 始まり (`TextSegmentBuilder`) と 1 始まり (命令のコンストラクタ) で混在
   - [ ] 末尾のアンダースコア (`_debugger_`, `inst_`, `maxLength_`)
 
 ### テストと CI

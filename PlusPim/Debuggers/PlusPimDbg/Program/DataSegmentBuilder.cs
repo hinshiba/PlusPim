@@ -14,14 +14,14 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// <summary>
     /// アドレス未確定のラベル
     /// </summary>
-    private readonly List<(string Name, int LineIndex)> _pendingLabels = [];
+    private readonly List<(string Name, int LineNumber)> _pendingLabels = [];
 
-    private readonly List<(Label Label, int LineIndex)> _resolvedLabels = [];
+    private readonly List<(Label Label, int LineNumber)> _resolvedLabels = [];
 
     /// <summary>
     /// アドレスが確定したラベル．Build後に確定する
     /// </summary>
-    public IReadOnlyList<(Label Label, int LineIndex)> ResolvedLabels => this._resolvedLabels;
+    public IReadOnlyList<(Label Label, int LineNumber)> ResolvedLabels => this._resolvedLabels;
 
     /// <summary>
     /// 空き領域の先頭を示す
@@ -35,9 +35,9 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// ラベルを登録する．アドレスは直後に配置される実データの先頭で確定する
     /// </summary>
     /// <param name="name">ラベル名</param>
-    /// <param name="lineIndex">0-indexedの行番号</param>
-    public void AddLabel(string name, int lineIndex) {
-        this._pendingLabels.Add((name, lineIndex));
+    /// <param name="lineNumber">1-indexedの行番号</param>
+    public void AddLabel(string name, int lineNumber) {
+        this._pendingLabels.Add((name, lineNumber));
     }
 
     /// <summary>
@@ -47,8 +47,8 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
         if(this._pendingLabels.Count == 0) {
             return;
         }
-        foreach((string name, int lineIndex) in this._pendingLabels) {
-            this._resolvedLabels.Add((new Label(name, this.NextDataAddress), lineIndex));
+        foreach((string name, int lineNumber) in this._pendingLabels) {
+            this._resolvedLabels.Add((new Label(name, this.NextDataAddress), lineNumber));
         }
         this._pendingLabels.Clear();
     }

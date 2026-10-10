@@ -24,13 +24,13 @@ public class InstructionParseTests {
     [InlineData("syscall")]
     [InlineData("break")]
     public void TryParse_RealInstruction_Succeeds(string assemblyLine) {
-        int lineIndex = 5;
+        int lineNumber = 5;
 
-        bool result = InstructionRegistry.Default.TryParse(assemblyLine, lineIndex, out IInstruction? instruction);
+        bool result = InstructionRegistry.Default.TryParse(assemblyLine, lineNumber, out IInstruction? instruction);
 
         Assert.True(result);
         Assert.NotNull(instruction);
-        Assert.Equal(lineIndex, instruction.SourceLine);
+        Assert.Equal(lineNumber, instruction.SourceLine);
     }
 
     [Fact]

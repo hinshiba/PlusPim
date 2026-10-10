@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
-internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpInstruction(targetLabel, lineIndex) {
+internal sealed class JalInstruction(string targetLabel, int lineNumber): JumpInstruction(targetLabel, lineNumber) {
     private readonly Stack<uint> _previousRaValues = new();
 
     public override ExecuteResult Execute(RuntimeContext context) {
@@ -45,10 +45,10 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
 internal sealed class JalInstructionParser: IInstructionParser {
     public string Mnemonic => "jal";
 
-    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(OperandParser.TryParseLabelOperand(operands, out string? label)) {
-            instruction = new JalInstruction(label, lineIndex);
+            instruction = new JalInstruction(label, lineNumber);
             return true;
         }
         return false;

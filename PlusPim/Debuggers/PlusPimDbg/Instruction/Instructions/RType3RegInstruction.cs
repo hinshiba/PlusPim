@@ -12,14 +12,14 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 /// <see cref="OverflowException"/> が発生し，MIPS例外 <see cref="ExcCode.Ov"/> として処理される。
 /// </remarks>
 internal sealed class RType3RegInstruction(
-    RegisterID rd, RegisterID rs, RegisterID rt, int lineIndex,
+    RegisterID rd, RegisterID rs, RegisterID rt, int lineNumber,
     string mnemonic, Func<uint, uint, uint> compute
 ): IInstruction {
 
     /// <summary>
     /// 行番号
     /// </summary>
-    public int SourceLine { get; } = lineIndex;
+    public int SourceLine { get; } = lineNumber;
 
     private readonly Stack<uint> _previousRdValues = new();
 
@@ -53,9 +53,9 @@ internal sealed class RType3RegInstruction(
     /// 3レジスタR形式命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(Func<uint, uint, uint> compute) {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParse3RegOperands(operands, out RegisterID rd, out RegisterID rs, out RegisterID rt)
-                ? new RType3RegInstruction(rd, rs, rt, lineIndex, mnemonic, compute)
+                ? new RType3RegInstruction(rd, rs, rt, lineNumber, mnemonic, compute)
                 : (IInstruction?)null;
         });
     }

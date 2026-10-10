@@ -216,11 +216,11 @@ internal class PlusPimDbg: IDebugger {
 
         (uint badVAddr, uint status, uint cause, uint epc) = this._context.GetCP0DisplayValues();
         // 例外発生なら次の命令ではなく，例外発生の命令の情報にする
-        (FileInfo? file, int lineIndex) = this._programs.GetSourceInfo((this._context.LastException is null) ? this._context.PC : new Address(epc));
+        (FileInfo? file, int lineNumber) = this._programs.GetSourceInfo((this._context.LastException is null) ? this._context.PC : new Address(epc));
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = this._context.CurrentLabel.Name,
-            Line = lineIndex,
+            Line = lineNumber,
             SrcFile = file,
             Registers = this._context.Registers.ToArray(),
             PC = this._context.PC.Addr,
@@ -235,11 +235,11 @@ internal class PlusPimDbg: IDebugger {
         // CallStackの各フレーム
         int frameId = 2;
         foreach(StackFrame frame in this._context.CallStack) {
-            (file, lineIndex) = this._programs.GetSourceInfo(frame.CurrentPC);
+            (file, lineNumber) = this._programs.GetSourceInfo(frame.CurrentPC);
             frames.Add(new StackFrameInfo {
                 FrameId = frameId,
                 Name = frame.Label.Name,
-                Line = lineIndex,
+                Line = lineNumber,
                 SrcFile = file,
                 Registers = frame.Registers.ToArray(),
                 PC = frame.CurrentPC.Addr,

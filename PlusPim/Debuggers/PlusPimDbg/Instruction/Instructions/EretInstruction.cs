@@ -37,8 +37,8 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
     }
 
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new EretInstruction(lineIndex) : null;
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new EretInstruction(lineNumber) : null;
         });
     }
 }

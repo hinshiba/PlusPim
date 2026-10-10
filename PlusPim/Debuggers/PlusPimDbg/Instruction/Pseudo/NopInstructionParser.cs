@@ -22,10 +22,10 @@ internal sealed class NopInstructionParser: IPseudoInstructionParser {
         return 1;
     }
 
-    public bool TryExpand(string operands, int lineIndex, SymbolTable symbolTable,
+    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
                           [MaybeNullWhen(false)] out IInstruction[] instructions) {
         instructions = [
-            InstructionFactory.Sll(RegisterID.Zero, RegisterID.Zero, new Immediate(0), lineIndex),
+            InstructionFactory.Sll(RegisterID.Zero, RegisterID.Zero, new Immediate(0), lineNumber),
         ];
         return true;
     }
