@@ -29,4 +29,11 @@ internal record class CP0RegisterFile {
         Exc = ExcCode.RI,
         Epc = Address.InValid
     };
+
+    /// <summary>
+    /// 対応している CP0 レジスタ番号か (8: BadVAddr，12: Status，13: Cause，14: EPC)
+    /// </summary>
+    public static bool IsSupported(int regNum) {
+        return regNum is 8 or 12 or 13 or 14;
+    }
 }

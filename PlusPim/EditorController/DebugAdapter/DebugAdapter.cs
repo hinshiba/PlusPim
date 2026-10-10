@@ -152,6 +152,14 @@ internal class DebugAdapter: DebugAdapterBase {
 
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments args) {
         this._logger.Debug("DebugAdapter", "ExceptionInfoRequest.");
+        // ランタイムエラーは続行できないので，未処理の例外として報告する
+        RuntimeErrorInfo? runtimeError = this._app.GetRuntimeError();
+        if(runtimeError is not null) {
+            return new ExceptionInfoResponse(runtimeError.Id, ExceptionBreakMode.Unhandled) {
+                Description = runtimeError.Description
+            };
+        }
+
         ExceptionInfo? exInfo = this._app.GetLastException();
         return exInfo is null
             ? new ExceptionInfoResponse("unknown", ExceptionBreakMode.Always)
@@ -342,6 +350,20 @@ internal class DebugAdapter: DebugAdapterBase {
                     Text = exInfo.ExceptionId
                 });
 
+                break;
+            // ランタイムエラーはセッションを終了させずに停止する (StepBack で戻れるようにするため)
+            case StopReason.RuntimeError:
+                RuntimeErrorInfo errorInfo = this._app.GetRuntimeError() ?? throw new InvalidOperationException("PlusPim Dbg report stop by RuntimeError. But RuntimeErrorInfo is not set");
+                this.Protocol.SendEvent(new OutputEvent {
+                    Output = $"Runtime error at 0x{errorInfo.Address:X8}: {errorInfo.Description}\n",
+                    Category = OutputEvent.CategoryValue.Stderr
+                });
+                this.Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                    ThreadId = 1,
+                    AllThreadsStopped = true,
+                    Description = errorInfo.Description,
+                    Text = errorInfo.Id
+                });
                 break;
             default:
                 // 到達不能であるはず

@@ -11,6 +11,8 @@ public enum StopReason {
     /// デバッギが終了した
     Terminated,
     /// 例外が発生した
-    Exception
+    Exception,
+    /// ランタイムエラーが発生した
+    RuntimeError
 }
 
