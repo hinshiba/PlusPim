@@ -110,8 +110,8 @@ internal class ParsedProgram {
 
         // パス1: 各行を解析してシンボルテーブルを構築する
         // 解析した行の命令数はここで確定するため，ラベルのアドレスもここで確定する
-        List<(ParsedLine Line, int LineNumber)> parsedTextLines = this.ParseTextLines(textLines, textSegmentBase, logger);
-        List<(ParsedLine Line, int LineNumber)> parsedKernelTextLines = this.ParseTextLines(kernelTextLines, kernelTextSegmentBase, logger);
+        List<(ParsedLine Line, int LineNumber)> parsedTextLines = this.ParseTextLines(textLines, textSegmentBase, logger, strict);
+        List<(ParsedLine Line, int LineNumber)> parsedKernelTextLines = this.ParseTextLines(kernelTextLines, kernelTextSegmentBase, logger, strict);
         this.TextInstructionCount = parsedTextLines.Sum(parsed => parsed.Line.Size);
         this.KernelTextInstructionCount = parsedKernelTextLines.Sum(parsed => parsed.Line.Size);
 
@@ -172,9 +172,12 @@ internal class ParsedProgram {
     /// <summary>
     /// テキスト系セグメントの各行を解析し，ラベルをシンボルテーブルに登録する
     /// </summary>
-    /// <remarks>解析できない行と未対応の指令は警告を出して読み飛ばす</remarks>
+    /// <remarks>
+    /// 解析できない行と未対応の指令は警告を出して読み飛ばす．
+    /// <paramref name="strict"/>が<see langword="true"/>ならば警告の代わりにエラーを記録する
+    /// </remarks>
     /// <returns>解析できた行と1始まりの行番号</returns>
-    private List<(ParsedLine Line, int LineNumber)> ParseTextLines(List<(string Trimmed, int LineNumber)> lines, Address segmentBase, ILogger logger) {
+    private List<(ParsedLine Line, int LineNumber)> ParseTextLines(List<(string Trimmed, int LineNumber)> lines, Address segmentBase, ILogger logger, bool strict) {
         List<(ParsedLine Line, int LineNumber)> parsedLines = [];
         int instructionCount = 0;
         foreach((string trimmed, int lineNumber) in lines) {
@@ -186,15 +189,27 @@ internal class ParsedProgram {
                 }
                 logger.Debug("ParsedProgram", $"Line{lineNumber} {label}");
             } else if(trimmed.StartsWith('.')) {
-                logger.Warning("ParsedProgram", $"{this.File.Name}:{lineNumber} Directive ignored (unsupported in text segment): {trimmed}");
+                this.ReportSkipped($"{this.File.Name}:{lineNumber} Directive ignored (unsupported in text segment): {trimmed}", logger, strict);
             } else if(InstructionRegistry.Default.TryParseLine(trimmed, lineNumber, out ParsedLine? parsed)) {
                 parsedLines.Add((parsed, lineNumber));
                 instructionCount += parsed.Size;
             } else {
-                logger.Warning("ParsedProgram", $"{this.File.Name}:{lineNumber} Line skipped (cannot parse): {trimmed}");
+                this.ReportSkipped($"{this.File.Name}:{lineNumber} Line skipped (cannot parse): {trimmed}", logger, strict);
             }
         }
         return parsedLines;
+    }
+
+    /// <summary>
+    /// 読み飛ばした行を報告する．
+    /// strictならエラー，そうでなければ警告とする
+    /// </summary>
+    private void ReportSkipped(string message, ILogger logger, bool strict) {
+        if(strict) {
+            this._errors.Add(message);
+        } else {
+            logger.Warning("ParsedProgram", message);
+        }
     }
 
     /// <summary>

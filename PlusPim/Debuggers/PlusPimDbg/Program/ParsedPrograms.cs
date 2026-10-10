@@ -26,7 +26,11 @@ internal sealed class ParsedPrograms {
     /// </summary>
     private readonly int[] _kernelTextCumulativeLengths;
 
-    public ParsedPrograms(FileInfo[] files, ILogger logger) {
+    /// <param name="files">すべての実行するファイル</param>
+    /// <param name="logger">ロガー</param>
+    /// <param name="strict">解析できない行と未対応の指令をエラーにするかどうか</param>
+    /// <exception cref="AssemblyException">アセンブルに失敗した場合</exception>
+    public ParsedPrograms(FileInfo[] files, ILogger logger, bool strict = false) {
         // まず全部解析
         List<ParsedProgram> programList = [];
         Address textSegmentOffset = TextSegment.TextSegmentBase;
@@ -37,7 +41,7 @@ internal sealed class ParsedPrograms {
         int textTotal = 0;
         int kernelTextTotal = 0;
         foreach(FileInfo file in files) {
-            ParsedProgram program = new(file, textSegmentOffset, dataSegmentOffset, kernelTextSegmentOffset, logger);
+            ParsedProgram program = new(file, textSegmentOffset, dataSegmentOffset, kernelTextSegmentOffset, logger, strict);
 
             // 開始アドレスの調整
             textSegmentOffset += program.TextSegmentSize;
