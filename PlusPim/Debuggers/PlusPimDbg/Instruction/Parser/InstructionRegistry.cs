@@ -177,16 +177,7 @@ internal sealed partial class InstructionRegistry {
     /// <param name="assemblyLine">アセンブリ行</param>
     /// <returns>命令数．解析不能な場合は0</returns>
     public int GetInstructionCount(string assemblyLine) {
-        Match match = AssemblyLinePattern().Match(assemblyLine);
-        if(!match.Success) {
-            return 0;
-        }
-
-        string op = match.Groups["op"].Value;
-
-        return this._pseudoParsers.TryGetValue(op, out IPseudoInstructionParser? pseudo)
-            ? pseudo.GetExpansionSize(match.Groups["operands"].Value)
-            : this._parsers.ContainsKey(op) ? 1 : 0;
+        return this.TryParseLine(assemblyLine, 0, out ParsedLine? line) ? line.Size : 0;
     }
 
     /// <summary>
@@ -214,16 +205,14 @@ internal sealed partial class InstructionRegistry {
     }
 
     /// <summary>
-    /// 指定された行を実命令列に解析する(疑似命令の展開を含む)
+    /// 指定された行を，展開後の命令数が確定した<see cref="ParsedLine"/>に解析する(疑似命令を含む)
     /// </summary>
     /// <param name="assemblyLine">行</param>
     /// <param name="lineNumber">行番号(1-based)</param>
-    /// <param name="symbolTable">シンボルテーブル</param>
-    /// <param name="instructions">成功の場合は命令列が返却される</param>
+    /// <param name="line">成功の場合は解析済みの行が返却される</param>
     /// <returns>成功なら<see langword="true"/></returns>
-    public bool TryParseAll(string assemblyLine, int lineNumber, SymbolTable symbolTable,
-                            [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = null;
+    public bool TryParseLine(string assemblyLine, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
         Match match = AssemblyLinePattern().Match(assemblyLine);
         if(!match.Success) {
@@ -235,16 +224,41 @@ internal sealed partial class InstructionRegistry {
 
         // 疑似命令を先に試す
         if(this._pseudoParsers.TryGetValue(op, out IPseudoInstructionParser? pseudo)) {
-            return pseudo.TryExpand(operands, lineNumber, symbolTable, out instructions);
+            return pseudo.TryParse(operands, lineNumber, out line);
         }
 
         // 通常の命令
         if(this._parsers.TryGetValue(op, out IInstructionParser? parser)
             && parser.TryParse(operands, lineNumber, out IInstruction? instruction)) {
-            instructions = [instruction];
+            line = ParsedLine.Fixed(instruction);
             return true;
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// 指定された行を実命令列に解析する(疑似命令の展開を含む)
+    /// </summary>
+    /// <param name="assemblyLine">行</param>
+    /// <param name="lineNumber">行番号(1-based)</param>
+    /// <param name="symbols">シンボルの解決に使う</param>
+    /// <param name="instructions">成功の場合は命令列が返却される</param>
+    /// <returns>成功なら<see langword="true"/>．未定義のシンボルを参照する場合は<see langword="false"/></returns>
+    public bool TryParseAll(string assemblyLine, int lineNumber, ISymbolResolver symbols,
+                            [MaybeNullWhen(false)] out IInstruction[] instructions) {
+        instructions = null;
+
+        if(!this.TryParseLine(assemblyLine, lineNumber, out ParsedLine? line)) {
+            return false;
+        }
+
+        IInstruction[] materialized = line.Materialize(symbols, out string? unresolved);
+        if(unresolved is not null) {
+            return false;
+        }
+
+        instructions = materialized;
+        return true;
     }
 }

@@ -61,6 +61,15 @@ internal sealed class ParsedPrograms {
             programList.Add(program);
         }
 
+        // すべてのファイルを処理してからエラーをまとめて報告する
+        List<string> errors = [.. programList.SelectMany(program => program.Errors)];
+        if(errors.Count != 0) {
+            foreach(string error in errors) {
+                logger.Error("ParsedPrograms", error);
+            }
+            throw new AssemblyException(errors);
+        }
+
         this._programs = [.. programList];
         this._textCumulativeLengths = [.. textCumulativeLengths];
         this._kernelTextCumulativeLengths = [.. kernelTextCumulativeLengths];

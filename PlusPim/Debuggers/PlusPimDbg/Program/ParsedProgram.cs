@@ -35,6 +35,23 @@ internal class ParsedProgram {
     /// </summary>
     public FileInfo File { get; }
 
+    /// <summary>
+    /// パス1で確定したテキストセグメントの命令数
+    /// </summary>
+    public int TextInstructionCount { get; }
+
+    /// <summary>
+    /// パス1で確定したカーネルテキストセグメントの命令数
+    /// </summary>
+    public int KernelTextInstructionCount { get; }
+
+    /// <summary>
+    /// アセンブルを失敗させるエラー
+    /// </summary>
+    public IReadOnlyList<string> Errors => this._errors;
+
+    private readonly List<string> _errors = [];
+
     public ParsedProgram(FileInfo file, Address textSegmentBase, Address dataSegmentBase, Address kernelTextSegmentBase, ILogger logger) {
         this.File = file;
         this.SymbolTable = new SymbolTable();
@@ -91,10 +108,12 @@ internal class ParsedProgram {
             }
         }
 
-        // パス1: シンボルテーブルの構築
-        // 疑似命令の展開後命令数を考慮してラベルアドレスを計算する
-        this.BuildTextSegmentSymbols(textLines, textSegmentBase, logger);
-        this.BuildTextSegmentSymbols(kernelTextLines, kernelTextSegmentBase, logger);
+        // パス1: 各行を解析してシンボルテーブルを構築する
+        // 解析した行の命令数はここで確定するため，ラベルのアドレスもここで確定する
+        List<(ParsedLine Line, int LineNumber)> parsedTextLines = this.ParseTextLines(textLines, textSegmentBase, logger);
+        List<(ParsedLine Line, int LineNumber)> parsedKernelTextLines = this.ParseTextLines(kernelTextLines, kernelTextSegmentBase, logger);
+        this.TextInstructionCount = parsedTextLines.Sum(parsed => parsed.Line.Size);
+        this.KernelTextInstructionCount = parsedKernelTextLines.Sum(parsed => parsed.Line.Size);
 
         // データセグメント
         DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
@@ -116,25 +135,21 @@ internal class ParsedProgram {
         }
 
 
-        // パス2: 完成したシンボルテーブルを使って命令をパース
-        // テキストセグメント
-        TextSegmentBuilder textSegmentBuilder = new(textSegmentBase, logger);
-        foreach((string trimmed, int lineNumber) in textLines) {
-            if(!IsLabel(trimmed)) {
-                textSegmentBuilder.AddLine(trimmed, lineNumber, this.SymbolTable);
-            }
-        }
+        // パス2: 完成したシンボルテーブルを使ってシンボルを解決する
+        this.TextSegment = this.Materialize(parsedTextLines, textSegmentBase, logger);
+        this.KernelTextSegment = this.Materialize(parsedKernelTextLines, kernelTextSegmentBase, logger);
+    }
 
-        // カーネルテキストセグメント
-        TextSegmentBuilder kernelTextSegmentBuilder = new(kernelTextSegmentBase, logger);
-        foreach((string trimmed, int lineNumber) in kernelTextLines) {
-            if(!IsLabel(trimmed)) {
-                kernelTextSegmentBuilder.AddLine(trimmed, lineNumber, this.SymbolTable);
-            }
+    /// <summary>
+    /// パス1で解析した行のシンボルを解決してテキスト系セグメントを作る
+    /// </summary>
+    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber)> lines, Address segmentBase, ILogger logger) {
+        TextSegmentBuilder builder = new(segmentBase, logger);
+        foreach((ParsedLine line, int lineNumber) in lines) {
+            builder.Add(line, lineNumber, this.SymbolTable, this.File.Name);
         }
-
-        this.TextSegment = textSegmentBuilder.Build();
-        this.KernelTextSegment = kernelTextSegmentBuilder.Build();
+        this._errors.AddRange(builder.Errors);
+        return builder.Build();
     }
 
     /// <summary>
@@ -155,9 +170,12 @@ internal class ParsedProgram {
     }
 
     /// <summary>
-    /// テキスト系セグメントのシンボルテーブルを構築する
+    /// テキスト系セグメントの各行を解析し，ラベルをシンボルテーブルに登録する
     /// </summary>
-    private void BuildTextSegmentSymbols(List<(string Trimmed, int LineNumber)> lines, Address segmentBase, ILogger logger) {
+    /// <remarks>解析できない行と未対応の指令は警告を出して読み飛ばす</remarks>
+    /// <returns>解析できた行と1始まりの行番号</returns>
+    private List<(ParsedLine Line, int LineNumber)> ParseTextLines(List<(string Trimmed, int LineNumber)> lines, Address segmentBase, ILogger logger) {
+        List<(ParsedLine Line, int LineNumber)> parsedLines = [];
         int instructionCount = 0;
         foreach((string trimmed, int lineNumber) in lines) {
             if(IsLabel(trimmed)) {
@@ -167,10 +185,16 @@ internal class ParsedProgram {
                     logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineNumber}. The previous definition will be overwritten.");
                 }
                 logger.Debug("ParsedProgram", $"Line{lineNumber} {label}");
-            } else if(!trimmed.StartsWith('.')) {
-                instructionCount += InstructionRegistry.Default.GetInstructionCount(trimmed);
+            } else if(trimmed.StartsWith('.')) {
+                logger.Warning("ParsedProgram", $"{this.File.Name}:{lineNumber} Directive ignored (unsupported in text segment): {trimmed}");
+            } else if(InstructionRegistry.Default.TryParseLine(trimmed, lineNumber, out ParsedLine? parsed)) {
+                parsedLines.Add((parsed, lineNumber));
+                instructionCount += parsed.Size;
+            } else {
+                logger.Warning("ParsedProgram", $"{this.File.Name}:{lineNumber} Line skipped (cannot parse): {trimmed}");
             }
         }
+        return parsedLines;
     }
 
     /// <summary>
@@ -186,12 +210,12 @@ internal class ParsedProgram {
     /// <summary>
     /// テキストセグメントのバイト数
     /// </summary>
-    public Address TextSegmentSize => new((uint)this.TextSegment.Instructions.Length * 4);
+    public Address TextSegmentSize => new((uint)this.TextInstructionCount * 4);
 
     /// <summary>
     /// カーネルテキストセグメントのバイト数
     /// </summary>
-    public Address KernelTextSegmentSize => new((uint)this.KernelTextSegment.Instructions.Length * 4);
+    public Address KernelTextSegmentSize => new((uint)this.KernelTextInstructionCount * 4);
 
     /// <summary>
     /// データセグメントのバイト数
