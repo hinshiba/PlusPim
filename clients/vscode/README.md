@@ -68,7 +68,7 @@ Prerequisites:
 - [Bun](https://bun.sh/) 1.3 or later
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 
-Run the following in `vscode_ext/pluspim`:
+Run the following in `clients/vscode`:
 
 ```sh
 bun install
