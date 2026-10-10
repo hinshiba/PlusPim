@@ -1,13 +1,27 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
+using System.Text.RegularExpressions;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 /// <summary>
 /// 解析済みのプログラムファイルを表すクラス
 /// </summary>
-internal class ParsedProgram {
+internal partial class ParsedProgram {
+    /// <summary>
+    /// 前処理済みの1行
+    /// </summary>
+    /// <param name="Text">ラベルならばラベル名．そうでなければトリム済みの文字列</param>
+    /// <param name="LineNumber">このファイルでの1始まりの行番号</param>
+    /// <param name="IsLabel">ラベルかどうか</param>
+    private readonly record struct SourceLine(string Text, int LineNumber, bool IsLabel);
+
+    /// <summary>
+    /// 行頭のラベル定義 (<c>name:</c>) と，その後の空白
+    /// </summary>
+    [GeneratedRegex(@"^(?<label>[A-Za-z_.$][\w.$]*):\s*")]
+    private static partial Regex LabelPrefixPattern();
 
 
     /// <summary>
@@ -58,19 +72,46 @@ internal class ParsedProgram {
 
 
         // 前処理: 各行をトリムして，セグメントごとに分割する
-        // 行番号はこのファイルでの1始まりの値
-        List<(string Trimmed, int LineNumber)> textLines = [];
-        List<(string Trimmed, int LineNumber)> dataLines = [];
-
-        List<(string Trimmed, int LineNumber)> kernelTextLines = [];
+        // 行頭のラベルは別の行として取り出す
+        List<SourceLine> textLines = [];
+        List<SourceLine> dataLines = [];
+        List<SourceLine> kernelTextLines = [];
 
         SegmentType currentSegment = SegmentType.Unknown;
+
+        // 現在のセグメントに行を振り分ける
+        void Place(SourceLine sourceLine) {
+            switch(currentSegment) {
+                case SegmentType.Text:
+                    textLines.Add(sourceLine);
+                    break;
+                case SegmentType.Data:
+                    dataLines.Add(sourceLine);
+                    break;
+                case SegmentType.KernelText:
+                    kernelTextLines.Add(sourceLine);
+                    break;
+                default:
+                    logger.Warning("ParsedProgram", $"Line{sourceLine.LineNumber} Segment type is not specified. So set text segment.");
+                    currentSegment = SegmentType.Text;
+                    textLines.Add(sourceLine);
+                    break;
+            }
+        }
+
         {
             using StreamReader reader = file.OpenText();
             int lineNumber = 0;
             while(reader.ReadLine() is string line) {
                 lineNumber++;
                 string processed = RemoveComment(line).Trim();
+
+                // 行頭のラベルをすべて取り出す．ラベルは現在のセグメントに属する
+                while(LabelPrefixPattern().Match(processed) is { Success: true } match) {
+                    Place(new SourceLine(match.Groups["label"].Value, lineNumber, IsLabel: true));
+                    processed = processed[match.Length..];
+                }
+
                 if(string.IsNullOrEmpty(processed)) {
                     continue;
                 }
@@ -89,22 +130,7 @@ internal class ParsedProgram {
                     continue;
                 }
 
-                switch(currentSegment) {
-                    case SegmentType.Text:
-                        textLines.Add((processed, lineNumber));
-                        break;
-                    case SegmentType.Data:
-                        dataLines.Add((processed, lineNumber));
-                        break;
-                    case SegmentType.KernelText:
-                        kernelTextLines.Add((processed, lineNumber));
-                        break;
-                    default:
-                        logger.Warning("ParsedProgram", $"Line{lineNumber} Segment type is not specified. So set text segment.");
-                        currentSegment = SegmentType.Text;
-                        textLines.Add((processed, lineNumber));
-                        break;
-                }
+                Place(new SourceLine(processed, lineNumber, IsLabel: false));
             }
         }
 
@@ -117,11 +143,11 @@ internal class ParsedProgram {
 
         // データセグメント
         DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
-        foreach((string trimmed, int lineNumber) in dataLines) {
-            if(IsLabel(trimmed)) {
-                dataSegmentBuilder.AddLabel(trimmed[..^1], lineNumber);
+        foreach(SourceLine sourceLine in dataLines) {
+            if(sourceLine.IsLabel) {
+                dataSegmentBuilder.AddLabel(sourceLine.Text, sourceLine.LineNumber);
             } else {
-                dataSegmentBuilder.AddLine(trimmed);
+                dataSegmentBuilder.AddLine(sourceLine.Text);
             }
         }
         this.DataSegment = dataSegmentBuilder.Build();
@@ -177,15 +203,14 @@ internal class ParsedProgram {
     /// <paramref name="strict"/>が<see langword="true"/>ならば警告の代わりにエラーを記録する
     /// </remarks>
     /// <returns>解析できた行と1始まりの行番号</returns>
-    private List<(ParsedLine Line, int LineNumber)> ParseTextLines(List<(string Trimmed, int LineNumber)> lines, Address segmentBase, ILogger logger, bool strict) {
+    private List<(ParsedLine Line, int LineNumber)> ParseTextLines(List<SourceLine> lines, Address segmentBase, ILogger logger, bool strict) {
         List<(ParsedLine Line, int LineNumber)> parsedLines = [];
         int instructionCount = 0;
-        foreach((string trimmed, int lineNumber) in lines) {
-            if(IsLabel(trimmed)) {
-                string labelName = trimmed[..^1];
-                Label label = new(labelName, Address.FromInstructionIndex(new(instructionCount), segmentBase));
+        foreach((string trimmed, int lineNumber, bool isLabel) in lines) {
+            if(isLabel) {
+                Label label = new(trimmed, Address.FromInstructionIndex(new(instructionCount), segmentBase));
                 if(this.SymbolTable.Add(label)) {
-                    logger.Warning("ParsedProgram", $"Duplicate label '{labelName}' at line {lineNumber}. The previous definition will be overwritten.");
+                    logger.Warning("ParsedProgram", $"Duplicate label '{trimmed}' at line {lineNumber}. The previous definition will be overwritten.");
                 }
                 logger.Debug("ParsedProgram", $"Line{lineNumber} {label}");
             } else if(trimmed.StartsWith('.')) {
@@ -211,16 +236,6 @@ internal class ParsedProgram {
             logger.Warning("ParsedProgram", message);
         }
     }
-
-    /// <summary>
-    /// ラベルか判定する
-    /// </summary>
-    /// <param name="line">トリム済みの文字列</param>
-    /// <returns></returns>
-    private static bool IsLabel(string line) {
-        return line.EndsWith(':') && !line.Contains(' ');
-    }
-
 
     /// <summary>
     /// テキストセグメントのバイト数

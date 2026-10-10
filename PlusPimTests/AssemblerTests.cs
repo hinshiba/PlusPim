@@ -182,6 +182,76 @@ public class AssemblerTests {
         Assert.Equal(2, ex.Errors.Count);
     }
 
+    // ===== 命令と同じ行のラベル =====
+
+    [Fact]
+    public void InlineLabels_ResolveToConsecutiveAddresses() {
+        using Assembled a = Assemble("""
+            .text
+            main: addi $t0, $t0, 1
+            a: b:addi $t0, $t0, 2
+            loop:
+                addi $t0, $t0, 3
+            c:	li $t0, 0x10000   # comment: here
+            d: # only a label
+                nop
+            """);
+
+        Assert.Equal(T, a.Resolve("main"));
+        Assert.Equal(T + 4, a.Resolve("a"));
+        Assert.Equal(T + 4, a.Resolve("b"));
+        Assert.Equal(T + 8, a.Resolve("loop"));
+        Assert.Equal(T + 12, a.Resolve("c"));
+        Assert.Equal(T + 20, a.Resolve("d"));
+        Assert.Equal(T + 4, a.Programs.GetAddressForLine(a.Files[0], 3));
+        Assert.Equal(T + 12, a.Programs.GetAddressForLine(a.Files[0], 6));
+    }
+
+    [Fact]
+    public void InlineLabel_InData_ColonInStringIsNotALabel() {
+        using Assembled a = Assemble("""
+            .data
+            msg: .asciiz "a: b"
+            n:	.word 7
+            """);
+
+        Address msg = a.Resolve("msg");
+        Assert.Equal(DataSegment.DataSegmentBase, msg);
+        Assert.Equal((byte)'a', a.Programs.MemoryImage[msg]);
+        Assert.Equal((byte)':', a.Programs.MemoryImage[msg + 1]);
+        Assert.Equal(DataSegment.DataSegmentBase + 8, a.Resolve("n"));
+        Assert.Equal(7, a.Programs.MemoryImage[a.Resolve("n")]);
+        Assert.DoesNotContain(a.Logs, log => log.Level >= LogLevel.Warning);
+    }
+
+    [Fact]
+    public void InlineLabel_BeforeSegmentDirective_StaysInPreviousSegment() {
+        using Assembled a = Assemble("""
+            .text
+            main:
+                nop
+            end: .data
+            d: .word 1
+            .text
+            after: nop
+            """);
+
+        Assert.Equal(T + 4, a.Resolve("end"));
+        Assert.Equal(T + 4, a.Resolve("after"));
+        Assert.Equal(DataSegment.DataSegmentBase, a.Resolve("d"));
+    }
+
+    [Fact]
+    public void InlineLabel_WithDollar_IsALabel() {
+        using Assembled a = Assemble("""
+            .text
+            main: nop
+            $ret: jr $ra
+            """);
+
+        Assert.Equal(T + 4, a.Resolve("$ret"));
+    }
+
     // ===== ParsedLine =====
 
     [Fact]
