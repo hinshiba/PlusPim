@@ -10,12 +10,13 @@ internal sealed class SyscallInstruction(int sourceLine): IInstruction {
     public int SourceLine { get; } = sourceLine;
 
 
-    public void Execute(RuntimeContext context) {
-        context.RaiseException(ExcCode.Sys);
+    public ExecuteResult Execute(RuntimeContext context) {
+        return ExecuteResult.Raise(ExcCode.Sys);
     }
 
     public void Undo(RuntimeContext context) {
-        context.RetException();
+        // 常に例外を要求するので，Undo が呼ばれることはない
+        throw new InvalidOperationException("syscall always raises an exception, so it has nothing to undo.");
     }
 
     /// <summary>

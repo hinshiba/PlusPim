@@ -23,12 +23,13 @@ internal sealed class RTypeShiftVarInstruction(
 
     private readonly Stack<uint> _previousRdValues = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
         uint rtVal = context.Registers[rt];
         uint result = compute(rtVal, (int)(rsVal & 0x1F));
         this.WriteRd(context, result);
         context.Log($"{mnemonic} ${rd}, ${rt}, ${rs}: 0x{rtVal:X8}, {rsVal & 0x1F} => 0x{result:X8}");
+        return ExecuteResult.Next;
     }
 
     public void Undo(RuntimeContext context) {

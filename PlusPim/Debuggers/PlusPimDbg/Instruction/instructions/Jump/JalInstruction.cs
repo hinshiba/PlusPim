@@ -8,7 +8,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
 internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpInstruction(targetLabel, lineIndex) {
     private readonly Stack<uint> _previousRaValues = new();
 
-    public override void Execute(RuntimeContext context) {
+    public override ExecuteResult Execute(RuntimeContext context) {
         // ラベル解決
         Label label = context.ResolveLabelName(this.TargetLabel!) ?? Label.Invalid;
 
@@ -24,6 +24,7 @@ internal sealed class JalInstruction(string targetLabel, int lineIndex): JumpIns
         // ジャンプ
         this.JumpTo(context, label.Addr);
         context.Log($"jal {this.TargetLabel}: $ra = {returnPC}");
+        return ExecuteResult.PcSet;
     }
 
     public override void Undo(RuntimeContext context) {
