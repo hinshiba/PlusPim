@@ -1,121 +1,123 @@
 {
-  "name": "pluspim",
-  "displayName": "PlusPim for VS Code",
-  "publisher": "hinshiba",
-  "description": "MIPS assembly time-travel debugger",
-  "version": "0.2.0",
-  "license": "MIT",
-  "icon": "images/icon.png",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:hinshiba/PlusPim.git"
-  },
-  "engines": {
-    "vscode": "^1.108.0"
-  },
-  "categories": [
-    "Debuggers"
-  ],
-  "activationEvents": [
-    "onDebug"
-  ],
-  "main": "./out/extension.js",
-  "contributes": {
-    "breakpoints": [
-      {
-        "language": "mips"
-      }
-    ],
-    "languages": [
-      {
-        "id": "mips",
-        "extensions": [
-          ".asm",
-          ".s"
-        ],
-        "aliases": [
-          "MIPS Assembly"
-        ]
-      }
-    ],
-    "debuggers": [
-      {
-        "type": "pluspim",
-        "label": "PlusPim Debugger",
-        "languages": [
-          "mips"
-        ],
-        "configurationAttributes": {
-          "launch": {
-            "required": [
-              "program"
-            ],
-            "properties": {
-              "program": {
-                "type": [
-                  "string",
-                  "array"
-                ],
-                "items": {
-                  "type": "string"
-                },
-                "description": "Path to the MIPS assembly file (string) or an array of paths. The runtime will normalize either form.",
-                "default": [
-                  "${file}"
-                ]
-              },
-              "trace": {
-                "type": "boolean",
-                "description": "Enable DAP communication trace",
-                "default": false
-              },
-              "port": {
-                "type": "number",
-                "description": "DAP TCP port",
-                "default": 4711
-              },
-              "args": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Extra arguments (e.g. [\"--verbose\"])",
-                "default": []
-              }
-            }
-          }
-        },
-        "initialConfigurations": [
-          {
-            "type": "pluspim",
-            "request": "launch",
-            "name": "Minimal Launch",
-            "program": [
-              "${file}"
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "scripts": {
-    "package:win32-x64": "bun scripts/vsix.ts win32-x64",
-    "package:linux-x64": "bun scripts/vsix.ts linux-x64",
-    "dotnet:publish:win": "bun scripts/vsix.ts --publish-only win32-x64",
-    "dotnet:publish:linux": "bun scripts/vsix.ts --publish-only linux-x64",
-    "dotnet:debug:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "lint": "eslint src"
-  },
-  "devDependencies": {
-    "@types/bun": "^1.4.2",
-    "@types/node": "^22",
-    "@types/vscode": "^1.108.0",
-    "@typescript-eslint/eslint-plugin": "^8.71.1",
-    "@typescript-eslint/parser": "^8.71.1",
-    "@vscode/vsce": "^4.0.0",
-    "eslint": "^10.12.0",
-    "typescript": "6"
-  }
+	"name": "pluspim",
+	"displayName": "PlusPim for VS Code",
+	"publisher": "hinshiba",
+	"description": "MIPS assembly time-travel debugger",
+	"version": "0.2.0",
+	"license": "MIT",
+	"icon": "images/icon.png",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:hinshiba/PlusPim.git"
+	},
+	"engines": {
+		"vscode": "^1.108.0"
+	},
+	"categories": [
+		"Debuggers"
+	],
+	"activationEvents": [
+		"onDebug"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"breakpoints": [
+			{
+				"language": "mips"
+			}
+		],
+		"languages": [
+			{
+				"id": "mips",
+				"extensions": [
+					".asm",
+					".s"
+				],
+				"aliases": [
+					"MIPS Assembly"
+				]
+			}
+		],
+		"debuggers": [
+			{
+				"type": "pluspim",
+				"label": "PlusPim Debugger",
+				"languages": [
+					"mips"
+				],
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"program"
+						],
+						"properties": {
+							"program": {
+								"type": [
+									"string",
+									"array"
+								],
+								"items": {
+									"type": "string"
+								},
+								"description": "Path to the MIPS assembly file (string) or an array of paths. The runtime will normalize either form.",
+								"default": [
+									"${file}"
+								]
+							},
+							"trace": {
+								"type": "boolean",
+								"description": "Enable DAP communication trace",
+								"default": false
+							},
+							"port": {
+								"type": "number",
+								"description": "DAP TCP port",
+								"default": 4711
+							},
+							"args": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								},
+								"description": "Extra arguments (e.g. [\"--verbose\"])",
+								"default": []
+							}
+						}
+					}
+				},
+				"initialConfigurations": [
+					{
+						"type": "pluspim",
+						"request": "launch",
+						"name": "Minimal Launch",
+						"program": [
+							"${file}"
+						]
+					}
+				]
+			}
+		]
+	},
+	"scripts": {
+		"package:win32-x64": "bun scripts/vsix.ts win32-x64",
+		"package:linux-x64": "bun scripts/vsix.ts linux-x64",
+		"dotnet:publish:win": "bun scripts/vsix.ts --publish-only win32-x64",
+		"dotnet:publish:linux": "bun scripts/vsix.ts --publish-only linux-x64",
+		"dotnet:debug:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write .",
+		"ci": "biome ci .",
+		"typecheck": "tsc -p ./ --noEmit && tsc -p scripts --noEmit"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15",
+		"@types/bun": "^1.4.2",
+		"@types/node": "^22",
+		"@types/vscode": "^1.108.0",
+		"@vscode/vsce": "^4.0.0",
+		"typescript": "6"
+	}
 }
