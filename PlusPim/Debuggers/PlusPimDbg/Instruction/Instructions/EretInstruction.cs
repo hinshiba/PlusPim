@@ -1,9 +1,9 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// eret命令: 例外からの復帰 (PC = EPC, EXL = 0)

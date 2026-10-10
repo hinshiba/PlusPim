@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 
 /// <summary>
 /// 疑似命令の展開時に具象命令インスタンスを直接生成するためのファクトリ

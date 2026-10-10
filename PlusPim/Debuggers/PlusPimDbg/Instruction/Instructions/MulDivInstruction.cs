@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// MIPSにおいて乗除算の命令を表すクラス

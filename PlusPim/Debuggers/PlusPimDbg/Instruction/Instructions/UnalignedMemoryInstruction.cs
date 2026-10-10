@@ -2,7 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// MIPSにおけるアライメントされていないメモリ操作命令 (lwl, lwr, swl, swr) を表すクラス

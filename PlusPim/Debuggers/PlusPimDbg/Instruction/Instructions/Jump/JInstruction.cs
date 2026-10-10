@@ -2,7 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
 internal sealed class JInstruction(string targetLabel, int lineIndex): JumpInstruction(targetLabel, lineIndex) {
     public override ExecuteResult Execute(RuntimeContext context) {

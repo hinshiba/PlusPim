@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 
 /// <summary>
 /// ラムダベースの汎用パーサー

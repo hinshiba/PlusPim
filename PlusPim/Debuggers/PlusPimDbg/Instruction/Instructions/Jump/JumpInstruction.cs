@@ -2,7 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Program.records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using Label = PlusPim.Debuggers.PlusPimDbg.Program.records.Label;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
 /// <summary>
 /// MIPSにおいてジャンプ命令を表す抽象基底クラス
