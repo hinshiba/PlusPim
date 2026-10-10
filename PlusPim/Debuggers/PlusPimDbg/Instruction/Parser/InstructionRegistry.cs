@@ -2,6 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 using PlusPim.Debuggers.PlusPimDbg.Program;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -113,6 +114,10 @@ internal sealed partial class InstructionRegistry {
         // Branch
         this.Register("beq", BranchInstruction.CreateParser((rs, rt) => rs == rt));
         this.Register("bne", BranchInstruction.CreateParser((rs, rt) => rs != rt));
+        this.Register("bgez", BranchInstruction.CreateZeroParser(rs => rs >= 0));
+        this.Register("bgtz", BranchInstruction.CreateZeroParser(rs => rs > 0));
+        this.Register("blez", BranchInstruction.CreateZeroParser(rs => rs <= 0));
+        this.Register("bltz", BranchInstruction.CreateZeroParser(rs => rs < 0));
 
         // MulDiv
         this.Register("mult", MulDivInstruction.CreateParser((rs, rt) => {
@@ -124,10 +129,15 @@ internal sealed partial class InstructionRegistry {
             return unchecked(((uint)(result >> 32), (uint)(result & 0xFFFFFFFF)));
         }));
 
+        // ゼロ除算と0x80000000 / -1 は計算前にランタイムエラーとする
         this.Register("div", MulDivInstruction.CreateParser((rs, rt) => unchecked(
-            ((uint)((int)rs % (int)rt), (uint)((int)rs / (int)rt)))));
+            ((uint)((int)rs % (int)rt), (uint)((int)rs / (int)rt))),
+            (rs, rt) => rt == 0 ? RuntimeErrorKind.DivisionByZero
+                : rs == 0x80000000 && rt == 0xFFFFFFFF ? RuntimeErrorKind.DivisionOverflow
+                : null));
         this.Register("divu", MulDivInstruction.CreateParser((rs, rt) => unchecked(
-            (rs % rt, rs / rt))));
+            (rs % rt, rs / rt)),
+            (rs, rt) => rt == 0 ? RuntimeErrorKind.DivisionByZero : null));
 
         // LoHi
         this.Register("mfhi", LoHiRegisterInstruction.CreateParser(true, true));
@@ -145,6 +155,10 @@ internal sealed partial class InstructionRegistry {
         this.Register("sb", MemoryInstruction.CreateParser(byteNum: 1, isWrite: true));
         this.Register("sh", MemoryInstruction.CreateParser(byteNum: 2, isWrite: true));
         this.Register("sw", MemoryInstruction.CreateParser(byteNum: 4, isWrite: true));
+        this.Register("lwl", UnalignedMemoryInstruction.CreateParser(isWrite: false, isLeft: true));
+        this.Register("lwr", UnalignedMemoryInstruction.CreateParser(isWrite: false, isLeft: false));
+        this.Register("swl", UnalignedMemoryInstruction.CreateParser(isWrite: true, isLeft: true));
+        this.Register("swr", UnalignedMemoryInstruction.CreateParser(isWrite: true, isLeft: false));
 
         // Syscall等
         this.Register("syscall", SyscallInstruction.CreateParser());

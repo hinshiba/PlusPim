@@ -8,9 +8,28 @@ using PlusPim.Logging;
 namespace PlusPim.Debuggers.PlusPimDbg;
 
 internal class PlusPimDbg: IDebugger {
+    /// <summary>
+    /// 1ステップの履歴
+    /// </summary>
+    private abstract record HistoryEntry;
+
+    /// <summary>
+    /// 命令の実行 (命令フェッチでの例外を含む)
+    /// </summary>
+    /// <param name="Record">処理系による実行の記録</param>
+    /// <param name="PcAdvanced">PCを自動インクリメントしたか</param>
+    private sealed record Executed(ExecutionRecord Record, bool PcAdvanced): HistoryEntry;
+
+    /// <summary>
+    /// 例外ハンドラへの遷移
+    /// </summary>
+    /// <param name="PcBefore">遷移前のPC</param>
+    /// <param name="Acked">遷移時に消去した例外</param>
+    private sealed record EnteredHandler(Address PcBefore, ExceptionEvent Acked): HistoryEntry;
+
     private readonly RuntimeContext _context;
     private readonly ParsedPrograms _programs;
-    private readonly Stack<(IInstruction? Instruction, bool WasTerminated, bool PcAutoIncremented)> _history = new();
+    private readonly Stack<HistoryEntry> _history = new();
     private readonly HashSet<Address> _breakpoints = [];
 
     internal PlusPimDbg(FileInfo[] files, ILogger logger) {
@@ -38,36 +57,44 @@ internal class PlusPimDbg: IDebugger {
     /// <summary>
     /// 命令を1ステップ実行する
     /// </summary>
-    /// <remarks>終了状態である場合は何もしない</remarks>
+    /// <remarks>終了状態，またはランタイムエラーが発生している場合は何もせず，履歴にも積まない</remarks>
     public StopReason Step() {
-        if(this._context.AckException()) {
-            // ktextにジャンプ
+        if(this._context.IsTerminated) {
+            return StopReason.Terminated;
+        }
+
+        if(this._context.RuntimeError is not null) {
+            // ランタイムエラーの後は続行できない．Backでのみ抜けられる
+            return StopReason.RuntimeError;
+        }
+
+        if(this._context.LastException is ExceptionEvent acked) {
+            // 例外を消去してktextにジャンプする
+            Address pcBefore = this._context.PC;
+            _ = this._context.AckException();
             this._context.PC = TextSegment.KernelTextSegmentBase;
+            this._history.Push(new EnteredHandler(pcBefore, acked));
 
             return StopReason.Step;
         }
 
-        // 実行前の状態を保存
-        Address pcBeforeExec = this._context.PC;
-        bool wasTerminatedBefore = this._context.IsTerminated;
-        bool pcAutoIncremented = false;
+        ExecutionRecord record;
+        bool pcAdvanced = false;
         // 命令を取得
-        IInstruction? inst_ = this._programs.GetInstruction(this._context.PC, this._context);
-        if(inst_ is IInstruction inst) {
+        if(this._programs.TryGetInstruction(this._context.PC, this._context.IsKernelMode, out IInstruction? inst, out ExceptionRequest fault)) {
             // 実行
-            inst.Execute(this._context);
-            // 命令がPCを変更しなかった場合のみ自動increment
-            // 例外は完了させずに停止するので，例外が発生していないときのみPCを自動incrementする
-            pcAutoIncremented = (this._context.PC == pcBeforeExec) && (this._context.LastException is null);
-
-            if(pcAutoIncremented) {
-
+            record = Processor.Execute(this._context, inst);
+            // 例外・ランタイムエラーは完了させずに停止するので，命令の実行が完了し，命令自身がPCを設定しなかったときのみ自動incrementする
+            if(record.Completed && !record.Result.PcWritten) {
                 this._context.PC += 4;
+                pcAdvanced = true;
             }
+        } else {
+            record = Processor.RaiseFetchFault(this._context, fault);
         }
 
         // 履歴に保存
-        this._history.Push((inst_, wasTerminatedBefore, pcAutoIncremented));
+        this._history.Push(new Executed(record, pcAdvanced));
 
 
         // 戻り値を決定する
@@ -75,6 +102,10 @@ internal class PlusPimDbg: IDebugger {
         // exceptionより前にないと，二重例外のときに終了できない
         if(this._context.IsTerminated) {
             return StopReason.Terminated;
+        }
+
+        if(this._context.RuntimeError is not null) {
+            return StopReason.RuntimeError;
         }
 
         if(this._context.LastException is not null) {
@@ -104,18 +135,24 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // popして逆操作しているだけ
-        (IInstruction? instruction, bool wasTerminated, bool pcAutoIncremented) = this._history.Pop();
-        if(instruction is null) {
-            // 命令フェッチに失敗している状態を巻き戻す
-            // 何もしない
-            return true;
-        }
+        switch(this._history.Pop()) {
+            case EnteredHandler(Address pcBefore, ExceptionEvent acked):
+                // 遷移前のPCと，消去した例外を戻す
+                this._context.PC = pcBefore;
+                this._context.RestoreExceptionState(this._context.CaptureExceptionState() with { LastException = acked });
+                break;
 
-        instruction.Undo(this._context);
-        if(pcAutoIncremented) {
-            this._context.PC -= 4;
+            case Executed(ExecutionRecord record, bool pcAdvanced):
+                // 命令フェッチでの例外も含め，例外に関わる状態は処理系が戻す
+                Processor.Undo(this._context, record);
+                if(pcAdvanced) {
+                    this._context.PC -= 4;
+                }
+                break;
+
+            default:
+                throw new InvalidOperationException("Unknown history entry.");
         }
-        this._context.IsTerminated = wasTerminated;
         return true;
     }
 
@@ -135,6 +172,18 @@ internal class PlusPimDbg: IDebugger {
         }
         return null;
 
+    }
+
+    public RuntimeErrorInfo? GetRuntimeError() {
+        if(this._context.RuntimeError is RuntimeError error) {
+            // ランタイムエラーではPCを進めないので，PCが発生した命令のアドレスである
+            return new RuntimeErrorInfo {
+                Kind = error.Kind,
+                Description = error.Message,
+                Address = this._context.PC.Addr
+            };
+        }
+        return null;
     }
 
     /// <summary>

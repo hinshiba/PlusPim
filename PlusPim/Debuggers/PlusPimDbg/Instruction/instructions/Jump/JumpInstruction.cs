@@ -25,7 +25,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// </summary>
     private readonly Stack<Address> _previousPCs = new();
 
-    public abstract void Execute(RuntimeContext context);
+    public abstract ExecuteResult Execute(RuntimeContext context);
     public abstract void Undo(RuntimeContext context);
 
     /// <summary>

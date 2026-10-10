@@ -68,6 +68,10 @@ internal class Application: IApplication {
         return this._debugger_?.GetLastException();
     }
 
+    public RuntimeErrorInfo? GetRuntimeError() {
+        return this._debugger_?.GetRuntimeError();
+    }
+
     // 順方向実行
 
     public StopReason StepOut() {
@@ -106,12 +110,14 @@ internal class Application: IApplication {
     }
 
     private bool CanContinue(StopReason reason) {
-        // ブレークポイント，キャッチする例外，終了は停止する
+        // ブレークポイント，キャッチする例外，終了，ランタイムエラーは停止する
         return reason switch {
             StopReason.Step => true,
             StopReason.Breakpoint => false,
             StopReason.Terminated => false,
             StopReason.Exception => !this.IsBreakException(this.GetLastException() ?? throw new InvalidOperationException("Debugger reported an exception but GetLastException() returned null.")),
+            // ランタイムエラーは続行できないので，例外フィルタによらず常に停止する
+            StopReason.RuntimeError => false,
             _ => throw new UnreachableException("StopReason val is not defined."),
         };
     }
@@ -128,6 +134,7 @@ internal class Application: IApplication {
             StopReason.Exception => this.IsBreakException(this.GetLastException() ?? throw new InvalidOperationException("Debugger reported an exception but GetLastException() returned null."))
                                 ? reason
                                 : StopReason.Step,
+            StopReason.RuntimeError => reason,
             _ => throw new UnreachableException("StopReason val is not defined."),
         };
     }

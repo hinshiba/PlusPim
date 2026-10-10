@@ -46,6 +46,11 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     public ExceptionEvent? LastException { get; private set; }
 
     /// <summary>
+    /// 発生したランタイムエラー (nullならランタイムエラーなし)．発生後は実行を続けられない
+    /// </summary>
+    public RuntimeError? RuntimeError { get; private set; }
+
+    /// <summary>
     /// 現在実行中の命令に属すると考えられるラベル
     /// </summary>
     public Label CurrentLabel { get; private set; } = startLabel;
@@ -211,8 +216,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     /// <summary>
     /// 例外を発生させる
     /// </summary>
+    /// <remarks>
+    /// カーネルモードでは二重例外となり，CP0 は変更せずに終了する．
+    /// 巻き戻しは <see cref="CaptureExceptionState"/> と <see cref="RestoreExceptionState"/> で行う
+    /// </remarks>
     /// <param name="reason">発生理由</param>
-    /// <param name="badVAddr">アドレスが関わる場合は，原因となったアドレス</param>
+    /// <param name="badVAddr">アドレス例外の場合は，原因となったアドレス．<see langword="null"/>なら BadVAddr は変更しない</param>
     public void RaiseException(ExcCode reason, Address? badVAddr = null) {
         if(this.IsKernelMode) {
             this.LastException = new ExceptionEvent(reason, IsDouble: true);
@@ -224,24 +233,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
         this.LastException = new ExceptionEvent(reason, IsDouble: false);
         this.Log($"Exception raised: {reason}");
 
-        this._cp0Regs = new CP0RegisterFile {
-            BadVAddr = badVAddr,
+        this._cp0Regs = this._cp0Regs with {
+            BadVAddr = badVAddr ?? this._cp0Regs.BadVAddr,
             Exl = true, // 実質的にカーネル空間のフラグ
             Exc = reason,
             Epc = this.PC
         };
-    }
-
-    /// <summary>
-    /// 例外を解決する
-    /// </summary>
-    public void RetException() {
-        // EPCの値に復帰
-        this.PC = this._cp0Regs.Epc;
-        // 最後の例外を消す
-        this.LastException = null;
-        // カーネルモードから脱出する
-        this._cp0Regs = CP0RegisterFile.Default;
     }
 
     /// <summary>
@@ -259,19 +256,21 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     /// <summary>
     /// CP0レジスタをMIPS番号で読み取る
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">未対応の番号のとき (<see cref="CP0RegisterFile.IsSupported"/>)</exception>
     public uint ReadCP0Register(int regNum) {
         return regNum switch {
             8 => this._cp0Regs.BadVAddr?.Addr ?? 0,
             12 => this._cp0Regs.Exl ? 0x2u : 0x0u,
             13 => (uint)this._cp0Regs.Exc << 2,
             14 => this._cp0Regs.Epc.Addr,
-            _ => 0
+            _ => throw new ArgumentOutOfRangeException(nameof(regNum), regNum, "Unsupported CP0 register number.")
         };
     }
 
     /// <summary>
     /// CP0レジスタをMIPS番号で書き込む
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">未対応の番号のとき (<see cref="CP0RegisterFile.IsSupported"/>)</exception>
     public void WriteCP0Register(int regNum, uint value) {
         this._cp0Regs = regNum switch {
             8 => this._cp0Regs with { BadVAddr = new Address(value) },
@@ -280,8 +279,37 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
             14 => this._cp0Regs with {
                 Epc = new Address(value)
             },
-            _ => this._cp0Regs
+            _ => throw new ArgumentOutOfRangeException(nameof(regNum), regNum, "Unsupported CP0 register number.")
         };
+    }
+
+    /// <summary>
+    /// ランタイムエラーを発生させる
+    /// </summary>
+    /// <remarks>
+    /// 例外と異なり CP0，<see cref="LastException"/>，<see cref="IsTerminated"/> は変更しない．
+    /// 巻き戻しは <see cref="CaptureExceptionState"/> と <see cref="RestoreExceptionState"/> で行う
+    /// </remarks>
+    public void RaiseRuntimeError(RuntimeError error) {
+        this.RuntimeError = error;
+        this.Log($"Runtime error raised: {error.Kind}: {error.Message}");
+    }
+
+    /// <summary>
+    /// 例外・ランタイムエラーに関わる状態を取得する (Undo用)
+    /// </summary>
+    public ExceptionState CaptureExceptionState() {
+        return new ExceptionState(this._cp0Regs, this.LastException, this.IsTerminated, this.RuntimeError);
+    }
+
+    /// <summary>
+    /// 例外・ランタイムエラーに関わる状態を復元する (Undo用)
+    /// </summary>
+    public void RestoreExceptionState(ExceptionState state) {
+        this._cp0Regs = state.CP0;
+        this.LastException = state.LastException;
+        this.IsTerminated = state.IsTerminated;
+        this.RuntimeError = state.RuntimeError;
     }
 
     /// <summary>
@@ -310,3 +338,12 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
 /// ステップ実行中に発生した例外イベントの情報
 /// </summary>
 internal record struct ExceptionEvent(ExcCode Code, bool IsDouble);
+
+/// <summary>
+/// 例外・ランタイムエラーで変化しうる状態のスナップショット
+/// </summary>
+/// <param name="CP0">CP0レジスタ</param>
+/// <param name="LastException">直前のステップで発生した例外</param>
+/// <param name="IsTerminated">プログラムの終了の有無 (二重例外で変化する)</param>
+/// <param name="RuntimeError">発生したランタイムエラー</param>
+internal readonly record struct ExceptionState(CP0RegisterFile CP0, ExceptionEvent? LastException, bool IsTerminated, RuntimeError? RuntimeError);

@@ -5,9 +5,10 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
 
 internal sealed class JInstruction(string targetLabel, int lineIndex): JumpInstruction(targetLabel, lineIndex) {
-    public override void Execute(RuntimeContext context) {
+    public override ExecuteResult Execute(RuntimeContext context) {
         this.JumpTo(context, this.TargetLabel!);
         context.Log($"j {this.TargetLabel}");
+        return ExecuteResult.PcSet;
     }
 
     public override void Undo(RuntimeContext context) {

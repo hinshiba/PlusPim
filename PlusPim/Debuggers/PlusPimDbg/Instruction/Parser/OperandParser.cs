@@ -29,6 +29,9 @@ internal static partial class OperandParser {
     [GeneratedRegex(@"^\$(?<rs>\w+),\s*\$(?<rt>\w+),\s*(?<label>(\w|\$)+)$")]
     private static partial Regex BranchOperandsPattern();
 
+    [GeneratedRegex(@"^\$(?<rs>\w+),\s*(?<label>(\w|\$)+)$")]
+    private static partial Regex BranchZeroOperandsPattern();
+
     [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<offset>\S+)\(\$(?<rs>\w+)\)$")]
     private static partial Regex MemoryOperandPattern();
 
@@ -222,6 +225,30 @@ internal static partial class OperandParser {
             && Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rtParsed)) {
             rs = rsParsed;
             rt = rtParsed;
+            label = match.Groups["label"].Value;
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// ゼロとの比較を行う分岐命令のオペランド ($rs, label) を解析する (bgez, bgtz, blez, bltz)
+    /// </summary>
+    internal static bool TryParseBranchZeroOperands(
+        string operands,
+        [MaybeNullWhen(false)] out RegisterID rs,
+        [MaybeNullWhen(false)] out string label) {
+
+        rs = default;
+        label = null;
+
+        Match match = BranchZeroOperandsPattern().Match(operands);
+        if(!match.Success) {
+            return false;
+        }
+
+        if(Enum.TryParse<RegisterID>(match.Groups["rs"].Value, true, out RegisterID rsParsed)) {
+            rs = rsParsed;
             label = match.Groups["label"].Value;
             return true;
         }

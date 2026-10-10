@@ -1,5 +1,7 @@
 # MIPS 命令 対応状況チェックリスト
 
+ハイフンの入ったチェックリストは実装予定がないことを示す．
+
 ## R形式命令
 
 ### 算術・論理演算
@@ -44,21 +46,27 @@
 ### ジャンプ (レジスタ)
 
 - [x] `jr` — Jump Register (PC = rs)
-- [ ] `jalr` — Jump and Link Register (rd = PC+8, PC = rs)
+- [-] `jalr` — Jump and Link Register (rd = PC+4, PC = rs. 遅延スロットなし)
 
 ### システム
 
 - [x] `syscall` — System Call
 - [x] `break` — Breakpoint
 
+### コプロセッサ0 (例外処理)
+
+- [x] `mfc0` — Move From Coprocessor 0 (rt = CP0[rd])
+- [x] `mtc0` — Move To Coprocessor 0 (CP0[rd] = rt)
+- [x] `eret` — Exception Return (PC = EPC, ユーザーモードへ復帰)
+
 ### トラップ
 
-- [ ] `tge` — Trap if Greater or Equal (符号付き)
-- [ ] `tgeu` — Trap if Greater or Equal Unsigned
-- [ ] `tlt` — Trap if Less Than (符号付き)
-- [ ] `tltu` — Trap if Less Than Unsigned
-- [ ] `teq` — Trap if Equal
-- [ ] `tne` — Trap if Not Equal
+- [-] `tge` — Trap if Greater or Equal (符号付き)
+- [-] `tgeu` — Trap if Greater or Equal Unsigned
+- [-] `tlt` — Trap if Less Than (符号付き)
+- [-] `tltu` — Trap if Less Than Unsigned
+- [-] `teq` — Trap if Equal
+- [-] `tne` — Trap if Not Equal
 
 ---
 
@@ -82,12 +90,12 @@
 
 - [x] `beq` — Branch on Equal (if rs == rt)
 - [x] `bne` — Branch on Not Equal (if rs != rt)
-- [ ] `bgez` — Branch on Greater or Equal Zero (if rs >= 0)
-- [ ] `bgtz` — Branch on Greater Than Zero (if rs > 0)
-- [ ] `blez` — Branch on Less or Equal Zero (if rs <= 0)
-- [ ] `bltz` — Branch on Less Than Zero (if rs < 0)
-- [ ] `bgezal` — Branch on >= Zero and Link
-- [ ] `bltzal` — Branch on < Zero and Link
+- [x] `bgez` — Branch on Greater or Equal Zero (if rs >= 0, 符号付き比較, 遅延スロットなし)
+- [x] `bgtz` — Branch on Greater Than Zero (if rs > 0, 符号付き比較, 遅延スロットなし)
+- [x] `blez` — Branch on Less or Equal Zero (if rs <= 0, 符号付き比較, 遅延スロットなし)
+- [x] `bltz` — Branch on Less Than Zero (if rs < 0, 符号付き比較, 遅延スロットなし)
+- [-] `bgezal` — Branch on >= Zero and Link
+- [-] `bltzal` — Branch on < Zero and Link
 
 ### ロード
 
@@ -96,16 +104,16 @@
 - [x] `lh` — Load Halfword (符号拡張)
 - [x] `lhu` — Load Halfword Unsigned (ゼロ拡張)
 - [x] `lw` — Load Word
-- [ ] `lwl` — Load Word Left
-- [ ] `lwr` — Load Word Right
+- [x] `lwl` — Load Word Left (リトルエンディアン, アラインメント例外なし)
+- [x] `lwr` — Load Word Right (リトルエンディアン, アラインメント例外なし)
 
 ### ストア
 
 - [x] `sb` — Store Byte
 - [x] `sh` — Store Halfword
 - [x] `sw` — Store Word
-- [ ] `swl` — Store Word Left
-- [ ] `swr` — Store Word Right
+- [x] `swl` — Store Word Left (リトルエンディアン, アラインメント例外なし)
+- [x] `swr` — Store Word Right (リトルエンディアン, アラインメント例外なし)
 
 ### トラップ (即値)
 
@@ -121,7 +129,7 @@
 ## J形式命令 (Jump)
 
 - [x] `j` — Jump (PC = target)
-- [x] `jal` — Jump and Link (ra = PC+8, PC = target)
+- [x] `jal` — Jump and Link (ra = PC+4, PC = target. 遅延スロットなし)
 
 ---
 

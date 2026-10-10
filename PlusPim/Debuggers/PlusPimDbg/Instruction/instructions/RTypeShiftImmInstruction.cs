@@ -19,12 +19,13 @@ internal sealed class RTypeShiftImmInstruction(
 
     private readonly Stack<uint> _previousRdValues = new();
 
-    public void Execute(RuntimeContext context) {
+    public ExecuteResult Execute(RuntimeContext context) {
         uint rtVal = context.Registers[rt];
         int shamtVal = shamt.ToSInt();
         uint result = compute(rtVal, shamtVal);
         this.WriteRd(context, result);
         context.Log($"{mnemonic} ${rd}, ${rt}, {shamt}: 0x{rtVal:X8}, {shamtVal} => 0x{result:X8}");
+        return ExecuteResult.Next;
     }
 
     public void Undo(RuntimeContext context) {
