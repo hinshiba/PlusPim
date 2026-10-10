@@ -1,6 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
+namespace PlusPim.Debuggers.PlusPimDbg.Program.Records;
 
 /// <summary>
 /// 命令インデックスを表す値型

@@ -1,4 +1,4 @@
-namespace PlusPim.Debuggers.PlusPimDbg.Program.records;
+namespace PlusPim.Debuggers.PlusPimDbg.Program.Records;
 
 /// <summary>
 /// アドレスを表す値型

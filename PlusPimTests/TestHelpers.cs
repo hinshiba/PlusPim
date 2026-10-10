@@ -3,7 +3,7 @@ using PlusPim.Debuggers.PlusPimDbg;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
 using Xunit;
