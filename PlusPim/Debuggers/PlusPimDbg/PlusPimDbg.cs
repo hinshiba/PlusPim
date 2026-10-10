@@ -157,8 +157,8 @@ internal class PlusPimDbg: IDebugger {
     }
 
     public ExceptionInfo? GetLastException() {
-        ExceptionEvent? exc_ = this._context.LastException;
-        if(exc_ is ExceptionEvent exc) {
+        ExceptionEvent? lastException = this._context.LastException;
+        if(lastException is ExceptionEvent exc) {
             string desc = exc.IsDouble
             ? $"Double exception: {exc.Code} (program will terminate)"
             : $"MIPS exception: {exc.Code}";
@@ -197,8 +197,8 @@ internal class PlusPimDbg: IDebugger {
 
         BreakpointResult[] result = new BreakpointResult[lines.Length];
         for(int i = 0; i < lines.Length; i++) {
-            Address? addr_ = this._programs.GetAddressForLine(file, lines[i]);
-            if(addr_ is Address addr) {
+            Address? lineAddr = this._programs.GetAddressForLine(file, lines[i]);
+            if(lineAddr is Address addr) {
                 _ = this._breakpoints.Add(addr);
                 result[i] = new BreakpointResult { Line = lines[i], Verified = true };
             } else {
