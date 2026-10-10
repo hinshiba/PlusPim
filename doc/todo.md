@@ -116,10 +116,6 @@
 
 - [ ] 命令と同じ行のラベル `loop: addi ...` (`ParsedProgram.cs:182`)
 
-
-- [ ] オフセットを省略したメモリオペランド `sw $t0, ($sp)` (#7, `OperandParser.cs:32`)
-
-
 ## コード品質
 
 ### テストと CI
