@@ -26,7 +26,7 @@ internal sealed class CP0RegisterInstruction(
             string mnemonic = isFrom ? "mfc0" : "mtc0";
             return ExecuteResult.Fail(
                 RuntimeErrorKind.UnsupportedCP0Register,
-                $"{mnemonic} ${rt.ToString().ToLowerInvariant()}, ${cp0RegNum}: unsupported CP0 register number {cp0RegNum} (supported: 8, 12, 13, 14)"
+                $"RuntimeError: {mnemonic} ${rt.ToString().ToLowerInvariant()}, ${cp0RegNum}: unsupported CP0 register number {cp0RegNum} (supported: 8, 12, 13, 14)"
             );
         }
 

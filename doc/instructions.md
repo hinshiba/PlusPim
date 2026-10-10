@@ -59,10 +59,6 @@
 - [x] `mtc0` — Move To Coprocessor 0 (CP0[rd] = rt)
 - [x] `eret` — Exception Return (PC = EPC, ユーザーモードへ復帰)
 
-### PlusPim 独自
-
-- [x] `runtime_call!` — `$v0` で指定した syscall の機能を実行する (カーネルモード専用)
-
 ### トラップ
 
 - [-] `tge` — Trap if Greater or Equal (符号付き)
@@ -94,10 +90,10 @@
 
 - [x] `beq` — Branch on Equal (if rs == rt)
 - [x] `bne` — Branch on Not Equal (if rs != rt)
-- [ ] `bgez` — Branch on Greater or Equal Zero (if rs >= 0)
-- [ ] `bgtz` — Branch on Greater Than Zero (if rs > 0)
-- [ ] `blez` — Branch on Less or Equal Zero (if rs <= 0)
-- [ ] `bltz` — Branch on Less Than Zero (if rs < 0)
+- [x] `bgez` — Branch on Greater or Equal Zero (if rs >= 0, 符号付き比較, 遅延スロットなし)
+- [x] `bgtz` — Branch on Greater Than Zero (if rs > 0, 符号付き比較, 遅延スロットなし)
+- [x] `blez` — Branch on Less or Equal Zero (if rs <= 0, 符号付き比較, 遅延スロットなし)
+- [x] `bltz` — Branch on Less Than Zero (if rs < 0, 符号付き比較, 遅延スロットなし)
 - [-] `bgezal` — Branch on >= Zero and Link
 - [-] `bltzal` — Branch on < Zero and Link
 
@@ -108,16 +104,16 @@
 - [x] `lh` — Load Halfword (符号拡張)
 - [x] `lhu` — Load Halfword Unsigned (ゼロ拡張)
 - [x] `lw` — Load Word
-- [ ] `lwl` — Load Word Left
-- [ ] `lwr` — Load Word Right
+- [x] `lwl` — Load Word Left (リトルエンディアン, アラインメント例外なし)
+- [x] `lwr` — Load Word Right (リトルエンディアン, アラインメント例外なし)
 
 ### ストア
 
 - [x] `sb` — Store Byte
 - [x] `sh` — Store Halfword
 - [x] `sw` — Store Word
-- [ ] `swl` — Store Word Left
-- [ ] `swr` — Store Word Right
+- [x] `swl` — Store Word Left (リトルエンディアン, アラインメント例外なし)
+- [x] `swr` — Store Word Right (リトルエンディアン, アラインメント例外なし)
 
 ### トラップ (即値)
 

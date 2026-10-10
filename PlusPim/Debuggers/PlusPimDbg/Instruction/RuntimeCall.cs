@@ -42,7 +42,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
             // 未知の番号はランタイムエラー．入出力も行わず，Undo用の情報も積まない
             return ExecuteResult.Fail(
                 RuntimeErrorKind.UnknownRuntimeCall,
-                $"unknown runtime call code {context.Registers[RegisterID.V0]} in $v0 (syscall at 0x{context.GetCP0Snapshot().Epc.Addr:X8})"
+                $"RuntimeError: unknown runtime call code {context.Registers[RegisterID.V0]} in $v0 (syscall at 0x{context.GetCP0Snapshot().Epc.Addr:X8})"
             );
         }
 
