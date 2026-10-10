@@ -8,6 +8,9 @@ on:
       - "clients/vscode/**"
       - ".github/workflows/vscode-ci.yml"
 
+permissions:
+  contents: read
+
 jobs:
   lint-typecheck:
     name: Biome, Typecheck
@@ -20,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
