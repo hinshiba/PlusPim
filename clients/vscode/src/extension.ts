@@ -1,7 +1,7 @@
+import * as fs from "node:fs";
+import * as net from "node:net";
+import * as path from "node:path";
 import * as vscode from "vscode";
-import * as fs from "fs";
-import * as net from "net";
-import * as path from "path";
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("PlusPim Extension was loaded.");
@@ -9,16 +9,15 @@ export function activate(context: vscode.ExtensionContext) {
 	// 情報を設定
 	const factory = new PlusPimDescriptorFactory(context);
 	context.subscriptions.push(
-		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory)
+		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory),
 	);
 	context.subscriptions.push(
 		vscode.debug.onDidTerminateDebugSession((session) => {
 			if (session.type === "pluspim") {
 				factory.dispose();
 			}
-		})
+		}),
 	);
-
 
 	const output = vscode.window.createOutputChannel("PlusPim DAP Trace");
 	context.subscriptions.push(output);
@@ -31,45 +30,82 @@ export function activate(context: vscode.ExtensionContext) {
 					return new PlusPimTracker(output);
 				}
 				return undefined; // トラッキングしない
-			}
-		}));
+			},
+		}),
+	);
 }
 
-export function deactivate() { }
+export function deactivate() {}
 
+// Linux 向けに実行権限がなければ付与する
+// 失敗時は理由を文字列で返す．成功時は undefined
+function ensureExecutable(binPath: string): string | undefined {
+	if (process.platform === "win32") {
+		return undefined;
+	}
+	try {
+		fs.accessSync(binPath, fs.constants.X_OK);
+		return undefined;
+	} catch (e) {
+		if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+			return `PlusPim binary not found: ${binPath}`;
+		}
+	}
+	try {
+		fs.chmodSync(binPath, 0o755);
+		return undefined;
+	} catch {
+		return `PlusPim binary is not executable and could not be fixed automatically. Run: chmod +x "${binPath}"`;
+	}
+}
 
 class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	private terminal: vscode.Terminal | undefined;
 
-	constructor(private readonly context: vscode.ExtensionContext) { }
+	constructor(private readonly context: vscode.ExtensionContext) {}
 
 	async createDebugAdapterDescriptor(
-		session: vscode.DebugSession
+		session: vscode.DebugSession,
 	): Promise<vscode.DebugAdapterDescriptor> {
 		const port = session.configuration.port ?? 4711;
 		// vscode.DebugConfigurationの[key: string]: any
 		// Normalize program paths defensively
 		const programInput = session.configuration.program;
-		const programs: string[] = (Array.isArray(programInput) ? programInput : [programInput])
-			.filter(p => p !== null && p !== undefined)
-			.map(p => String(p));
+		const programs: string[] = (
+			Array.isArray(programInput) ? programInput : [programInput]
+		)
+			.filter((p) => p !== null && p !== undefined)
+			.map((p) => String(p));
 
-		const extraArgsInput: any[] = session.configuration.args ?? [];
+		const extraArgsInput: unknown[] = session.configuration.args ?? [];
 		const extraArgs: string[] = extraArgsInput
-			.filter(a => a !== null && a !== undefined)
-			.map(a => String(a));
+			.filter((a) => a !== null && a !== undefined)
+			.map((a) => String(a));
 
 		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
-		// 開発用(dotnet build)を優先，なければリリース用(dotnet publish)にフォールバック
+		// 開発モードのときだけ開発ビルドを優先
+		const preferDebug =
+			this.context.extensionMode === vscode.ExtensionMode.Development;
 		const debugBinPath = this.context.asAbsolutePath(`bin/debug/${exe}`);
 		const releaseBinPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
-		const binPath = fs.existsSync(debugBinPath) ? debugBinPath : releaseBinPath;
+		const useDebug = preferDebug && fs.existsSync(debugBinPath);
+		if (preferDebug && !useDebug) {
+			vscode.window.showWarningMessage(
+				"The extension was launched in development mode, but no debug build was found. Using the release build instead.",
+			);
+		}
+		const binPath = useDebug ? debugBinPath : releaseBinPath;
+		const execError = ensureExecutable(binPath);
+		if (execError) {
+			vscode.window.showErrorMessage(execError);
+			throw new Error(execError);
+		}
 
 		// ターミナルで呼んでもらう
 		const args = ["-d", "--port", String(port), ...extraArgs, ...programs];
 		this.terminal = vscode.window.createTerminal({
-			name: `Debug: ${programs.length > 0 ? programs.map(p => path.basename(p)).join(", ") : "PlusPim"}`,
+			name: `Debug: ${programs.length > 0 ? programs.map((p) => path.basename(p)).join(", ") : "PlusPim"}`,
 			shellPath: binPath,
 			shellArgs: args,
 		});
@@ -87,7 +123,6 @@ class PlusPimDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 	}
 }
 
-
 function waitForPort(port: number, timeoutMs: number): Promise<void> {
 	return new Promise((resolve, reject) => {
 		const deadline = Date.now() + timeoutMs;
@@ -100,7 +135,11 @@ function waitForPort(port: number, timeoutMs: number): Promise<void> {
 			});
 			socket.on("error", () => {
 				if (deadline <= Date.now()) {
-					reject(new Error(`DA did not listen on port ${port} within ${timeoutMs}ms`));
+					reject(
+						new Error(
+							`DA did not listen on port ${port} within ${timeoutMs}ms`,
+						),
+					);
 				} else {
 					setTimeout(tryConnect, 100);
 				}
@@ -108,6 +147,13 @@ function waitForPort(port: number, timeoutMs: number): Promise<void> {
 		}
 		tryConnect();
 	});
+}
+
+/** トレース出力に必要な DAP メッセージの最小形 */
+interface DapMessage {
+	type?: string;
+	command?: string;
+	event?: string;
 }
 
 class PlusPimTracker implements vscode.DebugAdapterTracker {
@@ -118,15 +164,19 @@ class PlusPimTracker implements vscode.DebugAdapterTracker {
 	}
 
 	// VSCode → DA
-	onWillReceiveMessage(message: any): void {
-		this.output.appendLine(`>>> ${message.type}/${message.command ?? message.event ?? ""}`);
+	onWillReceiveMessage(message: DapMessage): void {
+		this.output.appendLine(
+			`>>> ${message.type}/${message.command ?? message.event ?? ""}`,
+		);
 		this.output.appendLine(JSON.stringify(message, null, 2));
 		this.output.appendLine("");
 	}
 
 	// DA → VSCode
-	onDidSendMessage(message: any): void {
-		this.output.appendLine(`<<< ${message.type}/${message.command ?? message.event ?? ""}`);
+	onDidSendMessage(message: DapMessage): void {
+		this.output.appendLine(
+			`<<< ${message.type}/${message.command ?? message.event ?? ""}`,
+		);
 		this.output.appendLine(JSON.stringify(message, null, 2));
 		this.output.appendLine("");
 	}

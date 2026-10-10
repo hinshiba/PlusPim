@@ -1,0 +1,15 @@
+.vscode/**
+src/**
+.gitignore
+**/tsconfig.json
+biome.json
+**/*.ts
+node_modules/**
+bun.lock
+scripts/**
+out/**
+!out/extension.js
+# Debug builds (dotnet:debug:win) must never ship
+bin/debug/**
+# Debug symbols for any platform
+**/*.pdb

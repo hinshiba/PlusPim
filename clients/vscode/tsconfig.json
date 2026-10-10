@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"module": "nodenext",
+		"target": "ES2022",
+		"outDir": "out",
+		"lib": ["ES2022"],
+		"types": ["node"],
+		"sourceMap": true,
+		"rootDir": "src",
+		"strict": true,
+		"skipLibCheck": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedParameters": true,
+		"noUnusedLocals": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"exactOptionalPropertyTypes": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true
+	},
+	"include": ["src"]
+}

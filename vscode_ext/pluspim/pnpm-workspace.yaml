@@ -1,3 +1,0 @@
-allowBuilds:
-  '@vscode/vsce-sign': true
-  keytar: true

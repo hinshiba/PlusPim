@@ -1,0 +1,20 @@
+{
+	// エディタ用
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"target": "ES2022",
+		"lib": ["ES2022"],
+		"types": ["bun"],
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"exactOptionalPropertyTypes": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"skipLibCheck": true
+	},
+	"include": ["*.ts"]
+}
