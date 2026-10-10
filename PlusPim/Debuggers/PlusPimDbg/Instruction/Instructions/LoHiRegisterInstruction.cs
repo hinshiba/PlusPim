@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// MIPSにおいてLo Hiレジスタ間の転送を行う命令のクラス
@@ -69,9 +69,9 @@ internal sealed class LoHiRegisterInstruction(RegisterID reg, bool isHi, bool is
     /// <param name="isFrom"><see langword="true"/>の場合はHi/Loレジスタからの転送となる </param>
     /// <returns></returns>
     internal static Func<string, IInstructionParser> CreateParser(bool isHi, bool isFrom) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseSingleRegOperand(operands, out RegisterID reg)
-                ? new LoHiRegisterInstruction(reg, isHi, isFrom, lineIndex)
+                ? new LoHiRegisterInstruction(reg, isHi, isFrom, lineNumber)
                 : (IInstruction?)null;
         });
     }

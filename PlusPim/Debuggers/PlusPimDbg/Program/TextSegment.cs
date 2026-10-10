@@ -1,5 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 

@@ -1,4 +1,4 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
@@ -22,7 +22,7 @@ internal sealed class MoveInstructionParser: IPseudoInstructionParser {
         return 1;
     }
 
-    public bool TryExpand(string operands, int lineIndex, SymbolTable symbolTable,
+    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
                           [MaybeNullWhen(false)] out IInstruction[] instructions) {
         instructions = null;
 
@@ -31,7 +31,7 @@ internal sealed class MoveInstructionParser: IPseudoInstructionParser {
         }
 
         instructions = [
-            InstructionFactory.Addu(rt, rs, RegisterID.Zero, lineIndex),
+            InstructionFactory.Addu(rt, rs, RegisterID.Zero, lineNumber),
         ];
         return true;
     }

@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 
 /// <summary>
 /// ラムダベースの汎用パーサー
@@ -12,8 +12,8 @@ internal sealed class FuncInstructionParser(
 ): IInstructionParser {
     public string Mnemonic => mnemonic;
 
-    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
-        instruction = parseFunc(operands, lineIndex);
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out IInstruction instruction) {
+        instruction = parseFunc(operands, lineNumber);
         return instruction is not null;
     }
 }

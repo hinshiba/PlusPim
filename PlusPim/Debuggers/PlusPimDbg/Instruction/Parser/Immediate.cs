@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 /// <summary>
 /// 2バイト即値を表すクラス
 /// </summary>
-internal class Immediate: IParsable<Immediate> {
+internal class Immediate {
 
     private readonly ushort _value;
 
@@ -21,11 +21,6 @@ internal class Immediate: IParsable<Immediate> {
     public uint ToUInt() {
         return this._value;
     }
-
-    public static Immediate Parse(string s, IFormatProvider? provider) {
-        return TryParse(s, provider, out Immediate? result) ? result : throw new FormatException();
-    }
-
 
     /// <summary>
     /// 0xから始まる16進数か10進数文字列から即値への変換

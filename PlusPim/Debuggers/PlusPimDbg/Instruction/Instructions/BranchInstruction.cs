@@ -1,8 +1,8 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// MIPSにおいてブランチ命令を表すクラス
@@ -46,7 +46,7 @@ internal sealed class BranchInstruction(
 
         if(this.EvaluateCondition(context)) {
             // 不正なラベルでも，InstructionFetchで例外が発生するべき
-            context.PC = context.ResolveLabelName(targetLabel)?.Addr ?? Address.InValid;
+            context.PC = context.ResolveLabelName(targetLabel)?.Addr ?? Address.Invalid;
             context.Log($"{mnemonic}: branch taken to {targetLabel}");
         } else {
             // 分岐不成立時は次の命令へ
@@ -68,9 +68,9 @@ internal sealed class BranchInstruction(
     /// 条件分岐命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(Func<uint, uint, bool> condition) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseBranchOperands(operands, out RegisterID rs, out RegisterID rt, out string? label)
-                ? new BranchInstruction(rs, rt, label, lineIndex, mnemonic, condition)
+                ? new BranchInstruction(rs, rt, label, lineNumber, mnemonic, condition)
                 : (IInstruction?)null;
         });
     }
@@ -80,9 +80,9 @@ internal sealed class BranchInstruction(
     /// </summary>
     /// <remarks>rtには<see cref="RegisterID.Zero"/>を渡して既存の実装を再利用する</remarks>
     internal static Func<string, IInstructionParser> CreateZeroParser(Func<int, bool> condition) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseBranchZeroOperands(operands, out RegisterID rs, out string? label)
-                ? new BranchInstruction(rs, RegisterID.Zero, label, lineIndex, mnemonic, (rsVal, _) => condition(unchecked((int)rsVal)))
+                ? new BranchInstruction(rs, RegisterID.Zero, label, lineNumber, mnemonic, (rsVal, _) => condition(unchecked((int)rsVal)))
                 : (IInstruction?)null;
         });
     }

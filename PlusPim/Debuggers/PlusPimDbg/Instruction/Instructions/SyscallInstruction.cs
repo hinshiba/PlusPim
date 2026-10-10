@@ -1,7 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 internal sealed class SyscallInstruction(int sourceLine): IInstruction {
     /// <summary>
@@ -23,8 +23,8 @@ internal sealed class SyscallInstruction(int sourceLine): IInstruction {
     /// 命令のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new SyscallInstruction(lineIndex) : null;
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new SyscallInstruction(lineNumber) : null;
         });
     }
 

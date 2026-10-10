@@ -26,10 +26,10 @@ internal interface IPseudoInstructionParser {
     /// 疑似命令を実命令列に展開する
     /// </summary>
     /// <param name="operands">オペランド文字列</param>
-    /// <param name="lineIndex">ソースファイル上の行番号(1-based)</param>
+    /// <param name="lineNumber">ソースファイル上の行番号(1-based)</param>
     /// <param name="symbolTable">解決済みのシンボルテーブル</param>
     /// <param name="instructions">展開後の命令列</param>
     /// <returns>成功なら<see langword="true"/></returns>
-    bool TryExpand(string operands, int lineIndex, SymbolTable symbolTable,
+    bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
                    [MaybeNullWhen(false)] out IInstruction[] instructions);
 }

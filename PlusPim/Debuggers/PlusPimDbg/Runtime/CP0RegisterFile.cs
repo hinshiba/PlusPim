@@ -1,4 +1,4 @@
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 
@@ -27,7 +27,7 @@ internal record class CP0RegisterFile {
         BadVAddr = null,
         Exl = false,
         Exc = ExcCode.RI,
-        Epc = Address.InValid
+        Epc = Address.Invalid
     };
 
     /// <summary>

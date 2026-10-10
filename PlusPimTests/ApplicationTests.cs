@@ -32,7 +32,7 @@ public class ApplicationTests {
     private static void WithApplication(string asm, Action<App> test) {
         FileInfo tempFile = TestHelpers.WriteTempAsm(asm);
         try {
-            App app = new(true, [tempFile], Logger.Null);
+            App app = new([tempFile], Logger.Null);
             Assert.True(app.Load());
             test(app);
         } finally {

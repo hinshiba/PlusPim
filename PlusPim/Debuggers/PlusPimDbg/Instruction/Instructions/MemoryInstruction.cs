@@ -1,8 +1,8 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// MIPSにおいてメモリ操作命令を表すクラス
@@ -93,9 +93,9 @@ internal sealed class MemoryInstruction(
     /// メモリアクセス命令のパーサーを生成するファクトリ (lw, sw, lb, sb 等)
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(int byteNum, bool isWrite, bool isSign = false) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseMemoryOperands(operands, out RegisterID rt, out RegisterID rs, out Immediate? offset)
-                ? new MemoryInstruction(rt, rs, offset, isWrite, isSign, byteNum, lineIndex)
+                ? new MemoryInstruction(rt, rs, offset, isWrite, isSign, byteNum, lineNumber)
                 : (IInstruction?)null;
         });
     }

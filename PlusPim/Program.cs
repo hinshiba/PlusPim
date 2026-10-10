@@ -101,7 +101,7 @@ internal class Program {
             logger.Debug("Program", "Debug Launch");
 
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(true, files, logger);
+            Application.Application app = new(files, logger);
 
             if(parseResult.GetValue(stdioArg)) {
                 // stdio経由でDAPを話す．DAPに渡す前に元のstdin/stdoutストリームを確保する
@@ -144,10 +144,8 @@ internal class Program {
                 await adapter.WaitForSessionEnd();
             }
         } else {
-            // 実行するだけ
-            throw new NotImplementedException("Non-debug mode is not implemented yet");
-            FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(false, files, logger);
+            Console.Error.WriteLine("Non-debug mode is not implemented. Use --debug.");
+            return 1;
         }
 
         logger.Info("Program", "Exit.");

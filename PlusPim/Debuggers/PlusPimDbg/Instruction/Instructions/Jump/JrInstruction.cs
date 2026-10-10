@@ -1,11 +1,11 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
-internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstruction(null, lineIndex) {
+internal sealed class JrInstruction(RegisterID rs, int lineNumber): JumpInstruction(null, lineNumber) {
     private RegisterID Rs { get; } = rs;
     private readonly Stack<(Label, StackFrame?, bool)> _poppedFrames = new();
 
@@ -48,10 +48,10 @@ internal sealed class JrInstruction(RegisterID rs, int lineIndex): JumpInstructi
 internal sealed class JrInstructionParser: IInstructionParser {
     public string Mnemonic => "jr";
 
-    public bool TryParse(string operands, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
         if(OperandParser.TryParseSingleRegOperand(operands, out RegisterID rs)) {
-            instruction = new JrInstruction(rs, lineIndex);
+            instruction = new JrInstruction(rs, lineNumber);
             return true;
         }
         return false;

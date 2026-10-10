@@ -9,10 +9,9 @@ namespace PlusPim.Application;
 /// アプリケーションの主要な機能を提供するクラス
 /// </summary>
 internal class Application: IApplication {
-    private IDebugger? _debugger_;
-    private IDebugger Debugger => this._debugger_ ?? throw new InvalidOperationException("Debugger is not initialized");
+    private IDebugger? _debugger;
+    private IDebugger Debugger => this._debugger ?? throw new InvalidOperationException("Debugger is not initialized");
     private readonly ILogger _logger;
-    private readonly bool _isDebug;
     private readonly FileInfo[] _files;
 
     /// 報告すべき例外の集合
@@ -24,34 +23,26 @@ internal class Application: IApplication {
     /// <summary>
     /// アプリケーションのコンストラクタ
     /// </summary>
-    /// <param name="isDebug">デバッグ起動かどうか</param>
     /// <param name="files">すべての実行するファイル</param>
     /// <param name="logger">ロガー</param>
-    public Application(bool isDebug, FileInfo[] files, ILogger logger) {
-        this._isDebug = isDebug;
+    public Application(FileInfo[] files, ILogger logger) {
         this._files = files;
         this._logger = logger;
     }
 
     /// <summary>
-    /// プログラムをロードする．ランタイムモードの場合はContinue()する．
+    /// プログラムをロードする．
     /// </summary>
     /// <returns>成功した場合<see langword="true"/></returns>
     public bool Load() {
-        this._debugger_ = new PlusPimDbg(this._files, this._logger);
-
-        if(!this._isDebug) {
-            // デバッガモードでない場合はすぐに実行する
-            // ここで無限ループする可能性がある
-            _ = this.Continue();
-        }
-        // デバッガモードではメソッドで操作されるのを待つ
+        this._debugger = new PlusPimDbg(this._files, this._logger);
+        // メソッドで操作されるのを待つ
         this._logger.Info("Application", "Load success");
         return true;
     }
 
     public StackFrameInfo[] GetCallStack() {
-        return this._debugger_?.GetCallStack() ?? [];
+        return this._debugger?.GetCallStack() ?? [];
     }
 
     public StackFrameInfo? GetStackFrame(int frameId) {
@@ -65,11 +56,11 @@ internal class Application: IApplication {
     }
 
     public ExceptionInfo? GetLastException() {
-        return this._debugger_?.GetLastException();
+        return this._debugger?.GetLastException();
     }
 
     public RuntimeErrorInfo? GetRuntimeError() {
-        return this._debugger_?.GetRuntimeError();
+        return this._debugger?.GetRuntimeError();
     }
 
     // 順方向実行

@@ -1,8 +1,8 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// break命令: ブレークポイント例外 (ExcCode=9) を発生させる
@@ -20,8 +20,8 @@ internal sealed class BreakInstruction(int sourceLine): IInstruction {
     }
 
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new BreakInstruction(lineIndex) : null;
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new BreakInstruction(lineNumber) : null;
         });
     }
 }

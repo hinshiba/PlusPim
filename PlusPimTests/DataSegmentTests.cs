@@ -1,5 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Program;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
 using Xunit;
@@ -201,7 +201,7 @@ public class DataSegmentTests {
 
         Assert.Equal(Base + 4, Resolve(program, "msg"));
         // la は lui/ori の2命令に展開される
-        Assert.Equal(2, program.InstructionCount);
+        Assert.Equal(2, program.TextSegment.Instructions.Length);
     }
 
     [Fact]

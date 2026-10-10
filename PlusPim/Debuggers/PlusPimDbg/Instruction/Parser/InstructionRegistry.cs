@@ -1,5 +1,5 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
@@ -193,10 +193,10 @@ internal sealed partial class InstructionRegistry {
     /// 指定された行を<see cref="IInstruction"/>への解析を試みる
     /// </summary>
     /// <param name="assemblyLine">行</param>
-    /// <param name="lineIndex">行番号(1-based)</param>
+    /// <param name="lineNumber">行番号(1-based)</param>
     /// <param name="instruction">成功の場合は<see cref="IInstruction"/>が返却される</param>
     /// <returns>成功なら<see langword="true"/></returns>
-    public bool TryParse(string assemblyLine, int lineIndex, [MaybeNullWhen(false)] out IInstruction instruction) {
+    public bool TryParse(string assemblyLine, int lineNumber, [MaybeNullWhen(false)] out IInstruction instruction) {
         instruction = null;
 
         // アセンブリの行にマッチするか探索
@@ -210,18 +210,18 @@ internal sealed partial class InstructionRegistry {
         string operands = match.Groups["operands"].Value;
 
         // オペコードに対応するパーサーを探して，あればそれでオペランドを解析する
-        return this._parsers.TryGetValue(op, out IInstructionParser? parser) && parser.TryParse(operands, lineIndex, out instruction);
+        return this._parsers.TryGetValue(op, out IInstructionParser? parser) && parser.TryParse(operands, lineNumber, out instruction);
     }
 
     /// <summary>
     /// 指定された行を実命令列に解析する(疑似命令の展開を含む)
     /// </summary>
     /// <param name="assemblyLine">行</param>
-    /// <param name="lineIndex">行番号(1-based)</param>
+    /// <param name="lineNumber">行番号(1-based)</param>
     /// <param name="symbolTable">シンボルテーブル</param>
     /// <param name="instructions">成功の場合は命令列が返却される</param>
     /// <returns>成功なら<see langword="true"/></returns>
-    public bool TryParseAll(string assemblyLine, int lineIndex, SymbolTable symbolTable,
+    public bool TryParseAll(string assemblyLine, int lineNumber, SymbolTable symbolTable,
                             [MaybeNullWhen(false)] out IInstruction[] instructions) {
         instructions = null;
 
@@ -235,12 +235,12 @@ internal sealed partial class InstructionRegistry {
 
         // 疑似命令を先に試す
         if(this._pseudoParsers.TryGetValue(op, out IPseudoInstructionParser? pseudo)) {
-            return pseudo.TryExpand(operands, lineIndex, symbolTable, out instructions);
+            return pseudo.TryExpand(operands, lineNumber, symbolTable, out instructions);
         }
 
         // 通常の命令
         if(this._parsers.TryGetValue(op, out IInstructionParser? parser)
-            && parser.TryParse(operands, lineIndex, out IInstruction? instruction)) {
+            && parser.TryParse(operands, lineNumber, out IInstruction? instruction)) {
             instructions = [instruction];
             return true;
         }

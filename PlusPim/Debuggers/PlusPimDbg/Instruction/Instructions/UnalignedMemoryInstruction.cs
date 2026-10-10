@@ -1,8 +1,8 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// MIPSにおけるアライメントされていないメモリ操作命令 (lwl, lwr, swl, swr) を表すクラス
@@ -67,9 +67,9 @@ internal sealed class UnalignedMemoryInstruction(
     /// lwl, lwr, swl, swr のパーサーを生成するファクトリ
     /// </summary>
     internal static Func<string, IInstructionParser> CreateParser(bool isWrite, bool isLeft) {
-        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineIndex) => {
+        return mnemonic => new Factories.FuncInstructionParser(mnemonic, (operands, lineNumber) => {
             return OperandParser.TryParseMemoryOperands(operands, out RegisterID rt, out RegisterID rs, out Immediate? offset)
-                ? new UnalignedMemoryInstruction(rt, rs, offset, isWrite, isLeft, lineIndex)
+                ? new UnalignedMemoryInstruction(rt, rs, offset, isWrite, isLeft, lineNumber)
                 : (IInstruction?)null;
         });
     }

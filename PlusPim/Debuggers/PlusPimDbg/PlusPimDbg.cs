@@ -1,7 +1,7 @@
 using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Program;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
 
@@ -157,8 +157,8 @@ internal class PlusPimDbg: IDebugger {
     }
 
     public ExceptionInfo? GetLastException() {
-        ExceptionEvent? exc_ = this._context.LastException;
-        if(exc_ is ExceptionEvent exc) {
+        ExceptionEvent? lastException = this._context.LastException;
+        if(lastException is ExceptionEvent exc) {
             string desc = exc.IsDouble
             ? $"Double exception: {exc.Code} (program will terminate)"
             : $"MIPS exception: {exc.Code}";
@@ -197,8 +197,8 @@ internal class PlusPimDbg: IDebugger {
 
         BreakpointResult[] result = new BreakpointResult[lines.Length];
         for(int i = 0; i < lines.Length; i++) {
-            Address? addr_ = this._programs.GetAddressForLine(file, lines[i]);
-            if(addr_ is Address addr) {
+            Address? lineAddr = this._programs.GetAddressForLine(file, lines[i]);
+            if(lineAddr is Address addr) {
                 _ = this._breakpoints.Add(addr);
                 result[i] = new BreakpointResult { Line = lines[i], Verified = true };
             } else {
@@ -216,11 +216,11 @@ internal class PlusPimDbg: IDebugger {
 
         (uint badVAddr, uint status, uint cause, uint epc) = this._context.GetCP0DisplayValues();
         // 例外発生なら次の命令ではなく，例外発生の命令の情報にする
-        (FileInfo? file, int lineIndex) = this._programs.GetSourceInfo((this._context.LastException is null) ? this._context.PC : new Address(epc));
+        (FileInfo? file, int lineNumber) = this._programs.GetSourceInfo((this._context.LastException is null) ? this._context.PC : new Address(epc));
         frames.Add(new StackFrameInfo {
             FrameId = 1,
             Name = this._context.CurrentLabel.Name,
-            Line = lineIndex,
+            Line = lineNumber,
             SrcFile = file,
             Registers = this._context.Registers.ToArray(),
             PC = this._context.PC.Addr,
@@ -235,11 +235,11 @@ internal class PlusPimDbg: IDebugger {
         // CallStackの各フレーム
         int frameId = 2;
         foreach(StackFrame frame in this._context.CallStack) {
-            (file, lineIndex) = this._programs.GetSourceInfo(frame.CurrentPC);
+            (file, lineNumber) = this._programs.GetSourceInfo(frame.CurrentPC);
             frames.Add(new StackFrameInfo {
                 FrameId = frameId,
                 Name = frame.Label.Name,
-                Line = lineIndex,
+                Line = lineNumber,
                 SrcFile = file,
                 Registers = frame.Registers.ToArray(),
                 PC = frame.CurrentPC.Addr,

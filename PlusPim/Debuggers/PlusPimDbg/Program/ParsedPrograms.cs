@@ -1,5 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using PlusPim.Logging;
 using System.Diagnostics.CodeAnalysis;
@@ -124,7 +124,7 @@ internal sealed class ParsedPrograms {
     /// </summary>
     /// <param name="pc">アドレス</param>
     /// <returns>ファイルと1-indexの行番号</returns>
-    public (FileInfo? file, int lineIndex) GetSourceInfo(Address pc) {
+    public (FileInfo? file, int lineNumber) GetSourceInfo(Address pc) {
         // 有効なアドレスか確認
         if((pc.Addr & 0b11) != 0) {
             return (null, 0);
@@ -196,9 +196,9 @@ internal sealed class ParsedPrograms {
     /// 指定ファイル・行番号に対応する先頭の命令アドレスを返す
     /// </summary>
     /// <param name="file">ソースファイル</param>
-    /// <param name="lineIndex">1-indexedの行番号</param>
+    /// <param name="lineNumber">1-indexedの行番号</param>
     /// <returns>該当する命令のアドレス．見つからない場合はnull</returns>
-    public Address? GetAddressForLine(FileInfo file, int lineIndex) {
+    public Address? GetAddressForLine(FileInfo file, int lineNumber) {
         if(!this.TryFindProgramIndexByFile(file, out int fileIndex)) {
             return null;
         }
@@ -206,7 +206,7 @@ internal sealed class ParsedPrograms {
         // まずはユーザーテキストセグメントを検索
         ReadOnlySpan<IInstruction> instructions = this._programs[fileIndex].TextSegment.Instructions;
         for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
-            if(instructions[localIndex].SourceLine == lineIndex) {
+            if(instructions[localIndex].SourceLine == lineNumber) {
                 return new Address((uint)((fileIndex == 0 ? 0 : this._textCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.TextSegmentBase;
             }
 
@@ -214,7 +214,7 @@ internal sealed class ParsedPrograms {
         // 次にカーネルテキストセグメントを検索
         instructions = this._programs[fileIndex].KernelTextSegment.Instructions;
         for(int localIndex = 0; localIndex < instructions.Length; localIndex++) {
-            if(instructions[localIndex].SourceLine == lineIndex) {
+            if(instructions[localIndex].SourceLine == lineNumber) {
                 return new Address((uint)((fileIndex == 0 ? 0 : this._kernelTextCumulativeLengths[fileIndex - 1]) + localIndex) * 4) + TextSegment.KernelTextSegmentBase;
             }
 

@@ -111,24 +111,6 @@
 
 ## コード品質
 
-- [ ] デッドコードを削除する
-  - [ ] `Program.cs:148-150` の `throw` より後のコード (CS0162)
-  - [ ] `Application._isDebug` とランタイムモードの経路
-  - [ ] `InstructionIndex.FromAddress` (両オーバーロード)
-  - [ ] `Address.FromInstructionIndex(…, bool)`
-  - [ ] `TextSegmentBuilder.CurrentInstructionIndex` / `CurrentAddr`
-  - [ ] `TextSegment.BaseAddress`, `DataSegment.BaseAddress`
-  - [ ] `ParsedProgram.GetInstruction`
-  - [ ] `Immediate.Parse`
-  - [ ] テストからしか使われていない `PlusPimDbg.GetRegisters`, `ParsedProgram.InstructionCount` の扱いを決める
-- [ ] 重複の共通化
-  - [ ] `Stack<uint>` + `WriteRd` + `Undo` の重複 (`RType3Reg`, `RTypeShiftImm`, `RTypeShiftVar`, `IType`)
-- [ ] 命名を統一する
-  - [ ] `Address.InValid` と `Label.Invalid`
-  - [ ] 名前空間の大文字小文字 (`…Instruction.instructions`, `Program.records`)
-  - [ ] `lineIndex` が 0 始まり (`TextSegmentBuilder`) と 1 始まり (命令のコンストラクタ) で混在
-  - [ ] 末尾のアンダースコア (`_debugger_`, `inst_`, `maxLength_`)
-
 ### テストと CI
 
 - [ ] テストの追加 (#17)

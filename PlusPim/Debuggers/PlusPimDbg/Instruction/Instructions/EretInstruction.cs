@@ -1,9 +1,9 @@
-using PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Factories;
+using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions;
 
 /// <summary>
 /// eret命令: 例外からの復帰 (PC = EPC, EXL = 0)
@@ -37,8 +37,8 @@ internal sealed class EretInstruction(int sourceLine): IInstruction {
     }
 
     internal static Func<string, IInstructionParser> CreateParser() {
-        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineIndex) => {
-            return OperandParser.TryParseNoOperand(operands) ? new EretInstruction(lineIndex) : null;
+        return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
+            return OperandParser.TryParseNoOperand(operands) ? new EretInstruction(lineNumber) : null;
         });
     }
 }

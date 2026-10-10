@@ -1,8 +1,8 @@
-using PlusPim.Debuggers.PlusPimDbg.Program.records;
+using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
-using Label = PlusPim.Debuggers.PlusPimDbg.Program.records.Label;
+using Label = PlusPim.Debuggers.PlusPimDbg.Program.Records.Label;
 
-namespace PlusPim.Debuggers.PlusPimDbg.Instruction.instructions.Jump;
+namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Jump;
 
 /// <summary>
 /// MIPSにおいてジャンプ命令を表す抽象基底クラス
@@ -34,7 +34,7 @@ internal abstract class JumpInstruction(string? targetLabel, int sourceLine): II
     /// </summary>
     protected void JumpTo(RuntimeContext context, string name) {
         Label? label = context.ResolveLabelName(name);
-        this.JumpTo(context, label?.Addr ?? Address.InValid);
+        this.JumpTo(context, label?.Addr ?? Address.Invalid);
     }
 
     /// <summary>
