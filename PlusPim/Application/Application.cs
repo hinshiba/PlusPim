@@ -172,6 +172,10 @@ internal class Application: IApplication {
         }
     }
 
+    /// <remarks>
+    /// ブレークポイントまで巻き戻す
+    /// <see cref="BatchSize"/>ステップごとにロックを解放する
+    /// </remarks>
     public StopReason ReverseContinue(CancellationToken ct = default) {
         while(true) {
             lock(this._gate) {
@@ -182,6 +186,9 @@ internal class Application: IApplication {
                     }
                     if(!debugger.Back()) {
                         return StopReason.EmptyHistory;
+                    }
+                    if(debugger.IsAtBreakpoint) {
+                        return StopReason.Breakpoint;
                     }
                 }
             }

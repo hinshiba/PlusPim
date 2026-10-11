@@ -47,7 +47,7 @@ internal interface IApplication {
     bool StepBack();
 
     /// <summary>
-    /// 停止するまで実行を巻き戻す
+    /// ブレークポイントか履歴の先頭に達するまで実行を巻き戻す
     /// </summary>
     /// <returns>停止した理由</returns>
     StopReason ReverseContinue(CancellationToken ct = default);

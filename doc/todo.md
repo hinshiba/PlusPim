@@ -70,13 +70,6 @@
 
 ### 実行系
 
-
-- [ ] Reverse Continue をブレークポイントで止める (#5, `Application.cs:151-156`)
-  - [ ] `Back` 後の PC がブレークポイントなら止める. 判定を `PlusPimDbg` 側に用意する
-  - [ ] 例外フィルタに該当する例外の発生地点でも止めるか決める
-  - [ ] `stopped` イベントの reason を `breakpoint` にする
-  - [ ] テスト
-
 - [ ] 擬似命令の展開先をインレイヒントで表示する (#11)
   - [ ] 展開結果を拡張機能に渡す方法を決める (カスタム DAP 要求 / CLI / LSP)
   - [ ] `InlayHintsProvider` で `la` → `lui` + `ori` などを表示する

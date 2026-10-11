@@ -18,6 +18,11 @@ public interface IDebugger {
     bool Back();
 
     /// <summary>
+    /// 次に実行する命令にブレークポイントがあり，かつ例外による一時停止状態でない
+    /// </summary>
+    bool IsAtBreakpoint { get; }
+
+    /// <summary>
     /// コールスタックの情報を取得する
     /// </summary>
     /// <returns><see cref="StackFrameInfo"/>の配列．ライブフレームが先頭である</returns>
