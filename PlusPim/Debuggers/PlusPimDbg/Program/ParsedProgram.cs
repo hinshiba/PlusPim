@@ -245,7 +245,7 @@ internal partial class ParsedProgram {
         int instructionCount = 0;
         foreach((string trimmed, int lineNumber, bool isLabel) in lines) {
             if(isLabel) {
-                Label label = new(trimmed, Address.FromInstructionIndex(new(instructionCount), segmentBase));
+                Label label = new(trimmed, segmentBase + (uint)(instructionCount * 4));
                 if(this.SymbolTable.Add(label)) {
                     logger.Warning("ParsedProgram", $"Duplicate label '{trimmed}' at line {lineNumber}. The previous definition will be overwritten.");
                 }
