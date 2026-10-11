@@ -24,6 +24,11 @@ public interface IDebugger {
     StackFrameInfo[] GetCallStack();
 
     /// <summary>
+    /// コールスタックのフレーム数
+    /// </summary>
+    int CallStackDepth { get; }
+
+    /// <summary>
     /// 直前のStepで発生した例外情報を取得する
     /// </summary>
     /// <returns>例外情報．例外が発生していない場合はnull</returns>

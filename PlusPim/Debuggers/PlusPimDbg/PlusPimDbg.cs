@@ -214,6 +214,11 @@ internal class PlusPimDbg: IDebugger {
     }
 
     /// <summary>
+    /// ライブフレームと呼び出し元のフレームの数
+    /// </summary>
+    public int CallStackDepth => 1 + this._context.CallStack.Count;
+
+    /// <summary>
     /// コールスタックの状態を返す
     /// </summary>
     public StackFrameInfo[] GetCallStack() {

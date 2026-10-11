@@ -16,25 +16,29 @@ internal interface IApplication {
     /// </summary>
     bool IsLoaded { get; }
 
+    // 実行の操作はワーカースレッドから呼ばれる．
+    // ct が取り消されたら StopReason.Pause で停止する
+    // ct を省略した場合は取り消されない
+
     /// <summary>
     /// スタックフレームを1つ除去するまで実行する
     /// </summary>
-    StopReason StepOut();
+    StopReason StepOut(CancellationToken ct = default);
 
     /// <summary>
     /// 表示されている次の行まで実行する
     /// </summary>
-    StopReason StepOver();
+    StopReason StepOver(CancellationToken ct = default);
 
     /// <summary>
     /// 次の命令を実行する
     /// </summary>
-    StopReason StepIn();
+    StopReason StepIn(CancellationToken ct = default);
 
     /// <summary>
     /// 停止するまで実行する
     /// </summary>
-    StopReason Continue();
+    StopReason Continue(CancellationToken ct = default);
 
     /// <summary>
     /// 1ステップ分，実行を巻き戻す
@@ -45,8 +49,8 @@ internal interface IApplication {
     /// <summary>
     /// 停止するまで実行を巻き戻す
     /// </summary>
-    /// <returns>1ステップ以上巻き戻しに成功した場合は<see langword="true"/></returns>
-    bool ReverseContinue();
+    /// <returns>停止した理由</returns>
+    StopReason ReverseContinue(CancellationToken ct = default);
 
     /// <summary>
     /// 停止する例外を設定する

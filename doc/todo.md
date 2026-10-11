@@ -70,13 +70,6 @@
 
 ### 実行系
 
-- [ ] Pause:  無限ループで VS Code が応答しなくなったときに抜ける唯一の手段 
-  - [ ] `Continue` をワーカースレッドで実行し, 実行中も DAP 要求 (`threads`, `pause` など) に応答する (`Application.cs:135-144`, `DebugAdapter.cs:255`)
-  - [ ] 停止要求のフラグを Step のループで確認する
-  - [ ] `SupportsPause` と `HandlePauseRequest` を実装し, reason `pause` の `stopped` イベントを送る
-  - [ ] 実行中に来た Step / StepBack などの要求を排他制御する
-  - [ ] Reverse Continue も中断できるようにする
-  - [ ] テスト: 無限ループ → Pause → 停止位置とレジスタを取得できる
 
 - [ ] Reverse Continue をブレークポイントで止める (#5, `Application.cs:151-156`)
   - [ ] `Back` 後の PC がブレークポイントなら止める. 判定を `PlusPimDbg` 側に用意する
