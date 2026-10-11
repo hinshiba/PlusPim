@@ -52,4 +52,17 @@ public interface IDebugger {
     /// <param name="lines">1-indexedの行番号の配列</param>
     /// <returns>各行に対応するブレークポイント設定結果</returns>
     BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines);
+
+    /// <summary>
+    /// メモリの内容を返す．書き込まれていない領域は0である
+    /// </summary>
+    /// <param name="address">先頭のアドレス</param>
+    /// <param name="count">バイト数</param>
+    /// <returns>読んだバイト列</returns>
+    byte[] ReadMemory(uint address, int count);
+
+    /// <summary>
+    /// データセグメントの先頭のアドレスとバイト数
+    /// </summary>
+    (uint Start, uint Size) DataSegmentRange { get; }
 }

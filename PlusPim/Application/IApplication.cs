@@ -91,4 +91,17 @@ internal interface IApplication {
     /// </summary>
     /// <returns>ランタイムエラーの情報．発生していない場合はnull</returns>
     RuntimeErrorInfo? GetRuntimeError();
+
+    /// <summary>
+    /// メモリの内容を返す．書き込まれていない領域は0である
+    /// </summary>
+    /// <param name="address">先頭のアドレス</param>
+    /// <param name="count">バイト数</param>
+    /// <returns>読んだバイト列</returns>
+    byte[] ReadMemory(uint address, int count);
+
+    /// <summary>
+    /// データセグメントの先頭のアドレスとバイト数
+    /// </summary>
+    (uint Start, uint Size) DataSegmentRange { get; }
 }
