@@ -165,8 +165,10 @@ internal class DebugAdapter: DebugAdapterBase {
 
         this._isInit = false;
 
-        // 応答を書いてからセッションを終了する
+        // 応答してからセッションを終了する
         responder.SetResponse(new DisconnectResponse());
+        // キューが空になるかタイムアウトまで待つ
+        this.Protocol.Stop(2000);
         _ = this._sessionEnded.TrySetResult();
     }
 
