@@ -8,7 +8,13 @@ internal interface IApplication {
     /// プログラムを読み込んで起動する
     /// </summary>
     /// <returns>成功した場合は<see langword="true"/></returns>
+    /// <exception cref="Debuggers.PlusPimDbg.Program.AssemblyException">アセンブルに失敗した場合</exception>
     bool Load();
+
+    /// <summary>
+    /// プログラムを読み込み済みかどうか
+    /// </summary>
+    bool IsLoaded { get; }
 
     /// <summary>
     /// スタックフレームを1つ除去するまで実行する

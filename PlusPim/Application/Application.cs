@@ -37,12 +37,15 @@ internal class Application: IApplication {
     /// プログラムをロードする．
     /// </summary>
     /// <returns>成功した場合<see langword="true"/></returns>
+    /// <exception cref="Debuggers.PlusPimDbg.Program.AssemblyException">アセンブルに失敗した場合</exception>
     public bool Load() {
         this._debugger = new PlusPimDbg(this._files, this._logger, this._strict);
         // メソッドで操作されるのを待つ
         this._logger.Info("Application", "Load success");
         return true;
     }
+
+    public bool IsLoaded => this._debugger is not null;
 
     public StackFrameInfo[] GetCallStack() {
         return this._debugger?.GetCallStack() ?? [];

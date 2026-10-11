@@ -16,8 +16,6 @@
 - [ ] 入力バッファ (PendingInput) が MachineState / デバッガのスナップショットから見えない
   - RuntimeContext に明示的な PendingInput プロパティを持たせ, テストのスナップショットに含める. PendingInput 自体は同期されていない (ステップ実行が単一スレッドなので許容) ことをコメントに書く.
 
-- [ ] initでDAPに準拠しない問題
-
 ### 前処理系
 
 - [ ] `.kdata` がセグメント指令として認識されない (`ParsedProgram.cs:71` 付近)
