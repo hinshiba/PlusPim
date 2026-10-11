@@ -13,6 +13,7 @@ internal class Application: IApplication {
     private IDebugger Debugger => this._debugger ?? throw new InvalidOperationException("Debugger is not initialized");
     private readonly ILogger _logger;
     private readonly FileInfo[] _files;
+    private readonly bool _strict;
 
     /// 報告すべき例外の集合
     private HashSet<ExcCode> _filters = [];
@@ -25,9 +26,11 @@ internal class Application: IApplication {
     /// </summary>
     /// <param name="files">すべての実行するファイル</param>
     /// <param name="logger">ロガー</param>
-    public Application(FileInfo[] files, ILogger logger) {
+    /// <param name="strict">解析できない行と未対応の指令をエラーにするかどうか</param>
+    public Application(FileInfo[] files, ILogger logger, bool strict = false) {
         this._files = files;
         this._logger = logger;
+        this._strict = strict;
     }
 
     /// <summary>
@@ -35,7 +38,7 @@ internal class Application: IApplication {
     /// </summary>
     /// <returns>成功した場合<see langword="true"/></returns>
     public bool Load() {
-        this._debugger = new PlusPimDbg(this._files, this._logger);
+        this._debugger = new PlusPimDbg(this._files, this._logger, this._strict);
         // メソッドで操作されるのを待つ
         this._logger.Info("Application", "Load success");
         return true;

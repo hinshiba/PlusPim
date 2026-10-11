@@ -6,7 +6,7 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// ラベルとアドレスの対応を管理する
 /// ラベル名から全情報(名前, アドレス)を持っているラベル型との相互変換
 /// </summary>
-internal sealed class SymbolTable {
+internal sealed class SymbolTable: ISymbolResolver {
     private readonly Dictionary<string, Label> _forwardTable = [];
 
     /// <summary>

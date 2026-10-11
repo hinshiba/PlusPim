@@ -1,6 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,15 +17,14 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 internal sealed class NopInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "nop";
 
-    public int GetExpansionSize(string operands) {
-        return 1;
-    }
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
-    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                          [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = [
-            InstructionFactory.Sll(RegisterID.Zero, RegisterID.Zero, new Immediate(0), lineNumber),
-        ];
+        if(!OperandParser.TryParseNoOperand(operands)) {
+            return false;
+        }
+
+        line = ParsedLine.Fixed(InstructionFactory.Sll(RegisterID.Zero, RegisterID.Zero, new Immediate(0), lineNumber));
         return true;
     }
 }

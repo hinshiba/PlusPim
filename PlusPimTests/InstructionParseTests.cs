@@ -2,6 +2,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using Xunit;
 
 namespace PlusPimTests;
@@ -158,6 +159,104 @@ public class InstructionParseTests {
     [InlineData("blez")]
     public void TryParse_BranchZero_Malformed_ReturnsFalse(string assemblyLine) {
         Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    // ===== Register operands =====
+
+    [Theory]
+    [InlineData("add $t0, $t1, $31")]
+    [InlineData("add $t0, $t1, $0")]
+    [InlineData("add $t0, $t1, $9")]
+    [InlineData("add $zero, $at, $ra")]
+    [InlineData("add $fp, $sp, $gp")]
+    public void TryParse_ValidRegister_Succeeds(string assemblyLine) {
+        Assert.True(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Theory]
+    [InlineData("add $t0, $t1, $32")]
+    [InlineData("add $t0, $t1, $40")]
+    [InlineData("add $t0, $t1, $01")]
+    [InlineData("add $t0, $t1, $08")]
+    [InlineData("add $t0, $t1, $00")]
+    [InlineData("add $t0, $t1, $-1")]
+    [InlineData("add $T0, $t1, $t2")]
+    [InlineData("add $t0, $ZERO, $t2")]
+    [InlineData("add $t0, $Sp, $t2")]
+    [InlineData("add $t0, $s8, $t2")]
+    [InlineData("jr $40")]
+    [InlineData("lw $t0, 0($32)")]
+    [InlineData("addi $40, $t0, 1")]
+    [InlineData("beq $t0, $99, label")]
+    public void TryParse_InvalidRegister_ReturnsFalse(string assemblyLine) {
+        Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Theory]
+    [InlineData("li $40, 1")]
+    [InlineData("li $T0, 1")]
+    [InlineData("move $t0, $32")]
+    [InlineData("la $08, mydata")]
+    public void TryParseAll_PseudoInvalidRegister_ReturnsFalse(string assemblyLine) {
+        SymbolTable symbolTable = new();
+        _ = symbolTable.Add(new Label("mydata", new Address(0x10000004)));
+
+        Assert.False(InstructionRegistry.Default.TryParseAll(assemblyLine, 1, symbolTable, out _));
+    }
+
+    [Theory]
+    [InlineData("mfc0 $k0, $14")]
+    [InlineData("mtc0 $k0, $12")]
+    [InlineData("mfc0 $26, $0")]
+    [InlineData("mtc0 $t0, $31")]
+    public void TryParse_Cp0NumberOperand_Succeeds(string assemblyLine) {
+        Assert.True(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Theory]
+    [InlineData("mfc0 $k0, $sp")]
+    [InlineData("mtc0 $k0, $zero")]
+    [InlineData("mfc0 $k0, $32")]
+    [InlineData("mfc0 $k0, $014")]
+    [InlineData("mfc0 $K0, $14")]
+    public void TryParse_Cp0InvalidOperand_ReturnsFalse(string assemblyLine) {
+        Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    // ===== Memory operands =====
+
+    [Theory]
+    [InlineData("sw $t0, ($sp)")]
+    [InlineData("lw $t0, ( $sp )")]
+    [InlineData("lw $t0, -0x4($sp)")]
+    [InlineData("lb $t0, 4( $t1)")]
+    [InlineData("lwl $t0, ($t1)")]
+    [InlineData("swr $t0, ($t1 )")]
+    public void TryParse_MemoryOperand_Succeeds(string assemblyLine) {
+        Assert.True(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Theory]
+    [InlineData("sw $t0, $sp")]
+    [InlineData("sw $t0, ()")]
+    [InlineData("sw $t0, 4 ($sp)")]
+    [InlineData("sw $t0, 0x10000($sp)")]
+    [InlineData("sw $t0, ($sp")]
+    public void TryParse_MemoryOperand_Malformed_ReturnsFalse(string assemblyLine) {
+        Assert.False(InstructionRegistry.Default.TryParse(assemblyLine, 1, out _));
+    }
+
+    [Fact]
+    public void Execute_MemoryOperandWithoutOffset_UsesBaseAddress() {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext();
+        context.Registers[RegisterID.Sp] = 0x10000010;
+        context.Registers[RegisterID.T0] = 0x12345678;
+
+        _ = TestHelpers.ParseInstruction("sw $t0, ($sp)")!.Execute(context);
+        _ = TestHelpers.ParseInstruction("lw $t1, ( $sp )")!.Execute(context);
+
+        Assert.Equal(0x12345678u, context.ReadMemoryBytes(new Address(0x10000010), 4, false));
+        Assert.Equal(0x12345678u, context.Registers[RegisterID.T1]);
     }
 
     [Fact]

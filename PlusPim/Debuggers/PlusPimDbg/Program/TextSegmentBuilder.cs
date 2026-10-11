@@ -1,45 +1,39 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
 
-internal sealed class TextSegmentBuilder(Address baseAddr, ILogger logger) {
+internal sealed class TextSegmentBuilder(ILogger logger) {
     private readonly List<IInstruction> _instructions = [];
+    private readonly List<string> _errors = [];
 
     /// <summary>
-    /// テキストセグメントの1行を解析・展開する
+    /// シンボルを解決できなかった行のエラー
     /// </summary>
-    /// <param name="line">トリム済みの文字列</param>
+    public IReadOnlyList<string> Errors => this._errors;
+
+    /// <summary>
+    /// パス1で解析済みの1行のシンボルを解決して命令列を追加する
+    /// </summary>
+    /// <remarks>シンボルを解決できなくても<see cref="ParsedLine.Size"/>個の命令を追加し，エラーを記録する</remarks>
+    /// <param name="line">パス1で解析済みの行</param>
     /// <param name="lineNumber">1-basedの行番号</param>
-    /// <param name="symbolTable">解決済みのシンボルテーブル</param>
-    public void AddLine(string line, int lineNumber, SymbolTable symbolTable) {
-        // アセンブラ指令を無視
-        if(line.StartsWith('.')) {
-            return;
+    /// <param name="symbols">シンボルの解決に使う</param>
+    /// <param name="fileName">エラーメッセージに使うファイル名</param>
+    public void Add(ParsedLine line, int lineNumber, ISymbolResolver symbols, string fileName) {
+        IInstruction[] instructions = line.Materialize(symbols, out string? unresolved);
+        if(unresolved is not null) {
+            this._errors.Add($"{fileName}:{lineNumber} Undefined label '{unresolved}'");
         }
 
-        // 命令をパース
-        if(InstructionRegistry.Default.TryParseAll(line, lineNumber, symbolTable, out IInstruction[]? instructions)) {
-            this._instructions.AddRange(instructions);
-            logger.Debug("TextSegmentBuilder", $"Parsed: {line} ({instructions.Length} instruction(s))");
-        } else {
-            logger.Warning("TextSegmentBuilder", $"Parse failed for Instruction: {line}");
-        }
-    }
-
-    public InstructionIndex CurrentInstructionIndex() {
-        return new(this._instructions.Count);
-    }
-
-    public Address CurrentAddr() {
-        return Address.FromInstructionIndex(this.CurrentInstructionIndex(), baseAddr);
+        this._instructions.AddRange(instructions);
+        logger.Debug("TextSegmentBuilder", $"{fileName}:{lineNumber} {instructions.Length} instruction(s)");
     }
 
     public TextSegment Build() {
-        return new TextSegment(this._instructions, baseAddr);
+        return new TextSegment(this._instructions);
     }
 
 
