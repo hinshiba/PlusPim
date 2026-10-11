@@ -1,9 +1,7 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 
@@ -21,50 +19,32 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 /// ori $rt, $zero, lower16(imm)
 /// </code>
 /// </remarks>
-internal sealed partial class LiInstructionParser: IPseudoInstructionParser {
+internal sealed class LiInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "li";
 
-    [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<imm>\S+)$")]
-    private static partial Regex LiOperandsPattern();
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
-    public int GetExpansionSize(string operands) {
-        // TryExpandを呼び出して展開サイズを計算する
-        // falseならinstructionsはnullになるため，結果を確認しなくてもよい
-        _ = this.TryExpand(operands, 0, new SymbolTable(), out IInstruction[]? instructions);
-        return instructions?.Length ?? 0;
-    }
-
-    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                          [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = null;
-
-        Match match = LiOperandsPattern().Match(operands);
-        if(!match.Success) {
+        if(!OperandParser.TryParseRegTokenOperands(operands, out RegisterID rt, out string? token)) {
             return false;
         }
 
-        if(!Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rt)) {
+        // 32bitの可能性があるため，Immediate.TryParse32を使う
+        if(!Immediate.TryParse32(token, out uint imm)) {
             return false;
         }
 
-        // 32bitの可能性があるため，Immediate.TryParseではなくint.TryParseを使う
-        if(!int.TryParse(match.Groups["imm"].Value, null, out int imm)) {
-            return false;
-        }
-
-        ushort upper = (ushort)((uint)imm >> 16);
+        ushort upper = (ushort)(imm >> 16);
         ushort lower = (ushort)(imm & 0xFFFF);
 
-        instructions =
-            (upper == 0) ?
-            [
-                InstructionFactory.Ori(rt, RegisterID.Zero, new Immediate(lower), lineNumber),
-            ] :
-            [
+        // 命令数は値だけで決まる
+        line = (upper == 0)
+            ? ParsedLine.Fixed(
+                InstructionFactory.Ori(rt, RegisterID.Zero, new Immediate(lower), lineNumber))
+            : ParsedLine.Fixed(
                 // lui命令は下位ビットを0にするため先行する必要がある
                 InstructionFactory.Lui(rt, new Immediate(upper), lineNumber),
-                InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber),
-        ];
+                InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber));
         return true;
     }
 }

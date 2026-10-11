@@ -63,12 +63,21 @@ internal class Program {
             DefaultValueFactory = (_) => false
         };
 
+        Option<bool> strictArg = new(
+            name: "--strict"
+            ) {
+            Required = false,
+            Description = "Fail to load when a line cannot be parsed or a directive is unsupported (default: false)",
+            DefaultValueFactory = (_) => false
+        };
+
         cmd.Arguments.Add(fileArg);
         cmd.Options.Add(verboseArg);
         cmd.Options.Add(debugArg);
         cmd.Options.Add(portArg);
         cmd.Options.Add(attachArg);
         cmd.Options.Add(stdioArg);
+        cmd.Options.Add(strictArg);
 
 
         // 実際に解析
@@ -101,7 +110,7 @@ internal class Program {
             logger.Debug("Program", "Debug Launch");
 
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(files, logger);
+            Application.Application app = new(files, logger, parseResult.GetValue(strictArg));
 
             if(parseResult.GetValue(stdioArg)) {
                 // stdio経由でDAPを話す．DAPに渡す前に元のstdin/stdoutストリームを確保する

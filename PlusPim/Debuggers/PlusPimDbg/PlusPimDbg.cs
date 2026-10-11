@@ -32,8 +32,12 @@ internal class PlusPimDbg: IDebugger {
     private readonly Stack<HistoryEntry> _history = new();
     private readonly HashSet<Address> _breakpoints = [];
 
-    internal PlusPimDbg(FileInfo[] files, ILogger logger) {
-        this._programs = new ParsedPrograms(files, logger);
+    /// <param name="files">すべての実行するファイル</param>
+    /// <param name="logger">ロガー</param>
+    /// <param name="strict">解析できない行と未対応の指令をエラーにするかどうか</param>
+    /// <exception cref="AssemblyException">アセンブルに失敗した場合</exception>
+    internal PlusPimDbg(FileInfo[] files, ILogger logger, bool strict = false) {
+        this._programs = new ParsedPrograms(files, logger, strict);
 
         // mainがなければ暫定でテキストセグメントの先頭から開始する
         Address startAddr = TextSegment.TextSegmentBase;

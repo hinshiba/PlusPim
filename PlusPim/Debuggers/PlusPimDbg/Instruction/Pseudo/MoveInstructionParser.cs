@@ -1,6 +1,5 @@
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Instructions.Factories;
 using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
-using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,21 +17,14 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 internal sealed class MoveInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "move";
 
-    public int GetExpansionSize(string operands) {
-        return 1;
-    }
-
-    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                          [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = null;
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
         if(!OperandParser.TryParse2RegOperands(operands, out RegisterID rt, out RegisterID rs)) {
             return false;
         }
 
-        instructions = [
-            InstructionFactory.Addu(rt, rs, RegisterID.Zero, lineNumber),
-        ];
+        line = ParsedLine.Fixed(InstructionFactory.Addu(rt, rs, RegisterID.Zero, lineNumber));
         return true;
     }
 }

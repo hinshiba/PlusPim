@@ -3,7 +3,6 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 
@@ -17,43 +16,35 @@ namespace PlusPim.Debuggers.PlusPimDbg.Instruction.Pseudo;
 /// ori $rt, $rt, lower16(addr)
 /// </code>
 /// </remarks>
-internal sealed partial class LaInstructionParser: IPseudoInstructionParser {
+internal sealed class LaInstructionParser: IPseudoInstructionParser {
     public string Mnemonic => "la";
 
-    [GeneratedRegex(@"^\$(?<rt>\w+),\s*(?<label>\w+)$")]
-    private static partial Regex LaOperandsPattern();
+    public bool TryParse(string operands, int lineNumber, [MaybeNullWhen(false)] out ParsedLine line) {
+        line = null;
 
-    public int GetExpansionSize(string operands) {
-        return 2;
-    }
-
-    public bool TryExpand(string operands, int lineNumber, SymbolTable symbolTable,
-                          [MaybeNullWhen(false)] out IInstruction[] instructions) {
-        instructions = null;
-
-        Match match = LaOperandsPattern().Match(operands);
-        if(!match.Success) {
+        if(!OperandParser.TryParseRegTokenOperands(operands, out RegisterID rt, out string? labelName)) {
             return false;
         }
 
-        if(!Enum.TryParse<RegisterID>(match.Groups["rt"].Value, true, out RegisterID rt)) {
-            return false;
-        }
+        // ラベルはパス2で解決するが，未定義でも配置をずらさないよう常に2命令にする
+        line = ParsedLine.Deferred(2, (ISymbolResolver symbols, out string? unresolved) => {
+            uint addr = 0;
+            if(symbols.Resolve(labelName) is { } label) {
+                addr = label.Addr.Addr;
+                unresolved = null;
+            } else {
+                unresolved = labelName;
+            }
 
-        string labelName = match.Groups["label"].Value;
-        if(symbolTable.Resolve(labelName) is not { } label) {
-            return false;
-        }
+            ushort upper = (ushort)(addr >>> 16);
+            ushort lower = (ushort)(addr & 0xFFFF);
 
-        uint addr = label.Addr.Addr;
-        ushort upper = (ushort)(addr >>> 16);
-        ushort lower = (ushort)(addr & 0xFFFF);
-
-        instructions = [
-            // lui命令は下位ビットを0にするため先行する必要がある
-            InstructionFactory.Lui(rt, new Immediate(upper), lineNumber),
-            InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber),
-        ];
+            return [
+                // lui命令は下位ビットを0にするため先行する必要がある
+                InstructionFactory.Lui(rt, new Immediate(upper), lineNumber),
+                InstructionFactory.Ori(rt, rt, new Immediate(lower), lineNumber),
+            ];
+        });
         return true;
     }
 }

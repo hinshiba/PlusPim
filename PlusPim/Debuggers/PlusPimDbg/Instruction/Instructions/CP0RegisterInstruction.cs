@@ -52,9 +52,8 @@ internal sealed class CP0RegisterInstruction(
 
     internal static Func<string, IInstructionParser> CreateParser(bool isFrom) {
         return mnemonic => new FuncInstructionParser(mnemonic, (operands, lineNumber) => {
-            return OperandParser.TryParse2RegOperands(operands, out RegisterID rt, out RegisterID rd)
-            // $nでもC#のenumの仕様としてパースされるので，既存のパーサーを使いまわしてintにキャストする
-                ? new CP0RegisterInstruction(rt, (int)rd, isFrom, lineNumber)
+            return OperandParser.TryParseCp0Operands(operands, out RegisterID rt, out int cp0Reg)
+                ? new CP0RegisterInstruction(rt, cp0Reg, isFrom, lineNumber)
                 : (IInstruction?)null;
         });
     }

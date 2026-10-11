@@ -7,11 +7,10 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// テキストセグメントを表現する
 /// </summary>
 /// <param name="instructions">命令列</param>
-/// <param name="addr">開始アドレス</param>
 /// <remarks>
 /// カーネルテキストセグメントもこのクラスで表現する
 /// </remarks>
-internal sealed class TextSegment(List<IInstruction> instructions, Address addr) {
+internal sealed class TextSegment(List<IInstruction> instructions) {
     /// <summary>
     /// (ユーザー)テキストセグメントの開始アドレス
     /// </summary>
@@ -21,11 +20,6 @@ internal sealed class TextSegment(List<IInstruction> instructions, Address addr)
     /// カーネルテキストセグメントの開始アドレス
     /// </summary>
     public static readonly Address KernelTextSegmentBase = new(0x80000180);
-
-    /// <summary>
-    /// このインスタンスのテキストセグメントの開始アドレス
-    /// </summary>
-    public readonly Address BaseAddress = addr;
 
     public ReadOnlySpan<IInstruction> Instructions => this._instructions.AsSpan();
     private readonly IInstruction[] _instructions = [.. instructions];

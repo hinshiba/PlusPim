@@ -201,6 +201,9 @@ public class DataSegmentTests {
 
         Assert.Equal(Base + 4, Resolve(program, "msg"));
         // la は lui/ori の2命令に展開される
+        Assert.Equal(2, program.TextInstructionCount);
+        program.Assemble(new SymbolTable());
+        Assert.Empty(program.Errors);
         Assert.Equal(2, program.TextSegment.Instructions.Length);
     }
 
