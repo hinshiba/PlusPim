@@ -137,7 +137,7 @@ dotnet build PlusPim.slnx
 dotnet test PlusPim.slnx
 ```
 
-単体の実行ファイルを作る場合は `dotnet publish` を使います (`<rid>` は `win-x64` や `linux-x64`):
+単体の実行ファイルを作る場合は `dotnet publish` を使います (`<rid>` は `win-x64`，`linux-x64`，`osx-x64`，`osx-arm64` など):
 
 ```sh
 dotnet publish PlusPim/PlusPim.csproj -c Release -r <rid> --self-contained -o ./out

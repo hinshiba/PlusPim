@@ -41,13 +41,13 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 ## Launch Configuration
 
-| Property            | Type       | Default       | Description                                                                                                                                                      |
-| ------------------- | ---------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `program`           | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                                                                         |
-| `stopOnEntry`       | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                      |
+| Property            | Type       | Default       | Description                                                                                                                                                                 |
+| ------------------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `program`           | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                                                                                    |
+| `stopOnEntry`       | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                                  |
 | `forceTerminalUtf8` | `boolean`  | `true`        | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
-| `args`              | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                              |
-| `trace`             | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                                                                                |
+| `args`              | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                                         |
+| `trace`             | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                                                                                           |
 
 ## How It Works
 
@@ -63,7 +63,6 @@ The program's standard input and output are the terminal itself, so you type inp
 
 - The terminal is closed by VS Code when PlusPim exits, so the program's output disappears when the session ends.
 - On Windows, UTF-8 output is garbled when `forceTerminalUtf8` is `false` and the console code page is not UTF-8 (for example Shift_JIS). The code page is restored when PlusPim exits, but not if PlusPim is killed forcibly.
-- Only Windows (x64) and Linux (x64) are supported. macOS is not available.
 - Pseudo-instruction hints are only shown during a debug session, because the expansion needs the assembled program.
 
 ## Development
@@ -80,13 +79,19 @@ bun install
 bun run compile
 ```
 
-| Command                        | Description                                                                  |
-| ------------------------------ | ---------------------------------------------------------------------------- |
-| `bun run package:win32-x64`    | Publish the PlusPim binary for `win-x64` and build a platform-specific VSIX. |
-| `bun run package:linux-x64`    | Same for `linux-x64`.                                                        |
-| `bun run dotnet:publish:win`   | Publish the `win-x64` binary to `bin/win-x64` only (no VSIX).                |
-| `bun run dotnet:publish:linux` | Publish the `linux-x64` binary to `bin/linux-x64` only (no VSIX).            |
-| `bun run dotnet:debug:win`     | Build a Debug binary to `bin/debug` (never included in a VSIX).              |
+| Command                            | Description                                                                  |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| `bun run package:win32-x64`        | Publish the PlusPim binary for `win-x64` and build a platform-specific VSIX. |
+| `bun run package:linux-x64`        | Same for `linux-x64`.                                                        |
+| `bun run package:darwin-x64`       | Same for `osx-x64` (Intel Mac).                                              |
+| `bun run package:darwin-arm64`     | Same for `osx-arm64` (Apple Silicon).                                        |
+| `bun run dotnet:publish:win`       | Publish the `win-x64` binary to `bin/win-x64` only (no VSIX).                |
+| `bun run dotnet:publish:linux`     | Publish the `linux-x64` binary to `bin/linux-x64` only (no VSIX).            |
+| `bun run dotnet:publish:mac-x64`   | Publish the `osx-x64` binary to `bin/osx-x64` only (no VSIX).                |
+| `bun run dotnet:publish:mac-arm64` | Publish the `osx-arm64` binary to `bin/osx-arm64` only (no VSIX).            |
+| `bun run dotnet:debug:win`         | Build a Debug binary to `bin/debug` (never included in a VSIX).              |
+
+Release publishes are compiled with ReadyToRun. Cross-publishing from another OS works, but the binaries are unsigned, so macOS may require `xattr -d com.apple.quarantine` on first run.
 
 ## License
 

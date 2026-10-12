@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 起動構成に `stopOnEntry` を追加
 - 疑似命令の展開結果を返す DAP のカスタム要求を追加
 - 実行時エラーのメッセージに `RuntimeError:` の接頭辞を付与
+- macOS 向けバイナリ (`osx-x64`, `osx-arm64`) を `dotnet publish` で出力できるように
 
 ### Changed
 

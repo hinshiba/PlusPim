@@ -117,8 +117,12 @@
 	"scripts": {
 		"package:win32-x64": "bun scripts/vsix.ts win32-x64",
 		"package:linux-x64": "bun scripts/vsix.ts linux-x64",
+		"package:darwin-x64": "bun scripts/vsix.ts darwin-x64",
+		"package:darwin-arm64": "bun scripts/vsix.ts darwin-arm64",
 		"dotnet:publish:win": "bun scripts/vsix.ts --publish-only win32-x64",
 		"dotnet:publish:linux": "bun scripts/vsix.ts --publish-only linux-x64",
+		"dotnet:publish:mac-x64": "bun scripts/vsix.ts --publish-only darwin-x64",
+		"dotnet:publish:mac-arm64": "bun scripts/vsix.ts --publish-only darwin-arm64",
 		"dotnet:debug:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
