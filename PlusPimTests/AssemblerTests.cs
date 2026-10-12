@@ -138,6 +138,77 @@ public class AssemblerTests {
         Assert.Equal(0, InstructionRegistry.Default.GetInstructionCount("nop $t0"));
     }
 
+    // ===== 文字列指令のASCII判定 =====
+
+    [Theory]
+    [InlineData(".ascii \"あ\"")]
+    [InlineData(".asciiz \"é\"")]
+    [InlineData(".asciiz \"🎉\"")]
+    [InlineData(".ASCIIZ \"a\\tあ\"")]
+    public void StringDirective_NonAscii_ThrowsWithFileAndLine(string directive) {
+        foreach(bool strict in new[] { false, true }) {
+            using Assembled assembled = new([$".data\nok: .asciiz \"ok\"\n{directive}"]);
+
+            AssemblyException ex = Assert.Throws<AssemblyException>(() => assembled.Build(strict));
+
+            string error = Assert.Single(ex.Errors);
+            Assert.Contains($"{assembled.Files[0].Name}:3", error);
+        }
+    }
+
+    [Fact]
+    public void StringDirective_NonAscii_AllErrorsAreCollectedTogether() {
+        AssemblyException ex = AssembleFails(
+            """
+            .data
+            a: .ascii "あ"
+            b: .asciiz "ok"
+            c: .asciiz "é"
+            .text
+            main:
+                la $t0, nowhere
+            """,
+            """
+            .data
+            d: .asciiz "🎉"
+            """);
+
+        // 1つ目のファイルの2行と未定義のラベル，2つ目のファイルの1行
+        Assert.Equal(4, ex.Errors.Count);
+        Assert.Contains(":2", ex.Errors[0]);
+        Assert.Contains(":4", ex.Errors[1]);
+        Assert.Contains(":7", ex.Errors[2]);
+        Assert.Contains("nowhere", ex.Errors[2]);
+        Assert.Contains(":2", ex.Errors[3]);
+    }
+
+    [Fact]
+    public void StringDirective_NonAsciiInComment_Assembles() {
+        using Assembled a = Assemble("""
+            .data
+            s: .asciiz "ok" # あ
+            # 🎉
+            .utf-8z "あ"
+            """);
+
+        Assert.DoesNotContain(a.Logs, log => log.Level >= LogLevel.Warning);
+        Assert.Equal((byte)'o', a.Programs.MemoryImage[a.Resolve("s")]);
+    }
+
+    [Fact]
+    public void Utf8z_Assembles_AndDoesNotWarn() {
+        using Assembled a = Assemble("""
+            .data
+            s: .utf-8z "あ"
+            t: .UTF-8Z "x"
+            """);
+
+        Address s = a.Resolve("s");
+        Assert.Equal([0xE3, 0x81, 0x82, 0x00], Enumerable.Range(0, 4).Select(i => a.Programs.MemoryImage[s + i]));
+        Assert.Equal(s + 4, a.Resolve("t"));
+        Assert.DoesNotContain(a.Logs, log => log.Level >= LogLevel.Warning);
+    }
+
     // ===== la =====
 
     [Fact]
@@ -279,7 +350,7 @@ public class AssemblerTests {
         FileInfo caller = TestHelpers.WriteTempAsm(CallerSource);
         FileInfo callee = TestHelpers.WriteTempAsm(CalleeSource);
         try {
-            PlusPimDbg debugger = new([caller, callee], Logger.Null);
+            PlusPimDbg debugger = new([caller, callee], Logger.Null, new InMemoryDebuggeeIO());
 
             // la (2命令)，jal，li，jr
             for(int i = 0; i < 5; i++) {

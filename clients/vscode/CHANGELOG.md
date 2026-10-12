@@ -9,10 +9,36 @@
 - Inlay hints that show the machine instructions each pseudo-instruction
   expands to, during a debug session (setting
   `pluspim.inlayHints.pseudoInstructions`, default `true`)
+- `.utf-8z` data directive: places a string as UTF-8 bytes followed by a NUL byte
+- `forceTerminalUtf8` launch option (default `true`). The extension passes
+  `--force-terminal-utf8` to PlusPim, which switches the terminal to UTF-8
+  while it runs and restores it on exit (currently effective on Windows only)
 
 ### Changed
 
+- `.ascii` and `.asciiz` now reject non-ASCII characters with an assembly error
+  (always, regardless of `--strict`). Use `.utf-8z` for UTF-8 strings
 - Display name is now "PlusPim for VS Code"
+- The extension now listens on a loopback port chosen by the OS, and PlusPim
+  connects to it with `--connect`. The first connection is taken as the debug
+  session. This replaces the fixed port and the probe connection
+- Terminals are managed per debug session, so ending one session no longer
+  disposes the terminal of another
+- The program's standard input and output are passed through the terminal as
+  raw bytes, and no longer go through the Debug Console
+
+### Removed
+
+- `port` launch option, and the `--port` and `--stdio` command line options
+  (use `--connect <host:port>` or `--listen <host:port>`)
+
+### Fixed
+
+- `print_char` and `print_string` write raw bytes instead of re-encoding them,
+  so UTF-8 text printed byte by byte is no longer garbled when the terminal
+  decodes it as UTF-8
+- UTF-8 program output is no longer garbled on Windows terminals using a legacy
+  code page (for example Shift_JIS)
 
 ## [0.2.0] - 2026-08-31
 

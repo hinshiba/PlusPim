@@ -48,7 +48,7 @@ public class MemoryReadTests {
               .space 16
             """);
         try {
-            PlusPimDbg debugger = new([first, second], Logger.Null);
+            PlusPimDbg debugger = new([first, second], Logger.Null, new InMemoryDebuggeeIO());
             Assert.Equal((0x10000000u, 5u + 16u), debugger.DataSegmentRange);
         } finally {
             first.Delete();

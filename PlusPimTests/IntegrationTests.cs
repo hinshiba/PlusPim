@@ -1,6 +1,8 @@
 using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg;
+using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Logging;
 using Xunit;
 
 namespace PlusPimTests;
@@ -324,6 +326,61 @@ public class IntegrationTests {
             Assert.Equal(pcBefore, pcAfter);
             Assert.Equal(hiBefore, hiAfter);
             Assert.Equal(loBefore, loAfter);
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    [Fact]
+    public void Syscall_PrintString_WritesUtf8BytesOfUtf8zLiteral() {
+        // .utf-8z のUTF-8での配置から，ハンドラの runtime_call! による出力までを通しで確認する
+        string asm = """
+            .data
+            msg:
+                .utf-8z "あ"
+            .text
+            main:
+                la      $a0,    msg
+                li      $v0,    4
+                syscall
+            .ktext
+            __exception_handler:
+                runtime_call!
+                mfc0    $k0,    $14
+                addiu   $k0,    $k0,    4
+                mtc0    $k0,    $14
+                eret
+            """;
+        InMemoryDebuggeeIO io = new();
+        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm, io);
+        try {
+            for(int i = 0; i < 20 && io.OutputBytes.Length == 0; i++) {
+                _ = debugger.Step();
+            }
+
+            Assert.Equal([0xE3, 0x81, 0x82], io.OutputBytes);
+            Assert.Null(debugger.GetRuntimeError());
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    [Fact]
+    public void Load_AsciizWithNonAscii_FailsWithAssemblyException() {
+        string asm = """
+            .data
+            msg:
+                .asciiz "あ"
+            .text
+            main:
+                nop
+            """;
+        FileInfo tempFile = TestHelpers.WriteTempAsm(asm);
+        try {
+            AssemblyException ex = Assert.Throws<AssemblyException>(() => new PlusPimDbg([tempFile], Logger.Null, new InMemoryDebuggeeIO()));
+
+            string error = Assert.Single(ex.Errors);
+            Assert.Contains($"{tempFile.Name}:3", error);
         } finally {
             tempFile.Delete();
         }

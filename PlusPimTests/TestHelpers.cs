@@ -42,13 +42,14 @@ internal static class TestHelpers {
     /// <summary>
     /// 単体テスト用のRuntimeContextを構築する
     /// </summary>
-    public static RuntimeContext CreateRuntimeContext(SymbolTable? symbolTable = null) {
+    public static RuntimeContext CreateRuntimeContext(SymbolTable? symbolTable = null, IDebuggeeIO? io = null) {
         SymbolTable table = symbolTable ?? new SymbolTable();
         return new RuntimeContext(
             Logger.Null.ToAction("Test"),
             (name, _, _) => table.Resolve(name),
             TextSegment.TextSegmentBase,
-            new Label("test", new Address(0x400000))
+            new Label("test", new Address(0x400000)),
+            io ?? new InMemoryDebuggeeIO()
         );
     }
 
@@ -124,9 +125,9 @@ internal static class TestHelpers {
     /// <summary>
     /// アセンブリ文字列からPlusPimDbgインスタンスを生成する
     /// </summary>
-    public static (PlusPimDbg Debugger, FileInfo TempFile) CreateDebugger(string asmContent) {
+    public static (PlusPimDbg Debugger, FileInfo TempFile) CreateDebugger(string asmContent, IDebuggeeIO? io = null) {
         FileInfo tempFile = WriteTempAsm(asmContent);
-        PlusPimDbg debugger = new([tempFile], Logger.Null);
+        PlusPimDbg debugger = new([tempFile], Logger.Null, io ?? new InMemoryDebuggeeIO());
         return (debugger, tempFile);
     }
 

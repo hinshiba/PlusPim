@@ -33,7 +33,7 @@ public class PseudoExpansionTests {
               NOP
             """);
         try {
-            PlusPimDbg debugger = new([first, second], Logger.Null);
+            PlusPimDbg debugger = new([first, second], Logger.Null, new InMemoryDebuggeeIO());
 
             Assert.Equal([
                 (6, "la", new[] { (0x00400000u, "lui $t0, 0x1000"), (0x00400004u, "ori $t0, $t0, 0x0000") }),

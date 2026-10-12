@@ -173,15 +173,16 @@ internal partial class ParsedProgram {
         this.KernelTextInstructionCount = this._parsedKernelTextLines.Sum(parsed => parsed.Line.Size);
 
         // データセグメント
-        DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger);
+        DataSegmentBuilder dataSegmentBuilder = new(dataSegmentBase, logger, file.Name);
         foreach(SourceLine sourceLine in dataLines) {
             if(sourceLine.IsLabel) {
                 dataSegmentBuilder.AddLabel(sourceLine.Text, sourceLine.LineNumber);
             } else {
-                dataSegmentBuilder.AddLine(sourceLine.Text);
+                dataSegmentBuilder.AddLine(sourceLine.Text, sourceLine.LineNumber);
             }
         }
         this.DataSegment = dataSegmentBuilder.Build();
+        this._errors.AddRange(dataSegmentBuilder.Errors);
 
         // ラベルのアドレスは直後のデータの配置位置で確定するため，Build後にシンボルテーブルへ登録する
         foreach((Label label, int lineNumber) in dataSegmentBuilder.ResolvedLabels) {

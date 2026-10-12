@@ -41,26 +41,28 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 ## Launch Configuration
 
-| Property      | Type       | Default       | Description                                                                                                 |
-| ------------- | ---------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
-| `program`     | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                    |
-| `stopOnEntry` | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end. |
-| `port`        | `number`   | `4711`        | TCP port used for the DAP connection.                                                                       |
-| `args`        | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                         |
-| `trace`       | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                           |
+| Property            | Type       | Default       | Description                                                                                                                                                      |
+| ------------------- | ---------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `program`           | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                                                                         |
+| `stopOnEntry`       | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                      |
+| `forceTerminalUtf8` | `boolean`  | `true`        | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
+| `args`              | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                              |
+| `trace`             | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                                                                                |
 
 ## How It Works
 
 When a debug session starts, the extension:
 
-1. Spawns the bundled `PlusPim` binary in a VS Code terminal, passing the target file and options.
-2. Waits for the debug adapter to start listening on the configured TCP port (default `4711`).
-3. Connects VS Code to the adapter via `DebugAdapterServer` over TCP.
+1. Starts listening on a free loopback port chosen by the OS.
+2. Spawns the bundled `PlusPim` binary in a VS Code terminal with `--connect 127.0.0.1:<port>`, passing the target file and options.
+3. Takes the first connection from PlusPim as the debug session. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
 
-On session termination, the terminal is automatically disposed.
+The program's standard input and output are the terminal itself, so you type input there and the output is written there as raw bytes. Non-ASCII output is shown correctly only if the terminal decodes it as UTF-8. By default the extension asks PlusPim to switch the terminal to UTF-8 while it runs (`forceTerminalUtf8`); if you turn that off, the terminal itself must decode UTF-8.
 
 ## Known Limitations
 
+- The terminal is closed by VS Code when PlusPim exits, so the program's output disappears when the session ends.
+- On Windows, UTF-8 output is garbled when `forceTerminalUtf8` is `false` and the console code page is not UTF-8 (for example Shift_JIS). The code page is restored when PlusPim exits, but not if PlusPim is killed forcibly.
 - Only Windows (x64) and Linux (x64) are supported. macOS is not available.
 - Pseudo-instruction hints are only shown during a debug session, because the expansion needs the assembled program.
 

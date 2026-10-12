@@ -37,6 +37,7 @@ PlusPimは，Debug Adapter Protocolに対応したMIPSアセンブリコード�
 `エディタUI (VS Code) -> DebugAdapter -> IApplication <- Application -> IDebugger <- PlusPimDbg`
 
 - **EditorController (`DebugAdapter`)**: DAPを実装し，VS Codeクライアントと通信します．DAPリクエストを`IApplication`インターフェースへの呼び出しに変換します．
+- **EditorController (`Transport`)**: DAPの通信路を確立します．`--connect`でクライアントへ接続するか，`--listen`でクライアントの接続を待ちます．デバッギの標準入出力とは別の通信路を使います．詳細は[doc/connection.md](doc/connection.md)を参照してください．
 - **Application (`IApplication`)**: アプリケーションのコアロジックを定義し，エディタ向けコンポーネントとデバッガバックエンドの間の橋渡しをします．
 - **Debugger (`IDebugger`)**: デバッグエンジンのインターフェースで，異なるデバッガバックエンドを交換可能にします．
 - **PlusPimDbg**: `IDebugger`インターフェースの現在の実装で，MIPS命令パーサーと実行エンジンを含みます．

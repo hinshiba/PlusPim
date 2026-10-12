@@ -1,9 +1,10 @@
+using PlusPim.Application;
 using PlusPim.EditorController.DebugAdapter;
+using PlusPim.EditorController.Transport;
 using PlusPim.Logging;
+using PlusPim.Terminal;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
 namespace PlusPim;
 
@@ -39,12 +40,19 @@ internal class Program {
             DefaultValueFactory = (_) => false
         };
 
-        Option<int> portArg = new(
-            name: "--port"
+        // --debug のときはどちらか一方が必須．検証は --debug の分岐で行う
+        Option<string?> connectArg = new(
+            name: "--connect"
             ) {
             Required = false,
-            Description = "Port to listen on for debug adapter connections (default: 4711)",
-            DefaultValueFactory = (_) => 4711
+            Description = "Connect to the DAP client listening at host:port (debug mode)"
+        };
+
+        Option<string?> listenArg = new(
+            name: "--listen"
+            ) {
+            Required = false,
+            Description = "Listen for the DAP client at host:port; port 0 picks a free port and the address is announced on stderr (debug mode)"
         };
 
         Option<bool> attachArg = new(
@@ -52,14 +60,6 @@ internal class Program {
             ) {
             Required = false,
             Description = "Attach a .NET debugger on startup (default: false)",
-            DefaultValueFactory = (_) => false
-        };
-
-        Option<bool> stdioArg = new(
-            name: "--stdio"
-            ) {
-            Required = false,
-            Description = "Use stdin/stdout for DAP transport instead of TCP (default: false)",
             DefaultValueFactory = (_) => false
         };
 
@@ -71,13 +71,22 @@ internal class Program {
             DefaultValueFactory = (_) => false
         };
 
+        Option<bool> forceTerminalUtf8Arg = new(
+            name: "--force-terminal-utf8"
+            ) {
+            Required = false,
+            Description = "Switch the terminal to UTF-8 while PlusPim runs and restore it on exit, where supported (currently Windows only; no effect elsewhere) (default: false)",
+            DefaultValueFactory = (_) => false
+        };
+
         cmd.Arguments.Add(fileArg);
         cmd.Options.Add(verboseArg);
         cmd.Options.Add(debugArg);
-        cmd.Options.Add(portArg);
+        cmd.Options.Add(connectArg);
+        cmd.Options.Add(listenArg);
         cmd.Options.Add(attachArg);
-        cmd.Options.Add(stdioArg);
         cmd.Options.Add(strictArg);
+        cmd.Options.Add(forceTerminalUtf8Arg);
 
 
         // 実際に解析
@@ -109,49 +118,31 @@ internal class Program {
             // デバッガモードで起動する
             logger.Debug("Program", "Debug Launch");
 
-            FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(files, logger, parseResult.GetValue(strictArg));
-
-            if(parseResult.GetValue(stdioArg)) {
-                // stdio経由でDAPを話す．DAPに渡す前に元のstdin/stdoutストリームを確保する
-                Stream stdin = Console.OpenStandardInput();
-                Stream stdout = Console.OpenStandardOutput();
-                logger.Debug("Program", "Using stdio transport for DAP");
-
-                DebugAdapter adapter = new(stdin, stdout, app, logger);
-
-                // デバッギのConsole.WriteがDAPストリームを汚染しないようにOutputEventへ転送
-                Console.SetOut(new DebuggeeOutputWriter(adapter));
-                // stdinはDAPが占有するため，デバッギからの読み取りは空文字列扱いに劣化させる
-                Console.SetIn(TextReader.Null);
-
-                await adapter.WaitForSessionEnd();
-            } else {
-                Socket dapSocket = new(SocketType.Stream, ProtocolType.Tcp);
-                dapSocket.Bind(new IPEndPoint(IPAddress.Loopback, parseResult.GetValue(portArg)));
-                dapSocket.Listen();
-                logger.Debug("Program", "Socket created");
-
-                // プローブ接続（waitForPort）を読み飛ばし，本番DAP接続を待つ
-                Socket clientSocket;
-                while(true) {
-                    clientSocket = await dapSocket.AcceptAsync();
-                    await Task.Delay(50);
-                    if(clientSocket.Poll(0, SelectMode.SelectRead) && clientSocket.Available == 0) {
-                        clientSocket.Dispose();
-                        logger.Debug("Program", "Probe connection discarded");
-                        continue;
-                    }
-                    break;
-                }
-
-                await using NetworkStream stream = new(clientSocket, ownsSocket: true);
-
-                logger.Debug("Program", "Socket connected");
-
-                DebugAdapter adapter = new(stream, stream, app, logger);
-                await adapter.WaitForSessionEnd();
+            if(!DapTransportFactory.TryCreate(parseResult.GetValue(connectArg), parseResult.GetValue(listenArg), logger, Console.Error, out IDapTransport? transport, out string? error)) {
+                Console.Error.WriteLine(error);
+                return 1;
             }
+
+            // 引数の検証と通信路の生成が済んでから端末の符号化の切り替える
+            using TerminalUtf8Guard terminalGuard = TerminalUtf8Guard.Apply(TerminalUtf8Backends.Create(), parseResult.GetValue(forceTerminalUtf8Arg));
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => terminalGuard.Restore();
+
+            FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
+            Application.Application app = new(files, logger, StreamDebuggeeIO.OpenConsole(), parseResult.GetValue(strictArg));
+
+            // DAPはデバッギの標準入出力とは別の通信路で話す．stdin/stdoutはデバッギがそのまま使う
+            Stream dap;
+            try {
+                dap = await transport.OpenAsync();
+            } catch(DapTransportException e) {
+                Console.Error.WriteLine(e.Message);
+                return 1;
+            }
+            await using Stream dapStream = dap;
+            logger.Debug("Program", "DAP transport opened");
+
+            DebugAdapter adapter = new(dapStream, dapStream, app, logger);
+            await adapter.WaitForSessionEnd();
         } else {
             Console.Error.WriteLine("Non-debug mode is not implemented. Use --debug.");
             return 1;

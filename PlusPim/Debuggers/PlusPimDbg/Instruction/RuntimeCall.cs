@@ -3,6 +3,7 @@ using PlusPim.Debuggers.PlusPimDbg.Instruction.Parser;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
 using System.Globalization;
+using System.Text;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Instruction;
 
@@ -18,7 +19,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
 
     private readonly Stack<SyscallCode> _history = new();
     private readonly Stack<uint> _prevV0 = new();
-    private readonly Stack<string> _consumedReadInt = new();
+    private readonly Stack<byte[]> _consumedReadInt = new();
     private readonly Stack<int> _prevReadChar = new();
     private readonly Stack<ReadStringRecord> _prevReadString = new();
 
@@ -28,7 +29,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
     /// <param name="Address">書き込み先</param>
     /// <param name="PrevBytes">書き込み前の内容(書き込んだ範囲のみ)</param>
     /// <param name="Consumed">この命令が消費した入力(入力バッファへ戻した残りは含まない)</param>
-    private readonly record struct ReadStringRecord(Address Address, byte[] PrevBytes, string Consumed);
+    private readonly record struct ReadStringRecord(Address Address, byte[] PrevBytes, byte[] Consumed);
 
 
     public ExecuteResult Execute(RuntimeContext context) {
@@ -51,7 +52,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 context.Log($"RuntimeCall: print_int {context.Registers[RegisterID.A0]}");
 
                 // 符号付き32bit整数として出力する
-                Console.Write(((int)context.Registers[RegisterID.A0]).ToString(CultureInfo.InvariantCulture));
+                context.IO.Write(Encoding.ASCII.GetBytes(((int)context.Registers[RegisterID.A0]).ToString(CultureInfo.InvariantCulture)));
                 break;
 
             case SyscallCode.PrintString:
@@ -63,7 +64,8 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 for(byte b; (b = context.ReadMemoryByte(readAddr++)) != 0;) {
                     bytes.Add(b);
                 }
-                Console.Write(System.Text.Encoding.UTF8.GetString([.. bytes]));
+                // NULまでのバイト列をそのまま出力する
+                context.IO.Write([.. bytes]);
                 break;
 
             case SyscallCode.ReadInt:
@@ -73,10 +75,12 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 this._prevV0.Push(context.Registers[RegisterID.V0]);
 
                 // ユーザーからの入力を1行読み，整数として解釈する
-                string? intLine = PendingInput.For(context).ReadLine();
+                byte[]? intLine = context.PendingInput.ReadLine();
                 // Undoのために消費した入力を保存
-                this._consumedReadInt.Push(intLine ?? "");
-                if(int.TryParse(intLine?.TrimEnd('\r', '\n'), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)) {
+                this._consumedReadInt.Push(intLine ?? []);
+                // ASCII以外のバイトは'?'になり，整数として解釈できない
+                string? intText = intLine is null ? null : Encoding.ASCII.GetString(intLine).TrimEnd('\r', '\n');
+                if(int.TryParse(intText, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)) {
                     context.Registers[RegisterID.V0] = (uint)value;
                 } else {
                     context.Log("RuntimeCall: Invalid input for read_int, so set 0");
@@ -89,42 +93,32 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
 
                 Address writeAddr = new(context.Registers[RegisterID.A0]);
                 uint maxLength = context.Registers[RegisterID.A1];
-                PendingInput pending = PendingInput.For(context);
+                PendingInput pending = context.PendingInput;
 
                 if(maxLength == 0) {
                     // 何も書き込まず，入力も読まない
-                    this._prevReadString.Push(new(writeAddr, [], ""));
+                    this._prevReadString.Push(new(writeAddr, [], []));
                     break;
                 }
 
                 // 改行を含む1行を読む．EOFなら空
-                string line = pending.ReadLine() ?? "";
-                byte[] lineBytes = System.Text.Encoding.UTF8.GetBytes(line);
+                byte[] line = pending.ReadLine() ?? [];
 
-                // 書き込むのは最大 maxLength-1 バイトとNUL．実際の入力長を超えては扱わない
-                int written = (int)Math.Min((uint)lineBytes.Length, maxLength - 1);
+                // 書き込むのは最大 maxLength-1 バイトとNUL
+                int written = (int)Math.Min((uint)line.Length, maxLength - 1);
 
-                // 全体が書き込める文字までを消費とし，入りきらなかった分は次の読み取りのために残す
-                int consumedLength = 0;
-                int consumedBytes = 0;
-                foreach(System.Text.Rune rune in line.EnumerateRunes()) {
-                    consumedBytes += rune.Utf8SequenceLength;
-                    if(written < consumedBytes) {
-                        break;
-                    }
-                    consumedLength += rune.Utf16SequenceLength;
-                }
-                pending.PushFront(line[consumedLength..]);
+                // 入りきらなかった分は次の読み取りのために残す
+                pending.PushFront(line.AsSpan(written));
 
                 // Undoのために書き込む範囲(NUL込み)のメモリの内容を保存
                 byte[] prevBytes = new byte[written + 1];
                 for(int i = 0; i < prevBytes.Length; i++) {
                     prevBytes[i] = context.ReadMemoryByte(writeAddr + i);
                 }
-                this._prevReadString.Push(new(writeAddr, prevBytes, line[..consumedLength]));
+                this._prevReadString.Push(new(writeAddr, prevBytes, line[..written]));
 
                 for(int i = 0; i < written; i++) {
-                    context.WriteMemoryByte(writeAddr + i, lineBytes[i]);
+                    context.WriteMemoryByte(writeAddr + i, line[i]);
                 }
                 context.WriteMemoryByte(writeAddr + written, 0); // null terminator
                 break;
@@ -132,8 +126,8 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
             case SyscallCode.PrintChar:
                 context.Log($"RuntimeCall: print_char 0x{context.Registers[RegisterID.A0] & 0xFF:X2}");
 
-                // $a0の下位1バイトをそのまま文字として出力する
-                Console.Write((char)(context.Registers[RegisterID.A0] & 0xFF));
+                // $a0の下位1バイトをそのまま出力する
+                context.IO.Write([(byte)(context.Registers[RegisterID.A0] & 0xFF)]);
                 break;
 
             case SyscallCode.ReadChar:
@@ -142,8 +136,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                 // Undoのために現在の値を保存
                 this._prevV0.Push(context.Registers[RegisterID.V0]);
 
-                // 1文字だけ消費する．EOFなら-1
-                int ch = PendingInput.For(context).ReadChar();
+                int ch = context.PendingInput.ReadByte();
                 this._prevReadChar.Push(ch);
                 context.Registers[RegisterID.V0] = (uint)ch;
                 break;
@@ -167,15 +160,15 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
             case SyscallCode.ReadInt:
                 // レジスタの値の復元と，消費した入力の返却
                 context.Registers[RegisterID.V0] = this._prevV0.Pop();
-                PendingInput.For(context).PushFront(this._consumedReadInt.Pop());
+                context.PendingInput.PushFront(this._consumedReadInt.Pop());
                 break;
 
             case SyscallCode.ReadChar:
-                // レジスタの値の復元と，消費した文字の返却
+                // レジスタの値の復元と，消費したバイトの返却
                 context.Registers[RegisterID.V0] = this._prevV0.Pop();
                 int ch = this._prevReadChar.Pop();
                 if(0 <= ch) {
-                    PendingInput.For(context).PushFront(((char)ch).ToString());
+                    context.PendingInput.PushFront([(byte)ch]);
                 }
                 break;
 
@@ -187,7 +180,7 @@ internal sealed class RuntimeCall(int sourceLine): IInstruction {
                     context.WriteMemoryByte(addr++, b);
                 }
                 // 消費した入力の返却(後続の命令はUndo済みなので，残りは先頭にある)
-                PendingInput.For(context).PushFront(rec.Consumed);
+                context.PendingInput.PushFront(rec.Consumed);
                 break;
 
             case SyscallCode.Exit:
@@ -216,52 +209,4 @@ internal enum SyscallCode {
     Exit = 10,
     PrintChar = 11,
     ReadChar = 12,
-}
-
-/// <summary>
-/// 標準入力のうち，消費されずに残っている文字．read_int/read_char/read_stringで共有する
-/// </summary>
-/// <remarks>実行(RuntimeContext)ごとに1つ持つ</remarks>
-internal sealed class PendingInput {
-    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<RuntimeContext, PendingInput> Table = new();
-
-    private string _pending = "";
-
-    public static PendingInput For(RuntimeContext context) {
-        return Table.GetValue(context, _ => new PendingInput());
-    }
-
-    /// <summary>
-    /// 1文字読む．EOFなら-1
-    /// </summary>
-    public int ReadChar() {
-        if(this._pending.Length == 0) {
-            return Console.In.Read();
-        }
-        char c = this._pending[0];
-        this._pending = this._pending[1..];
-        return c;
-    }
-
-    /// <summary>
-    /// 改行を含む1行を読む．何も読めない(EOF)なら <c>null</c>
-    /// </summary>
-    public string? ReadLine() {
-        System.Text.StringBuilder sb = new();
-        int c;
-        while((c = this.ReadChar()) >= 0) {
-            sb.Append((char)c);
-            if(c == '\n') {
-                break;
-            }
-        }
-        return sb.Length == 0 ? null : sb.ToString();
-    }
-
-    /// <summary>
-    /// 読み取り位置の手前に文字列を戻す
-    /// </summary>
-    public void PushFront(string text) {
-        this._pending = text + this._pending;
-    }
 }

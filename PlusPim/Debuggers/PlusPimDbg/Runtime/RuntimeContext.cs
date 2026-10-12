@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using System.Buffers.Binary;
 
@@ -6,11 +7,21 @@ namespace PlusPim.Debuggers.PlusPimDbg.Runtime;
 /// <summary>
 /// 実行に必要なレジスタ，特殊レジスタ，メモリ情報を提供する
 /// </summary>
-internal sealed class RuntimeContext(Action<string> log, Func<string, Address, bool, Label?> resolveLabel, Address startAddr, Label startLabel) {
+internal sealed class RuntimeContext(Action<string> log, Func<string, Address, bool, Label?> resolveLabel, Address startAddr, Label startLabel, IDebuggeeIO io) {
     /// <summary>
     /// 汎用レジスタの表現
     /// </summary>
     public RegisterFile Registers { get; private set; } = new RegisterFile();
+
+    /// <summary>
+    /// デバッギの標準入出力
+    /// </summary>
+    public IDebuggeeIO IO { get; } = io;
+
+    /// <summary>
+    /// 標準入力のうち消費されずに残っているバイト
+    /// </summary>
+    public PendingInput PendingInput { get; } = new(io);
 
     /// <summary>
     /// プログラムカウンタ

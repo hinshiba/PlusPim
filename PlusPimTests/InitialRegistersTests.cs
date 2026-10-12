@@ -79,7 +79,7 @@ public class InitialRegistersTests {
     public void ReverseContinue_KeepsInitialSpAndGp() {
         FileInfo tempFile = TestHelpers.WriteTempAsm(Prologue);
         try {
-            App app = new([tempFile], Logger.Null);
+            App app = new([tempFile], Logger.Null, new InMemoryDebuggeeIO());
             Assert.True(app.Load());
             for(int i = 0; i < 4; i++) {
                 _ = app.StepIn();

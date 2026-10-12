@@ -11,6 +11,7 @@ namespace PlusPimTests.Instructions;
 /// <param name="CallStack">コールスタック．先頭 (index 0) がスタックトップ．要素は参照で比較する</param>
 /// <param name="MemoryBase">記録したメモリ窓の先頭アドレス</param>
 /// <param name="Memory">メモリ窓 <c>[MemoryBase, MemoryBase + Memory.Length)</c> のバイト列</param>
+/// <param name="PendingInput">入力バッファ (<c>PendingInput</c>) に戻されているバイト．読む順．デバッギの入力にまだ残っているバイトは含まない</param>
 internal sealed record MachineState(
     uint[] Registers,
     uint HI,
@@ -26,7 +27,8 @@ internal sealed record MachineState(
     StackFrame[] CallStack,
     Label CurrentLabel,
     Address MemoryBase,
-    byte[] Memory
+    byte[] Memory,
+    byte[] PendingInput
 ) {
     /// <summary>
     /// <see cref="TestHelpers.SeedRegisters"/> がメモリを書き込む範囲 (既定のメモリ窓)
@@ -70,7 +72,8 @@ internal sealed record MachineState(
             context.CallStack.ToArray(),
             context.CurrentLabel,
             memoryBase,
-            memory
+            memory,
+            context.PendingInput.ToArray()
         );
     }
 
@@ -125,6 +128,13 @@ internal sealed record MachineState(
     /// </summary>
     public byte MemoryByte(Address address) {
         return this.Memory[this.OffsetInWindow(address, 1)];
+    }
+
+    /// <summary>
+    /// 入力バッファに戻されているバイトを書き換えた状態を返す (読む順)
+    /// </summary>
+    public MachineState WithPendingInput(params byte[] bytes) {
+        return this with { PendingInput = bytes };
     }
 
     /// <summary>
@@ -208,7 +218,7 @@ internal sealed record MachineState(
     /// </summary>
     /// <remarks>
     /// コールスタックと現在のラベルは書き戻す手段がないため，変化していないことをアサートする．
-    /// メモリはこの状態のメモリ窓の範囲だけを書き戻す
+    /// メモリはこの状態のメモリ窓の範囲だけを書き戻す．入力バッファ (<see cref="PendingInput"/>) は書き戻さない
     /// </remarks>
     public void ApplyTo(RuntimeContext context) {
         MachineState current = Capture(context, this.MemoryBase, this.Memory.Length);
@@ -256,6 +266,18 @@ internal sealed record MachineState(
     /// 全項目が一致することをアサートする．コールスタックは要素ごとに参照で比較する
     /// </summary>
     public static void AssertEqual(MachineState expected, MachineState actual) {
+        AssertEqualExceptPendingInput(expected, actual);
+        Assert.Equal(expected.PendingInput, actual.PendingInput);
+    }
+
+    /// <summary>
+    /// 入力バッファ (<see cref="PendingInput"/>) を除く全項目が一致することをアサートする
+    /// </summary>
+    /// <remarks>
+    /// Undo は消費した入力をデバッギの入力ではなく入力バッファへ戻すため，入力を読む命令の
+    /// Execute 前後で入力バッファは異なるが，これから読める入力の全体は同じになる
+    /// </remarks>
+    public static void AssertEqualExceptPendingInput(MachineState expected, MachineState actual) {
         Assert.Equal(expected.Registers, actual.Registers);
         Assert.Equal(expected.HI, actual.HI);
         Assert.Equal(expected.LO, actual.LO);
