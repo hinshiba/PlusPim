@@ -13,6 +13,24 @@
 ### Changed
 
 - Display name is now "PlusPim for VS Code"
+- The extension now listens on a loopback port chosen by the OS, and PlusPim
+  connects to it with `--connect`. The first connection is taken as the debug
+  session. This replaces the fixed port and the probe connection
+- The terminal is kept after a debug session ends, and is disposed only when
+  the extension is deactivated
+- The program's standard input and output are passed through the terminal as
+  raw bytes, and no longer go through the Debug Console
+
+### Removed
+
+- `port` launch option, and the `--port` and `--stdio` command line options
+  (use `--connect <host:port>` or `--listen <host:port>`)
+
+### Fixed
+
+- `print_char` and `print_string` write raw bytes instead of re-encoding them,
+  so UTF-8 text printed byte by byte is no longer garbled
+- `.ascii` and `.asciiz` write non-ASCII characters as UTF-8 bytes
 
 ## [0.2.0] - 2026-08-31
 

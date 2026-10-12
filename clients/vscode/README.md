@@ -45,7 +45,6 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 | ------------- | ---------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
 | `program`     | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                    |
 | `stopOnEntry` | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end. |
-| `port`        | `number`   | `4711`        | TCP port used for the DAP connection.                                                                       |
 | `args`        | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                         |
 | `trace`       | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                           |
 
@@ -53,11 +52,13 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 When a debug session starts, the extension:
 
-1. Spawns the bundled `PlusPim` binary in a VS Code terminal, passing the target file and options.
-2. Waits for the debug adapter to start listening on the configured TCP port (default `4711`).
-3. Connects VS Code to the adapter via `DebugAdapterServer` over TCP.
+1. Starts listening on a free loopback port chosen by the OS.
+2. Spawns the bundled `PlusPim` binary in a VS Code terminal with `--connect 127.0.0.1:<port>`, passing the target file and options.
+3. Takes the first connection from PlusPim as the debug session. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
 
-On session termination, the terminal is automatically disposed.
+The program's standard input and output are the terminal itself, so you type input there and the output is written there as raw bytes. Non-ASCII output is shown correctly only if the terminal decodes it as UTF-8 (on Windows, the terminal code page must be UTF-8).
+
+The terminal is kept after the session ends so that the program's output stays readable. Terminals are disposed when the extension is deactivated.
 
 ## Known Limitations
 

@@ -12,17 +12,19 @@
 
 ### 前処理系
 
-- [ ] `.ascii`/`.asciiz` が UTF-16 の下位1バイトだけを書く (`DataSegmentBuilder.cs:244`, `248`)
-  - `"あ"` が `0x42` になる．print_string は UTF-8 として出力するため不整合
-  - [ ] 文字列を UTF-8 のバイト列にして書く．エスケープは ASCII のまま処理する
-  - [ ] テスト: `.asciiz "あ"` が `E3 81 82 00`
 - [ ] 文字列の直後が `\\"` のとき，行末のコメントが除去されない (`ParsedProgram.cs:149`)
   - `.asciiz "a\\" # c "q"` で文字列が `a\\" # c "q` になる．引用符の直前の `\` の個数の偶奇で判定する
   - [ ] テスト
 
 ### VS Code 拡張
 
-- [ ] プラットフォームとアーキテクチャの判定を厳密にする
+- [ ] セッションごとにターミナルが増え，拡張が終了するまで残る
+  - セッション終了後もプログラムの出力を読めるようにターミナルを残している．不要になったターミナルを自動で片付ける方法を検討する
+- [ ] launch 設定を検証する (`extension.ts:48-65`)
+  - [ ] `session.configuration` は実質 `any`. 型付きの `PlusPimLaunchConfig` を定義し, `unknown` から検証する (`resolveDebugConfiguration` で行うのが筋)
+  - [ ] `program` に配列と文字列以外が来たとき `String(p)` で `"[object Object]"` にならないようエラーにする
+  - [ ] `args` の `any[]` を `unknown[]` にして検証する
+- [ ] プラットフォームとアーキテクチャの判定を厳密にする (`extension.ts:86-87`)
   - [ ] 現状は `win32` 以外をすべて `linux-x64` とみなす. macOS や arm64 で原因の分からない `ENOENT` になる
   - [ ] `process.platform` と `process.arch` の組から rid を引くテーブルを作り, 未対応環境では明確なエラーを出す
   - [ ] `scripts/vsix.ts` の `ridMap` と重複しているので, 共通化する (拡張本体は `src`, スクリプトは `scripts` にあり `rootDir` が別なので, 置き場所に注意)
