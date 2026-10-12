@@ -85,11 +85,6 @@
 								"description": "Enable DAP communication trace",
 								"default": false
 							},
-							"port": {
-								"type": "number",
-								"description": "DAP TCP port",
-								"default": 4711
-							},
 							"args": {
 								"type": "array",
 								"items": {
