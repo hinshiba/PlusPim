@@ -8,7 +8,7 @@ node_modules/**
 bun.lock
 scripts/**
 out/**
-!out/extension.js
+!out/*.js
 # Debug builds (dotnet:debug:win) must never ship
 bin/debug/**
 # Debug symbols for any platform
