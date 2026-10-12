@@ -5,8 +5,13 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Ready To Run は RID を指定した Release の publish のときだけ有効にする -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' And '$(Configuration)' == 'Release'">
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>

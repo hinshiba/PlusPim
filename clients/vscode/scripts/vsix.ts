@@ -9,6 +9,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ridMap: Record<string, string> = {
 	"win32-x64": "win-x64",
 	"linux-x64": "linux-x64",
+	"darwin-x64": "osx-x64",
+	"darwin-arm64": "osx-arm64",
 };
 
 function run(command: string, args: string[]): boolean {

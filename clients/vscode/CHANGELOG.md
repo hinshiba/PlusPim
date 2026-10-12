@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.3.0] - 2026-10-13
 
 ### Added
 
@@ -13,8 +13,13 @@
 - `forceTerminalUtf8` launch option (default `true`). The extension passes
   `--force-terminal-utf8` to PlusPim, which switches the terminal to UTF-8
   while it runs and restores it on exit (currently effective on Windows only)
+- Packaging scripts for macOS (`package:darwin-x64` and `package:darwin-arm64`).
+  The extension picks the bundled binary by `process.arch` on macOS. The
+  binaries are not signed or notarized
 
 ### Changed
+
+- The bundled PlusPim binary is now compiled with ReadyToRun
 
 - `.ascii` and `.asciiz` now reject non-ASCII characters with an assembly error
   (always, regardless of `--strict`). Use `.utf-8z` for UTF-8 strings

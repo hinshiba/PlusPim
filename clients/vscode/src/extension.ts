@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-// Linux 向けに実行権限がなければ付与する
+// Linux と macOS 向けに実行権限がなければ付与する
 // 失敗時は理由を文字列で返す．成功時は undefined
 function ensureExecutable(binPath: string): string | undefined {
 	if (process.platform === "win32") {
@@ -148,7 +148,14 @@ class PlusPimDescriptorFactory
 				? ["--force-terminal-utf8"]
 				: [];
 
-		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
+		const rid =
+			process.platform === "win32"
+				? "win-x64"
+				: process.platform === "darwin"
+					? process.arch === "arm64"
+						? "osx-arm64"
+						: "osx-x64"
+					: "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
 		// 開発モードのときだけ開発ビルドを優先
 		const preferDebug =
