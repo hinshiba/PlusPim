@@ -2,6 +2,7 @@ using PlusPim.Application;
 using PlusPim.EditorController.DebugAdapter;
 using PlusPim.EditorController.Transport;
 using PlusPim.Logging;
+using PlusPim.Terminal;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Reflection;
@@ -70,6 +71,14 @@ internal class Program {
             DefaultValueFactory = (_) => false
         };
 
+        Option<bool> forceTerminalUtf8Arg = new(
+            name: "--force-terminal-utf8"
+            ) {
+            Required = false,
+            Description = "Switch the terminal to UTF-8 while PlusPim runs and restore it on exit, where supported (currently Windows only; no effect elsewhere) (default: false)",
+            DefaultValueFactory = (_) => false
+        };
+
         cmd.Arguments.Add(fileArg);
         cmd.Options.Add(verboseArg);
         cmd.Options.Add(debugArg);
@@ -77,6 +86,7 @@ internal class Program {
         cmd.Options.Add(listenArg);
         cmd.Options.Add(attachArg);
         cmd.Options.Add(strictArg);
+        cmd.Options.Add(forceTerminalUtf8Arg);
 
 
         // 実際に解析
@@ -112,6 +122,10 @@ internal class Program {
                 Console.Error.WriteLine(error);
                 return 1;
             }
+
+            // 引数の検証と通信路の生成が済んでから端末の符号化の切り替える
+            using TerminalUtf8Guard terminalGuard = TerminalUtf8Guard.Apply(TerminalUtf8Backends.Create(), parseResult.GetValue(forceTerminalUtf8Arg));
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => terminalGuard.Restore();
 
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
             Application.Application app = new(files, logger, StreamDebuggeeIO.OpenConsole(), parseResult.GetValue(strictArg));
