@@ -124,7 +124,6 @@ internal class DebugAdapter: DebugAdapterBase {
     /// DAP の順序に従い，読み込みに成功したら launch に応答してから initialized を送る．
     /// </remarks>
     protected override void HandleLaunchRequestAsync(IRequestResponder<LaunchArguments> responder) {
-        this._isInit = true;
         this._logger.Debug("DebugAdapter", "LaunchRequest.");
 
         this._stopOnEntry = ReadStopOnEntry(responder.Arguments);
@@ -138,7 +137,7 @@ internal class DebugAdapter: DebugAdapterBase {
             responder.SetError(new ProtocolException($"Failed to load program: {ex.Message}"));
             return;
         }
-
+        this._isInit = true;
         responder.SetResponse(new LaunchResponse());
         // 応答の後に送信する
         this.Protocol.SendEvent(new InitializedEvent());
