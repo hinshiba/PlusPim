@@ -23,6 +23,8 @@ internal sealed class RType3RegInstruction(
 
     private readonly RegisterWriteHistory _rd = new(rd);
 
+    public string Disassembly => $"{mnemonic} {RegisterParser.Format(rd)}, {RegisterParser.Format(rs)}, {RegisterParser.Format(rt)}";
+
     public ExecuteResult Execute(RuntimeContext context) {
         uint rsVal = context.Registers[rs];
         uint rtVal = context.Registers[rt];
