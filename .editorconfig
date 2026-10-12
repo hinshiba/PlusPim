@@ -1,7 +1,17 @@
-# 上位ディレクトリから .editorconfig 設定を継承する場合は、以下の行を削除します
 root = true
 
-# C# ファイル
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+[*.{ts,json,jsonc}]
+indent_style = tab
+
+[*.{yml,yaml,csproj,slnx}]
+indent_style = space
+indent_size = 2
+
 [*.cs]
 
 #### コア EditorConfig オプション ####
