@@ -80,6 +80,11 @@
 								"description": "Stop at the first instruction after the program is loaded. When false, the program runs until a breakpoint, an exception or the end.",
 								"default": true
 							},
+							"forceTerminalUtf8": {
+								"type": "boolean",
+								"description": "Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit, so UTF-8 program output is not garbled. Currently effective on Windows only; has no effect on other platforms.",
+								"default": true
+							},
 							"trace": {
 								"type": "boolean",
 								"description": "Enable DAP communication trace",

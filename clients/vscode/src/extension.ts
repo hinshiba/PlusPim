@@ -141,6 +141,13 @@ class PlusPimDescriptorFactory
 			.filter((a) => a !== null && a !== undefined)
 			.map((a) => String(a));
 
+		// 端末の符号化の切り替えは PlusPim が判断する．拡張は全 OS で既定で依頼する
+		const forceUtf8 = session.configuration.forceTerminalUtf8 !== false;
+		const utf8Args =
+			forceUtf8 && !extraArgs.includes("--force-terminal-utf8")
+				? ["--force-terminal-utf8"]
+				: [];
+
 		const rid = process.platform === "win32" ? "win-x64" : "linux-x64";
 		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
 		// 開発モードのときだけ開発ビルドを優先
@@ -171,6 +178,7 @@ class PlusPimDescriptorFactory
 			"-d",
 			"--connect",
 			`127.0.0.1:${port}`,
+			...utf8Args,
 			...extraArgs,
 			...programs,
 		];
