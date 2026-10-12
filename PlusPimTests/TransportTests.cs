@@ -227,7 +227,7 @@ public partial class TransportTests {
         using TcpClient client = new();
         await client.ConnectAsync(IPAddress.Loopback, port);
         await using Stream server = await opening.WaitAsync(Timeout);
-        _ = new DebugAdapter(server, server, new App([], Logger.Null), Logger.Null);
+        _ = new DebugAdapter(server, server, new App([], Logger.Null, new InMemoryDebuggeeIO()), Logger.Null);
 
         NetworkStream clientStream = client.GetStream();
         byte[] body = Encoding.UTF8.GetBytes("""{"seq":1,"type":"request","command":"initialize","arguments":{"adapterID":"pluspim"}}""");

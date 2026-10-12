@@ -23,6 +23,7 @@ internal class Application: IApplication {
     private IDebugger Debugger => this._debugger ?? throw new InvalidOperationException("Debugger is not initialized");
     private readonly ILogger _logger;
     private readonly FileInfo[] _files;
+    private readonly IDebuggeeIO _io;
     private readonly bool _strict;
 
     /// 報告すべき例外の集合
@@ -36,10 +37,12 @@ internal class Application: IApplication {
     /// </summary>
     /// <param name="files">すべての実行するファイル</param>
     /// <param name="logger">ロガー</param>
+    /// <param name="io">デバッギの標準入出力</param>
     /// <param name="strict">解析できない行と未対応の指令をエラーにするかどうか</param>
-    public Application(FileInfo[] files, ILogger logger, bool strict = false) {
+    public Application(FileInfo[] files, ILogger logger, IDebuggeeIO io, bool strict = false) {
         this._files = files;
         this._logger = logger;
+        this._io = io;
         this._strict = strict;
     }
 
@@ -49,7 +52,7 @@ internal class Application: IApplication {
     /// <returns>成功した場合<see langword="true"/></returns>
     /// <exception cref="Debuggers.PlusPimDbg.Program.AssemblyException">アセンブルに失敗した場合</exception>
     public bool Load() {
-        PlusPimDbg debugger = new(this._files, this._logger, this._strict);
+        PlusPimDbg debugger = new(this._files, this._logger, this._io, this._strict);
         lock(this._gate) {
             this._debugger = debugger;
         }

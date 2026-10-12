@@ -29,7 +29,7 @@ public class ApplicationExecutionTests {
     private static async Task WithApplication(string asm, Func<App, FileInfo, Task> test) {
         FileInfo tempFile = TestHelpers.WriteTempAsm(asm);
         try {
-            App app = new([tempFile], Logger.Null);
+            App app = new([tempFile], Logger.Null, new InMemoryDebuggeeIO());
             Assert.True(app.Load());
             await test(app, tempFile);
         } finally {

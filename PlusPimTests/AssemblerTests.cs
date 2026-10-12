@@ -279,7 +279,7 @@ public class AssemblerTests {
         FileInfo caller = TestHelpers.WriteTempAsm(CallerSource);
         FileInfo callee = TestHelpers.WriteTempAsm(CalleeSource);
         try {
-            PlusPimDbg debugger = new([caller, callee], Logger.Null);
+            PlusPimDbg debugger = new([caller, callee], Logger.Null, new InMemoryDebuggeeIO());
 
             // la (2命令)，jal，li，jr
             for(int i = 0; i < 5; i++) {

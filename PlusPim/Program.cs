@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.EditorController.DebugAdapter;
 using PlusPim.EditorController.Transport;
 using PlusPim.Logging;
@@ -113,7 +114,7 @@ internal class Program {
             }
 
             FileInfo[] files = parseResult.GetValue(fileArg) ?? throw new ArgumentException("file is not set");
-            Application.Application app = new(files, logger, parseResult.GetValue(strictArg));
+            Application.Application app = new(files, logger, StreamDebuggeeIO.OpenConsole(), parseResult.GetValue(strictArg));
 
             // DAPはデバッギの標準入出力とは別の通信路で話す．stdin/stdoutはデバッギがそのまま使う
             Stream dap;

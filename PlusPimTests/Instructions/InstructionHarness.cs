@@ -1,3 +1,4 @@
+using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg.Instruction;
 using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
@@ -74,8 +75,8 @@ internal static class InstructionHarness {
     /// ユーザーモード (CP0 初期値) のコンテキスト．
     /// 全レジスタ・HI・LO・既定メモリ窓をシードで乱数化し，PC は <see cref="InstructionAddress"/>
     /// </summary>
-    public static RuntimeContext CreateUser(int seed = DefaultSeed) {
-        RuntimeContext context = TestHelpers.CreateRuntimeContext(CreateSymbolTable());
+    public static RuntimeContext CreateUser(int seed = DefaultSeed, IDebuggeeIO? io = null) {
+        RuntimeContext context = TestHelpers.CreateRuntimeContext(CreateSymbolTable(), io);
         TestHelpers.SeedRegisters(context, seed);
         context.PC = InstructionAddress;
         return context;
@@ -88,8 +89,8 @@ internal static class InstructionHarness {
     /// PC=<paramref name="epc"/> で例外を発生させ，<c>LastException</c> を消してからハンドラへ移る
     /// </remarks>
     /// <param name="badVAddr">アドレス例外の実効アドレス．<see langword="null"/> なら設定しない</param>
-    public static RuntimeContext CreateKernel(ExcCode code, Address epc, uint? badVAddr = null, int seed = DefaultSeed) {
-        RuntimeContext context = CreateUser(seed);
+    public static RuntimeContext CreateKernel(ExcCode code, Address epc, uint? badVAddr = null, int seed = DefaultSeed, IDebuggeeIO? io = null) {
+        RuntimeContext context = CreateUser(seed, io);
         context.PC = epc;
         context.RaiseException(code, badVAddr is uint v ? new Address(v) : null);
         context.AckException();
@@ -101,8 +102,8 @@ internal static class InstructionHarness {
     /// <c>eret</c> 後のユーザーモードのコンテキスト (EXL=0 だが Cause/EPC/BadVAddr に値が残る)．
     /// PC は <see cref="InstructionAddress"/>
     /// </summary>
-    public static RuntimeContext CreatePostEret(ExcCode code, Address epc, uint? badVAddr = null, int seed = DefaultSeed) {
-        RuntimeContext context = CreateKernel(code, epc, badVAddr, seed);
+    public static RuntimeContext CreatePostEret(ExcCode code, Address epc, uint? badVAddr = null, int seed = DefaultSeed, IDebuggeeIO? io = null) {
+        RuntimeContext context = CreateKernel(code, epc, badVAddr, seed, io);
         context.WriteCP0Register(12, 0);
         context.PC = InstructionAddress;
         return context;

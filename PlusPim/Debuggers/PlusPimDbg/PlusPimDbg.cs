@@ -34,9 +34,10 @@ internal class PlusPimDbg: IDebugger {
 
     /// <param name="files">すべての実行するファイル</param>
     /// <param name="logger">ロガー</param>
+    /// <param name="io">デバッギの標準入出力</param>
     /// <param name="strict">解析できない行と未対応の指令をエラーにするかどうか</param>
     /// <exception cref="AssemblyException">アセンブルに失敗した場合</exception>
-    internal PlusPimDbg(FileInfo[] files, ILogger logger, bool strict = false) {
+    internal PlusPimDbg(FileInfo[] files, ILogger logger, IDebuggeeIO io, bool strict = false) {
         this._programs = new ParsedPrograms(files, logger, strict);
 
         // mainがなければ暫定でテキストセグメントの先頭から開始する
@@ -50,7 +51,7 @@ internal class PlusPimDbg: IDebugger {
         }
 
         // コンテキスト設定
-        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startAddr, (Label)mainLabel);
+        this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startAddr, (Label)mainLabel, io);
         this._context.LoadMemoryImage(this._programs.MemoryImage);
         InitialRegisters.Apply(this._context.Registers);
     }
