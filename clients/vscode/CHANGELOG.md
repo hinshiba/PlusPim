@@ -9,9 +9,12 @@
 - Inlay hints that show the machine instructions each pseudo-instruction
   expands to, during a debug session (setting
   `pluspim.inlayHints.pseudoInstructions`, default `true`)
+- `.utf-8z` data directive: places a string as UTF-8 bytes followed by a NUL byte
 
 ### Changed
 
+- `.ascii` and `.asciiz` now reject non-ASCII characters with an assembly error
+  (always, regardless of `--strict`). Use `.utf-8z` for UTF-8 strings
 - Display name is now "PlusPim for VS Code"
 - The extension now listens on a loopback port chosen by the OS, and PlusPim
   connects to it with `--connect`. The first connection is taken as the debug
@@ -31,7 +34,6 @@
 - `print_char` and `print_string` write raw bytes instead of re-encoding them,
   so UTF-8 text printed byte by byte is no longer garbled when the terminal
   decodes it as UTF-8
-- `.ascii` and `.asciiz` write non-ASCII characters as UTF-8 bytes
 
 ## [0.2.0] - 2026-08-31
 
