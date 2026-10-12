@@ -1,0 +1,228 @@
+using PlusPim.Application;
+using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Logging;
+using Xunit;
+using App = PlusPim.Application.Application;
+
+namespace PlusPimTests;
+
+/// <summary>
+/// <see cref="App"/> の実行の取り消しと，実行中の読み取りのテスト
+/// </summary>
+/// <remarks>待機は状態の変化を条件にし，時間で成否を決めない (タイムアウトはハングの検出のためだけに使う)</remarks>
+public class ApplicationExecutionTests {
+    private const uint TextBase = 0x00400000;
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// <c>$t0</c> を増やし続ける無限ループ．ループは <see cref="TextBase"/> + 4 から + 8
+    /// </summary>
+    internal const string InfiniteLoop = """
+        .text
+        main:
+          addiu $t0, $zero, 0
+        loop:
+          addiu $t0, $t0, 1
+          j loop
+        """;
+
+    private static async Task WithApplication(string asm, Func<App, FileInfo, Task> test) {
+        FileInfo tempFile = TestHelpers.WriteTempAsm(asm);
+        try {
+            App app = new([tempFile], Logger.Null);
+            Assert.True(app.Load());
+            await test(app, tempFile);
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    /// <summary>
+    /// 操作を専用のスレッドで始める
+    /// </summary>
+    private static Task<StopReason> Start(Func<StopReason> operation) {
+        return Task.Factory.StartNew(operation, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
+
+    private static uint T0(App app) {
+        return app.GetCallStack()[0].Registers[(int)RegisterID.T0];
+    }
+
+    /// <summary>
+    /// 条件が成り立つまで待つ
+    /// </summary>
+    private static void WaitUntil(Func<bool> condition) {
+        DateTime deadline = DateTime.UtcNow + Timeout;
+        while(!condition()) {
+            Assert.True(DateTime.UtcNow < deadline, "Condition was not met.");
+            _ = Thread.Yield();
+        }
+    }
+
+    [Fact]
+    public Task Continue_WithCancelledToken_PausesWithoutStepping() {
+        return WithApplication(InfiniteLoop, (app, _) => {
+            using CancellationTokenSource cts = new();
+            cts.Cancel();
+
+            Assert.Equal(StopReason.Pause, app.Continue(cts.Token));
+            Assert.Equal(TextBase, app.GetCallStack()[0].PC);
+            return Task.CompletedTask;
+        });
+    }
+
+    [Fact]
+    public Task Continue_IsPausedWhileRunning_AndStateIsReadableDuringRun() {
+        return WithApplication(InfiniteLoop, async (app, _) => {
+            using CancellationTokenSource cts = new();
+            Task<StopReason> run = Start(() => app.Continue(cts.Token));
+
+            // 実行中もレジスタを読める．ループが回っていることを確かめる
+            WaitUntil(() => 1000 < T0(app));
+            Assert.False(run.IsCompleted);
+
+            cts.Cancel();
+            Assert.Equal(StopReason.Pause, await run.WaitAsync(Timeout));
+
+            uint pc = app.GetCallStack()[0].PC;
+            Assert.InRange(pc, TextBase + 4, TextBase + 8);
+
+            // 停止後も実行を続けられる
+            uint t0 = T0(app);
+            Assert.Equal(StopReason.Step, app.StepIn());
+            Assert.NotEqual(pc, app.GetCallStack()[0].PC);
+            Assert.True(t0 <= T0(app));
+        });
+    }
+
+    [Fact]
+    public Task ReverseContinue_IsPausedWhileRunning() {
+        return WithApplication(InfiniteLoop, async (app, _) => {
+            using(CancellationTokenSource forward = new()) {
+                Task<StopReason> run = Start(() => app.Continue(forward.Token));
+                WaitUntil(() => 100_000 < T0(app));
+                forward.Cancel();
+                Assert.Equal(StopReason.Pause, await run.WaitAsync(Timeout));
+            }
+
+            uint before = T0(app);
+            using CancellationTokenSource cts = new();
+            Task<StopReason> reverse = Start(() => app.ReverseContinue(cts.Token));
+
+            // 巻き戻し中も読める
+            WaitUntil(() => T0(app) < before);
+            cts.Cancel();
+            StopReason result = await reverse.WaitAsync(Timeout);
+
+            // 履歴の先頭に達する前に止めたなら Pause で，まだ戻れる．先に達したなら EmptyHistory
+            Assert.Contains(result, new[] { StopReason.Pause, StopReason.EmptyHistory });
+            Assert.Equal(result == StopReason.Pause, app.StepBack());
+        });
+    }
+
+    [Fact]
+    public Task ReverseContinue_ReachesEmptyHistory() {
+        return WithApplication(InfiniteLoop, (app, _) => {
+            for(int i = 0; i < 5; i++) {
+                Assert.Equal(StopReason.Step, app.StepIn());
+            }
+
+            Assert.Equal(StopReason.EmptyHistory, app.ReverseContinue());
+            Assert.Equal(TextBase, app.GetCallStack()[0].PC);
+            Assert.Equal(0u, T0(app));
+
+            // 先頭でも EmptyHistory
+            Assert.Equal(StopReason.EmptyHistory, app.ReverseContinue());
+            Assert.False(app.StepBack());
+            return Task.CompletedTask;
+        });
+    }
+
+    [Fact]
+    public Task SetBreakpoints_WhileRunning_StopsTheRun() {
+        return WithApplication(InfiniteLoop, async (app, file) => {
+            Task<StopReason> run = Start(() => app.Continue());
+            WaitUntil(() => 1000 < T0(app));
+
+            // 実行中に設定したブレークポイントで止まる (j loop の行)
+            Assert.True(app.SetBreakpoints(file, [6])[0].Verified);
+            Assert.Equal(StopReason.Breakpoint, await run.WaitAsync(Timeout));
+            Assert.Equal(TextBase + 8, app.GetCallStack()[0].PC);
+        });
+    }
+
+    /// <summary>
+    /// 5行目 (ループの先頭) にブレークポイントを置くループ
+    /// </summary>
+    internal const string CountingLoop = """
+        .text
+        main:
+          addiu $t0, $zero, 0
+        loop:
+          addiu $t1, $t1, 1
+          addiu $t0, $t0, 1
+          j loop
+        """;
+
+    [Fact]
+    public Task ReverseContinue_StopsAtBreakpoints() {
+        return WithApplication(CountingLoop, (app, file) => {
+            Assert.True(app.SetBreakpoints(file, [5])[0].Verified);
+            for(uint i = 0; i < 3; i++) {
+                Assert.Equal(StopReason.Breakpoint, app.Continue());
+                Assert.Equal(i, T0(app));
+            }
+
+            Assert.Equal(StopReason.Breakpoint, app.ReverseContinue());
+            Assert.Equal(1u, T0(app));
+            Assert.Equal(TextBase + 4, app.GetCallStack()[0].PC);
+
+            Assert.Equal(StopReason.Breakpoint, app.ReverseContinue());
+            Assert.Equal(0u, T0(app));
+            Assert.Equal(TextBase + 4, app.GetCallStack()[0].PC);
+
+            Assert.Equal(StopReason.EmptyHistory, app.ReverseContinue());
+            Assert.Equal(TextBase, app.GetCallStack()[0].PC);
+            return Task.CompletedTask;
+        });
+    }
+
+    [Fact]
+    public Task ReverseContinue_DoesNotStopAtExceptionsOrPendingExceptionState() {
+        // break は Bp の例外を起こす．例外ハンドラに入った後から巻き戻すと，
+        // 例外実行による一時停止では止まらず，break の実行前で止まる
+        const string program = """
+            .text
+            main:
+              addiu $t0, $zero, 1
+              break
+              addiu $t0, $zero, 2
+            .ktext
+              addiu $k0, $zero, 1
+            """;
+        return WithApplication(program, (app, file) => {
+            // 例外フィルタに Bp を含めても，巻き戻しは例外では止まらない
+            app.SetExceptionFilters([ExceptionFilter.Break]);
+            Assert.Equal(StopReason.Step, app.StepIn()); // addiu
+            Assert.Equal(StopReason.Exception, app.StepIn()); // break
+            Assert.Equal(StopReason.Step, app.StepIn()); // 例外ハンドラへ
+            Assert.Equal(StopReason.Step, app.StepIn()); // addiu $k0
+
+            Assert.Equal(StopReason.EmptyHistory, app.ReverseContinue());
+
+            // break の行にブレークポイントを置くと，break の実行前で止まる
+            app.SetExceptionFilters([]);
+            Assert.True(app.SetBreakpoints(file, [4])[0].Verified);
+            for(int i = 0; i < 4; i++) {
+                _ = app.StepIn();
+            }
+            Assert.Equal(0x80000184u, app.GetCallStack()[0].PC);
+
+            Assert.Equal(StopReason.Breakpoint, app.ReverseContinue());
+            Assert.Equal(TextBase + 4, app.GetCallStack()[0].PC);
+            Assert.Null(app.GetLastException());
+            Assert.Equal(1u, T0(app));
+            return Task.CompletedTask;
+        });
+    }
+}

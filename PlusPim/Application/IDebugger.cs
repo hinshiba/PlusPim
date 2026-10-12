@@ -18,10 +18,20 @@ public interface IDebugger {
     bool Back();
 
     /// <summary>
+    /// 次に実行する命令にブレークポイントがあり，かつ例外による一時停止状態でない
+    /// </summary>
+    bool IsAtBreakpoint { get; }
+
+    /// <summary>
     /// コールスタックの情報を取得する
     /// </summary>
     /// <returns><see cref="StackFrameInfo"/>の配列．ライブフレームが先頭である</returns>
     StackFrameInfo[] GetCallStack();
+
+    /// <summary>
+    /// コールスタックのフレーム数
+    /// </summary>
+    int CallStackDepth { get; }
 
     /// <summary>
     /// 直前のStepで発生した例外情報を取得する
@@ -42,4 +52,17 @@ public interface IDebugger {
     /// <param name="lines">1-indexedの行番号の配列</param>
     /// <returns>各行に対応するブレークポイント設定結果</returns>
     BreakpointResult[] SetBreakpoints(FileInfo file, int[] lines);
+
+    /// <summary>
+    /// メモリの内容を返す．書き込まれていない領域は0である
+    /// </summary>
+    /// <param name="address">先頭のアドレス</param>
+    /// <param name="count">バイト数</param>
+    /// <returns>読んだバイト列</returns>
+    byte[] ReadMemory(uint address, int count);
+
+    /// <summary>
+    /// データセグメントの先頭のアドレスとバイト数
+    /// </summary>
+    (uint Start, uint Size) DataSegmentRange { get; }
 }

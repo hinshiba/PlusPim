@@ -6,8 +6,6 @@
 
 #### MIPS準拠
 
-- [ ] `$sp`, `$gp` に適切な初期値を設定する
-
 #### 履歴整合性
 
 #### ランタイム系
@@ -17,8 +15,6 @@
     - `Console.Write((char)(a0 & 0xFF))` は U+00XX を書くため UTF-8 出力では 0x80 以上のバイトが 2バイトになり, UTF-8 文字列を1バイトずつ print_char で出すと文字化けする. 対応案: 状態を持つ UTF-8 デコーダ経由で生バイトを出力する, または仕様を Latin-1 (MARS 互換) と明記する. 0x80 以上のバイトのテストも追加する.
 - [ ] 入力バッファ (PendingInput) が MachineState / デバッガのスナップショットから見えない
   - RuntimeContext に明示的な PendingInput プロパティを持たせ, テストのスナップショットに含める. PendingInput 自体は同期されていない (ステップ実行が単一スレッドなので許容) ことをコメントに書く.
-
-- [ ] initでDAPに準拠しない問題
 
 ### 前処理系
 
@@ -74,20 +70,6 @@
 
 ### 実行系
 
-- [ ] Pause:  無限ループで VS Code が応答しなくなったときに抜ける唯一の手段 
-  - [ ] `Continue` をワーカースレッドで実行し, 実行中も DAP 要求 (`threads`, `pause` など) に応答する (`Application.cs:135-144`, `DebugAdapter.cs:255`)
-  - [ ] 停止要求のフラグを Step のループで確認する
-  - [ ] `SupportsPause` と `HandlePauseRequest` を実装し, reason `pause` の `stopped` イベントを送る
-  - [ ] 実行中に来た Step / StepBack などの要求を排他制御する
-  - [ ] Reverse Continue も中断できるようにする
-  - [ ] テスト: 無限ループ → Pause → 停止位置とレジスタを取得できる
-
-- [ ] Reverse Continue をブレークポイントで止める (#5, `Application.cs:151-156`)
-  - [ ] `Back` 後の PC がブレークポイントなら止める. 判定を `PlusPimDbg` 側に用意する
-  - [ ] 例外フィルタに該当する例外の発生地点でも止めるか決める
-  - [ ] `stopped` イベントの reason を `breakpoint` にする
-  - [ ] テスト
-
 - [ ] 擬似命令の展開先をインレイヒントで表示する (#11)
   - [ ] 展開結果を拡張機能に渡す方法を決める (カスタム DAP 要求 / CLI / LSP)
   - [ ] `InlayHintsProvider` で `la` → `lui` + `ori` などを表示する
@@ -96,10 +78,6 @@
   - [ ] `kseg.asm` 相当を同梱する (拡張機能のファイル, または PlusPim の埋め込みリソース)
   - [ ] `.ktext` を含むファイルが指定されていなければ自動で読み込む
   - [ ] 同梱ハンドラの中をステップ時にどう見せるか決める
-
-- [ ] メモリビュー機能
-  - [ ] DAP `readMemory`
-  - [ ] `.data` と `$sp` 周辺を表示
 
 ### 前処理系
 

@@ -16,7 +16,7 @@ public class DataSegmentTests {
     private static ParsedProgram Parse(string asm) {
         FileInfo file = TestHelpers.WriteTempAsm(asm);
         try {
-            return new ParsedProgram(file, TextSegment.TextSegmentBase, Base, TextSegment.KernelTextSegmentBase, Logger.Null);
+            return new ParsedProgram(file, TextSegment.TextSegmentBase, Base, TextSegment.KernelTextSegmentBase, Logger.Null, false);
         } finally {
             file.Delete();
         }

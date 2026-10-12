@@ -52,6 +52,7 @@ internal class PlusPimDbg: IDebugger {
         // コンテキスト設定
         this._context = new RuntimeContext(logger.ToAction("Instruction"), this._programs.CreateResolver(), startAddr, (Label)mainLabel);
         this._context.LoadMemoryImage(this._programs.MemoryImage);
+        InitialRegisters.Apply(this._context.Registers);
     }
 
     public (uint[] Registers, uint PC, uint HI, uint LO) GetRegisters() {
@@ -160,6 +161,21 @@ internal class PlusPimDbg: IDebugger {
         return true;
     }
 
+    public byte[] ReadMemory(uint address, int count) {
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        // アドレス空間の末尾を超える分は読まない
+        int readable = (int)Math.Min(count, 0x1_0000_0000L - address);
+        byte[] bytes = new byte[readable];
+        for(int i = 0; i < readable; i++) {
+            bytes[i] = this._context.ReadMemoryByte(new Address(address + (uint)i));
+        }
+        return bytes;
+    }
+
+    public (uint Start, uint Size) DataSegmentRange => (DataSegment.DataSegmentBase.Addr, this._programs.DataSegmentSize);
+
+    public bool IsAtBreakpoint => this._context.LastException is null && this._breakpoints.Contains(this._context.PC);
+
     public ExceptionInfo? GetLastException() {
         ExceptionEvent? lastException = this._context.LastException;
         if(lastException is ExceptionEvent exc) {
@@ -211,6 +227,11 @@ internal class PlusPimDbg: IDebugger {
         }
         return result;
     }
+
+    /// <summary>
+    /// ライブフレームと呼び出し元のフレームの数
+    /// </summary>
+    public int CallStackDepth => 1 + this._context.CallStack.Count;
 
     /// <summary>
     /// コールスタックの状態を返す

@@ -8,27 +8,37 @@ internal interface IApplication {
     /// プログラムを読み込んで起動する
     /// </summary>
     /// <returns>成功した場合は<see langword="true"/></returns>
+    /// <exception cref="Debuggers.PlusPimDbg.Program.AssemblyException">アセンブルに失敗した場合</exception>
     bool Load();
+
+    /// <summary>
+    /// プログラムを読み込み済みかどうか
+    /// </summary>
+    bool IsLoaded { get; }
+
+    // 実行の操作はワーカースレッドから呼ばれる．
+    // ct が取り消されたら StopReason.Pause で停止する
+    // ct を省略した場合は取り消されない
 
     /// <summary>
     /// スタックフレームを1つ除去するまで実行する
     /// </summary>
-    StopReason StepOut();
+    StopReason StepOut(CancellationToken ct = default);
 
     /// <summary>
     /// 表示されている次の行まで実行する
     /// </summary>
-    StopReason StepOver();
+    StopReason StepOver(CancellationToken ct = default);
 
     /// <summary>
     /// 次の命令を実行する
     /// </summary>
-    StopReason StepIn();
+    StopReason StepIn(CancellationToken ct = default);
 
     /// <summary>
     /// 停止するまで実行する
     /// </summary>
-    StopReason Continue();
+    StopReason Continue(CancellationToken ct = default);
 
     /// <summary>
     /// 1ステップ分，実行を巻き戻す
@@ -37,10 +47,10 @@ internal interface IApplication {
     bool StepBack();
 
     /// <summary>
-    /// 停止するまで実行を巻き戻す
+    /// ブレークポイントか履歴の先頭に達するまで実行を巻き戻す
     /// </summary>
-    /// <returns>1ステップ以上巻き戻しに成功した場合は<see langword="true"/></returns>
-    bool ReverseContinue();
+    /// <returns>停止した理由</returns>
+    StopReason ReverseContinue(CancellationToken ct = default);
 
     /// <summary>
     /// 停止する例外を設定する
@@ -81,4 +91,17 @@ internal interface IApplication {
     /// </summary>
     /// <returns>ランタイムエラーの情報．発生していない場合はnull</returns>
     RuntimeErrorInfo? GetRuntimeError();
+
+    /// <summary>
+    /// メモリの内容を返す．書き込まれていない領域は0である
+    /// </summary>
+    /// <param name="address">先頭のアドレス</param>
+    /// <param name="count">バイト数</param>
+    /// <returns>読んだバイト列</returns>
+    byte[] ReadMemory(uint address, int count);
+
+    /// <summary>
+    /// データセグメントの先頭のアドレスとバイト数
+    /// </summary>
+    (uint Start, uint Size) DataSegmentRange { get; }
 }
