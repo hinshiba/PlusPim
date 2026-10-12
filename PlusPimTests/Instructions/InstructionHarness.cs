@@ -214,9 +214,10 @@ internal static class RepeatedExecution {
         while(history.Count > 0) {
             (MachineState beforeInput, MachineState beforeExecute, ExecutionRecord record) = history.Pop();
             Processor.Undo(context, record);
-            MachineState.AssertEqual(beforeExecute, MachineState.Capture(context, memoryBase, memorySize));
+            // Undo は消費した入力を入力バッファへ戻すので，入力バッファは比較しない
+            MachineState.AssertEqualExceptPendingInput(beforeExecute, MachineState.Capture(context, memoryBase, memorySize));
             beforeInput.ApplyTo(context);
-            MachineState.AssertEqual(beforeInput, MachineState.Capture(context, memoryBase, memorySize));
+            MachineState.AssertEqualExceptPendingInput(beforeInput, MachineState.Capture(context, memoryBase, memorySize));
         }
         return results;
     }

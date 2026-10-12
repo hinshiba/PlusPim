@@ -19,6 +19,11 @@ internal sealed class RuntimeContext(Action<string> log, Func<string, Address, b
     public IDebuggeeIO IO { get; } = io;
 
     /// <summary>
+    /// 標準入力のうち消費されずに残っているバイト
+    /// </summary>
+    public PendingInput PendingInput { get; } = new(io);
+
+    /// <summary>
     /// プログラムカウンタ
     /// </summary>
     public Address PC { get; set; } = startAddr;

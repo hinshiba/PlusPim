@@ -328,4 +328,38 @@ public class IntegrationTests {
             tempFile.Delete();
         }
     }
+
+    [Fact]
+    public void Syscall_PrintString_WritesUtf8BytesOfAsciizLiteral() {
+        // .asciiz のUTF-8での配置から，ハンドラの runtime_call! による出力までを通しで確認する
+        string asm = """
+            .data
+            msg:
+                .asciiz "あ"
+            .text
+            main:
+                la      $a0,    msg
+                li      $v0,    4
+                syscall
+            .ktext
+            __exception_handler:
+                runtime_call!
+                mfc0    $k0,    $14
+                addiu   $k0,    $k0,    4
+                mtc0    $k0,    $14
+                eret
+            """;
+        InMemoryDebuggeeIO io = new();
+        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm, io);
+        try {
+            for(int i = 0; i < 20 && io.OutputBytes.Length == 0; i++) {
+                _ = debugger.Step();
+            }
+
+            Assert.Equal([0xE3, 0x81, 0x82], io.OutputBytes);
+            Assert.Null(debugger.GetRuntimeError());
+        } finally {
+            tempFile.Delete();
+        }
+    }
 }

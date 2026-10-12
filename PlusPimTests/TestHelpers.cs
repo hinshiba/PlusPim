@@ -125,9 +125,9 @@ internal static class TestHelpers {
     /// <summary>
     /// アセンブリ文字列からPlusPimDbgインスタンスを生成する
     /// </summary>
-    public static (PlusPimDbg Debugger, FileInfo TempFile) CreateDebugger(string asmContent) {
+    public static (PlusPimDbg Debugger, FileInfo TempFile) CreateDebugger(string asmContent, IDebuggeeIO? io = null) {
         FileInfo tempFile = WriteTempAsm(asmContent);
-        PlusPimDbg debugger = new([tempFile], Logger.Null, new InMemoryDebuggeeIO());
+        PlusPimDbg debugger = new([tempFile], Logger.Null, io ?? new InMemoryDebuggeeIO());
         return (debugger, tempFile);
     }
 
