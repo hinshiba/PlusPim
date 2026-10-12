@@ -16,6 +16,13 @@ internal static class RegisterParser {
         Enum.GetValues<RegisterID>().ToFrozenDictionary(id => id.ToString().ToLowerInvariant(), StringComparer.Ordinal);
 
     /// <summary>
+    /// レジスタをアセンブリでの表記にする
+    /// </summary>
+    public static string Format(RegisterID register) {
+        return $"${register.ToString().ToLowerInvariant()}";
+    }
+
+    /// <summary>
     /// レジスタ名か番号を解析する
     /// </summary>
     /// <param name="nameWithoutDollar"><c>$</c> を除いたレジスタ指定</param>

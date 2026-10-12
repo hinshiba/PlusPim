@@ -13,7 +13,7 @@ internal static class InstructionFactory {
 
     internal static IInstruction Lui(RegisterID rt, Immediate imm, int lineNumber) {
         return new ITypeInstruction(rt, RegisterID.Zero, imm, lineNumber, "lui",
-            (_, immVal) => unchecked(immVal.ToUInt() << 16));
+            (_, immVal) => unchecked(immVal.ToUInt() << 16), isRegImm: true);
     }
 
     internal static IInstruction Addu(RegisterID rd, RegisterID rs, RegisterID rt, int lineNumber) {

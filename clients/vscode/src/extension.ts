@@ -2,6 +2,10 @@ import * as fs from "node:fs";
 import * as net from "node:net";
 import * as path from "node:path";
 import * as vscode from "vscode";
+import {
+	DapExpansionSource,
+	PseudoExpansionHintsProvider,
+} from "./inlayHints.js";
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("PlusPim Extension was loaded.");
@@ -16,6 +20,43 @@ export function activate(context: vscode.ExtensionContext) {
 			if (session.type === "pluspim") {
 				factory.dispose();
 			}
+		}),
+	);
+
+	// 疑似命令の展開先のインレイヒント．デバッグセッション中だけ表示する
+	const expansions = new DapExpansionSource();
+	const hints = new PseudoExpansionHintsProvider(expansions);
+	context.subscriptions.push(
+		vscode.languages.registerInlayHintsProvider({ language: "mips" }, hints),
+		vscode.debug.onDidTerminateDebugSession((session) => {
+			if (session.type === "pluspim") {
+				expansions.forget(session.id);
+				hints.invalidate();
+			}
+		}),
+		vscode.debug.onDidChangeActiveDebugSession(() => hints.invalidate()),
+		vscode.workspace.onDidChangeConfiguration((e) => {
+			if (e.affectsConfiguration("pluspim.inlayHints")) {
+				hints.invalidate();
+			}
+		}),
+		// プログラムは launch でアセンブルされるため，その応答の後にヒントを取り直す
+		// trace の有無にかかわらず必要なので，trace 用のトラッカーとは別に登録する
+		vscode.debug.registerDebugAdapterTrackerFactory("pluspim", {
+			createDebugAdapterTracker(session) {
+				return {
+					onDidSendMessage(message: DapMessage) {
+						if (
+							message.type === "response" &&
+							message.command === "launch" &&
+							message.success
+						) {
+							expansions.markReady(session.id);
+							hints.invalidate();
+						}
+					},
+				};
+			},
 		}),
 	);
 
@@ -154,6 +195,7 @@ interface DapMessage {
 	type?: string;
 	command?: string;
 	event?: string;
+	success?: boolean;
 }
 
 class PlusPimTracker implements vscode.DebugAdapterTracker {
