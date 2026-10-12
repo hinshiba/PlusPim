@@ -1,6 +1,8 @@
 using PlusPim.Application;
 using PlusPim.Debuggers.PlusPimDbg;
+using PlusPim.Debuggers.PlusPimDbg.Program;
 using PlusPim.Debuggers.PlusPimDbg.Runtime;
+using PlusPim.Logging;
 using Xunit;
 
 namespace PlusPimTests;
@@ -330,12 +332,12 @@ public class IntegrationTests {
     }
 
     [Fact]
-    public void Syscall_PrintString_WritesUtf8BytesOfAsciizLiteral() {
-        // .asciiz のUTF-8での配置から，ハンドラの runtime_call! による出力までを通しで確認する
+    public void Syscall_PrintString_WritesUtf8BytesOfUtf8zLiteral() {
+        // .utf-8z のUTF-8での配置から，ハンドラの runtime_call! による出力までを通しで確認する
         string asm = """
             .data
             msg:
-                .asciiz "あ"
+                .utf-8z "あ"
             .text
             main:
                 la      $a0,    msg
@@ -358,6 +360,27 @@ public class IntegrationTests {
 
             Assert.Equal([0xE3, 0x81, 0x82], io.OutputBytes);
             Assert.Null(debugger.GetRuntimeError());
+        } finally {
+            tempFile.Delete();
+        }
+    }
+
+    [Fact]
+    public void Load_AsciizWithNonAscii_FailsWithAssemblyException() {
+        string asm = """
+            .data
+            msg:
+                .asciiz "あ"
+            .text
+            main:
+                nop
+            """;
+        FileInfo tempFile = TestHelpers.WriteTempAsm(asm);
+        try {
+            AssemblyException ex = Assert.Throws<AssemblyException>(() => new PlusPimDbg([tempFile], Logger.Null, new InMemoryDebuggeeIO()));
+
+            string error = Assert.Single(ex.Errors);
+            Assert.Contains($"{tempFile.Name}:3", error);
         } finally {
             tempFile.Delete();
         }

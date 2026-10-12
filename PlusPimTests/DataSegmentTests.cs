@@ -299,35 +299,36 @@ public class DataSegmentTests {
     }
 
     [Fact]
-    public void Asciiz_Hiragana_WritesUtf8Bytes() {
+    public void Utf8z_Hiragana_WritesUtf8BytesWithNull() {
         ParsedProgram program = Parse("""
             .data
             s:
-                .asciiz "あ"
+                .utf-8z "あ"
             """);
 
         Assert.Equal([0xE3, 0x81, 0x82, 0x00], ReadImage(program, Resolve(program, "s"), 4));
         Assert.Equal(4u, program.DataSegment.Size);
+        Assert.Empty(program.Errors);
     }
 
     [Fact]
-    public void Ascii_Latin1Char_WritesUtf8BytesWithoutNull() {
+    public void Utf8z_AsciiOnly_WritesAsciiBytesWithNull() {
         ParsedProgram program = Parse("""
             .data
             s:
-                .ascii "é"
+                .utf-8z "abc"
             """);
 
-        Assert.Equal([0xC3, 0xA9], ReadImage(program, Resolve(program, "s"), 2));
-        Assert.Equal(2u, program.DataSegment.Size);
+        Assert.Equal([0x61, 0x62, 0x63, 0x00], ReadImage(program, Resolve(program, "s"), 4));
+        Assert.Equal(4u, program.DataSegment.Size);
     }
 
     [Fact]
-    public void Asciiz_SurrogatePair_WritesFourByteUtf8() {
+    public void Utf8z_SurrogatePair_WritesFourByteUtf8() {
         ParsedProgram program = Parse("""
             .data
             s:
-                .asciiz "🎉"
+                .utf-8z "🎉"
             """);
 
         Assert.Equal([0xF0, 0x9F, 0x8E, 0x89, 0x00], ReadImage(program, Resolve(program, "s"), 5));
@@ -335,11 +336,11 @@ public class DataSegmentTests {
     }
 
     [Fact]
-    public void Asciiz_EscapesStayAsciiAroundMultibyte() {
+    public void Utf8z_EscapesStayAsciiAroundMultibyte() {
         ParsedProgram program = Parse("""
             .data
             s:
-                .asciiz "a\tあ\\\n"
+                .utf-8z "a\tあ\\\n"
             """);
 
         // 'a', TAB, あ(E3 81 82), バックスラッシュ, 改行, NUL
@@ -347,22 +348,49 @@ public class DataSegmentTests {
     }
 
     [Fact]
-    public void Asciiz_UnknownEscapeBeforeMultibyte_KeepsBackslash() {
+    public void Utf8z_UnknownEscapeBeforeMultibyte_KeepsBackslash() {
         ParsedProgram program = Parse("""
             .data
             s:
-                .asciiz "\あ"
+                .utf-8z "\あ"
             """);
 
         Assert.Equal([0x5C, 0xE3, 0x81, 0x82, 0x00], ReadImage(program, Resolve(program, "s"), 5));
     }
 
     [Fact]
-    public void Asciiz_LabelAfterMultibyte_IsAlignedByByteLength() {
+    public void Utf8z_UpperCaseDirective_Works() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .UTF-8Z "あ"
+            """);
+
+        Assert.Equal([0xE3, 0x81, 0x82, 0x00], ReadImage(program, Resolve(program, "s"), 4));
+        Assert.Empty(program.Errors);
+    }
+
+    [Fact]
+    public void Utf8z_InlineLabelAndCommentAfterHyphenatedDirective_Work() {
+        // 指令名のハイフンがラベルや行の分割に影響しない
+        ParsedProgram program = Parse("""
+            .data
+            s: .utf-8z "x: あ" # 終端の#はコメント
+            t: .utf-8z "#"
+            """);
+
+        Assert.Equal([0x78, 0x3A, 0x20, 0xE3, 0x81, 0x82, 0x00], ReadImage(program, Resolve(program, "s"), 7));
+        Assert.Equal(Base + 7, Resolve(program, "t"));
+        Assert.Equal(9u, program.DataSegment.Size);
+        Assert.Empty(program.Errors);
+    }
+
+    [Fact]
+    public void Utf8z_LabelAfterMultibyte_IsAlignedByByteLength() {
         ParsedProgram program = Parse("""
             .data
             a:
-                .asciiz "あ"
+                .utf-8z "あ"
             b:
                 .align  2
                 .asciiz "x"
@@ -373,5 +401,114 @@ public class DataSegmentTests {
         // "あ"+NULで4バイトなのでbは追加の詰め物なしでBase+4に置かれる
         Assert.Equal(Base + 4, Resolve(program, "b"));
         Assert.Equal(Base + 6, Resolve(program, "c"));
+    }
+
+    [Fact]
+    public void Utf8z_FollowedByWord_IsAlignedAfterOddLength() {
+        ParsedProgram program = Parse("""
+            .data
+            a:
+                .utf-8z "いう"
+            w:
+                .word 1
+            """);
+
+        // 7バイトの次のワード境界はBase+8
+        Assert.Equal(Base + 8, Resolve(program, "w"));
+    }
+
+    [Fact]
+    public void Ascii_NonAsciiChar_IsErrorAndWritesNothing() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .ascii "あ"
+            """);
+
+        _ = Assert.Single(program.Errors);
+        Assert.Equal(0u, program.DataSegment.Size);
+    }
+
+    [Fact]
+    public void Asciiz_NonAsciiChar_IsErrorAndWritesNothing() {
+        ParsedProgram program = Parse("""
+            .data
+            .asciiz "é"
+            .asciiz "🎉"
+            """);
+
+        Assert.Equal(2, program.Errors.Count);
+        Assert.Equal(0u, program.DataSegment.Size);
+    }
+
+    [Fact]
+    public void Asciiz_NonAsciiChar_ErrorHasFileAndLine() {
+        FileInfo file = TestHelpers.WriteTempAsm("""
+            .data
+            a: .asciiz "ok"
+            b: .asciiz "ab🎉"
+            """);
+        try {
+            ParsedProgram program = new(file, TextSegment.TextSegmentBase, Base, TextSegment.KernelTextSegmentBase, Logger.Null, false);
+
+            string error = Assert.Single(program.Errors);
+            Assert.Contains($"{file.Name}:3", error);
+            Assert.Contains("U+1F389", error);
+        } finally {
+            file.Delete();
+        }
+    }
+
+    [Fact]
+    public void Asciiz_NonAsciiInComment_IsNotAnError() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "ok" # あ
+            # 🎉
+            """);
+
+        Assert.Empty(program.Errors);
+        Assert.Equal([0x6F, 0x6B, 0x00], ReadImage(program, Resolve(program, "s"), 3));
+    }
+
+    [Fact]
+    public void Asciiz_AsciiOnly_WritesSameBytes() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "a\tb\\\n"
+            """);
+
+        Assert.Equal([0x61, 0x09, 0x62, 0x5C, 0x0A, 0x00], ReadImage(program, Resolve(program, "s"), 6));
+        Assert.Empty(program.Errors);
+    }
+
+    [Fact]
+    public void Asciiz_NulEscape_IsAllowed() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "a\0b"
+            """);
+
+        Assert.Equal([0x61, 0x00, 0x62, 0x00], ReadImage(program, Resolve(program, "s"), 4));
+        Assert.Empty(program.Errors);
+    }
+
+    [Fact]
+    public void Ascii_NonAsciiChar_LabelStillResolvesToNextData() {
+        ParsedProgram program = Parse("""
+            .data
+            a:
+                .ascii "あ"
+            b:
+                .asciiz "x"
+            """);
+
+        // エラーの行は何も配置しないので，aとbは同じアドレスになる
+        Assert.Equal(Base, Resolve(program, "a"));
+        Assert.Equal(Base, Resolve(program, "b"));
+        _ = Assert.Single(program.Errors);
     }
 }

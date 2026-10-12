@@ -7,10 +7,21 @@ namespace PlusPim.Debuggers.PlusPimDbg.Program;
 /// <summary>
 /// .dataセグメントの行を処理し，メモリイメージを構築する
 /// </summary>
-internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
+/// <param name="baseAddr">データセグメントの開始アドレス</param>
+/// <param name="logger">ロガー</param>
+/// <param name="fileName">エラーの報告に使うファイル名</param>
+internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger, string fileName) {
 
 
     private readonly Dictionary<Address, byte> _memoryImage = [];
+
+    private readonly List<string> _errors = [];
+
+    /// <summary>
+    /// アセンブルを失敗させるエラー．ファイル名と行番号を含む
+    /// </summary>
+    /// <remarks>エラーになった指令は何も配置しない．ほかの行の処理は続ける</remarks>
+    public IReadOnlyList<string> Errors => this._errors;
 
     /// <summary>
     /// アドレス未確定のラベル
@@ -58,7 +69,8 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
     /// データセグメントの1行を処理する
     /// </summary>
     /// <param name="line">トリム済みの文字列</param>
-    public void AddLine(string line) {
+    /// <param name="lineNumber">1-indexedの行番号</param>
+    public void AddLine(string line, int lineNumber) {
         // ディレクティブ処理
         if(!line.StartsWith('.')) {
             logger.Warning("DataSegmentBuilder", $"Unexpected data segment content: {line}");
@@ -91,10 +103,13 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
                 this.ProcessWord(operands);
                 break;
             case ".ascii":
-                this.ProcessAscii(operands, addNull: false);
+                this.ProcessString(directive, lineNumber, operands, asciiOnly: true, addNull: false);
                 break;
             case ".asciiz":
-                this.ProcessAscii(operands, addNull: true);
+                this.ProcessString(directive, lineNumber, operands, asciiOnly: true, addNull: true);
+                break;
+            case ".utf-8z":
+                this.ProcessString(directive, lineNumber, operands, asciiOnly: false, addNull: true);
                 break;
             case ".align":
                 this.ProcessAlign(operands);
@@ -177,7 +192,15 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
         }
     }
 
-    private void ProcessAscii(string operands, bool addNull) {
+    /// <summary>
+    /// 文字列配置の指令を処理する
+    /// </summary>
+    /// <param name="directive">小文字にした指令名</param>
+    /// <param name="lineNumber">1-indexedの行番号</param>
+    /// <param name="operands">指令の引数</param>
+    /// <param name="asciiOnly"><see langword="true"/>ならASCII範囲外の文字をエラーにする．そうでなければUTF-8で配置する</param>
+    /// <param name="addNull">NUL終端を付けるかどうか</param>
+    private void ProcessString(string directive, int lineNumber, string operands, bool asciiOnly, bool addNull) {
         // 文字列は"..."で囲まれている
         int firstQuote = operands.IndexOf('"');
         int lastQuote = operands.LastIndexOf('"');
@@ -187,6 +210,16 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
         }
 
         string content = operands[(firstQuote + 1)..lastQuote];
+        if(asciiOnly) {
+            // エスケープはASCIIの文字だけなので，リテラルのまま判定する
+            foreach(Rune rune in content.EnumerateRunes()) {
+                if(!rune.IsAscii) {
+                    this._errors.Add($"{fileName}:{lineNumber} Non-ASCII character U+{rune.Value:X4} in {directive} string (use .utf-8z): {operands}");
+                    return;
+                }
+            }
+        }
+
         byte[] bytes = this.ProcessEscapeSequences(content);
         foreach(byte b in bytes) {
             this.WriteByte(b);
