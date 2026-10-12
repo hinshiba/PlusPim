@@ -1,5 +1,6 @@
 using PlusPim.Debuggers.PlusPimDbg.Program.Records;
 using PlusPim.Logging;
+using System.Text;
 
 namespace PlusPim.Debuggers.PlusPimDbg.Program;
 
@@ -216,6 +217,7 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
 
     private byte[] ProcessEscapeSequences(string input) {
         List<byte> result = [];
+        Span<byte> utf8 = stackalloc byte[4];
         for(int i = 0; i < input.Length; i++) {
             if(input[i] == '\\' && i + 1 < input.Length) {
                 char next = input[i + 1];
@@ -245,7 +247,15 @@ internal sealed class DataSegmentBuilder(Address baseAddr, ILogger logger) {
                         break;
                 }
             } else {
-                result.Add((byte)input[i]);
+                // 文字列リテラルはUTF-8のバイト列として書く．孤立サロゲートはU+FFFDにする
+                if(!Rune.TryGetRuneAt(input, i, out Rune rune)) {
+                    rune = Rune.ReplacementChar;
+                }
+                int length = rune.EncodeToUtf8(utf8);
+                for(int j = 0; j < length; j++) {
+                    result.Add(utf8[j]);
+                }
+                i += rune.Utf16SequenceLength - 1;
             }
         }
         return result.ToArray();

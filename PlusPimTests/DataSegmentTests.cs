@@ -290,4 +290,88 @@ public class DataSegmentTests {
             tempFile.Delete();
         }
     }
+
+    /// <summary>
+    /// ラベルから始まるメモリイメージをsizeバイト分取り出す
+    /// </summary>
+    private static byte[] ReadImage(ParsedProgram program, Address start, int size) {
+        return [.. Enumerable.Range(0, size).Select(i => program.DataSegment.MemoryImage[start + i])];
+    }
+
+    [Fact]
+    public void Asciiz_Hiragana_WritesUtf8Bytes() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "あ"
+            """);
+
+        Assert.Equal([0xE3, 0x81, 0x82, 0x00], ReadImage(program, Resolve(program, "s"), 4));
+        Assert.Equal(4u, program.DataSegment.Size);
+    }
+
+    [Fact]
+    public void Ascii_Latin1Char_WritesUtf8BytesWithoutNull() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .ascii "é"
+            """);
+
+        Assert.Equal([0xC3, 0xA9], ReadImage(program, Resolve(program, "s"), 2));
+        Assert.Equal(2u, program.DataSegment.Size);
+    }
+
+    [Fact]
+    public void Asciiz_SurrogatePair_WritesFourByteUtf8() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "🎉"
+            """);
+
+        Assert.Equal([0xF0, 0x9F, 0x8E, 0x89, 0x00], ReadImage(program, Resolve(program, "s"), 5));
+        Assert.Equal(5u, program.DataSegment.Size);
+    }
+
+    [Fact]
+    public void Asciiz_EscapesStayAsciiAroundMultibyte() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "a\tあ\\\n"
+            """);
+
+        // 'a', TAB, あ(E3 81 82), バックスラッシュ, 改行, NUL
+        Assert.Equal([0x61, 0x09, 0xE3, 0x81, 0x82, 0x5C, 0x0A, 0x00], ReadImage(program, Resolve(program, "s"), 8));
+    }
+
+    [Fact]
+    public void Asciiz_UnknownEscapeBeforeMultibyte_KeepsBackslash() {
+        ParsedProgram program = Parse("""
+            .data
+            s:
+                .asciiz "\あ"
+            """);
+
+        Assert.Equal([0x5C, 0xE3, 0x81, 0x82, 0x00], ReadImage(program, Resolve(program, "s"), 5));
+    }
+
+    [Fact]
+    public void Asciiz_LabelAfterMultibyte_IsAlignedByByteLength() {
+        ParsedProgram program = Parse("""
+            .data
+            a:
+                .asciiz "あ"
+            b:
+                .align  2
+                .asciiz "x"
+            c:
+                .asciiz "y"
+            """);
+
+        // "あ"+NULで4バイトなのでbは追加の詰め物なしでBase+4に置かれる
+        Assert.Equal(Base + 4, Resolve(program, "b"));
+        Assert.Equal(Base + 6, Resolve(program, "c"));
+    }
 }
