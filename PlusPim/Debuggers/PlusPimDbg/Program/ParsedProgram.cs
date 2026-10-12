@@ -78,8 +78,8 @@ internal partial class ParsedProgram {
 
     private readonly List<string> _errors = [];
     private readonly List<(string Name, int LineNumber)> _globalDeclarations = [];
-    private readonly List<(ParsedLine Line, int LineNumber)> _parsedTextLines;
-    private readonly List<(ParsedLine Line, int LineNumber)> _parsedKernelTextLines;
+    private readonly List<(ParsedLine Line, int LineNumber, string? PseudoMnemonic)> _parsedTextLines;
+    private readonly List<(ParsedLine Line, int LineNumber, string? PseudoMnemonic)> _parsedKernelTextLines;
     private readonly ILogger _logger;
     private TextSegment? _textSegment;
     private TextSegment? _kernelTextSegment;
@@ -206,10 +206,10 @@ internal partial class ParsedProgram {
     /// <summary>
     /// パス1で解析した行のシンボルを解決してテキスト系セグメントを作る
     /// </summary>
-    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber)> lines, ISymbolResolver symbols) {
+    private TextSegment Materialize(List<(ParsedLine Line, int LineNumber, string? PseudoMnemonic)> lines, ISymbolResolver symbols) {
         TextSegmentBuilder builder = new(this._logger);
-        foreach((ParsedLine line, int lineNumber) in lines) {
-            builder.Add(line, lineNumber, symbols, this.File.Name);
+        foreach((ParsedLine line, int lineNumber, string? pseudoMnemonic) in lines) {
+            builder.Add(line, lineNumber, symbols, this.File.Name, pseudoMnemonic);
         }
         this._errors.AddRange(builder.Errors);
         return builder.Build();
@@ -239,9 +239,9 @@ internal partial class ParsedProgram {
     /// 解析できない行と未対応の指令は警告を出して読み飛ばす．
     /// <paramref name="strict"/>が<see langword="true"/>ならば警告の代わりにエラーを記録する
     /// </remarks>
-    /// <returns>解析できた行と1始まりの行番号</returns>
-    private List<(ParsedLine Line, int LineNumber)> ParseTextLines(List<SourceLine> lines, Address segmentBase, ILogger logger, bool strict) {
-        List<(ParsedLine Line, int LineNumber)> parsedLines = [];
+    /// <returns>解析できた行と1始まりの行番号，疑似命令ならそのニーモニック</returns>
+    private List<(ParsedLine Line, int LineNumber, string? PseudoMnemonic)> ParseTextLines(List<SourceLine> lines, Address segmentBase, ILogger logger, bool strict) {
+        List<(ParsedLine Line, int LineNumber, string? PseudoMnemonic)> parsedLines = [];
         int instructionCount = 0;
         foreach((string trimmed, int lineNumber, bool isLabel) in lines) {
             if(isLabel) {
@@ -253,7 +253,7 @@ internal partial class ParsedProgram {
             } else if(trimmed.StartsWith('.')) {
                 this.ReportSkipped($"{this.File.Name}:{lineNumber} Directive ignored (unsupported in text segment): {trimmed}", logger, strict);
             } else if(InstructionRegistry.Default.TryParseLine(trimmed, lineNumber, out ParsedLine? parsed)) {
-                parsedLines.Add((parsed, lineNumber));
+                parsedLines.Add((parsed, lineNumber, InstructionRegistry.Default.GetPseudoMnemonic(trimmed)));
                 instructionCount += parsed.Size;
             } else {
                 this.ReportSkipped($"{this.File.Name}:{lineNumber} Line skipped (cannot parse): {trimmed}", logger, strict);
