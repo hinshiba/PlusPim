@@ -58,10 +58,10 @@ When a debug session starts, the extension:
 
 The program's standard input and output are the terminal itself, so you type input there and the output is written there as raw bytes. Non-ASCII output is shown correctly only if the terminal decodes it as UTF-8 (on Windows, the terminal code page must be UTF-8).
 
-The terminal is kept after the session ends so that the program's output stays readable. Terminals are disposed when the extension is deactivated.
-
 ## Known Limitations
 
+- The terminal is closed by VS Code when PlusPim exits, so the program's output disappears when the session ends.
+- On Windows, PlusPim is started without a shell, so the terminal code page stays at the system default (for example Shift_JIS) and UTF-8 output is garbled.
 - Only Windows (x64) and Linux (x64) are supported. macOS is not available.
 - Pseudo-instruction hints are only shown during a debug session, because the expansion needs the assembled program.
 

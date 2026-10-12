@@ -18,8 +18,9 @@
 
 ### VS Code 拡張
 
-- [ ] セッションごとにターミナルが増え，拡張が終了するまで残る
-  - セッション終了後もプログラムの出力を読めるようにターミナルを残している．不要になったターミナルを自動で片付ける方法を検討する
+- [ ] セッション終了時にプログラムの出力がターミナルごと消える (#12)
+  - 実機で確認済み．`shellPath` で直接起動しているため，PlusPim の終了とともに VS Code がターミナルを閉じる
+  - 対応案: PlusPim に終了前の Enter 待ちオプション (`--wait-on-exit` など) を設け，拡張が付与する．または pwsh 等のシェルを経由して起動する
 - [ ] launch 設定を検証する (`extension.ts:48-65`)
   - [ ] `session.configuration` は実質 `any`. 型付きの `PlusPimLaunchConfig` を定義し, `unknown` から検証する (`resolveDebugConfiguration` で行うのが筋)
   - [ ] `program` に配列と文字列以外が来たとき `String(p)` で `"[object Object]"` にならないようエラーにする

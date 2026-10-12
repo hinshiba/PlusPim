@@ -16,8 +16,8 @@
 - The extension now listens on a loopback port chosen by the OS, and PlusPim
   connects to it with `--connect`. The first connection is taken as the debug
   session. This replaces the fixed port and the probe connection
-- The terminal is kept after a debug session ends, and is disposed only when
-  the extension is deactivated
+- Terminals are managed per debug session, so ending one session no longer
+  disposes the terminal of another
 - The program's standard input and output are passed through the terminal as
   raw bytes, and no longer go through the Debug Console
 
@@ -29,7 +29,8 @@
 ### Fixed
 
 - `print_char` and `print_string` write raw bytes instead of re-encoding them,
-  so UTF-8 text printed byte by byte is no longer garbled
+  so UTF-8 text printed byte by byte is no longer garbled when the terminal
+  decodes it as UTF-8
 - `.ascii` and `.asciiz` write non-ASCII characters as UTF-8 bytes
 
 ## [0.2.0] - 2026-08-31
