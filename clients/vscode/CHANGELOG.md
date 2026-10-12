@@ -10,6 +10,9 @@
   expands to, during a debug session (setting
   `pluspim.inlayHints.pseudoInstructions`, default `true`)
 - `.utf-8z` data directive: places a string as UTF-8 bytes followed by a NUL byte
+- `forceTerminalUtf8` launch option (default `true`). The extension passes
+  `--force-terminal-utf8` to PlusPim, which switches the terminal to UTF-8
+  while it runs and restores it on exit (currently effective on Windows only)
 
 ### Changed
 
@@ -34,6 +37,8 @@
 - `print_char` and `print_string` write raw bytes instead of re-encoding them,
   so UTF-8 text printed byte by byte is no longer garbled when the terminal
   decodes it as UTF-8
+- UTF-8 program output is no longer garbled on Windows terminals using a legacy
+  code page (for example Shift_JIS)
 
 ## [0.2.0] - 2026-08-31
 
