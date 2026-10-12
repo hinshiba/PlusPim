@@ -117,12 +117,12 @@
 
 ### トラップ (即値)
 
-- [ ] `tgei` — Trap if Greater or Equal Immediate
-- [ ] `tgeiu` — Trap if Greater or Equal Immediate Unsigned
-- [ ] `tlti` — Trap if Less Than Immediate
-- [ ] `tltiu` — Trap if Less Than Immediate Unsigned
-- [ ] `teqi` — Trap if Equal Immediate
-- [ ] `tnei` — Trap if Not Equal Immediate
+- [-] `tgei` — Trap if Greater or Equal Immediate
+- [-] `tgeiu` — Trap if Greater or Equal Immediate Unsigned
+- [-] `tlti` — Trap if Less Than Immediate
+- [-] `tltiu` — Trap if Less Than Immediate Unsigned
+- [-] `teqi` — Trap if Equal Immediate
+- [-] `tnei` — Trap if Not Equal Immediate
 
 ---
 
@@ -143,50 +143,50 @@
 
 ### 算術
 
-- [ ] `mul` — Multiply (rd = rs * rt) → `mult` + `mflo`
-- [ ] `div` (3オペランド) — Divide (rd = rs / rt) → `div` + `mflo`
-- [ ] `rem` — Remainder (rd = rs % rt) → `div` + `mfhi`
-- [ ] `abs` — Absolute Value
-- [ ] `neg` — Negate (rd = -rs) → `sub rd, $zero, rs`
-- [ ] `negu` — Negate Unsigned → `subu rd, $zero, rs`
+- [-] `mul` — Multiply (rd = rs * rt) → `mult` + `mflo`
+- [-] `div` (3オペランド) — Divide (rd = rs / rt) → `div` + `mflo`
+- [-] `rem` — Remainder (rd = rs % rt) → `div` + `mfhi`
+- [-] `abs` — Absolute Value
+- [-] `neg` — Negate (rd = -rs) → `sub rd, $zero, rs`
+- [-] `negu` — Negate Unsigned → `subu rd, $zero, rs`
 
 ### 論理
 
-- [ ] `not` — NOT (rd = ~rs) → `nor rd, rs, $zero`
+- [-] `not` — NOT (rd = ~rs) → `nor rd, rs, $zero`
 
 ### 分岐
 
-- [ ] `b` — Branch Unconditional → `beq $zero, $zero, label`
-- [ ] `bal` — Branch and Link → `bgezal $zero, label`
-- [ ] `beqz` — Branch if Equal Zero → `beq rs, $zero, label`
-- [ ] `bnez` — Branch if Not Equal Zero → `bne rs, $zero, label`
-- [ ] `bge` — Branch if Greater or Equal (符号付き)
-- [ ] `bgeu` — Branch if Greater or Equal Unsigned
-- [ ] `bgt` — Branch if Greater Than (符号付き)
-- [ ] `bgtu` — Branch if Greater Than Unsigned
-- [ ] `ble` — Branch if Less or Equal (符号付き)
-- [ ] `bleu` — Branch if Less or Equal Unsigned
-- [ ] `blt` — Branch if Less Than (符号付き)
-- [ ] `bltu` — Branch if Less Than Unsigned
+- [-] `b` — Branch Unconditional → `beq $zero, $zero, label`
+- [-] `bal` — Branch and Link → `bgezal $zero, label`
+- [-] `beqz` — Branch if Equal Zero → `beq rs, $zero, label`
+- [-] `bnez` — Branch if Not Equal Zero → `bne rs, $zero, label`
+- [-] `bge` — Branch if Greater or Equal (符号付き)
+- [-] `bgeu` — Branch if Greater or Equal Unsigned
+- [-] `bgt` — Branch if Greater Than (符号付き)
+- [-] `bgtu` — Branch if Greater Than Unsigned
+- [-] `ble` — Branch if Less or Equal (符号付き)
+- [-] `bleu` — Branch if Less or Equal Unsigned
+- [-] `blt` — Branch if Less Than (符号付き)
+- [-] `bltu` — Branch if Less Than Unsigned
 
 ### 比較・セット
 
-- [ ] `seq` — Set if Equal
-- [ ] `sne` — Set if Not Equal
-- [ ] `sge` — Set if Greater or Equal (符号付き)
-- [ ] `sgeu` — Set if Greater or Equal Unsigned
-- [ ] `sgt` — Set if Greater Than (符号付き)
-- [ ] `sgtu` — Set if Greater Than Unsigned
-- [ ] `sle` — Set if Less or Equal (符号付き)
-- [ ] `sleu` — Set if Less or Equal Unsigned
+- [-] `seq` — Set if Equal
+- [-] `sne` — Set if Not Equal
+- [-] `sge` — Set if Greater or Equal (符号付き)
+- [-] `sgeu` — Set if Greater or Equal Unsigned
+- [-] `sgt` — Set if Greater Than (符号付き)
+- [-] `sgtu` — Set if Greater Than Unsigned
+- [-] `sle` — Set if Less or Equal (符号付き)
+- [-] `sleu` — Set if Less or Equal Unsigned
 
 ### ロード
 
-- [ ] `ulh` — Unaligned Load Halfword
-- [ ] `ulhu` — Unaligned Load Halfword Unsigned
-- [ ] `ulw` — Unaligned Load Word
-- [ ] `ush` — Unaligned Store Halfword
-- [ ] `usw` — Unaligned Store Word
+- [-] `ulh` — Unaligned Load Halfword
+- [-] `ulhu` — Unaligned Load Halfword Unsigned
+- [-] `ulw` — Unaligned Load Word
+- [-] `ush` — Unaligned Store Halfword
+- [-] `usw` — Unaligned Store Word
 
 ### その他
 
@@ -201,7 +201,7 @@
 - [x] `.text` — テキスト(コード)セクション開始
 - [x] `.data` — データセクション開始
 - [x] `.ktext` — カーネルテキストセクション開始
-- [x] `.kdata` — カーネルデータセクション開始
+- [-] `.kdata` — カーネルデータセクション開始
 
 ### データ定義
 
@@ -219,9 +219,9 @@
 
 ### マクロ・制御
 
-- [ ] `.macro` — マクロ定義開始
-- [ ] `.end_macro` — マクロ定義終了
-- [ ] `.eqv` — シンボル定数定義
-- [ ] `.include` — ファイルインクルード
-- [ ] `.set` — アセンブラオプション設定 (e.g., `noat`, `noreorder`)
-- [ ] `.extern` — 外部シンボル宣言
+- [-] `.macro` — マクロ定義開始
+- [-] `.end_macro` — マクロ定義終了
+- [-] `.eqv` — シンボル定数定義
+- [-] `.include` — ファイルインクルード
+- [-] `.set` — アセンブラオプション設定 (e.g., `noat`, `noreorder`)
+- [-] `.extern` — 外部シンボル宣言

@@ -3,30 +3,28 @@ name: C# CI Formatting
 on:
   pull_request:
     branches:
-      - main # 対象のブランチ
+      - main
     types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
 
 jobs:
   build-format:
     name: Build, Format Check
     runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ./ # ソリューションファイル(sln, slnx?)の場所
 
     steps:
-      # ソースコードのチェックアウト
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      # .NET SDKのセットアップ
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/checkout@v7
         with:
-          dotnet-version: '10.0.101'
+          persist-credentials: false
 
-      # フォーマットの検証
-      # --verify-no-changes オプションでフォーマット違反がある場合はエラー
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      # フォーマット違反がある場合はエラー
       - name: Check Formatting
         run: dotnet format --verify-no-changes --verbosity diagnostic PlusPim.slnx

@@ -18,10 +18,6 @@
 
 ### 前処理系
 
-- [ ] `.kdata` がセグメント指令として認識されない (`ParsedProgram.cs:71` 付近)
-  - [ ] `doc/instructions.md` は `.kdata` を実装済みとしているため，実装するか未実装に直す
-  - [ ] 実装する場合は `.kdata` の開始アドレスを決め (MARS は `0x90000000`)，カーネルデータのセグメントを追加する
-  - [ ] テスト: `.kdata` の `kx:` `.word 1` でラベルのアドレスとメモリが正しい
 - [ ] `.ascii`/`.asciiz` が UTF-16 の下位1バイトだけを書く (`DataSegmentBuilder.cs:244`, `248`)
   - `"あ"` が `0x42` になる．print_string は UTF-8 として出力するため不整合
   - [ ] 文字列を UTF-8 のバイト列にして書く．エスケープは ASCII のまま処理する
@@ -29,10 +25,6 @@
 - [ ] 文字列の直後が `\\"` のとき，行末のコメントが除去されない (`ParsedProgram.cs:149`)
   - `.asciiz "a\\" # c "q"` で文字列が `a\\" # c "q` になる．引用符の直前の `\` の個数の偶奇で判定する
   - [ ] テスト
-- [ ] マクロ定義の本体が定義の位置に命令として配置され，`main` などのアドレスがずれる (`ParsedProgram.cs:171`, `TextSegmentBuilder.cs:19`)
-  - `.macro` 行は `.` で始まるため無視されるが，本体の行は通常の命令として数えられる
-  - [ ] マクロの実装まで，`.macro` から `.end_macro` の本体を読み飛ばす (上のパース失敗の項目の方針と合わせる)
-  - [ ] テスト: 定義の後の `main:` が `T+0`
 - [ ] `la` が `$` を含むラベルを参照できない (`LaInstructionParser.cs:23`)
   - 分岐とジャンプは `(\w|\$)+` を受け付けるが，`la` は `\w+` のみ
   - [ ] ラベルのパターンを共通化する
@@ -42,16 +34,31 @@
 
 - [ ] セッション終了時にプログラムの出力がターミナルごと消える (#12, `extension.ts:17-23`, `87-90`)
   - [ ] ターミナルを残して終了待ちにする
-- ポートが既定で 4711 固定のため, 使用中だと起動できない (#18, `extension.ts:52`)
-  - 空きポートを動的に選ぶ
-- 拡張機能のポート確認と本接続を 50ms のタイミングで区別している (#18, `Program.cs:128-137`)
-  - より堅牢な方法へ
+  - [ ] ターミナルの管理をセッション単位にする. 現状は `onDidTerminateDebugSession` が任意の pluspim セッション終了で `factory.dispose()` を呼び, `terminal` も単一フィールドなので, 2セッション目の起動で1つ目の端末への参照を失う. `Map<sessionId, Terminal>` にして該当セッション分だけ破棄する
+  - [ ] `factory` を `context.subscriptions` に登録し, 拡張の deactivate 時に端末が残らないようにする
+- [ ] launch 設定を検証する (`extension.ts:48-65`)
+  - [ ] `session.configuration` は実質 `any`. 型付きの `PlusPimLaunchConfig` を定義し, `unknown` から検証する (`resolveDebugConfiguration` で行うのが筋)
+  - [ ] `program` に配列と文字列以外が来たとき `String(p)` で `"[object Object]"` にならないようエラーにする
+  - [ ] `args` の `any[]` を `unknown[]` にして検証する
+  - [ ] `port` が整数かつ 1-65535 の範囲かを確認する
+- [ ] プラットフォームとアーキテクチャの判定を厳密にする (`extension.ts:86-87`)
+  - [ ] 現状は `win32` 以外をすべて `linux-x64` とみなす. macOS や arm64 で原因の分からない `ENOENT` になる
+  - [ ] `process.platform` と `process.arch` の組から rid を引くテーブルを作り, 未対応環境では明確なエラーを出す
+  - [ ] `scripts/vsix.ts` の `ridMap` と重複しているので, 共通化する (拡張本体は `src`, スクリプトは `scripts` にあり `rootDir` が別なので, 置き場所に注意)
+- [ ] `activationEvents: ["onDebug"]` を絞る
+  - [ ] `onDebug` は他の拡張のデバッグ開始でも activate される. `onDebugResolve:pluspim` と `onDebugAdapterProtocolTracker:pluspim` で足りるか, VS Code 1.74 以降の暗黙の activation event で省略できるかを実機で確認する
+- [ ] ログ出力を `console.log` から `LogOutputChannel` (`createOutputChannel(name, { log: true })`) に移す (`extension.ts:8`)
+- [ ] バイナリが見つからないときのエラー通知が二重 (`extension.ts:99-102`)
+  - [ ] `showErrorMessage` の直後に `throw` している. VS Code は throw されたエラーを自分で通知するので, どちらかにする．
+- [ ] `ensureExecutable` の同期 I/O (`fs.accessSync`, `fs.chmodSync`) を `fs.promises` にそろえ, エラーを値で返す方式と throw が混在している点を整理する
+
 - 起動に時間がかかる
   - プロファイリング
 
-- [ ] Debug ビルドが VSIX に入る (#18)
-  - [ ] Debug バイナリを優先するのは開発モード (`ExtensionMode.Development`) のときだけにする (`extension.ts:67-70`)
-- [ ] 表示名の変更: PlusPim for VS Code
+- [ ] ロジックを `vscode` API から分離してテスト可能にする
+  - [ ] 引数の組み立て, rid の選択, 設定の正規化, `ensureExecutable` を純粋関数にして別モジュールへ切り出す
+  - [ ] `bun test` か `node:test` で単体テストする. 以前削除した拡張機能の E2E テストとは別物
+  - [ ] 設定解決, プロセス起動, ポート待ち, tracker が `extension.ts` 1ファイルに同居しているので, 上記と合わせてファイルを分割する
 
 ### ドキュメンテーション
 
@@ -64,45 +71,34 @@
   - [ ] syscall を StepIn / StepOver するとカーネルハンドラに入ることを書く
 
 - [ ] `doc/おおまかな設計.puml` を現状に合わせる
+  - [ ] d2言語に移行
 - [ ] CHANGELOGを作成
 
 ## 新機能
 
 ### 実行系
 
-
-- [ ] 既定のカーネルハンドラを同梱する (#3)
-  - [ ] `kseg.asm` 相当を同梱する (拡張機能のファイル, または PlusPim の埋め込みリソース)
-  - [ ] `.ktext` を含むファイルが指定されていなければ自動で読み込む
-  - [ ] 同梱ハンドラの中をステップ時にどう見せるか決める
-
 ### 前処理系
 
 ## コード品質
 
-- [ ] デッドコードを削除する
-  - [ ] `Program.cs:148-150` の `throw` より後のコード (CS0162)
-  - [ ] `Application._isDebug` とランタイムモードの経路
-  - [ ] `InstructionIndex.FromAddress` (両オーバーロード)
-  - [ ] `Address.FromInstructionIndex(…, bool)`
-
 ### テストと CI
 
-- [ ] テストの追加 (#17)
-  - [ ] `Application`: StepOver, StepOut, Continue, ReverseContinue
-  - [ ] `DebugAdapter`: DAP の要求と応答
-  - [ ] 複数ファイル
-  - [ ] ブレークポイント
-  - [x] カーネルハンドラを経由する流れ (syscall → ハンドラ → `eret`) (`ExceptionTimeTravelTests`)
-  - [ ] `testfolder` の例題を実行し, 出力を照合する
+- [ ] テストの追加
+  - [ ] アセンブラ
+    - [ ] パース
+    - [ ] 疑似命令展開
+    - [ ] マクロ
+    - [ ] アドレス配置
+  - [ ] 結合テスト
+    - [ ] テスト用アセンブリディレクトリの自動実行
 
+- [ ] xUnit.net v3への移行
 
 ## 低優先度
 
 - [ ] 命令実行のパフォーマンス改善 (#13)
   - [ ] Debug ログが無効なときにログ文字列を組み立てない (`ITypeInstruction.cs:40` など)
   - [ ] 計測用のベンチマークを用意する
-
-## 検討中
 
 - [ ] Emacs, Vim, Neovim, Zed への拡張機能提供
