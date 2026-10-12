@@ -468,7 +468,7 @@ public sealed class RuntimeCallInstructionTests {
         IInstruction inst = Parse();
         RuntimeContext context = CreateKernel(PrintChar);
 
-        // 「あ」のUTF-8 を1バイトずつ出力する
+        // "あ" のUTF-8 を1バイトずつ出力する
         foreach(byte b in new byte[] { 0xE3, 0x81, 0x82 }) {
             context.Registers[RegisterID.A0] = b;
             _ = Processor.Execute(context, inst);
@@ -733,7 +733,7 @@ public sealed class RuntimeCallInstructionTests {
 
         ExecutionRecord record = Processor.Execute(context, inst);
 
-        // 4バイト + NUL．「い」(E3 81 84) は先頭の1バイトだけが書かれ，残りは入力バッファに残る
+        // 4バイト + NUL．"い" (E3 81 84) は先頭の1バイトだけが書かれ，残りは入力バッファに残る
         MachineState expected = before
             .WithMemory(BufferAddress, 0xE3, 0x81, 0x82, 0xE3, 0x00)
             .WithPendingInput(0x81, 0x84, 0x0A);
@@ -761,7 +761,8 @@ public sealed class RuntimeCallInstructionTests {
     public void ReadInt_NonAsciiLine_GivesZeroAndConsumesTheLine() {
         IInstruction inst = Parse();
         RuntimeContext context = CreateKernel(ReadInt);
-        this._io.SetInput(Encoding.UTF8.GetBytes("４２\nnext\n"));
+        // 全角数字の行はASCIIの整数として解釈できない
+        this._io.SetInput(Encoding.UTF8.GetBytes("\uFF14\uFF12\nnext\n"));
         MachineState before = Capture(context);
 
         ExecutionRecord record = Processor.Execute(context, inst);
@@ -770,7 +771,7 @@ public sealed class RuntimeCallInstructionTests {
         Assert.Equal("next\n", this.RemainingInput());
 
         Processor.Undo(context, record);
-        MachineState.AssertEqual(before.WithPendingInput(Encoding.UTF8.GetBytes("４２\n")), Capture(context));
+        MachineState.AssertEqual(before.WithPendingInput(Encoding.UTF8.GetBytes("\uFF14\uFF12\n")), Capture(context));
     }
 
     [Fact]
