@@ -9,7 +9,7 @@
 # See doc/release.md for the release asset contract.
 
 # Everything runs inside main so that a truncated download does nothing.
-set -euo pipefail
+set -eu
 
 REPO="https://github.com/hinshiba/PlusPim"
 
