@@ -1,0 +1,50 @@
+name: Installer CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "install/**"
+      - ".github/workflows/installer-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: ShellCheck
+        run: shellcheck -s sh install/install.sh
+
+  psscriptanalyzer:
+    name: PSScriptAnalyzer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $issues = Invoke-ScriptAnalyzer -Path install/install.ps1 -ExcludeRule PSAvoidUsingWriteHost
+          $issues | Format-List
+          if ($issues) { exit 1 }
+
+      - name: Check ASCII
+        shell: pwsh
+        run: |
+          if ([IO.File]::ReadAllBytes("install/install.ps1") | Where-Object { $_ -gt 0x7F }) {
+            Write-Error "install/install.ps1 must be ASCII"
+          }
