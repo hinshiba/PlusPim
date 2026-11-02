@@ -1,0 +1,125 @@
+name: Install Check
+
+# 公開された Release に対して，README に載せたワンライナーでインストールできることを確かめる
+# ドラフトのアセットは認証なしで取得できないので，公開後に実行する
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to check (e.g. v0.6.0)"
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  REPO: https://github.com/hinshiba/PlusPim
+  ALPINE_IMAGE: alpine:3.22@sha256:2e0b81d60597f449baa56dc25d355367869d2dca4cd57e866f1e2b52af3eb55f
+
+jobs:
+  resolve:
+    name: Resolve tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      pin: ${{ steps.resolve.outputs.pin }}
+
+    steps:
+      # 公開したタグが latest でなければ公開されたバージョンを固定する
+      - name: Resolve
+        id: resolve
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          set -eu
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::invalid tag"
+            exit 1
+          fi
+          latest="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "$REPO/releases/latest")"
+          pin=true
+          [ "${latest##*/}" != "$TAG" ] || pin=false
+          echo "latest=${latest##*/} pin=$pin"
+          { echo "tag=$TAG"; echo "pin=$pin"; } >> "$GITHUB_OUTPUT"
+
+  unix:
+    name: install.sh (${{ matrix.runner }}${{ matrix.alpine && ', alpine' || '' }})
+    needs: resolve
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-latest }
+          - { runner: ubuntu-24.04-arm }
+          - { runner: macos-latest }
+          # busybox wget と musl の判定を確かめる
+          - { runner: ubuntu-latest, alpine: true }
+
+    steps:
+      - name: Install twice
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+          PIN: ${{ needs.resolve.outputs.pin }}
+          IN_ALPINE: ${{ matrix.alpine || false }}
+        run: |
+          set -eu
+          version="${TAG#v}"
+          if [ "$PIN" = true ]; then
+            export URL="$REPO/releases/download/$TAG/install.sh" PLUSPIM_VERSION="$version"
+          else
+            export URL="$REPO/releases/latest/download/install.sh"
+          fi
+          # 2回目は上書きによる更新を確かめる
+          script='for i in 1 2; do $FETCH "$URL" | sh; done; "$HOME/.local/bin/pluspim" --version'
+          if [ "$IN_ALPINE" = true ]; then
+            actual="$(docker run --rm -e URL -e PLUSPIM_VERSION -e FETCH='wget -qO-' "$ALPINE_IMAGE" sh -c "$script")"
+          else
+            actual="$(FETCH='curl -fsSL' sh -c "$script")"
+          fi
+          echo "$actual"
+          case "$actual" in
+            *"PlusPim $version" | *"PlusPim $version+"*) ;;
+            *) echo "::error::unexpected version line"; exit 1 ;;
+          esac
+
+  windows:
+    name: install.ps1 (${{ matrix.shell }})
+    needs: resolve
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+
+    steps:
+      - name: Install twice
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+          PIN: ${{ needs.resolve.outputs.pin }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = $env:TAG.Substring(1)
+          if ($env:PIN -eq 'true') {
+            $url = "$env:REPO/releases/download/$env:TAG/install.ps1"
+            $env:PLUSPIM_VERSION = $version
+          } else {
+            $url = "$env:REPO/releases/latest/download/install.ps1"
+          }
+          # 2回目は上書きと PATH の重複追加の防止を確かめる
+          1..2 | ForEach-Object { Invoke-RestMethod $url | Invoke-Expression }
+
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\PlusPim'
+          $actual = pluspim --version
+          Write-Output $actual
+          if ($actual -notmatch "^PlusPim $([regex]::Escape($version))(\+|$)") { throw "unexpected version line" }
+
+          $userPath = (Get-Item 'HKCU:\Environment').GetValue('Path', '', 'DoNotExpandEnvironmentNames') -split ';'
+          if (@($userPath | Where-Object { $_ -eq $dir }).Count -ne 1) { throw "user PATH must contain $dir exactly once" }
+          if ((Get-Item 'HKCU:\Environment').GetValueKind('Path') -ne 'ExpandString') { throw "user PATH must stay REG_EXPAND_SZ" }
