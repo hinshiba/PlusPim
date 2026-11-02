@@ -158,7 +158,7 @@ internal static class PlusPimCommand {
         foreach(ParseError error in parseResult.Errors) {
             configuration.Error.WriteLine(error.Message);
         }
-        configuration.Error.WriteLine("Run 'PlusPim --help' for usage.");
+        configuration.Error.WriteLine("Run 'pluspim --help' for usage.");
         return Task.FromResult(1);
     }
 

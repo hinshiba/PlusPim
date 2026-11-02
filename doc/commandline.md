@@ -3,8 +3,8 @@
 PlusPim のコマンドラインの使い方を説明します．
 
 ```
-PlusPim [-h | --help] [-V | --version]
-PlusPim <debug | runtime> [options] <file>...
+pluspim [-h | --help] [-V | --version]
+pluspim <debug | runtime> [options] <file>...
 ```
 
 ## サブコマンド
@@ -16,14 +16,14 @@ PlusPim <debug | runtime> [options] <file>...
 DAP クライアントからの操作を受け付けるデバッガモードで起動します．
 
 ```
-PlusPim debug (--connect <ip:port> | --listen <ip:port>) [options] <file>...
+pluspim debug (--connect <ip:port> | --listen <ip:port>) [options] <file>...
 ```
 
 `--connect` と `--listen` のどちらか一方を必ず指定してください．
 それぞれの動作については[DAP クライアントとの接続](connection.md)を参照してください．
 
 ```
-PlusPim debug --listen 127.0.0.1:0 main.asm sub.asm
+pluspim debug --listen 127.0.0.1:0 main.asm sub.asm
 ```
 
 ### `runtime`
@@ -33,7 +33,7 @@ PlusPim debug --listen 127.0.0.1:0 main.asm sub.asm
 デバッガの機能を用いず，プログラムを最後まで実行します．
 
 ```
-PlusPim runtime [options] <file>...
+pluspim runtime [options] <file>...
 ```
 
 ## オプション一覧

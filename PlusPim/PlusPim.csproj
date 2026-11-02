@@ -6,12 +6,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Version>0.5.0</Version>
+    <AssemblyName>pluspim</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <!-- Ready To Run は RID を指定した Release の publish のときだけ有効にする -->
   <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' And '$(Configuration)' == 'Release'">
     <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>

@@ -156,7 +156,7 @@ class PlusPimDescriptorFactory
 						? "osx-arm64"
 						: "osx-x64"
 					: "linux-x64";
-		const exe = process.platform === "win32" ? "PlusPim.exe" : "PlusPim";
+		const exe = process.platform === "win32" ? "pluspim.exe" : "pluspim";
 		// 開発モードのときだけ開発ビルドを優先
 		const preferDebug =
 			this.context.extensionMode === vscode.ExtensionMode.Development;

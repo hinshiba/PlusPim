@@ -13,7 +13,7 @@ public class CommandLineTests {
 
     private const string VersionLine = $"PlusPim {Version}";
 
-    private const string Hint = "Run 'PlusPim --help' for usage.";
+    private const string Hint = "Run 'pluspim --help' for usage.";
 
     private static readonly string[] CommonOptions = ["--verbose", "-v", "--strict", "--force-terminal-utf8", "--attach"];
 

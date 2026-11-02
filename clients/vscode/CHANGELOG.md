@@ -5,6 +5,7 @@
 ### Changed
 
 - Launch PlusPim with the `debug` subcommand instead of the removed `-d` option
+- Follow the rename of the bundled binary from `PlusPim` to `pluspim`
 
 ## [0.3.0] - 2026-10-13
 
