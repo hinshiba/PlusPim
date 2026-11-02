@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <Version>0.5.0</Version>
     <AssemblyName>pluspim</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
