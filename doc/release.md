@@ -3,6 +3,26 @@
 PlusPim の Release に添付するファイルの仕様と，リリースの手順を定めます．
 v0.5.0 より後のリリースはこれに従うこととします．
 
+## インストーラの環境変数
+
+`install.sh` と `install.ps1` は次の環境変数を受け付けます．
+
+| 変数                  | 内容                         | 既定値                                                                     |
+| --------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| `PLUSPIM_VERSION`     | インストールするバージョン   | 最新のリリース                                                             |
+| `PLUSPIM_TARGET`      | 取得するアーカイブの target  | 実行環境から判定                                                           |
+| `PLUSPIM_INSTALL_DIR` | インストール先のディレクトリ | `~/.local/bin` (Linux, macOS), `%LOCALAPPDATA%\Programs\PlusPim` (Windows) |
+
+- `PLUSPIM_VERSION` は先頭の `v` があっても構いません
+  - `<major>.<minor>.<patch>` に，必要なら `-` か `+` で始まる接尾辞が付いた形式のみ受け付けます
+- `PLUSPIM_TARGET` は[target](#target)の8つのいずれかです
+  - 自動判定が誤るときや，インストール後に `--version` が動かないときに指定します
+  - `install.sh` は Linux と macOS の6つ，`install.ps1` は `win-*` の2つのみ受け付けます
+
+```sh
+curl -fsSL https://github.com/hinshiba/PlusPim/releases/latest/download/install.sh | PLUSPIM_VERSION=0.6.0-rc.1 sh
+```
+
 ## タグとバージョン
 
 - タグは `v<version>` とする
