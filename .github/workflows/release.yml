@@ -1,0 +1,191 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+env:
+  # WARN: Dependabot の対象外
+  ALPINE_IMAGE: alpine:3.22@sha256:2e0b81d60597f449baa56dc25d355367869d2dca4cd57e866f1e2b52af3eb55f
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        with:
+          global-json-file: global.json
+
+      # タグと csproj の不整合を弾く
+      - name: Check version
+        id: version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          project="$(dotnet msbuild PlusPim/PlusPim.csproj -getProperty:Version)"
+          if [ "$version" != "$project" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match <Version>$project</Version>"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish and archive
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -eu
+          mkdir dist
+          # target:RID:拡張子
+          for spec in \
+            win-x64:win-x64:zip \
+            win-arm64:win-arm64:zip \
+            linux-glibc-x64:linux-x64:tar.gz \
+            linux-glibc-arm64:linux-arm64:tar.gz \
+            linux-musl-x64:linux-musl-x64:tar.gz \
+            linux-musl-arm64:linux-musl-arm64:tar.gz \
+            osx-x64:osx-x64:tar.gz \
+            osx-arm64:osx-arm64:tar.gz
+          do
+            IFS=: read -r target rid ext <<< "$spec"
+            out="publish/$target"
+            dotnet publish PlusPim/PlusPim.csproj -c Release -r "$rid" --self-contained \
+              -p:PublishSingleFile=true \
+              -p:PublishReadyToRun=true \
+              -p:IncludeNativeLibrariesForSelfExtract=true \
+              -p:GenerateDocumentationFile=false \
+              -o "$out"
+            cp LICENSE README.md "$out/"
+            name="pluspim-$VERSION-$target.$ext"
+            case "$ext" in
+              zip) (cd "$out" && zip -X -q "$GITHUB_WORKSPACE/dist/$name" pluspim.exe LICENSE README.md) ;;
+              tar.gz)
+                chmod 755 "$out/pluspim"
+                tar -czf "dist/$name" --owner=0 --group=0 -C "$out" pluspim LICENSE README.md
+                ;;
+            esac
+          done
+          cp install/install.sh install/install.ps1 dist/
+          (cd dist && sha256sum --text -- * > SHA256SUMS)
+          cat dist/SHA256SUMS
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  verify:
+    name: Verify ${{ matrix.target }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: win-x64, runner: windows-latest }
+          - { target: win-arm64, runner: windows-11-arm }
+          - { target: linux-glibc-x64, runner: ubuntu-latest }
+          - { target: linux-glibc-arm64, runner: ubuntu-24.04-arm }
+          - { target: linux-musl-x64, runner: ubuntu-latest, alpine: true }
+          - { target: linux-musl-arm64, runner: ubuntu-24.04-arm, alpine: true }
+          - { target: osx-x64, runner: macos-15-intel }
+          - { target: osx-arm64, runner: macos-latest }
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 
+        with:
+          name: dist
+          path: dist
+
+      - name: Check --version
+        shell: bash
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          TARGET: ${{ matrix.target }}
+          IN_ALPINE: ${{ matrix.alpine || false }}
+        run: |
+          set -eu
+          cd dist
+          case "$TARGET" in
+            win-*) name="pluspim-$VERSION-$TARGET.zip"; exe=./x/pluspim.exe ;;
+            *) name="pluspim-$VERSION-$TARGET.tar.gz"; exe=./x/pluspim ;;
+          esac
+          line="$(grep "  $name\$" SHA256SUMS)"
+          if command -v sha256sum > /dev/null; then echo "$line" | sha256sum -c -; else echo "$line" | shasum -a 256 -c -; fi
+          mkdir x
+          case "$name" in
+            *.zip) unzip -q "$name" -d x ;;
+            *) tar -xzf "$name" -C x ;;
+          esac
+          if [ "$IN_ALPINE" = true ]; then
+            actual="$(docker run --rm -v "$PWD/x:/x:ro" "$ALPINE_IMAGE" /x/pluspim --version)"
+          else
+            actual="$("$exe" --version | tr -d '\r')"
+          fi
+          echo "$actual"
+          case "$actual" in
+            "PlusPim $VERSION" | "PlusPim $VERSION+"*) ;;
+            *) echo "::error::unexpected version line: $actual"; exit 1 ;;
+          esac
+
+  release:
+    name: Draft release
+    needs: [build, verify]
+    runs-on: ubuntu-latest
+    # 要レビュワー環境で実施する
+    # 書き込み権限のトークンはここのみとする
+    environment: release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: dist
+          path: dist
+
+      # ビルド後のタグの付け替えや，main にないコミットからのリリースを防ぐ
+      - name: Check tagged commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tagged="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_REF_NAME" -q .sha)"
+          if [ "$tagged" != "$GITHUB_SHA" ]; then
+            echo "::error::$GITHUB_REF_NAME now points to $tagged, but $GITHUB_SHA was built"
+            exit 1
+          fi
+          status="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$GITHUB_SHA" -q .status)"
+          case "$status" in
+            identical | behind) ;;
+            *) echo "::error::$GITHUB_SHA is not on main ($status)"; exit 1 ;;
+          esac
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -eu
+          prerelease=""
+          case "$VERSION" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft --verify-tag --generate-notes $prerelease \
+            --title "$GITHUB_REF_NAME"
