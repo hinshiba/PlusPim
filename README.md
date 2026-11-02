@@ -71,7 +71,7 @@ DAP の通信には標準入出力ではなく TCP を使います．プログ�
     クライアントが接続しに来る場合は `--listen` を使います．ポートに 0 を指定すると空きポートが割り当てられ，実際のアドレスが標準エラー出力に通知されます．
 
     ```sh
-    PlusPim debug --listen 127.0.0.1:0 main.asm sub.asm
+    pluspim debug --listen 127.0.0.1:0 main.asm sub.asm
     # 標準エラー出力: DAP server listening at: 127.0.0.1:<実ポート>
     ```
 

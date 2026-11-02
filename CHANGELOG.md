@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `-d`, `--debug` を廃止し，`debug` サブコマンドへ移行
 - `System.CommandLine` を 2.0.14 に更新
 - `--connect` と `--listen` は `host` ではなく `ip` を取るように
+- 実行ファイル名を小文字の `pluspim` に変更
 
 ## [0.5.0] - 2026-10-13
 
