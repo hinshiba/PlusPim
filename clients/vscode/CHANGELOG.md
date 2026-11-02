@@ -1,5 +1,11 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- Launch PlusPim with the `debug` subcommand instead of the removed `-d` option
+
 ## [0.3.0] - 2026-10-13
 
 ### Added
