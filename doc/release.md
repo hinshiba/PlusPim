@@ -83,8 +83,6 @@ dotnet publish PlusPim/PlusPim.csproj -c Release -r <rid> --self-contained \
 
 - `InvariantGlobalization` が有効なので，ICU は不要です
 - SDK は `global.json` でで固定します
-- NuGet の依存は `packages.lock.json` で固定します
-- CI では `Directory.Build.props` を用いて，lock file と食い違う依存は取り込みません
 
 ### `SHA256SUMS`
 
