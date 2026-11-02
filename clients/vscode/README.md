@@ -54,7 +54,7 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 When a debug session starts, the extension:
 
 1. Starts listening on a free loopback port chosen by the OS.
-2. Spawns the bundled `PlusPim` binary in a VS Code terminal with `--connect 127.0.0.1:<port>`, passing the target file and options.
+2. Spawns the bundled `pluspim` binary in a VS Code terminal with `--connect 127.0.0.1:<port>`, passing the target file and options.
 3. Takes the first connection from PlusPim as the debug session. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
 
 The program's standard input and output are the terminal itself, so you type input there and the output is written there as raw bytes. Non-ASCII output is shown correctly only if the terminal decodes it as UTF-8. By default the extension asks PlusPim to switch the terminal to UTF-8 while it runs (`forceTerminalUtf8`); if you turn that off, the terminal itself must decode UTF-8.
