@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- サブコマンドとオプションの一覧を表示する `--help`, `-h`, `-?` を追加
+- バージョンとコミットハッシュを表示する `--version`, `-V` を追加
+
+### Changed
+
+- `-d`, `--debug` を廃止し，`debug` サブコマンドへ移行
+- `System.CommandLine` を 2.0.14 に更新
+- `--connect` と `--listen` は `host` ではなく `ip` を取るように
+
 ## [0.5.0] - 2026-10-13
 
 ### Added

@@ -182,7 +182,7 @@ class PlusPimDescriptorFactory
 		// ターミナルで呼んでもらう
 		const name = `Debug: ${programs.length > 0 ? programs.map((p) => path.basename(p)).join(", ") : "PlusPim"}`;
 		const args = [
-			"-d",
+			"debug",
 			"--connect",
 			`127.0.0.1:${port}`,
 			...utf8Args,

@@ -33,90 +33,10 @@ public partial class TransportTests {
         }
     }
 
-    [Theory]
-    [InlineData("localhost:4711", "localhost", 4711)]
-    [InlineData("127.0.0.1:5", "127.0.0.1", 5)]
-    [InlineData("[::1]:5", "::1", 5)]
-    [InlineData("example.com:65535", "example.com", 65535)]
-    public void Endpoint_TryParse_ValidValues(string text, string host, int port) {
-        Assert.True(DapEndpoint.TryParse(text, allowPortZero: false, out DapEndpoint endpoint, out string? error));
-        Assert.Null(error);
-        Assert.Equal(new DapEndpoint(host, port), endpoint);
-    }
-
-    [Fact]
-    public void Endpoint_TryParse_PortZeroOnlyWhenAllowed() {
-        Assert.True(DapEndpoint.TryParse("127.0.0.1:0", allowPortZero: true, out DapEndpoint endpoint, out _));
-        Assert.Equal(new DapEndpoint("127.0.0.1", 0), endpoint);
-        Assert.False(DapEndpoint.TryParse("127.0.0.1:0", allowPortZero: false, out _, out string? error));
-        Assert.NotNull(error);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("127.0.0.1")]
-    [InlineData(":80")]
-    [InlineData("h:")]
-    [InlineData("h:abc")]
-    [InlineData("h:65536")]
-    [InlineData("h:-1")]
-    [InlineData("h:+1")]
-    [InlineData("::1:5")]
-    [InlineData("[::1]")]
-    [InlineData("[::1]5")]
-    [InlineData("[]:5")]
-    public void Endpoint_TryParse_InvalidValues(string? text) {
-        Assert.False(DapEndpoint.TryParse(text, allowPortZero: true, out _, out string? error));
-        Assert.NotNull(error);
-    }
-
-    [Fact]
-    public void Endpoint_ToString_WrapsIpv6InBrackets() {
-        Assert.Equal("127.0.0.1:5", new DapEndpoint("127.0.0.1", 5).ToString());
-        Assert.Equal("[::1]:5", new DapEndpoint("::1", 5).ToString());
-    }
-
-    [Fact]
-    public void Factory_Neither_Fails() {
-        Assert.False(DapTransportFactory.TryCreate(null, null, Logger.Null, TextWriter.Null, out IDapTransport? transport, out string? error));
-        Assert.Null(transport);
-        Assert.Equal("--debug requires exactly one of --connect <host:port> or --listen <host:port>.", error);
-    }
-
-    [Fact]
-    public void Factory_Both_Fails() {
-        Assert.False(DapTransportFactory.TryCreate("127.0.0.1:5", "127.0.0.1:0", Logger.Null, TextWriter.Null, out IDapTransport? transport, out string? error));
-        Assert.Null(transport);
-        Assert.Equal("--connect and --listen cannot be used together.", error);
-    }
-
-    [Fact]
-    public void Factory_MalformedValue_FailsWithOptionName() {
-        Assert.False(DapTransportFactory.TryCreate("nonsense", null, Logger.Null, TextWriter.Null, out _, out string? connectError));
-        Assert.Equal("Invalid --connect value 'nonsense': expected host:port (port 1-65535).", connectError);
-        Assert.False(DapTransportFactory.TryCreate(null, "h:x", Logger.Null, TextWriter.Null, out _, out string? listenError));
-        Assert.Equal("Invalid --listen value 'h:x': expected host:port (port 0-65535).", listenError);
-    }
-
-    [Fact]
-    public void Factory_PortZero_InvalidForConnectValidForListen() {
-        Assert.False(DapTransportFactory.TryCreate("h:0", null, Logger.Null, TextWriter.Null, out _, out _));
-        Assert.True(DapTransportFactory.TryCreate(null, "127.0.0.1:0", Logger.Null, TextWriter.Null, out IDapTransport? transport, out string? error));
-        Assert.IsType<ListenTransport>(transport);
-        Assert.Null(error);
-    }
-
-    [Fact]
-    public void Factory_ConnectValue_CreatesConnectTransport() {
-        Assert.True(DapTransportFactory.TryCreate("127.0.0.1:5", null, Logger.Null, TextWriter.Null, out IDapTransport? transport, out _));
-        Assert.IsType<ConnectTransport>(transport);
-    }
-
     [Fact]
     public async Task Listen_AnnouncesOneLine_AndExchangesData() {
         SignalWriter announce = new();
-        ListenTransport transport = new(new DapEndpoint("127.0.0.1", 0), Logger.Null, announce);
+        ListenTransport transport = new(new IPEndPoint(IPAddress.Loopback, 0), Logger.Null, announce);
         Task<Stream> opening = transport.OpenAsync();
 
         string line = await announce.FirstLine.WaitAsync(Timeout);
@@ -153,7 +73,7 @@ public partial class TransportTests {
     [Fact]
     public async Task Listen_CanceledToken_Throws() {
         SignalWriter announce = new();
-        ListenTransport transport = new(new DapEndpoint("127.0.0.1", 0), Logger.Null, announce);
+        ListenTransport transport = new(new IPEndPoint(IPAddress.Loopback, 0), Logger.Null, announce);
         using CancellationTokenSource cts = new();
         Task<Stream> opening = transport.OpenAsync(cts.Token);
         _ = await announce.FirstLine.WaitAsync(Timeout);
@@ -163,18 +83,12 @@ public partial class TransportTests {
     }
 
     [Fact]
-    public async Task Listen_NonIpHost_Throws() {
-        ListenTransport transport = new(new DapEndpoint("example.invalid", 0), Logger.Null, TextWriter.Null);
-        _ = await Assert.ThrowsAsync<DapTransportException>(() => transport.OpenAsync());
-    }
-
-    [Fact]
     public async Task Connect_ConnectsAndEchoes() {
         TcpListener listener = new(IPAddress.Loopback, 0);
         listener.Start();
         try {
             int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            ConnectTransport transport = new(new DapEndpoint("127.0.0.1", port), Logger.Null);
+            ConnectTransport transport = new(new IPEndPoint(IPAddress.Loopback, port), Logger.Null);
             Task<Stream> opening = transport.OpenAsync();
             using TcpClient accepted = await listener.AcceptTcpClientAsync().WaitAsync(Timeout);
             await using Stream stream = await opening.WaitAsync(Timeout);
@@ -203,23 +117,22 @@ public partial class TransportTests {
         int port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
 
-        ConnectTransport transport = new(new DapEndpoint("127.0.0.1", port), Logger.Null, TimeSpan.FromSeconds(2));
-        DapTransportException e = await Assert.ThrowsAsync<DapTransportException>(() => transport.OpenAsync());
-        Assert.Contains($"127.0.0.1:{port}", e.Message);
+        ConnectTransport transport = new(new IPEndPoint(IPAddress.Loopback, port), Logger.Null, TimeSpan.FromSeconds(2));
+        _ = await Assert.ThrowsAsync<DapTransportException>(() => transport.OpenAsync());
     }
 
     [Fact]
     public async Task Connect_CanceledToken_ThrowsOperationCanceled() {
         using CancellationTokenSource cts = new();
         await cts.CancelAsync();
-        ConnectTransport transport = new(new DapEndpoint("127.0.0.1", 1), Logger.Null);
+        ConnectTransport transport = new(new IPEndPoint(IPAddress.Loopback, 1), Logger.Null);
         _ = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => transport.OpenAsync(cts.Token));
     }
 
     [Fact]
     public async Task Listen_WithDebugAdapter_RespondsToInitialize() {
         SignalWriter announce = new();
-        ListenTransport transport = new(new DapEndpoint("127.0.0.1", 0), Logger.Null, announce);
+        ListenTransport transport = new(new IPEndPoint(IPAddress.Loopback, 0), Logger.Null, announce);
         Task<Stream> opening = transport.OpenAsync();
         string line = await announce.FirstLine.WaitAsync(Timeout);
         int port = int.Parse(AnnounceLine().Match(line).Groups[1].Value);
