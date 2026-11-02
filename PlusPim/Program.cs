@@ -15,11 +15,11 @@ internal class Program {
         string version = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
             .InformationalVersion;
-        RootCommand cmd = PlusPimCommand.Create(version, (a, _) => RunDebugAsync(a, version), RunRuntime);
+        RootCommand cmd = PlusPimCommand.Create(version, (a, ct) => RunDebugAsync(a, version, ct), RunRuntime);
         return PlusPimCommand.InvokeAsync(cmd, args, new InvocationConfiguration());
     }
 
-    private static async Task<int> RunDebugAsync(DebugArgs args, string version) {
+    private static async Task<int> RunDebugAsync(DebugArgs args, string version, CancellationToken ct) {
         CommonArgs common = args.Common;
         LogLevel minLevel = common.Verbose ? LogLevel.Debug : LogLevel.Info;
         Logger logger = new(minLevel);
@@ -50,10 +50,13 @@ internal class Program {
         // stdin/stdoutはデバッギが使う
         Stream dap;
         try {
-            dap = await transport.OpenAsync();
+            dap = await transport.OpenAsync(ct);
         } catch(DapTransportException e) {
             Console.Error.WriteLine(e.Message);
             return 1;
+        } catch(OperationCanceledException) {
+            logger.Info("Program", "Operation canceled.");
+            return 130;
         }
         await using Stream dapStream = dap;
         logger.Debug("Program", "DAP transport opened");
