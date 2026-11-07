@@ -37,4 +37,4 @@ BenchmarkDotNet.Artifacts/
 .claude
 CLAUDE.md
 
-/doc/local
+.local
