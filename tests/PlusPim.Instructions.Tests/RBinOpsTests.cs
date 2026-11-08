@@ -1,10 +1,11 @@
 using PlusPim.Instructions.Instructions;
 using PlusPim.TestValues;
+using System.Collections.Frozen;
 
 namespace PlusPim.Instructions.Tests;
 
 /// <summary>
-/// R形式2項演算 <see cref="IRBinOp.Apply"/> を, 64bit で計算する参照モデルと照合する
+/// R形式2項演算 <see cref="IRBinOp.Apply"/> に関する命令をテストする
 /// </summary>
 public class RBinOpsTests {
     private delegate Effect ApplyFn(uint lhs, uint rhs, ref uint result);
@@ -26,8 +27,23 @@ public class RBinOpsTests {
     /// <param name="Reference">実装に依存しない期待値</param>
     private sealed record Spec(ApplyFn Apply, IReadOnlySet<uint> Lhs, IReadOnlySet<uint> Rhs, Func<uint, uint, Outcome> Reference);
 
+    /// <summary>シフト命令の被シフト値: ビットパターン ∪ 符号付き32bit値</summary>
+    private static readonly IReadOnlySet<uint> ShiftSources = BitPatterns.All.Union(Signed32.All).ToFrozenSet();
+
     private static readonly Dictionary<string, Spec> Specs = new() {
         ["add"] = new(Add.Apply, Signed32.All, Signed32.All, (a, b) => Trap(S(a) + S(b))),
+        ["addu"] = new(Addu.Apply, Unsigned32.All, Unsigned32.All, (a, b) => W((long)a + b)),
+        ["sub"] = new(Sub.Apply, Signed32.All, Signed32.All, (a, b) => Trap(S(a) - S(b))),
+        ["subu"] = new(Subu.Apply, Unsigned32.All, Unsigned32.All, (a, b) => W((long)a - b)),
+        ["and"] = new(And.Apply, BitPatterns.All, BitPatterns.All, (a, b) => W(a & b)),
+        ["or"] = new(Or.Apply, BitPatterns.All, BitPatterns.All, (a, b) => W(a | b)),
+        ["xor"] = new(Xor.Apply, BitPatterns.All, BitPatterns.All, (a, b) => W(a ^ b)),
+        ["nor"] = new(Nor.Apply, BitPatterns.All, BitPatterns.All, (a, b) => W(~(long)(a | b))),
+        ["slt"] = new(Slt.Apply, Signed32.All, Signed32.All, (a, b) => W(S(a) < S(b) ? 1 : 0)),
+        ["sltu"] = new(Sltu.Apply, Unsigned32.All, Unsigned32.All, (a, b) => W(a < b ? 1 : 0)),
+        ["sllv"] = new(Sllv.Apply, ShiftSources, ShiftAmounts.Register, (a, b) => W(a * Pow2(b))),
+        ["srlv"] = new(Srlv.Apply, ShiftSources, ShiftAmounts.Register, (a, b) => W(a / Pow2(b))),
+        ["srav"] = new(Srav.Apply, ShiftSources, ShiftAmounts.Register, (a, b) => W(FloorDiv(S(a), Pow2(b)))),
     };
 
     public static TheoryData<string, uint, uint> Cases() {
@@ -62,10 +78,21 @@ public class RBinOpsTests {
             : new Written(result);
     }
 
-    // ---- 参照モデルの部品 (実装のビット演算に依存しない) ----
+    // ---- 参照となる実装のユーティリティ ----
 
     private static long S(uint value) {
         return (int)value;
+    }
+
+    /// <summary>MIPS はシフト量の下位5bitのみを用いる</summary>
+    private static long Pow2(uint amount) {
+        return 1L << (int)(amount % 32);
+    }
+
+    /// <summary>-∞ 方向へ丸める除算. 算術右シフトに等しい</summary>
+    private static long FloorDiv(long dividend, long divisor) {
+        (long q, long r) = Math.DivRem(dividend, divisor);
+        return r < 0 ? q - 1 : q;
     }
 
     private static Written W(long exact) {
