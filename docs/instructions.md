@@ -46,7 +46,7 @@
 ### ジャンプ (レジスタ)
 
 - [x] `jr` — Jump Register (PC = rs)
-- [-] `jalr` — Jump and Link Register (rd = PC+4, PC = rs. 遅延スロットなし)
+- [x] `jalr` — Jump and Link Register (rd = PC+4, PC = rs. 遅延スロットなし. `jalr rs` は rd = `$ra`)
 
 ### システム
 
