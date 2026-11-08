@@ -3,7 +3,7 @@ namespace PlusPim.Instructions;
 /// <summary>
 /// MIPSの汎用レジスタを識別する列挙型
 /// </summary>
-public enum RegisterId {
+public enum GprId: byte {
     Zero,
     At,
     // $v
