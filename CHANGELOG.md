@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - サブコマンドとオプションの一覧を表示する `--help`, `-h`, `-?` を追加
 - バージョンとコミットハッシュを表示する `--version`, `-V` を追加
+- 命令 `jalr` に対応
 
 ### Changed
 
@@ -20,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `System.CommandLine` を 2.0.14 に更新
 - `--connect` と `--listen` は `host` ではなく `ip` を取るように
 - 実行ファイル名を小文字の `pluspim` に変更
+- ソースコードを複数のプロジェクトに分割
+- .NET 11 (C# 15) に移行
+- テストを xUnit v3 と Microsoft.Testing.Platform に移行
 
 ## [0.5.0] - 2026-10-13
 
