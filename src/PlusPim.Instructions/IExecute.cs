@@ -6,14 +6,14 @@ namespace PlusPim.Instructions;
 public interface IExecute {
 
     /// <summary>
-    /// 宣言順の読み込むレジスタ番号
+    /// 宣言順の読み込むレジスタ
     /// </summary>
-    ReadOnlySpan<RegisterId> Src { get; }
+    ReadOnlySpan<RegisterName> Src { get; }
 
     /// <summary>
-    /// 宣言順の書き込むレジスタ番号
+    /// 宣言順の書き込むレジスタ
     /// </summary>
-    ReadOnlySpan<RegisterId> Dest { get; }
+    ReadOnlySpan<RegisterName> Dest { get; }
 
     /// <summary>
     /// 値を評価してランタイムへの副作用を返す

@@ -18,18 +18,18 @@ public interface IRBinOp {
 /// <param name="rs">rs レジスタ番号</param>
 /// <param name="rt">rt レジスタ番号</param>
 /// <param name="sourceLine">行番号</param>
-public sealed class RBinOp<TOp>(RegisterId rd, RegisterId rs, RegisterId rt, int sourceLine): IAssemblerable, IExecute
+public sealed class RBinOp<TOp>(GprId rd, GprId rs, GprId rt, int sourceLine): IAssemblerable, IExecute
     where TOp : struct, IRBinOp {
 
     public static string Mnemonic => TOp.Mnemonic;
     private readonly RegIds3 _regs = RegIds3.Of(rd, rs, rt);
 
-    public ReadOnlySpan<RegisterId> Src => this._regs[1..];
-    public ReadOnlySpan<RegisterId> Dest => this._regs[..1];
+    public ReadOnlySpan<RegisterName> Src => this._regs[1..];
+    public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
     public int SourceLine { get; } = sourceLine;
 
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands is [RegisterId d, RegisterId s, RegisterId t] ? new RBinOp<TOp>(d, s, t, sourceLine) : null;
+        return operands is [GprId d, GprId s, GprId t] ? new RBinOp<TOp>(d, s, t, sourceLine) : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
@@ -39,10 +39,10 @@ public sealed class RBinOp<TOp>(RegisterId rd, RegisterId rs, RegisterId rt, int
 
 [InlineArray(3)]
 internal struct RegIds3 {
-    private RegisterId _e0;
+    private RegisterName _e0;
 
     /// <summary>平易な初期化のための便利関数. コレクション式が使えないため.</summary>
-    public static RegIds3 Of(RegisterId a, RegisterId b, RegisterId c) {
+    public static RegIds3 Of(RegisterName a, RegisterName b, RegisterName c) {
         RegIds3 r = default;
         r[0] = a;
         r[1] = b;

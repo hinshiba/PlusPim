@@ -12,6 +12,6 @@ public readonly record struct Immediate(ushort Bits) {
     public uint? Shamt => this.Bits <= 31 ? this.Bits : null;
 }
 
-public readonly record struct Memory(RegisterId BaseRegId, Immediate Offset);
+public readonly record struct Memory(GprId BaseRegId, Immediate Offset);
 
-public readonly union Operand(RegisterId, Immediate, Memory, Address);
+public readonly union Operand(GprId, Immediate, Memory, Address);

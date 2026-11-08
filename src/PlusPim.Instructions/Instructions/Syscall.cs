@@ -7,8 +7,8 @@ namespace PlusPim.Instructions.Instructions;
 public sealed class Syscall(int sourceLine): IAssemblerable, IExecute {
     public static string Mnemonic => "syscall";
 
-    public ReadOnlySpan<RegisterId> Src => [];
-    public ReadOnlySpan<RegisterId> Dest => [];
+    public ReadOnlySpan<RegisterName> Src => [];
+    public ReadOnlySpan<RegisterName> Dest => [];
     public int SourceLine { get; } = sourceLine;
 
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {

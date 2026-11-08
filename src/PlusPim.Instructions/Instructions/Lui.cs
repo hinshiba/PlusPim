@@ -6,16 +6,16 @@ namespace PlusPim.Instructions.Instructions;
 /// <param name="rt">rt レジスタ番号</param>
 /// <param name="value">シフト済みの書き込む値</param>
 /// <param name="sourceLine">行番号</param>
-public sealed class Lui(RegisterId rt, uint value, int sourceLine): IAssemblerable, IExecute {
+public sealed class Lui(GprId rt, uint value, int sourceLine): IAssemblerable, IExecute {
     public static string Mnemonic => "lui";
-    private readonly RegisterId _rt = rt;
+    private readonly RegisterName _rt = rt;
 
-    public ReadOnlySpan<RegisterId> Src => [];
-    public ReadOnlySpan<RegisterId> Dest => new(in this._rt);
+    public ReadOnlySpan<RegisterName> Src => [];
+    public ReadOnlySpan<RegisterName> Dest => new(in this._rt);
     public int SourceLine { get; } = sourceLine;
 
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands is [RegisterId t, Immediate i] ? new Lui(t, i.ZeroExtended << 16, sourceLine) : null;
+        return operands is [GprId t, Immediate i] ? new Lui(t, i.ZeroExtended << 16, sourceLine) : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {

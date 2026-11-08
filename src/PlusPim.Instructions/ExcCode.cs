@@ -4,7 +4,7 @@ namespace PlusPim.Instructions;
 /// MIPSの例外コードを表す列挙型
 /// 公式の略称を用いること
 /// </summary>
-public enum ExcCode {
+public enum ExcCode: byte {
     /// <summary>
     /// Loadアドレスエラー
     /// </summary>
