@@ -1,3 +1,5 @@
+using PlusPim.Instructions.Formats;
+
 namespace PlusPim.Instructions.Instructions;
 
 public readonly struct Mult: IHiLoOp {

@@ -1,3 +1,5 @@
+using PlusPim.Instructions.Formats;
+
 namespace PlusPim.Instructions.Instructions;
 
 // 演算は即値を拡張すれば R形式と同一なので RBinOps へ委譲する.

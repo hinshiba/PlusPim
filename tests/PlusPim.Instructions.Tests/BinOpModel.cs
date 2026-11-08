@@ -1,3 +1,5 @@
+using PlusPim.Instructions.Formats;
+
 namespace PlusPim.Instructions.Tests;
 
 /// <summary><see cref="IRBinOp.Apply"/> と <see cref="IImmBinOp.Apply"/> の共通の形</summary>

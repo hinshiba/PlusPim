@@ -1,4 +1,4 @@
-namespace PlusPim.Instructions;
+namespace PlusPim.Instructions.Formats;
 
 /// <summary>
 /// ロードを抽象化する

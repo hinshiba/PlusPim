@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace PlusPim.Instructions;
+namespace PlusPim.Instructions.Formats;
 
 /// <summary>
 /// 2つのレジスタからHIとLOを求める乗除算を抽象化する

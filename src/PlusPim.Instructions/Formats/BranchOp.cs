@@ -1,4 +1,4 @@
-namespace PlusPim.Instructions;
+namespace PlusPim.Instructions.Formats;
 
 /// <summary>
 /// 2つのレジスタを比べる条件分岐を抽象化する

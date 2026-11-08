@@ -1,4 +1,4 @@
-namespace PlusPim.Instructions;
+namespace PlusPim.Instructions.Formats;
 
 /// <summary>
 /// 汎用でないレジスタ以外との値を転送を抽象化する

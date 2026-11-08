@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace PlusPim.Instructions;
+namespace PlusPim.Instructions.Formats;
 
 /// <summary>
 /// R形式命令の2項演算を抽象化する
