@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace PlusPim.Instructions;
 
-/// <summary>PCを1命令文進める.</summary>
+/// <summary>PCを1命令分進める.</summary>
 public readonly record struct Next;
 
 /// <summary>例外を発生させる. レジスタへの書き込みを行っていないことを保証する.</summary>

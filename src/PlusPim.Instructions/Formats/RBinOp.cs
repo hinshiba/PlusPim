@@ -17,8 +17,7 @@ public interface IRBinOp {
 /// <param name="rd">rd レジスタ番号</param>
 /// <param name="rs">rs レジスタ番号</param>
 /// <param name="rt">rt レジスタ番号</param>
-/// <param name="sourceLine">行番号</param>
-public sealed class RBinOp<TOp>(GprId rd, GprId rs, GprId rt, int sourceLine): IAssemblerable, IExecute
+public sealed class RBinOp<TOp>(GprId rd, GprId rs, GprId rt): IAssemblerable, IExecute
     where TOp : struct, IRBinOp {
 
     public static string Mnemonic => TOp.Mnemonic;
@@ -26,10 +25,9 @@ public sealed class RBinOp<TOp>(GprId rd, GprId rs, GprId rt, int sourceLine): I
 
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
-    public int SourceLine { get; } = sourceLine;
 
-    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands is [GprId d, GprId s, GprId t] ? new RBinOp<TOp>(d, s, t, sourceLine) : null;
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
+        return operands is [GprId d, GprId s, GprId t] ? new RBinOp<TOp>(d, s, t) : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {

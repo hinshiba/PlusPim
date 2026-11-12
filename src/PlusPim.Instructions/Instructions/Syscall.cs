@@ -3,16 +3,14 @@ namespace PlusPim.Instructions.Instructions;
 /// <summary>
 /// syscall: システムコール例外を発生させる
 /// </summary>
-/// <param name="sourceLine">行番号</param>
-public sealed class Syscall(int sourceLine): IAssemblerable, IExecute {
+public sealed class Syscall: IAssemblerable, IExecute {
     public static string Mnemonic => "syscall";
 
     public ReadOnlySpan<RegisterName> Src => [];
     public ReadOnlySpan<RegisterName> Dest => [];
-    public int SourceLine { get; } = sourceLine;
 
-    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands.IsEmpty ? new Syscall(sourceLine) : null;
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
+        return operands.IsEmpty ? new Syscall() : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {

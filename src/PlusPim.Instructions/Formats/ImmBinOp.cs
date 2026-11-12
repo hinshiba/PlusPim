@@ -21,8 +21,7 @@ public interface IImmBinOp {
 /// <param name="dest">書き込むレジスタ番号</param>
 /// <param name="src">読み込むレジスタ番号</param>
 /// <param name="rhs">拡張済みの即値</param>
-/// <param name="sourceLine">行番号</param>
-public sealed class ImmBinOp<TOp>(GprId dest, GprId src, uint rhs, int sourceLine): IAssemblerable, IExecute
+public sealed class ImmBinOp<TOp>(GprId dest, GprId src, uint rhs): IAssemblerable, IExecute
     where TOp : struct, IImmBinOp {
 
     public static string Mnemonic => TOp.Mnemonic;
@@ -30,11 +29,10 @@ public sealed class ImmBinOp<TOp>(GprId dest, GprId src, uint rhs, int sourceLin
 
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
-    public int SourceLine { get; } = sourceLine;
 
-    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId d, GprId s, Immediate i] && TOp.Extend(i) is uint rhs
-            ? new ImmBinOp<TOp>(d, s, rhs, sourceLine)
+            ? new ImmBinOp<TOp>(d, s, rhs)
             : null;
     }
 

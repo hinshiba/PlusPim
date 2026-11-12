@@ -23,8 +23,7 @@ public interface IBranchZOp {
 /// <param name="rs">rs レジスタ番号</param>
 /// <param name="rt">rt レジスタ番号</param>
 /// <param name="target">成立時の分岐先</param>
-/// <param name="sourceLine">行番号</param>
-public sealed class BranchOp<TOp>(GprId rs, GprId rt, Address target, int sourceLine): IAssemblerable, IExecute
+public sealed class BranchOp<TOp>(GprId rs, GprId rt, Address target): IAssemblerable, IExecute
     where TOp : struct, IBranchOp {
 
     public static string Mnemonic => TOp.Mnemonic;
@@ -32,10 +31,9 @@ public sealed class BranchOp<TOp>(GprId rs, GprId rt, Address target, int source
 
     public ReadOnlySpan<RegisterName> Src => this._regs;
     public ReadOnlySpan<RegisterName> Dest => [];
-    public int SourceLine { get; } = sourceLine;
 
-    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands is [GprId s, GprId t, Address a] ? new BranchOp<TOp>(s, t, a, sourceLine) : null;
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
+        return operands is [GprId s, GprId t, Address a] ? new BranchOp<TOp>(s, t, a) : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
@@ -49,8 +47,7 @@ public sealed class BranchOp<TOp>(GprId rs, GprId rt, Address target, int source
 /// <typeparam name="TOp">条件</typeparam>
 /// <param name="rs">rs レジスタ番号</param>
 /// <param name="target">成立時の分岐先</param>
-/// <param name="sourceLine">行番号</param>
-public sealed class BranchZOp<TOp>(GprId rs, Address target, int sourceLine): IAssemblerable, IExecute
+public sealed class BranchZOp<TOp>(GprId rs, Address target): IAssemblerable, IExecute
     where TOp : struct, IBranchZOp {
 
     public static string Mnemonic => TOp.Mnemonic;
@@ -58,10 +55,9 @@ public sealed class BranchZOp<TOp>(GprId rs, Address target, int sourceLine): IA
 
     public ReadOnlySpan<RegisterName> Src => new(in this._rs);
     public ReadOnlySpan<RegisterName> Dest => [];
-    public int SourceLine { get; } = sourceLine;
 
-    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands is [GprId s, Address a] ? new BranchZOp<TOp>(s, a, sourceLine) : null;
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
+        return operands is [GprId s, Address a] ? new BranchZOp<TOp>(s, a) : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {

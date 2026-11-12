@@ -18,8 +18,7 @@ public interface IMoveOp {
 /// </summary>
 /// <typeparam name="TOp">転送</typeparam>
 /// <param name="r">オペランドのレジスタ番号</param>
-/// <param name="sourceLine">行番号</param>
-public sealed class MoveOp<TOp>(GprId r, int sourceLine): IAssemblerable, IExecute
+public sealed class MoveOp<TOp>(GprId r): IAssemblerable, IExecute
     where TOp : struct, IMoveOp {
 
     public static string Mnemonic => TOp.Mnemonic;
@@ -27,10 +26,9 @@ public sealed class MoveOp<TOp>(GprId r, int sourceLine): IAssemblerable, IExecu
 
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
-    public int SourceLine { get; } = sourceLine;
 
-    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine) {
-        return operands is [GprId r] ? new MoveOp<TOp>(r, sourceLine) : null;
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
+        return operands is [GprId r] ? new MoveOp<TOp>(r) : null;
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {

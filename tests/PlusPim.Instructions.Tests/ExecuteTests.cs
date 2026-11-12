@@ -47,12 +47,12 @@ public class ExecuteTests {
         Operand[] two = [GprId.T0, GprId.T1, Target];
         Operand[] one = [GprId.T0, Target];
         (IExecute? Inst, bool Taken, uint[] Src)[] cases = [
-            (BranchOp<Beq>.FromOperands(two, 1), rs == rt, [rs, rt]),
-            (BranchOp<Bne>.FromOperands(two, 1), rs != rt, [rs, rt]),
-            (BranchZOp<Bgez>.FromOperands(one, 1), (int)rs >= 0, [rs]),
-            (BranchZOp<Bgtz>.FromOperands(one, 1), (int)rs > 0, [rs]),
-            (BranchZOp<Blez>.FromOperands(one, 1), (int)rs <= 0, [rs]),
-            (BranchZOp<Bltz>.FromOperands(one, 1), (int)rs < 0, [rs]),
+            (BranchOp<Beq>.FromOperands(two), rs == rt, [rs, rt]),
+            (BranchOp<Bne>.FromOperands(two), rs != rt, [rs, rt]),
+            (BranchZOp<Bgez>.FromOperands(one), (int)rs >= 0, [rs]),
+            (BranchZOp<Bgtz>.FromOperands(one), (int)rs > 0, [rs]),
+            (BranchZOp<Blez>.FromOperands(one), (int)rs <= 0, [rs]),
+            (BranchZOp<Bltz>.FromOperands(one), (int)rs < 0, [rs]),
         ];
         foreach((IExecute? inst, bool taken, uint[] src) in cases) {
             Assert.Equal(taken ? new Jump(Target) : new Next(), Run(inst, src).Effect);
@@ -61,9 +61,9 @@ public class ExecuteTests {
 
     [Fact]
     public void Branch_DeclaresRegisters() {
-        AssertRegs(BranchOp<Beq>.FromOperands([GprId.T0, GprId.T1, Target], 1), [GprId.T0, GprId.T1], []);
-        AssertRegs(BranchZOp<Bltz>.FromOperands([GprId.T0, Target], 1), [GprId.T0], []);
-        Assert.Null(BranchOp<Beq>.FromOperands([GprId.T0, GprId.T1, new Immediate(4)], 1));
+        AssertRegs(BranchOp<Beq>.FromOperands([GprId.T0, GprId.T1, Target]), [GprId.T0, GprId.T1], []);
+        AssertRegs(BranchZOp<Bltz>.FromOperands([GprId.T0, Target]), [GprId.T0], []);
+        Assert.Null(BranchOp<Beq>.FromOperands([GprId.T0, GprId.T1, new Immediate(4)]));
     }
 
     public static TheoryData<uint, ushort> Addresses() {
@@ -85,13 +85,13 @@ public class ExecuteTests {
         Operand[] ops = [GprId.T0, new Memory(GprId.T1, new Immediate(offset))];
         Address addr = new(unchecked(baseValue + (uint)(short)offset));
         (IExecute? Inst, LoadKind Kind, uint Mask)[] cases = [
-            (LoadOp<Lb>.FromOperands(ops, 1), LoadKind.B, 0),
-            (LoadOp<Lbu>.FromOperands(ops, 1), LoadKind.BU, 0),
-            (LoadOp<Lh>.FromOperands(ops, 1), LoadKind.H, 1),
-            (LoadOp<Lhu>.FromOperands(ops, 1), LoadKind.HU, 1),
-            (LoadOp<Lw>.FromOperands(ops, 1), LoadKind.W, 3),
-            (LoadOp<Lwl>.FromOperands(ops, 1), LoadKind.Left, 0),
-            (LoadOp<Lwr>.FromOperands(ops, 1), LoadKind.Right, 0),
+            (LoadOp<Lb>.FromOperands(ops), LoadKind.B, 0),
+            (LoadOp<Lbu>.FromOperands(ops), LoadKind.BU, 0),
+            (LoadOp<Lh>.FromOperands(ops), LoadKind.H, 1),
+            (LoadOp<Lhu>.FromOperands(ops), LoadKind.HU, 1),
+            (LoadOp<Lw>.FromOperands(ops), LoadKind.W, 3),
+            (LoadOp<Lwl>.FromOperands(ops), LoadKind.Left, 0),
+            (LoadOp<Lwr>.FromOperands(ops), LoadKind.Right, 0),
         ];
         foreach((IExecute? inst, LoadKind kind, uint mask) in cases) {
             AssertRegs(inst, [GprId.T1], [GprId.T0]);
@@ -108,11 +108,11 @@ public class ExecuteTests {
         Operand[] ops = [GprId.T0, new Memory(GprId.T1, new Immediate(offset))];
         Address addr = new(unchecked(baseValue + (uint)(short)offset));
         (IExecute? Inst, StoreKind Kind, uint Mask)[] cases = [
-            (StoreOp<Sb>.FromOperands(ops, 1), StoreKind.B, 0),
-            (StoreOp<Sh>.FromOperands(ops, 1), StoreKind.H, 1),
-            (StoreOp<Sw>.FromOperands(ops, 1), StoreKind.W, 3),
-            (StoreOp<Swl>.FromOperands(ops, 1), StoreKind.Left, 0),
-            (StoreOp<Swr>.FromOperands(ops, 1), StoreKind.Right, 0),
+            (StoreOp<Sb>.FromOperands(ops), StoreKind.B, 0),
+            (StoreOp<Sh>.FromOperands(ops), StoreKind.H, 1),
+            (StoreOp<Sw>.FromOperands(ops), StoreKind.W, 3),
+            (StoreOp<Swl>.FromOperands(ops), StoreKind.Left, 0),
+            (StoreOp<Swr>.FromOperands(ops), StoreKind.Right, 0),
         ];
         foreach((IExecute? inst, StoreKind kind, uint mask) in cases) {
             AssertRegs(inst, [GprId.T0, GprId.T1], []);
@@ -125,69 +125,69 @@ public class ExecuteTests {
     [Theory]
     [MemberData(nameof(Immediates))]
     public void Lui_WritesImmediateToUpperHalf(ushort imm) {
-        IExecute? lui = Lui.FromOperands([GprId.T0, new Immediate(imm)], 1);
+        IExecute? lui = Lui.FromOperands([GprId.T0, new Immediate(imm)]);
         AssertRegs(lui, [], [GprId.T0]);
         Assert.Equal((new Next(), (uint?)((uint)imm << 16)), Run(lui));
-        Assert.Null(Lui.FromOperands([GprId.T0, GprId.T1], 1));
+        Assert.Null(Lui.FromOperands([GprId.T0, GprId.T1]));
     }
 
     [Fact]
     public void Trap_RaisesWithoutTouchingRegisters() {
         (IExecute? Inst, ExcCode Code)[] cases = [
-            (Syscall.FromOperands([], 1), ExcCode.Sys),
-            (Break.FromOperands([], 1), ExcCode.Bp),
+            (Syscall.FromOperands([]), ExcCode.Sys),
+            (Break.FromOperands([]), ExcCode.Bp),
         ];
         foreach((IExecute? inst, ExcCode code) in cases) {
             AssertRegs(inst, [], []);
             Assert.Equal((new Raise(code), (uint?)null), Run(inst));
         }
-        Assert.Null(Syscall.FromOperands([GprId.V0], 1));
-        Assert.Null(Break.FromOperands([new Immediate(0)], 1));
+        Assert.Null(Syscall.FromOperands([GprId.V0]));
+        Assert.Null(Break.FromOperands([new Immediate(0)]));
     }
 
     [Fact]
     public void Jump_TargetsAddressOrRegister() {
-        Assert.Equal(new Jump(Target), Run(J.FromOperands([Target], 1)).Effect);
-        Assert.Equal(new Jump(Target), Run(Jr.FromOperands([GprId.Ra], 1), Target.Addr).Effect);
-        AssertRegs(Jr.FromOperands([GprId.Ra], 1), [GprId.Ra], []);
-        Assert.Null(J.FromOperands([GprId.Ra], 1));
+        Assert.Equal(new Jump(Target), Run(J.FromOperands([Target])).Effect);
+        Assert.Equal(new Jump(Target), Run(Jr.FromOperands([GprId.Ra]), Target.Addr).Effect);
+        AssertRegs(Jr.FromOperands([GprId.Ra]), [GprId.Ra], []);
+        Assert.Null(J.FromOperands([GprId.Ra]));
     }
 
     [Fact]
     public void Call_WritesReturnAddress() {
-        IExecute? jal = Jal.FromOperands([Target], 1);
+        IExecute? jal = Jal.FromOperands([Target]);
         AssertRegs(jal, [RName.Pc], [GprId.Ra]);
         Assert.Equal((new Call(Target), (uint?)Pc + 4), Run(jal, Pc));
 
-        AssertRegs(Jalr.FromOperands([GprId.T9], 1), [RName.Pc, GprId.T9], [GprId.Ra]);
-        IExecute? jalr = Jalr.FromOperands([GprId.T0, GprId.T0], 1);
+        AssertRegs(Jalr.FromOperands([GprId.T9]), [RName.Pc, GprId.T9], [GprId.Ra]);
+        IExecute? jalr = Jalr.FromOperands([GprId.T0, GprId.T0]);
         AssertRegs(jalr, [RName.Pc, GprId.T0], [GprId.T0]);
         Assert.Equal((new Call(Target), (uint?)Pc + 4), Run(jalr, Pc, Target.Addr));
     }
 
     [Fact]
     public void Move_CopiesBetweenGprAndHiLo() {
-        AssertRegs(MoveOp<Mfhi>.FromOperands([GprId.T0], 1), [RName.Hi], [GprId.T0]);
-        AssertRegs(MoveOp<Mflo>.FromOperands([GprId.T0], 1), [RName.Lo], [GprId.T0]);
-        AssertRegs(MoveOp<Mthi>.FromOperands([GprId.T0], 1), [GprId.T0], [RName.Hi]);
-        AssertRegs(MoveOp<Mtlo>.FromOperands([GprId.T0], 1), [GprId.T0], [RName.Lo]);
-        Assert.Equal((new Next(), (uint?)42u), Run(MoveOp<Mfhi>.FromOperands([GprId.T0], 1), 42));
-        AssertRegs(HiLoOp<Div>.FromOperands([GprId.T0, GprId.T1], 1), [GprId.T0, GprId.T1], [RName.Hi, RName.Lo]);
+        AssertRegs(MoveOp<Mfhi>.FromOperands([GprId.T0]), [RName.Hi], [GprId.T0]);
+        AssertRegs(MoveOp<Mflo>.FromOperands([GprId.T0]), [RName.Lo], [GprId.T0]);
+        AssertRegs(MoveOp<Mthi>.FromOperands([GprId.T0]), [GprId.T0], [RName.Hi]);
+        AssertRegs(MoveOp<Mtlo>.FromOperands([GprId.T0]), [GprId.T0], [RName.Lo]);
+        Assert.Equal((new Next(), (uint?)42u), Run(MoveOp<Mfhi>.FromOperands([GprId.T0]), 42));
+        AssertRegs(HiLoOp<Div>.FromOperands([GprId.T0, GprId.T1]), [GprId.T0, GprId.T1], [RName.Hi, RName.Lo]);
     }
 
     [Fact]
     public void Cp0Move_ResolvesSupportedNumbersOnly() {
-        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)13], 1), [RName.Status, RName.Cause], [GprId.K0]);
-        AssertRegs(Mtc0.FromOperands([GprId.K0, (GprId)14], 1), [RName.Status, GprId.K0], [RName.Epc]);
-        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)8], 1), [RName.Status, RName.BadVAddr], [GprId.K0]);
-        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)12], 1), [RName.Status, RName.Status], [GprId.K0]);
-        Assert.Null(Mfc0.FromOperands([GprId.K0, (GprId)9], 1));
-        Assert.Null(Mtc0.FromOperands([GprId.K0, (GprId)0], 1));
+        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)13]), [RName.Status, RName.Cause], [GprId.K0]);
+        AssertRegs(Mtc0.FromOperands([GprId.K0, (GprId)14]), [RName.Status, GprId.K0], [RName.Epc]);
+        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)8]), [RName.Status, RName.BadVAddr], [GprId.K0]);
+        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)12]), [RName.Status, RName.Status], [GprId.K0]);
+        Assert.Null(Mfc0.FromOperands([GprId.K0, (GprId)9]));
+        Assert.Null(Mtc0.FromOperands([GprId.K0, (GprId)0]));
     }
 
     [Fact]
     public void Cp0Move_RaisesCpUOutsideKernel() {
-        foreach(IExecute? inst in new[] { Mfc0.FromOperands([GprId.K0, (GprId)13], 1), Mtc0.FromOperands([GprId.K0, (GprId)14], 1) }) {
+        foreach(IExecute? inst in new[] { Mfc0.FromOperands([GprId.K0, (GprId)13]), Mtc0.FromOperands([GprId.K0, (GprId)14]) }) {
             Assert.Equal((new Next(), (uint?)42u), Run(inst, Kernel, 42));
             Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(inst, User, 42));
         }
@@ -195,7 +195,7 @@ public class ExecuteTests {
 
     [Fact]
     public void Eret_ClearsOnlyExlAndReturnsToEpc() {
-        IExecute? eret = Eret.FromOperands([], 1);
+        IExecute? eret = Eret.FromOperands([]);
         AssertRegs(eret, [RName.Status, RName.Epc], [RName.Status]);
         Assert.Equal((new ExceptionReturn(Target), (uint?)User), Run(eret, Kernel, Target.Addr));
         Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(eret, User, Target.Addr));
@@ -203,13 +203,13 @@ public class ExecuteTests {
 
     [Fact]
     public void RuntimeCall_ReadsArgumentsAndWritesV0() {
-        AssertRegs(RuntimeCall.FromOperands([], 1), [RName.Status, GprId.V0, GprId.A0, GprId.A1], [GprId.V0]);
-        Assert.Null(RuntimeCall.FromOperands([GprId.V0], 1));
+        AssertRegs(RuntimeCall.FromOperands([]), [RName.Status, GprId.V0, GprId.A0, GprId.A1], [GprId.V0]);
+        Assert.Null(RuntimeCall.FromOperands([GprId.V0]));
     }
 
     [Fact]
     public void RuntimeCall_RequestsKnownKindWithRawArguments() {
-        IExecute? inst = RuntimeCall.FromOperands([], 1);
+        IExecute? inst = RuntimeCall.FromOperands([]);
         foreach(RuntimeRequestKind kind in Enum.GetValues<RuntimeRequestKind>()) {
             Assert.Equal((new RuntimeRequest(kind, 0x80000000, 0xffffffff), (uint?)(uint)kind), Run(inst, Kernel, (uint)kind, 0x80000000, 0xffffffff));
         }
@@ -222,13 +222,13 @@ public class ExecuteTests {
     [InlineData(0x101u)] // byte へ切り詰めると print_int になる
     [InlineData(0xffffffffu)]
     public void RuntimeCall_FailsOnUnknownKind(uint v0) {
-        Assert.Equal((new Fail(RuntimeErrorKind.UnknownRuntimeCall), (uint?)Sentinel), Run(RuntimeCall.FromOperands([], 1), Kernel, v0, 0, 0));
+        Assert.Equal((new Fail(RuntimeErrorKind.UnknownRuntimeCall), (uint?)Sentinel), Run(RuntimeCall.FromOperands([]), Kernel, v0, 0, 0));
     }
 
     [Theory]
     [InlineData(1u)]
     [InlineData(13u)]
     public void RuntimeCall_RaisesCpUOutsideKernelBeforeCheckingKind(uint v0) {
-        Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(RuntimeCall.FromOperands([], 1), User, v0, 0, 0));
+        Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(RuntimeCall.FromOperands([]), User, v0, 0, 0));
     }
 }

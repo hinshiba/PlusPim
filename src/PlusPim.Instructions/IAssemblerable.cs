@@ -7,5 +7,5 @@ public interface IAssemblerable {
 
     static abstract string Mnemonic { get; }
 
-    static abstract IExecute? FromOperands(ReadOnlySpan<Operand> operands, int sourceLine);
+    static abstract IExecute? FromOperands(ReadOnlySpan<Operand> operands);
 }
