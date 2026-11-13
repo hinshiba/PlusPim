@@ -4,8 +4,17 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/tests/">
-    <Project Path="PlusPimTests/PlusPimTests.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/PlusPim.Adapter/PlusPim.Adapter.csproj" />
+    <Project Path="src/PlusPim.Asm/PlusPim.Asm.csproj" />
+    <Project Path="src/PlusPim.Dbg/PlusPim.Dbg.csproj" />
+    <Project Path="src/PlusPim.Image/PlusPim.Image.csproj" />
+    <Project Path="src/PlusPim.Instructions/PlusPim.Instructions.csproj" />
+    <Project Path="src/PlusPim.Usecase/PlusPim.Usecase.csproj" />
+    <Project Path="src/PlusPim/PlusPim.csproj" />
   </Folder>
-  <Project Path="PlusPim/PlusPim.csproj" Id="c0fb3b22-3abc-4471-864b-cbb2482e0710" />
+  <Folder Name="/tests/">
+    <Project Path="tests/PlusPim.Instructions.Tests/PlusPim.Instructions.Tests.csproj" />
+    <Project Path="tests/PlusPim.TestValues/PlusPim.TestValues.csproj" />
+  </Folder>
 </Solution>
