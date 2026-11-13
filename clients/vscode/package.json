@@ -133,11 +133,11 @@
 		"typecheck": "tsc -p ./ --noEmit && tsc -p scripts --noEmit"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.15",
-		"@types/bun": "^1.4.2",
+		"@biomejs/biome": "2.6.4",
+		"@types/bun": "^1.4.4",
 		"@types/node": "^22",
-		"@types/vscode": "^1.108.0",
-		"@vscode/vsce": "^4.0.0",
+		"@types/vscode": "^1.144.0",
+		"@vscode/vsce": "^4.1.0",
 		"typescript": "6"
 	}
 }
