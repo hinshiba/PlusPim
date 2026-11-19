@@ -17,6 +17,7 @@ public class HiLoOpsTests {
     private sealed record Written(uint Hi, uint Lo): Outcome;
 
     /// <summary>ランタイムエラー <paramref name="Kind"/> で停止した</summary>
+    /// <param name="Kind">停止の原因</param>
     /// <param name="Touched">HIかLOを書き換えたか. <see cref="Fail"/> の保証により常に false であるべき</param>
     private sealed record Failed(RuntimeErrorKind Kind, bool Touched): Outcome;
 

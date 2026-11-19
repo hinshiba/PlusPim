@@ -40,6 +40,7 @@ public readonly struct Slti: IImmBinOp {
     public static Effect Apply(uint lhs, uint rhs, ref uint result) { return Slt.Apply(lhs, rhs, ref result); }
 }
 
+/// <summary><c>sltiu</c>: 即値との符号なし比較</summary>
 /// <remarks>MIPSの仕様通り, 符号拡張した即値と符号なしで比較する</remarks>
 public readonly struct Sltiu: IImmBinOp {
     public static string Mnemonic => "sltiu";

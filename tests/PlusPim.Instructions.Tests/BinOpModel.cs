@@ -12,6 +12,7 @@ public abstract record Outcome;
 public sealed record Written(uint Value): Outcome;
 
 /// <summary>例外 <paramref name="Code"/> を発生させた</summary>
+/// <param name="Code">発生させた例外</param>
 /// <param name="Touched">result を書き換えたか. <see cref="Raise"/> の保証により常に false であるべき</param>
 public sealed record Raised(ExcCode Code, bool Touched): Outcome;
 

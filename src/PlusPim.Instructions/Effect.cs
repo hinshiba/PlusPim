@@ -40,7 +40,7 @@ public readonly record struct Store(Address Addr, StoreKind Kind, uint Value);
 /// <remarks><see cref="RuntimeRequestKind.ReadInt"/> と <see cref="RuntimeRequestKind.ReadChar"/> の結果は Dest[0] へ書き込む.</remarks>
 public readonly record struct RuntimeRequest(RuntimeRequestKind Kind, uint A0, uint A1);
 
-/// <summary>ロードの範囲とDest[0] への書き込む手法./summary>
+/// <summary>ロードの範囲とDest[0] への書き込む手法.</summary>
 public enum LoadKind: byte {
     /// <summary><c>lb</c>: 1バイトを符号拡張する</summary>
     B,

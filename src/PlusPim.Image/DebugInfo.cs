@@ -28,6 +28,9 @@ public sealed class DebugInfo {
         this._names = names;
     }
 
+    /// <summary>
+    /// デバッグ情報を作る
+    /// </summary>
     /// <param name="sourceMap">アドレスと行の対応</param>
     /// <param name="paths"><see cref="SourceId"/> の順のソースのパス</param>
     /// <param name="symbols">定義順のラベル</param>

@@ -29,6 +29,10 @@ public sealed class SourceMap {
         this._byLocation = spans.ToFrozenDictionary(s => s.Location, s => s.Start);
     }
 
+    /// <summary>
+    /// 区間の集まりから対応を作る
+    /// </summary>
+    /// <param name="spans">命令の区間. 順不同</param>
     /// <exception cref="ArgumentException">区間に重なりや空の区間, 行の重複がある場合</exception>
     public static SourceMap Create(IEnumerable<LineSpan> spans) {
         LineSpan[] sorted = [.. spans.OrderBy(s => s.Start.Addr)];
