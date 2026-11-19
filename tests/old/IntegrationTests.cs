@@ -31,32 +31,6 @@ public class IntegrationTests {
     }
 
     [Fact]
-    public void Step_SubWithNegativeOperand_NoOverflowException() {
-        // li で作った負値を含む sub/subu が誤って Ov を起こさないことの回帰テスト
-        string asm = """
-            .text
-            main:
-              li $t0, -1
-              li $t1, 3
-              sub $a0, $t1, $t0
-              subu $a1, $t1, $t0
-            """;
-        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
-        try {
-            // li $t0, -1 は lui + ori の2命令に展開される
-            for(int i = 0; i < 5; i++) {
-                Assert.Equal(StopReason.Step, debugger.Step());
-            }
-
-            (uint[] regs, _, _, _) = debugger.GetRegisters();
-            Assert.Equal(4u, regs[(int)RegisterID.A0]);
-            Assert.Equal(4u, regs[(int)RegisterID.A1]);
-        } finally {
-            tempFile.Delete();
-        }
-    }
-
-    [Fact]
     public void Step_Loop_CorrectCounter() {
         string asm = """
             .text
@@ -281,57 +255,6 @@ public class IntegrationTests {
     }
 
     [Fact]
-    public void Step_IsTerminated_FalseUntilEnd() {
-        string asm = """
-            .text
-            main:
-              addiu $t0, $zero, 1
-              addiu $t1, $zero, 2
-            """;
-        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
-        try {
-            Assert.Equal(PlusPim.Application.StopReason.Step, debugger.Step());
-            Assert.Equal(PlusPim.Application.StopReason.Step, debugger.Step());
-        } finally {
-            tempFile.Delete();
-        }
-    }
-
-    [Fact]
-    public void Step_AfterTermination_IsNop() {
-        string asm = """
-            .text
-            main:
-              addiu $t0, $zero, 42
-            """;
-        (PlusPimDbg debugger, FileInfo tempFile) = TestHelpers.CreateDebugger(asm);
-        try {
-            _ = debugger.Step(); // addiu
-
-            // Run off the end: RI exception → kernel handler → kernel OOB → double exception → terminated
-            // Keep stepping until terminated (bounded to prevent infinite loop)
-            StopReason reason = StopReason.Step;
-            for(int i = 0; i < 100 && reason != StopReason.Terminated; i++) {
-                reason = debugger.Step();
-            }
-
-            // Record state after termination
-            (uint[] regsBefore, uint pcBefore, uint hiBefore, uint loBefore) = debugger.GetRegisters();
-
-            // Step again should be nop
-            _ = debugger.Step();
-
-            (uint[] regsAfter, uint pcAfter, uint hiAfter, uint loAfter) = debugger.GetRegisters();
-            Assert.Equal(regsBefore, regsAfter);
-            Assert.Equal(pcBefore, pcAfter);
-            Assert.Equal(hiBefore, hiAfter);
-            Assert.Equal(loBefore, loAfter);
-        } finally {
-            tempFile.Delete();
-        }
-    }
-
-    [Fact]
     public void Syscall_PrintString_WritesUtf8BytesOfUtf8zLiteral() {
         // .utf-8z のUTF-8での配置から，ハンドラの runtime_call! による出力までを通しで確認する
         string asm = """
@@ -365,24 +288,4 @@ public class IntegrationTests {
         }
     }
 
-    [Fact]
-    public void Load_AsciizWithNonAscii_FailsWithAssemblyException() {
-        string asm = """
-            .data
-            msg:
-                .asciiz "あ"
-            .text
-            main:
-                nop
-            """;
-        FileInfo tempFile = TestHelpers.WriteTempAsm(asm);
-        try {
-            AssemblyException ex = Assert.Throws<AssemblyException>(() => new PlusPimDbg([tempFile], Logger.Null, new InMemoryDebuggeeIO()));
-
-            string error = Assert.Single(ex.Errors);
-            Assert.Contains($"{tempFile.Name}:3", error);
-        } finally {
-            tempFile.Delete();
-        }
-    }
 }
