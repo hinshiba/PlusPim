@@ -74,6 +74,7 @@ print_string:
     jr      $ra
 
     # ================================ MARK: main
+    .globl main
 main:
     # -- 退避 --
     addiu   $sp, $sp, -16
