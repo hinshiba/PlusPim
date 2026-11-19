@@ -3,4 +3,8 @@
   <PropertyGroup>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PlusPim.Image\PlusPim.Image.csproj" />
+  </ItemGroup>
+
 </Project>

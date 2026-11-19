@@ -14,6 +14,8 @@
     <Project Path="src/PlusPim/PlusPim.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/PlusPim.Asm.Tests/PlusPim.Asm.Tests.csproj" />
+    <Project Path="tests/PlusPim.Image.Tests/PlusPim.Image.Tests.csproj" />
     <Project Path="tests/PlusPim.Instructions.Tests/PlusPim.Instructions.Tests.csproj" />
     <Project Path="tests/PlusPim.TestValues/PlusPim.TestValues.csproj" />
   </Folder>
