@@ -42,6 +42,8 @@ public sealed class LoadOp<TOp>(GprId rt, Memory mem): IAssemblerable, IExecute
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), Syntax.Mem(this._regs[1], this._offset));
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId t, Memory m] ? new LoadOp<TOp>(t, m) : null;
     }
@@ -76,6 +78,8 @@ public sealed class StoreOp<TOp>(GprId rt, Memory mem): IAssemblerable, IExecute
 
     public ReadOnlySpan<RegisterName> Src => this._regs;
     public ReadOnlySpan<RegisterName> Dest => [];
+
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), Syntax.Mem(this._regs[1], this._offset));
 
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId t, Memory m] ? new StoreOp<TOp>(t, m) : null;

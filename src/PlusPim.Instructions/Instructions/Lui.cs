@@ -12,6 +12,8 @@ public sealed class Lui(GprId rt, uint value): IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => [];
     public ReadOnlySpan<RegisterName> Dest => new(in this._rt);
 
+    public string Text => Syntax.Of(Mnemonic, this._rt.AsmName(), ImmKind.Zero.Format(value >> 16));
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId t, Immediate i] ? new Lui(t, i.ZeroExtended << 16) : null;
     }

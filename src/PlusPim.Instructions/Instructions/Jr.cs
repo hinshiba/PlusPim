@@ -11,6 +11,8 @@ public sealed class Jr(GprId rs): IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => new(in this._rs);
     public ReadOnlySpan<RegisterName> Dest => [];
 
+    public string Text => Syntax.Of(Mnemonic, this.Src);
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId s] ? new Jr(s) : null;
     }

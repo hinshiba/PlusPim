@@ -14,6 +14,8 @@ public sealed class Mtc0(GprId rt, RName rd): IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs[2].AsmName(), this._regs[0].AsmName());
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId t, GprId n] && Cp0.FromNumber(n) is RName d ? new Mtc0(t, d) : null;
     }

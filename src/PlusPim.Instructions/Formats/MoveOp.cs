@@ -27,6 +27,8 @@ public sealed class MoveOp<TOp>(GprId r): IAssemblerable, IExecute
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].Value is GprId ? this.Dest : this.Src);
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId r] ? new MoveOp<TOp>(r) : null;
     }

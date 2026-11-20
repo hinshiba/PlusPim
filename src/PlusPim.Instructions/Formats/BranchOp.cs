@@ -32,6 +32,8 @@ public sealed class BranchOp<TOp>(GprId rs, GprId rt, Address target): IAssemble
     public ReadOnlySpan<RegisterName> Src => this._regs;
     public ReadOnlySpan<RegisterName> Dest => [];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), this._regs[1].AsmName(), target.ToString());
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId s, GprId t, Address a] ? new BranchOp<TOp>(s, t, a) : null;
     }
@@ -55,6 +57,8 @@ public sealed class BranchZOp<TOp>(GprId rs, Address target): IAssemblerable, IE
 
     public ReadOnlySpan<RegisterName> Src => new(in this._rs);
     public ReadOnlySpan<RegisterName> Dest => [];
+
+    public string Text => Syntax.Of(Mnemonic, this._rs.AsmName(), target.ToString());
 
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId s, Address a] ? new BranchZOp<TOp>(s, a) : null;

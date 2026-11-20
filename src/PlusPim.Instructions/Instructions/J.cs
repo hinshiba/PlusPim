@@ -10,6 +10,8 @@ public sealed class J(Address target): IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => [];
     public ReadOnlySpan<RegisterName> Dest => [];
 
+    public string Text => Syntax.Of(Mnemonic, target.ToString());
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [Address a] ? new J(a) : null;
     }

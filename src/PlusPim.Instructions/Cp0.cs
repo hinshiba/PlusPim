@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace PlusPim.Instructions;
 
 /// <summary>
@@ -12,17 +14,27 @@ public static class Cp0 {
         return (status & Exl) != 0;
     }
 
+    /// <summary>CP0レジスタの番号. 未対応の番号は含まない</summary>
+    private static readonly FrozenDictionary<RName, byte> Numbers = new Dictionary<RName, byte> {
+        [RName.BadVAddr] = 8,
+        [RName.Status] = 12,
+        [RName.Cause] = 13,
+        [RName.Epc] = 14,
+    }.ToFrozenDictionary();
+
+    private static readonly FrozenDictionary<byte, RName> ByNumber = Numbers.ToFrozenDictionary(p => p.Value, p => p.Key);
+
     /// <summary>
     /// <c>mfc0</c> / <c>mtc0</c> のオペランド <c>$n</c> をCP0レジスタへ解決する. 未対応の番号なら <see langword="null"/>
     /// </summary>
     /// <remarks>アセンブラは <c>$n</c> を汎用レジスタとして読むので, その番号をCP0の番号とみなす</remarks>
     public static RName? FromNumber(GprId n) {
-        return (byte)n switch {
-            8 => RName.BadVAddr,
-            12 => RName.Status,
-            13 => RName.Cause,
-            14 => RName.Epc,
-            _ => null,
-        };
+        return ByNumber.TryGetValue((byte)n, out RName r) ? r : null;
+    }
+
+    /// <summary><see cref="FromNumber"/> の逆</summary>
+    /// <exception cref="KeyNotFoundException">CP0レジスタでない場合</exception>
+    public static byte ToNumber(RName r) {
+        return Numbers[r];
     }
 }

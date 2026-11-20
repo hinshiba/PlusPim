@@ -12,6 +12,8 @@ public sealed class Eret: IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => Regs[1..];
     public ReadOnlySpan<RegisterName> Dest => Regs[..1];
 
+    public string Text => Mnemonic;
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands.IsEmpty ? new Eret() : null;
     }

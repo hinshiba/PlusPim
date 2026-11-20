@@ -13,6 +13,8 @@ public sealed class Jal(Address target): IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => new(in Pc);
     public ReadOnlySpan<RegisterName> Dest => new(in Ra);
 
+    public string Text => Syntax.Of(Mnemonic, target.ToString());
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [Address a] ? new Jal(a) : null;
     }

@@ -12,6 +12,8 @@ public sealed class RuntimeCall: IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => Regs;
     public ReadOnlySpan<RegisterName> Dest => Regs[1..2];
 
+    public string Text => Mnemonic;
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands.IsEmpty ? new RuntimeCall() : null;
     }

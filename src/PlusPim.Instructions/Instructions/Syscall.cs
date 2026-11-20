@@ -9,6 +9,8 @@ public sealed class Syscall: IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => [];
     public ReadOnlySpan<RegisterName> Dest => [];
 
+    public string Text => Mnemonic;
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands.IsEmpty ? new Syscall() : null;
     }

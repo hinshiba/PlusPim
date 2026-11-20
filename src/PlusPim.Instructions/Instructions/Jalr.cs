@@ -15,6 +15,8 @@ public sealed class Jalr(GprId rd, GprId rs): IAssemblerable, IExecute {
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), this._regs[2].AsmName());
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands switch {
             [GprId s] => new Jalr(GprId.Ra, s),

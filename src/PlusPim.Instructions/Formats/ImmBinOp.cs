@@ -8,8 +8,8 @@ namespace PlusPim.Instructions.Formats;
 public interface IImmBinOp {
     static abstract string Mnemonic { get; }
 
-    /// <summary>即値を rhs となる32bit値へ拡張する. 命令が受け付けない即値なら <see langword="null"/></summary>
-    static abstract uint? Extend(Immediate imm);
+    /// <summary>即値の解釈</summary>
+    static abstract ImmKind Kind { get; }
 
     static abstract Effect Apply(uint lhs, uint rhs, ref uint result);
 }
@@ -30,8 +30,10 @@ public sealed class ImmBinOp<TOp>(GprId dest, GprId src, uint rhs): IAssemblerab
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), this._regs[1].AsmName(), TOp.Kind.Format(rhs));
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
-        return operands is [GprId d, GprId s, Immediate i] && TOp.Extend(i) is uint rhs
+        return operands is [GprId d, GprId s, Immediate i] && TOp.Kind.Extend(i) is uint rhs
             ? new ImmBinOp<TOp>(d, s, rhs)
             : null;
     }

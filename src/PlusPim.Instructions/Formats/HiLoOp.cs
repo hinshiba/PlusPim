@@ -25,6 +25,8 @@ public sealed class HiLoOp<TOp>(GprId rs, GprId rt): IAssemblerable, IExecute
     public ReadOnlySpan<RegisterName> Src => this._regs[2..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..2];
 
+    public string Text => Syntax.Of(Mnemonic, this.Src);
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId s, GprId t] ? new HiLoOp<TOp>(s, t) : null;
     }

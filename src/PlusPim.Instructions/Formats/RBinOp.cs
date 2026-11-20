@@ -26,6 +26,8 @@ public sealed class RBinOp<TOp>(GprId rd, GprId rs, GprId rt): IAssemblerable, I
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
+    public string Text => Syntax.Of(Mnemonic, this._regs);
+
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands is [GprId d, GprId s, GprId t] ? new RBinOp<TOp>(d, s, t) : null;
     }
