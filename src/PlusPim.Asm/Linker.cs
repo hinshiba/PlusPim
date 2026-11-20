@@ -19,15 +19,15 @@ internal static class Linker {
     public static AssembledProgram? Link(List<ObjectUnit> units, Diagnostics diag) {
         Address[][] bases = Place(units, diag);
         // ファイルごとの定義順のラベルの絶対アドレス
-        Dictionary<string, Address>[] locals = [.. units.Select((unit, u) => unit.Locals.ToDictionary(l => l.Key, l => bases[u][l.Value.Section] + l.Value.Offset))];
+        Dictionary<string, Address>[] labels = [.. units.Select((unit, u) => unit.Labels.ToDictionary(l => l.Key, l => bases[u][l.Value.Section] + l.Value.Offset))];
 
         Dictionary<string, Address> globals = [];
         for(int u = 0; u < units.Count; u++) {
-            foreach((string name, SourceLocation loc) in units[u].Exports) {
+            foreach((string name, SourceLocation loc) in units[u].Globals) {
                 if(globals.ContainsKey(name)) {
                     diag.Report(WarningCode.DuplicateGlobal, loc, name);
                 }
-                globals[name] = locals[u][name];
+                globals[name] = labels[u][name];
             }
         }
 
@@ -38,23 +38,22 @@ internal static class Linker {
         for(int u = 0; u < units.Count; u++) {
             ObjectUnit unit = units[u];
             Address[] b = bases[u];
-            Dictionary<string, Address> local = locals[u];
-            foreach((string name, Address at) in local) {
-                symbols.Add(new Symbol(name, at, unit.Exports.ContainsKey(name)));
+            Dictionary<string, Address> own = labels[u];
+            foreach((string name, Address at) in own) {
+                symbols.Add(new Symbol(name, at, unit.Globals.ContainsKey(name)));
             }
             for(int s = 0; s < unit.Sections.Count; s++) {
-                Section sec = unit.Sections[s];
-                if(sec.Kind == SegmentKind.Data) {
-                    data.AddRange(sec.Runs.Select(r => (b[s] + r.Offset, (ReadOnlyMemory<byte>)r.Bytes.ToArray())));
+                if(unit.Sections[s] is DataSection d) {
+                    data.AddRange(d.Initialized.Select(r => (b[s] + r.Offset, (ReadOnlyMemory<byte>)r.Bytes.ToArray())));
                     continue;
                 }
                 List<IExecute> code = [];
-                foreach(CodeLine line in sec.Code) {
+                foreach(CodeLine line in ((TextSection)unit.Sections[s]).Code) {
                     Address at = b[s] + line.Offset;
                     spans.Add(new LineSpan(line.Location, at, line.Templates.Length, line.Pseudo));
                     HashSet<string> reported = [];
                     Address Resolve(string name) {
-                        if(local.TryGetValue(name, out Address a) || globals.TryGetValue(name, out a)) {
+                        if(own.TryGetValue(name, out Address a) || globals.TryGetValue(name, out a)) {
                             return a;
                         }
                         if(reported.Add(name)) {
@@ -95,7 +94,7 @@ internal static class Linker {
             bases[u] = new Address[units[u].Sections.Count];
             for(int s = 0; s < units[u].Sections.Count; s++) {
                 Section sec = units[u].Sections[s];
-                ulong b = sec.Fixed?.Addr ?? ((counters[sec.Kind] + sec.Alignment - 1) / sec.Alignment * sec.Alignment);
+                ulong b = sec.Origin?.Addr ?? ((counters[sec.Kind] + sec.Alignment - 1) / sec.Alignment * sec.Alignment);
                 counters[sec.Kind] = b + sec.Size;
                 if(uint.MaxValue < b || !MemoryMap.Of(sec.Kind).Contains(new Address((uint)b), sec.Size)) {
                     diag.Report(ErrorCode.SectionOutOfRange, sec.Location, $"0x{b:X}", sec.Size.ToString());

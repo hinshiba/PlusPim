@@ -79,7 +79,7 @@ internal static class Parser {
         }
         LayoutEffect[]? effects = parse(args, r);
         if(effects is null) {
-            r.Report(WarningCode.InvalidOperands, "." + name);
+            r.Report(WarningCode.OperandMismatch, "." + name);
         }
         return effects;
     }
@@ -95,13 +95,13 @@ internal static class Parser {
             templates = expand(args, r);
             pseudo = mnemonic;
         } else if(InstructionSet.ByMnemonic.TryGetValue(mnemonic, out FromOperands? factory)) {
-            templates = Real(factory, args, r);
+            templates = FromReal(factory, args, r);
         } else {
             r.Report(WarningCode.UnknownMnemonic, mnemonic);
             return null;
         }
         if(templates is null) {
-            r.Report(WarningCode.InvalidOperands, mnemonic);
+            r.Report(WarningCode.OperandMismatch, mnemonic);
             return null;
         }
         return templates.Length == 0 ? null : [new PlaceCode(templates, pseudo)];
@@ -115,7 +115,7 @@ internal static class Parser {
     /// オペランドの形が合わなければ <see langword="null"/>.
     /// 値の範囲の誤りを報告したなら空の配列.
     /// </returns>
-    private static Template[]? Real(FromOperands factory, Arg[] args, Reporter r) {
+    private static Template[]? FromReal(FromOperands factory, Arg[] args, Reporter r) {
         // オペランドの検証
         // 文字列リテラルは実命令のオペランドにならないので早期リターン
         if(args.Any(a => a is Str)) {

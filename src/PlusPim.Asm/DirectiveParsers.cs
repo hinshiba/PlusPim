@@ -32,7 +32,7 @@ internal static class DirectiveParsers {
     }
 
     /// <summary>リトルエンディアンで <paramref name="width"/> バイトずつ配置する. 整数でない値は捨てる</summary>
-    public static Directives.Parse Ints(int width, long min, long max) {
+    public static Directives.Parse Integers(int width, long min, long max) {
         return (args, r) => {
             if(args.IsEmpty) {
                 return null;
@@ -41,7 +41,7 @@ internal static class DirectiveParsers {
             Span<byte> buf = stackalloc byte[4];
             foreach(Arg a in args) {
                 if(a is not long v) {
-                    r.Report(WarningCode.InvalidOperand, a.Display());
+                    r.Report(WarningCode.DiscardedOperand, a.Display());
                 } else if(v < min || max < v) {
                     r.Report(ErrorCode.ValueOutOfRange, v.ToString(CultureInfo.InvariantCulture));
                 } else {
@@ -56,7 +56,7 @@ internal static class DirectiveParsers {
     /// <summary>UTF-8で配置する</summary>
     /// <param name="ascii">ASCII以外の文字をエラーとする</param>
     /// <param name="nul">末尾にNULを足す</param>
-    public static Directives.Parse String(bool ascii, bool nul) {
+    public static Directives.Parse Characters(bool ascii, bool nul) {
         return (args, r) => {
             if(args is not [Str s]) {
                 return null;
@@ -76,22 +76,22 @@ internal static class DirectiveParsers {
             return null;
         }
         if(n is < 0 or > int.MaxValue) {
-            r.Report(WarningCode.InvalidOperand, n.ToString(CultureInfo.InvariantCulture));
+            r.Report(WarningCode.DiscardedOperand, n.ToString(CultureInfo.InvariantCulture));
             return [];
         }
         return [new Reserve((uint)n)];
     }
 
     /// <summary>2の累乗の境界まで進める</summary>
-    public static LayoutEffect[]? AlignTo(ReadOnlySpan<Arg> args, Reporter r) {
+    public static LayoutEffect[]? Align(ReadOnlySpan<Arg> args, Reporter r) {
         if(args is not [long n]) {
             return null;
         }
         if(n is < 0 or > 30) {
-            r.Report(WarningCode.InvalidOperand, n.ToString(CultureInfo.InvariantCulture));
+            r.Report(WarningCode.DiscardedOperand, n.ToString(CultureInfo.InvariantCulture));
             return [];
         }
-        return [new Align((int)n)];
+        return [new AlignTo((int)n)];
     }
 
     /// <summary>名前でない値は捨てる</summary>
@@ -104,7 +104,7 @@ internal static class DirectiveParsers {
             if(a is SymbolRef s) {
                 effects.Add(new DeclareGlobal(s.Name));
             } else {
-                r.Report(WarningCode.InvalidOperand, a.Display());
+                r.Report(WarningCode.DiscardedOperand, a.Display());
             }
         }
         return [.. effects];

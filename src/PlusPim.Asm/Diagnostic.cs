@@ -11,7 +11,7 @@ public enum WarningCode: ushort {
     UnparsableLine = 1,
     UnknownMnemonic = 2,
     UnknownDirective = 3,
-    InvalidOperand = 4,
+    DiscardedOperand = 4,
     MissingSegment = 5,
     MisplacedDirective = 6,
     DuplicateLabel = 7,
@@ -19,7 +19,7 @@ public enum WarningCode: ushort {
     DuplicateGlobal = 9,
     UndefinedSymbol = 10,
     MissingEntry = 11,
-    InvalidOperands = 12,
+    OperandMismatch = 12,
     MisplacedInstruction = 13,
     DuplicateSource = 14,
 }
