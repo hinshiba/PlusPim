@@ -40,6 +40,7 @@ internal static class Parser {
         }
         LayoutEffect[]? effects = (tokens[0], ParseArgs(tokens[1..])) switch {
             (Directive d, Arg[] args) => FromDirective(d.Name, args, r),
+            (Ident m, Arg[]) when NamesCp0ByGpr(m.Name, tokens[^1]) => OperandMismatch(m.Name, r),
             (Ident m, Arg[] args) => FromInstruction(m.Name, args, r),
             _ => Unparsable(r),
         };
@@ -60,6 +61,21 @@ internal static class Parser {
             LocalLabel l => l.Name,
             _ => null,
         };
+    }
+
+    /// <summary>
+    /// CP0レジスタを汎用レジスタの別名(<c>$t0</c>など)で書いたか.
+    /// 解析後の <see cref="GprId"/> は番号と名前を区別できないので綴りで判定する.
+    /// </summary>
+    /// <remarks>本来なら字句解析が行うべきであるが，汎用レジスタ関連の命令が圧倒的に多いため今のところはこちらのほうが簡潔</remarks>
+    private static bool NamesCp0ByGpr(string mnemonic, Token last) {
+        return mnemonic is "mfc0" or "mtc0" && last is Ident { Name: ['$', char c, ..] } && !char.IsAsciiDigit(c);
+    }
+
+    /// <summary>オペランドの誤りを報告して行を捨てる</summary>
+    private static LayoutEffect[]? OperandMismatch(string mnemonic, Reporter r) {
+        r.Report(WarningCode.OperandMismatch, mnemonic);
+        return null;
     }
 
     /// <summary>字句か構文のエラーを報告して行を捨てる</summary>
