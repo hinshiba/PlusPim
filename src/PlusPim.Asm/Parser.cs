@@ -10,7 +10,7 @@ internal readonly record struct Str(string Value);
 internal readonly record struct Mem(long Offset, GprId Base);
 
 /// <summary>
-/// 構文上のオペランド. 整数は配置先が決まるまで幅を検査しない
+/// 構文上のオペランド.
 /// </summary>
 internal readonly union Arg(GprId, long, SymbolRef, Str, Mem) {
     /// <summary>診断に埋め込む表記</summary>
