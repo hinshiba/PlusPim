@@ -36,21 +36,24 @@ public static class Assembler {
     /// <param name="reader">ソースを読む方法</param>
     public static AssemblyResult Assemble(IEnumerable<SourcePath> paths, ISourceReader reader) {
         Diagnostics diag = new();
+        HashSet<SourcePath> seen = [];
         List<SourcePath> sources = [];
-        List<ObjectUnit> units = [];
         foreach(SourcePath path in paths) {
-            if(sources.Contains(path)) {
+            if(seen.Add(path)) {
+                sources.Add(path);
+            } else {
                 diag.Report(WarningCode.DuplicateSource, null, path.Value);
-                continue;
             }
+        }
+        List<ObjectUnit> units = [];
+        foreach(SourcePath path in sources) {
             if(reader.Read(path) is not string text) {
                 diag.Report(ErrorCode.SourceNotFound, null, path.Value);
                 continue;
             }
-            units.Add(AssembleFile(new SourceId(sources.Count), text, diag));
-            sources.Add(path);
+            units.Add(AssembleFile(path, text, diag));
         }
-        return new AssemblyResult(Linker.Link(units, sources, diag), diag.ToImmutable());
+        return new AssemblyResult(Linker.Link(units, diag), diag.ToImmutable());
     }
 
     /// <summary>1ファイルをアセンブルする</summary>
