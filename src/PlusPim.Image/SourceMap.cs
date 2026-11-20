@@ -11,6 +11,9 @@ namespace PlusPim.Image;
 /// <param name="Count">命令数</param>
 /// <param name="Pseudo">疑似命令ならそのニーモニック</param>
 public readonly record struct LineSpan(SourceLocation Location, Address Start, int Count, string? Pseudo) {
+    /// <summary>
+    /// 末尾の命令の次のアドレス
+    /// </summary>
     public Address End => this.Start + ((uint)this.Count * 4);
 }
 
@@ -42,7 +45,7 @@ public sealed class SourceMap {
             if(s.Count <= 0) {
                 throw new ArgumentException($"Line span at {s.Start} is empty.", nameof(spans));
             }
-            if(i > 0 && s.Start < sorted[i - 1].End) {
+            if(0 < i && s.Start < sorted[i - 1].End) {
                 throw new ArgumentException($"Line span at {s.Start} overlaps the previous one.", nameof(spans));
             }
             if(!seen.Add(s.Location)) {
@@ -57,7 +60,7 @@ public sealed class SourceMap {
     /// </summary>
     public SourceLocation? LocationOf(Address addr) {
         int i = Sorted.Floor(this._starts, addr.Addr);
-        return i >= 0 && addr < this._spans[i].End ? this._spans[i].Location : null;
+        return 0 <= i && addr < this._spans[i].End ? this._spans[i].Location : null;
     }
 
     /// <summary>

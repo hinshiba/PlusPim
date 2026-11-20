@@ -34,7 +34,7 @@ public sealed class ProgramImage {
         IEnumerable<(Address Base, IExecute[] Code)> text,
         IEnumerable<(Address Base, ReadOnlyMemory<byte> Bytes)> data) {
 
-        (Address Base, IExecute[] Code)[] t = [.. text.Where(s => s.Code.Length > 0).OrderBy(s => s.Base.Addr)];
+        (Address Base, IExecute[] Code)[] t = [.. text.Where(s => 0 < s.Code.Length).OrderBy(s => s.Base.Addr)];
         (Address Base, ReadOnlyMemory<byte> Bytes)[] d = [.. data.Where(s => !s.Bytes.IsEmpty).OrderBy(s => s.Base.Addr)];
 
         foreach((Address b, IExecute[] code) in t) {

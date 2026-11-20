@@ -19,6 +19,9 @@ public sealed class DebugInfo {
     private readonly FrozenDictionary<SourcePath, SourceId> _ids;
     private readonly FrozenDictionary<Address, string> _names;
 
+    /// <summary>
+    /// アドレスとソース上の行の対応
+    /// </summary>
     public SourceMap SourceMap { get; }
 
     private DebugInfo(SourceMap sourceMap, SourcePath[] paths, FrozenDictionary<SourcePath, SourceId> ids, FrozenDictionary<Address, string> names) {

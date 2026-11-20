@@ -6,6 +6,6 @@ internal static class Sorted {
     /// </summary>
     public static int Floor(uint[] keys, uint key) {
         int i = Array.BinarySearch(keys, key);
-        return i >= 0 ? i : ~i - 1;
+        return 0 <= i ? i : ~i - 1;
     }
 }
