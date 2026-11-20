@@ -49,7 +49,7 @@ public sealed class DebugInfo {
 
         // 同じアドレスでは
         // 1. グローバルを優先
-        // 2. 同じスコープならラベルは後に出たものが優先
+        // 2. 同じスコープならラベルは先に出たものが優先
         Dictionary<Address, Symbol> names = [];
         foreach(Symbol s in symbols) {
             if(!names.TryGetValue(s.Addr, out Symbol prev) || (s.Global && !prev.Global)) {
@@ -67,10 +67,16 @@ public sealed class DebugInfo {
         return this._names.GetValueOrDefault(addr);
     }
 
+    /// <summary>
+    /// <paramref name="sid"/> のソースのパス
+    /// </summary>
     public SourcePath PathOf(SourceId sid) {
         return this._paths[sid.Index];
     }
 
+    /// <summary>
+    /// <paramref name="path"/> のソースの番号. ない場合は <see langword="null"/>
+    /// </summary>
     public SourceId? IdOf(SourcePath path) {
         return this._ids.TryGetValue(path, out SourceId id) ? id : null;
     }

@@ -26,10 +26,22 @@ public readonly record struct Segment(Address Base, Address Start, Address End) 
 /// 固定のメモリマップ
 /// </summary>
 public static class MemoryMap {
+    /// <summary>
+    /// ユーザのテキストセグメント
+    /// </summary>
     public static readonly Segment Text = new(new(0x00400000), new(0x00400000), new(0x10000000));
+    /// <summary>
+    /// データセグメント
+    /// </summary>
     public static readonly Segment Data = new(new(0x10000000), new(0x10000000), new(0x80000000));
+    /// <summary>
+    /// カーネルのテキストセグメント
+    /// </summary>
     public static readonly Segment KText = new(new(0x80000180), new(0x80000000), new(0x90000000));
 
+    /// <summary>
+    /// <paramref name="kind"/> のセグメント
+    /// </summary>
     public static Segment Of(SegmentKind kind) {
         return kind switch {
             SegmentKind.Text => Text,

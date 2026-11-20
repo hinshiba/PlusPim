@@ -10,6 +10,9 @@ public readonly record struct SourceLocation(SourceId Sid, int Line);
 /// 正規化済みの完全修飾のソースファイルのパス
 /// </summary>
 public readonly record struct SourcePath {
+    /// <summary>
+    /// 正規化済みのパスの文字列
+    /// </summary>
     public string Value { get; }
 
     private SourcePath(string value) {

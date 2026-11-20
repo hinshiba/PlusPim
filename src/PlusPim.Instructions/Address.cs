@@ -3,7 +3,7 @@ namespace PlusPim.Instructions;
 /// <summary>
 /// アドレスを表す値型
 /// </summary>
-/// <param name="Addr">アドレスとなる<see langword="int"/></param>
+/// <param name="Addr">アドレスとなる<see langword="uint"/></param>
 public record struct Address(uint Addr) {
     public static Address operator +(Address lhs, Address rhs) {
         lhs.Addr += rhs.Addr;
@@ -62,6 +62,4 @@ public record struct Address(uint Addr) {
     public override string ToString() {
         return $"0x{this.Addr:X}";
     }
-
-    public static readonly Address Invalid = new(0);
 }

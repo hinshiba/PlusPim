@@ -3,7 +3,7 @@ using PlusPim.Instructions.Formats;
 namespace PlusPim.Instructions.Instructions;
 
 /// <summary>
-/// $v0が示すの機能をランタイムへ要求する. カーネルモードでのみ実行できる
+/// $v0が示す機能をランタイムへ要求する. カーネルモードでのみ実行できる
 /// </summary>
 public sealed class RuntimeCall: IAssemblerable, IExecute {
     public static string Mnemonic => "runtime_call!";

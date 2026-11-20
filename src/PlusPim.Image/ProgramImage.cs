@@ -9,10 +9,13 @@ public sealed class ProgramImage {
     private readonly uint[] _textBases;
     private readonly IExecute[][] _text;
 
+    /// <summary>
+    /// 実行を始めるアドレス
+    /// </summary>
     public Address Entry { get; }
 
     /// <summary>
-    /// 昇順で重なりのないデータセグメント. 
+    /// 昇順で重なりのないデータセクション
     /// </summary>
     public IReadOnlyList<(Address Base, ReadOnlyMemory<byte> Bytes)> Data { get; }
 

@@ -1,7 +1,7 @@
 namespace PlusPim.Instructions.Formats;
 
 /// <summary>
-/// 汎用でないレジスタ以外との値を転送を抽象化する
+/// 汎用でないレジスタとの値の転送を抽象化する
 /// </summary>
 public interface IMoveOp {
     static abstract string Mnemonic { get; }
