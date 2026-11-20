@@ -54,12 +54,12 @@ public static class Assembler {
     }
 
     /// <summary>1ファイルをアセンブルする</summary>
-    private static ObjectUnit AssembleFile(SourceId sid, string text, Diagnostics diag) {
+    private static ObjectUnit AssembleFile(SourcePath path, string text, Diagnostics diag) {
         Layout layout = new(diag);
         List<LayoutEffect> effects = [];
         int line = 0;
         foreach(ReadOnlySpan<char> s in text.AsSpan().EnumerateLines()) {
-            SourceLocation loc = new(sid, ++line);
+            SourceLocation loc = new(path, ++line);
             effects.Clear();
             Parser.Parse(Lexer.Lex(s), new Reporter(diag, loc), effects);
             foreach(LayoutEffect e in effects) {

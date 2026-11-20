@@ -1,10 +1,7 @@
 namespace PlusPim.Image;
 
-/// <summary>ソースファイルの番号</summary>
-public readonly record struct SourceId(int Index);
-
 /// <summary>ソース上の行 (1-index)</summary>
-public readonly record struct SourceLocation(SourceId Sid, int Line);
+public readonly record struct SourceLocation(SourcePath Path, int Line);
 
 /// <summary>
 /// 正規化済みの完全修飾のソースファイルのパス

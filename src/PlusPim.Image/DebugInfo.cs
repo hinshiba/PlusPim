@@ -15,8 +15,6 @@ public readonly record struct Symbol(string Name, Address Addr, bool Global);
 /// デバッガのみが必要な情報
 /// </summary>
 public sealed class DebugInfo {
-    private readonly SourcePath[] _paths;
-    private readonly FrozenDictionary<SourcePath, SourceId> _ids;
     private readonly FrozenDictionary<Address, string> _names;
 
     /// <summary>
@@ -24,10 +22,8 @@ public sealed class DebugInfo {
     /// </summary>
     public SourceMap SourceMap { get; }
 
-    private DebugInfo(SourceMap sourceMap, SourcePath[] paths, FrozenDictionary<SourcePath, SourceId> ids, FrozenDictionary<Address, string> names) {
+    private DebugInfo(SourceMap sourceMap, FrozenDictionary<Address, string> names) {
         this.SourceMap = sourceMap;
-        this._paths = paths;
-        this._ids = ids;
         this._names = names;
     }
 
@@ -35,18 +31,8 @@ public sealed class DebugInfo {
     /// デバッグ情報を作る
     /// </summary>
     /// <param name="sourceMap">アドレスと行の対応</param>
-    /// <param name="paths"><see cref="SourceId"/> の順のソースのパス</param>
     /// <param name="symbols">定義順のラベル</param>
-    /// <exception cref="ArgumentException">同じパスの重複</exception>
-    public static DebugInfo Create(SourceMap sourceMap, IEnumerable<SourcePath> paths, IEnumerable<Symbol> symbols) {
-        SourcePath[] p = [.. paths];
-        Dictionary<SourcePath, SourceId> ids = [];
-        for(int i = 0; i < p.Length; i++) {
-            if(!ids.TryAdd(p[i], new SourceId(i))) {
-                throw new ArgumentException($"Path {p[i]} appears twice.", nameof(paths));
-            }
-        }
-
+    public static DebugInfo Create(SourceMap sourceMap, IEnumerable<Symbol> symbols) {
         // 同じアドレスでは
         // 1. グローバルを優先
         // 2. 同じスコープならラベルは先に出たものが優先
@@ -57,7 +43,7 @@ public sealed class DebugInfo {
             }
         }
 
-        return new DebugInfo(sourceMap, p, ids.ToFrozenDictionary(), names.ToFrozenDictionary(kv => kv.Key, kv => kv.Value.Name));
+        return new DebugInfo(sourceMap, names.ToFrozenDictionary(kv => kv.Key, kv => kv.Value.Name));
     }
 
     /// <summary>
@@ -65,19 +51,5 @@ public sealed class DebugInfo {
     /// </summary>
     public string? SymbolAt(Address addr) {
         return this._names.GetValueOrDefault(addr);
-    }
-
-    /// <summary>
-    /// <paramref name="sid"/> のソースのパス
-    /// </summary>
-    public SourcePath PathOf(SourceId sid) {
-        return this._paths[sid.Index];
-    }
-
-    /// <summary>
-    /// <paramref name="path"/> のソースの番号. ない場合は <see langword="null"/>
-    /// </summary>
-    public SourceId? IdOf(SourcePath path) {
-        return this._ids.TryGetValue(path, out SourceId id) ? id : null;
     }
 }

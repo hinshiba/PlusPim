@@ -14,11 +14,12 @@ internal static class Linker {
     /// セクションを配置し, シンボルを解決して1つのプログラムにする
     /// </summary>
     /// <param name="units">ファイルごとのアセンブル結果. アドレスが指定されていな場合はこの順に配置される.</param>
-    /// <param name="paths"><see cref="SourceId"/> の順のソースのパス</param>
     /// <param name="diag">診断の報告先</param>
     /// <returns>エラーがあれば <see langword="null"/></returns>
-    public static AssembledProgram? Link(List<ObjectUnit> units, List<SourcePath> paths, Diagnostics diag) {
+    public static AssembledProgram? Link(List<ObjectUnit> units, Diagnostics diag) {
         Address[][] bases = Place(units, diag);
+        // ファイルごとの定義順のラベルの絶対アドレス
+        Dictionary<string, Address>[] locals = [.. units.Select((unit, u) => unit.Locals.ToDictionary(l => l.Key, l => bases[u][l.Value.Section] + l.Value.Offset))];
 
         Dictionary<string, Address> globals = [];
         for(int u = 0; u < units.Count; u++) {
@@ -26,8 +27,7 @@ internal static class Linker {
                 if(globals.ContainsKey(name)) {
                     diag.Report(WarningCode.DuplicateGlobal, loc, name);
                 }
-                (int sec, uint off) = units[u].Locals[name];
-                globals[name] = bases[u][sec] + off;
+                globals[name] = locals[u][name];
             }
         }
 
@@ -38,13 +38,14 @@ internal static class Linker {
         for(int u = 0; u < units.Count; u++) {
             ObjectUnit unit = units[u];
             Address[] b = bases[u];
-            foreach((string name, (int sec, uint off)) in unit.Locals) {
-                symbols.Add(new Symbol(name, b[sec] + off, unit.Exports.ContainsKey(name)));
+            Dictionary<string, Address> local = locals[u];
+            foreach((string name, Address at) in local) {
+                symbols.Add(new Symbol(name, at, unit.Exports.ContainsKey(name)));
             }
             for(int s = 0; s < unit.Sections.Count; s++) {
                 Section sec = unit.Sections[s];
                 if(sec.Kind == SegmentKind.Data) {
-                    data.Add((b[s], sec.Bytes.ToArray()));
+                    data.AddRange(sec.Runs.Select(r => (b[s] + r.Offset, (ReadOnlyMemory<byte>)r.Bytes.ToArray())));
                     continue;
                 }
                 List<IExecute> code = [];
@@ -53,11 +54,8 @@ internal static class Linker {
                     spans.Add(new LineSpan(line.Location, at, line.Templates.Length, line.Pseudo));
                     HashSet<string> reported = [];
                     Address Resolve(string name) {
-                        if(unit.Locals.TryGetValue(name, out (int Sec, uint Off) l)) {
-                            return b[l.Sec] + l.Off;
-                        }
-                        if(globals.TryGetValue(name, out Address g)) {
-                            return g;
+                        if(local.TryGetValue(name, out Address a) || globals.TryGetValue(name, out a)) {
+                            return a;
                         }
                         if(reported.Add(name)) {
                             diag.Report(WarningCode.UndefinedSymbol, line.Location, name);
@@ -82,7 +80,7 @@ internal static class Linker {
 
         return diag.HasError
             ? null
-            : new AssembledProgram(ProgramImage.Create(entry, text, data), DebugInfo.Create(SourceMap.Create(spans), paths, symbols));
+            : new AssembledProgram(ProgramImage.Create(entry, text, data), DebugInfo.Create(SourceMap.Create(spans), symbols));
     }
 
     /// <summary>
@@ -114,7 +112,7 @@ internal static class Linker {
         (ulong end, Section? last) = (0, null);
         foreach((ulong b, Section sec) in placed) {
             if(b < end) {
-                diag.Report(ErrorCode.SectionOverlap, sec.Location, $"0x{b:X}", last!.Location.Sid.Index.ToString(), last.Location.Line.ToString());
+                diag.Report(ErrorCode.SectionOverlap, sec.Location, $"0x{b:X}", last!.Location.Path.Value, last.Location.Line.ToString());
             }
             if(end < b + sec.Size) {
                 (end, last) = (b + sec.Size, sec);

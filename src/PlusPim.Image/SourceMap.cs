@@ -71,9 +71,9 @@ public sealed class SourceMap {
     }
 
     /// <summary>
-    /// <paramref name="sid"/> の疑似命令の行をアドレス順に列挙する
+    /// <paramref name="path"/> の疑似命令の行をアドレス順に列挙する
     /// </summary>
-    public IEnumerable<LineSpan> PseudosIn(SourceId sid) {
-        return this._spans.Where(s => s.Location.Sid == sid && s.Pseudo is not null);
+    public IEnumerable<LineSpan> PseudosIn(SourcePath path) {
+        return this._spans.Where(s => s.Location.Path == path && s.Pseudo is not null);
     }
 }

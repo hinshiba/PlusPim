@@ -14,11 +14,13 @@ internal readonly record struct Mem(long Offset, GprId Base);
 /// </summary>
 internal readonly union Arg(GprId, long, SymbolRef, Str, Mem) {
     /// <summary>診断に埋め込む表記</summary>
-    public string Display() => this switch {
-        SymbolRef s => s.Name,
-        Str s => s.Value,
-        _ => Value?.ToString() ?? "",
-    };
+    public string Display() {
+        return this switch {
+            SymbolRef s => s.Name,
+            Str s => s.Value,
+            _ => this.Value?.ToString() ?? "",
+        };
+    }
 }
 
 /// <summary>

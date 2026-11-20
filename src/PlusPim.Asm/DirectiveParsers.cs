@@ -70,7 +70,7 @@ internal static class DirectiveParsers {
         };
     }
 
-    /// <summary>0で埋めた領域を確保する</summary>
+    /// <summary>未定義の値の領域を大きさのみ確保する</summary>
     public static LayoutEffect[]? Space(ReadOnlySpan<Arg> args, Reporter r) {
         if(args is not [long n]) {
             return null;
