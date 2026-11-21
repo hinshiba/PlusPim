@@ -19,14 +19,14 @@ public readonly record struct SourcePath {
     /// <summary>
     /// <paramref name="baseDir"/> を基準にパスを完全修飾して正規化する
     /// </summary>
-    /// <remarks>
-    /// CLIはカレントディレクトリ, <c>.include</c> はインクルード元を基準に解決する必要があるため.
-    /// 辞書のキーとして比較するので, Windowsのドライブ文字を大文字にそろえる. (VS Codeなど)
-    /// </remarks>
     /// <param name="raw">ユーザが与えたパス</param>
     /// <param name="baseDir">完全修飾のディレクトリ. そうでなければ <see cref="ArgumentException"/></param>
     /// <param name="path">正規化済みのパス</param>
     /// <returns><paramref name="raw"/> が空かNULを含むとき <see langword="false"/></returns>
+    /// <remarks>
+    /// CLIはカレントディレクトリ, <c>.include</c> はインクルード元を基準に解決する必要があるため.
+    /// 辞書のキーとして比較するので, Windowsのドライブ文字を大文字にそろえる. (VS Codeなど)
+    /// </remarks>
     public static bool TryResolve(string raw, string baseDir, out SourcePath path) {
         if(raw.Length == 0 || raw.Contains('\0')) {
             path = default;
