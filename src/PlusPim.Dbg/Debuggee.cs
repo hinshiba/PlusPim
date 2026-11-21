@@ -65,48 +65,26 @@ public sealed class Debuggee {
         return r;
     }
 
-    // TODO: Stepとの非対称性がある
     /// <summary>
-    /// 少なくとも1ステップ戻り, <paramref name="until"/> が成り立つ最も近い過去の位置で止まる. 成り立つ位置がなければ位置0で止まる
+    /// 1ステップ戻る
     /// </summary>
-    /// <param name="until">戻った先の各位置で評価する. <see langword="null"/> なら1ステップだけ戻る</param>
-    /// <param name="ct">取り消されたら探索を終えた区間の先頭で止まる</param>
     /// <returns>位置が0で戻れなかったら <see langword="false"/></returns>
-    /// <remarks>区間ごとに前向きに再生して探すので, 戻る距離 N に対して O(N) である</remarks>
-    public bool Back(Func<StateView, bool>? until = null, CancellationToken ct = default) {
+    /// <remarks>
+    /// 直前のチェックポイントから前向きに再生するので, 最大 <see cref="Interval"/> ステップかかる
+    /// TODO: 直近Intervalは密な状態を持つように変更する
+    /// </remarks>
+    public bool Back() {
         if(this.StepCount == 0) {
             return false;
         }
-        long target = this.StepCount - 1;
-        if(until is null) {
-            this.Seek(target);
-            return true;
-        }
-
-        for(long seg = target / Interval; seg >= 0; seg--) {
-            if(ct.IsCancellationRequested) {
-                this.Seek(Math.Min(target, (seg + 1) * Interval));
-                return true;
-            }
-            long start = seg * Interval;
-            long end = Math.Min(target, start + Interval - 1);
-            State s = this._checkpoints[(int)seg].Fork();
-            long hit = -1;
-            for(long p = start; ; p++) {
-                if(until(new StateView(s))) {
-                    hit = p;
-                }
-                if(p == end) {
-                    break;
-                }
-                this.Replay(s);
-            }
-            if(hit >= 0) {
-                this.Seek(hit);
-                return true;
+        this.StepCount--;
+        State s = this._checkpoints[(int)(this.StepCount / Interval)].Fork();
+        for(long i = this.StepCount % Interval; 0 < i; i--) {
+            if(Executor.Step(s, this._image, this._input, Discard.Instance) != StepResult.Stepped) {
+                throw new UnreachableException("Replay diverged from the recorded execution.");
             }
         }
-        this.Seek(0);
+        this._state = s;
         return true;
     }
 
@@ -119,20 +97,5 @@ public sealed class Debuggee {
     /// <summary>EOFを入力する</summary>
     public void CloseInput() {
         this._input.Close();
-    }
-
-    private void Seek(long position) {
-        State s = this._checkpoints[(int)(position / Interval)].Fork();
-        for(long i = position % Interval; i > 0; i--) {
-            this.Replay(s);
-        }
-        this._state = s;
-        this.StepCount = position;
-    }
-
-    private void Replay(State s) {
-        if(Executor.Step(s, this._image, this._input, Discard.Instance) != StepResult.Stepped) {
-            throw new UnreachableException("Replay diverged from the recorded execution.");
-        }
     }
 }
