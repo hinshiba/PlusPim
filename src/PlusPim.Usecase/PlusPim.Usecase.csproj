@@ -3,4 +3,9 @@
   <PropertyGroup>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PlusPim.Asm\PlusPim.Asm.csproj" />
+    <ProjectReference Include="..\PlusPim.Dbg\PlusPim.Dbg.csproj" />
+  </ItemGroup>
+
 </Project>
