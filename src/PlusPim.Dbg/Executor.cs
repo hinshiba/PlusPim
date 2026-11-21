@@ -16,7 +16,7 @@ internal static class Executor {
     /// <param name="image">命令を取り出すプログラム</param>
     /// <param name="input">デバッギへの入力</param>
     /// <param name="output">デバッギの出力の書き込み先</param>
-    public static StepResult Step(State s, ProgramImage image, InputTape input, IBufferWriter<byte>? output) {
+    public static StepResult Step(State s, ProgramImage image, InputTape input, IBufferWriter<byte> output) {
         switch(s.Status) {
             case Running:
                 break;
