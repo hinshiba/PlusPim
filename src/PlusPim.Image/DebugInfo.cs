@@ -4,7 +4,7 @@ using System.Collections.Frozen;
 namespace PlusPim.Image;
 
 /// <summary>
-/// ラベルの定義
+/// リンク後のラベル
 /// </summary>
 /// <param name="Name">名前</param>
 /// <param name="Addr">アドレス</param>

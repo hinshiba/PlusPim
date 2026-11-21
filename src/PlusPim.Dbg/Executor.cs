@@ -21,8 +21,8 @@ internal static class Executor {
             case Running:
                 break;
             case Trapped t:
-                s.Push(new Frame(MemoryMap.KText.Base, t.Epc, s.Registers, t.Code));
-                s.Registers.Pc = MemoryMap.KText.Base;
+                s.Push(new Frame(MemoryMap.ExceptionVector, t.Epc, s.Registers, t.Code));
+                s.Registers.Pc = MemoryMap.ExceptionVector;
                 s.Status = new Running();
                 return StepResult.Stepped;
             default:

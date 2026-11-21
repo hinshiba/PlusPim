@@ -11,7 +11,7 @@ namespace PlusPim.Asm;
 /// 疑似命令の一覧表
 /// </summary>
 /// <remarks>
-/// 展開後の命令数はシンボルの値に依存してはならない. Layout で相対オフセットを確定させるため.
+/// 展開後の命令数はラベル参照のアドレスに依存してはならない. Layout で相対オフセットを確定させるため.
 /// 疑似命令の追加は, オペランドの形を受け持つ形式関数に展開式を渡す表の1行で済ませる.
 /// 展開で一時レジスタが要る場合は <c>$at</c> を使う.
 /// </remarks>
@@ -79,12 +79,12 @@ internal static class Pseudos {
         return (args, _) => args is [GprId a, GprId b, GprId c] ? body(a, b, c) : null;
     }
 
-    private static Expand Label(Func<SymbolRef, Template[]> body) {
-        return (args, _) => args is [SymbolRef l] ? body(l) : null;
+    private static Expand Label(Func<LabelRef, Template[]> body) {
+        return (args, _) => args is [LabelRef l] ? body(l) : null;
     }
 
-    private static Expand RegLabel(Func<GprId, SymbolRef, Template[]> body) {
-        return (args, _) => args is [GprId a, SymbolRef l] ? body(a, l) : null;
+    private static Expand RegLabel(Func<GprId, LabelRef, Template[]> body) {
+        return (args, _) => args is [GprId a, LabelRef l] ? body(a, l) : null;
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ internal static class Pseudos {
     /// </summary>
     /// <param name="swap">比べる2つのレジスタを入れ替える</param>
     private static Expand CmpBranch<TSet, TBr>(bool swap) where TSet : struct, IRBinOp where TBr : struct, IBranchOp {
-        return (args, _) => args is [GprId a, GprId b, SymbolRef l]
+        return (args, _) => args is [GprId a, GprId b, LabelRef l]
             ? [RType<TSet>(At, swap ? b : a, swap ? a : b), Branch<TBr>(At, Zero, l)]
             : null;
     }
@@ -107,7 +107,7 @@ internal static class Pseudos {
         return new(ImmBinOp<T>.FromOperands, [rt, rs, new Immediate(imm)]);
     }
 
-    private static Template Branch<T>(GprId rs, GprId rt, SymbolRef target) where T : struct, IBranchOp {
+    private static Template Branch<T>(GprId rs, GprId rt, LabelRef target) where T : struct, IBranchOp {
         return new(BranchOp<T>.FromOperands, [rs, rt, target]);
     }
 
@@ -143,8 +143,8 @@ internal static class Pseudos {
     /// <c>lui $rt, hi(sym)</c> と <c>ori $rt, $rt, lo(sym)</c>. <c>ori</c> はゼロ拡張なので桁上がりの補正は要らない
     /// </summary>
     private static Template[]? La(ReadOnlySpan<Arg> args, Reporter r) {
-        return args is [GprId rt, SymbolRef s]
-            ? [new(Lui.FromOperands, [rt, new SymbolHi(s.Name)]), new(ImmBinOp<Ori>.FromOperands, [rt, rt, new SymbolLo(s.Name)])]
+        return args is [GprId rt, LabelRef s]
+            ? [new(Lui.FromOperands, [rt, new LabelHi(s.Name)]), new(ImmBinOp<Ori>.FromOperands, [rt, rt, new LabelLo(s.Name)])]
             : null;
     }
 }

@@ -12,11 +12,11 @@ internal readonly record struct Mem(long Offset, GprId Base);
 /// <summary>
 /// 構文上のオペランド.
 /// </summary>
-internal readonly union Arg(GprId, long, SymbolRef, Str, Mem) {
+internal readonly union Arg(GprId, long, LabelRef, Str, Mem) {
     /// <summary>診断に埋め込む表記</summary>
     public string Display() {
         return this switch {
-            SymbolRef s => s.Name,
+            LabelRef s => s.Name,
             Str s => s.Value,
             _ => this.Value?.ToString() ?? "",
         };
@@ -142,7 +142,7 @@ internal static class Parser {
         for(int i = 0; i < args.Length; i++) {
             AsmOperand? op = args[i] switch {
                 GprId g => g,
-                SymbolRef s => s,
+                LabelRef s => s,
                 long v => ToImmediate(v, r) is Immediate imm ? imm : null,
                 Mem m => ToImmediate(m.Offset, r) is Immediate off ? new Memory(m.Base, off) : null,
                 _ => null,
@@ -155,7 +155,7 @@ internal static class Parser {
         }
 
         Template t = new(factory, ops);
-        // 仮アドレスでシンボルを解決してオペランドの種類が合うか確認する
+        // 仮アドレスでラベル参照を解決してオペランドの種類が合うか確認する
         return t.Resolve(_ => default) is null ? null : [t];
     }
 
@@ -182,11 +182,11 @@ internal static class Parser {
                     t = t[1..];
                     break;
                 case [Ident sym, ..]:
-                    arg = new SymbolRef(sym.Name);
+                    arg = new LabelRef(sym.Name);
                     t = t[1..];
                     break;
                 case [Directive sym, ..]:
-                    arg = new SymbolRef("." + sym.Name);
+                    arg = new LabelRef("." + sym.Name);
                     t = t[1..];
                     break;
                 case [StrLiteral s, ..]:

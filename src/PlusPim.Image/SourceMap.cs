@@ -64,6 +64,15 @@ public sealed class SourceMap {
     }
 
     /// <summary>
+    /// <paramref name="addr"/> が行の先頭の命令か
+    /// </summary>
+    /// <remarks>疑似命令の展開の途中は先頭ではない</remarks>
+    public bool StartsLine(Address addr) {
+        int i = Sorted.Floor(this._starts, addr.Addr);
+        return 0 <= i && this._starts[i] == addr.Addr;
+    }
+
+    /// <summary>
     /// <paramref name="loc"/> の行の命令. 命令のない行は <see langword="null"/>
     /// </summary>
     public Address? AddressOf(SourceLocation loc) {

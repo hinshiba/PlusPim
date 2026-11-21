@@ -5,13 +5,13 @@ using System.Diagnostics;
 namespace PlusPim.Asm;
 
 /// <summary>
-/// セクションを配置し, シンボルを解決してプログラムを作る
+/// セクションを配置し, ラベル参照を解決してプログラムを作る
 /// </summary>
 internal static class Linker {
     private const string EntryName = "main";
 
     /// <summary>
-    /// セクションを配置し, シンボルを解決して1つのプログラムにする
+    /// セクションを配置し, ラベル参照を解決して1つのプログラムにする
     /// </summary>
     /// <param name="units">ファイルごとのアセンブル結果. アドレスが指定されていな場合はこの順に配置される.</param>
     /// <param name="diag">診断の報告先</param>

@@ -38,6 +38,11 @@ public static class MemoryMap {
     /// カーネルのテキストセグメント
     /// </summary>
     public static readonly Segment KText = new(new(0x80000180), new(0x80000000), new(0x90000000));
+    /// <summary>
+    /// 例外の発生時に制御が移るアドレス
+    /// </summary>
+    /// <remarks><see cref="KText"/> の配置先と同じ値なのは, アドレスなしの <c>.ktext</c> にハンドラを書く SPIM の慣習による</remarks>
+    public static readonly Address ExceptionVector = new(0x80000180);
 
     /// <summary>
     /// <paramref name="kind"/> のセグメント
@@ -49,15 +54,5 @@ public static class MemoryMap {
             SegmentKind.Data => Data,
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
-    }
-
-    /// <summary>
-    /// <paramref name="addr"/> を含むセグメント. どこにも属さなければ <see langword="null"/>
-    /// </summary>
-    public static SegmentKind? KindOf(Address addr) {
-        return Text.Contains(addr, 1) ? SegmentKind.Text
-            : KText.Contains(addr, 1) ? SegmentKind.KText
-            : Data.Contains(addr, 1) ? SegmentKind.Data
-            : null;
     }
 }

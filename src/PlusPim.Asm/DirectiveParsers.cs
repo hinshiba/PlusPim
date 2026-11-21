@@ -101,7 +101,7 @@ internal static class DirectiveParsers {
         }
         List<LayoutEffect> effects = [];
         foreach(Arg a in args) {
-            if(a is SymbolRef s) {
+            if(a is LabelRef s) {
                 effects.Add(new DeclareGlobal(s.Name));
             } else {
                 r.Report(WarningCode.DiscardedOperand, a.Display());
