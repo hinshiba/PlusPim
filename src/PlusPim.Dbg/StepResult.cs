@@ -7,7 +7,7 @@ public enum StepResult: byte {
     /// <summary>1ステップ進んだ</summary>
     Stepped,
     /// <summary>入力待ち</summary>
-    WaitInput,
+    NeedInput,
     /// <summary>停止している</summary>
     Halted,
 }

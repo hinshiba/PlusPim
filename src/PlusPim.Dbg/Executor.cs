@@ -86,7 +86,7 @@ internal static class Executor {
                 break;
             case RuntimeRequest rq:
                 if(!RuntimeCalls.TryRun(s, rq, dest, input, output)) {
-                    return StepResult.WaitInput;
+                    return StepResult.NeedInput;
                 }
                 break;
         }
