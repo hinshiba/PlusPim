@@ -21,10 +21,11 @@ public readonly record struct Fail(RuntimeErrorKind Kind);
 /// <summary>PCを<paramref name="Target"/>にする.</summary>
 public readonly record struct Jump(Address Target);
 
-/// <summary>PCを<paramref name="Target"/>にし, コールスタックに積む. </summary>
+/// <summary>サブルーチンを呼び出す. PCを<paramref name="Target"/>にする.</summary>
+/// <remarks>戻りアドレスはDestへ書かれる</remarks>
 public readonly record struct Call(Address Target);
 
-/// <summary>PCを<paramref name="Target"/>にし, 例外のフレームをコールスタックから取り出す.</summary>
+/// <summary>例外ハンドラから復帰する. PCを<paramref name="Target"/>にする.</summary>
 public readonly record struct ExceptionReturn(Address Target);
 
 /// <summary><paramref name="Addr"/>から<paramref name="Kind"/>に従ってDest[0]にロードする.</summary>

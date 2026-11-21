@@ -24,7 +24,7 @@ public readonly struct Multu: IHiLoOp {
     }
 }
 
-// MIPS では結果が未定義だが, ランタイムエラーにする.
+// MIPS ではゼロ除算の結果が未定義だが, ランタイムエラーにする.
 // C# の除算はゼロ方向へ丸めるので, 商と剰余の符号は MIPS と一致する.
 
 public readonly struct Div: IHiLoOp {
@@ -34,8 +34,11 @@ public readonly struct Div: IHiLoOp {
         if(rhs == 0) {
             return new Effect(new Fail(RuntimeErrorKind.DivisionByZero));
         }
+        // 0x80000000 / -1 はMIPSで定義されているが, C#ではOverflowExceptionになる
         if(lhs == 0x80000000 && rhs == 0xffffffff) {
-            return new Effect(new Fail(RuntimeErrorKind.DivisionOverflow));
+            hi = 0;
+            lo = 0x80000000;
+            return new Effect(new Next());
         }
         (int q, int r) = Math.DivRem(unchecked((int)lhs), unchecked((int)rhs));
         hi = unchecked((uint)r);

@@ -25,7 +25,8 @@ public static class InstructionSet {
         Of<LoadOp<Lb>>(), Of<LoadOp<Lbu>>(), Of<LoadOp<Lh>>(), Of<LoadOp<Lhu>>(), Of<LoadOp<Lw>>(),
         Of<LoadOp<Lwl>>(), Of<LoadOp<Lwr>>(),
         Of<StoreOp<Sb>>(), Of<StoreOp<Sh>>(), Of<StoreOp<Sw>>(), Of<StoreOp<Swl>>(), Of<StoreOp<Swr>>(),
-        Of<Syscall>(), Of<RuntimeCall>(), Of<Break>(), Of<Eret>(), Of<Mfc0>(), Of<Mtc0>(),
+        Of<Syscall>(), Of<Break>(),
+        Of<Privileged<RuntimeCall>>(), Of<Privileged<Eret>>(), Of<Privileged<Mfc0>>(), Of<Privileged<Mtc0>>(),
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static KeyValuePair<string, FromOperands> Of<T>() where T : IAssemblerable {
