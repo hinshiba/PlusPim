@@ -45,7 +45,7 @@ PlusPimは，Debug Adapter Protocolに対応したMIPSアセンブリコード�
 ### VS Code の場合
 
 VS Code 拡張機能 **PlusPim for VS Code** を使うのが最も簡単です．PlusPim の実行ファイルは拡張機能に同梱されているため，.NET を別途インストールする必要はありません．
-対応しているのは Windows (x64) と Linux (x64) です．
+対応しているのは Windows (x64)，Linux (x64)，macOS (x64，Apple Silicon) (実機未確認)です．
 
 1. **拡張機能をインストールする**:
     [Releases](https://github.com/hinshiba/PlusPim/releases) から使っている環境に合った `pluspim-<platform>-<version>.vsix` をダウンロードし，VS Code のコマンドパレットで `Extensions: Install from VSIX...` を実行してインストールします．
@@ -58,6 +58,31 @@ VS Code 拡張機能 **PlusPim for VS Code** を使うのが最も簡単です�
     プログラムの標準入出力は VS Code のターミナルにつながります．
 
 起動構成のプロパティ (`program`，`stopOnEntry`，`forceTerminalUtf8` など) は[拡張機能の README](clients/vscode/README.md#launch-configuration) を参照してください．
+
+#### `syscall`を使う場合
+
+PlusPim は`syscall`を直接処理しません．`syscall`は例外としてカーネルテキスト (`.ktext`) の例外ハンドラへ飛び，ハンドラの中の`runtime_call!`が入出力などを処理します．
+ハンドラがないと，飛び先に命令がないためランタイムエラー`NonInstructionExecution`で止まります．
+
+[`samples/kseg.asm`](samples/kseg.asm) は，`syscall`なら`runtime_call!`を呼び，それ以外の例外なら例外を起こした命令を飛ばして復帰する最小のハンドラです．
+これをワークスペースへコピーし，`program`に自分のファイルと並べて指定します．
+
+```json
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "pluspim",
+			"request": "launch",
+			"name": "Launch with kernel handler",
+			"program": ["${file}", "${workspaceFolder}/kseg.asm"]
+		}
+	]
+}
+```
+
+コマンドラインから起動する場合も同様に，`pluspim debug listen 127.0.0.1:0 main.asm kseg.asm`のようにハンドラのファイルを加えます．
+`runtime_call!`が処理する機能の一覧は[ランタイム](docs/runtime.md#ランタイムコール)を参照してください．
 
 ### それ以外のエディタの場合
 
