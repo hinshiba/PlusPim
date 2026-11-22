@@ -1,11 +1,9 @@
-using PlusPim.Application;
-using PlusPim.Cli;
-using PlusPim.EditorController.DebugAdapter;
-using PlusPim.EditorController.Transport;
-using PlusPim.Logging;
+using PlusPim.Adapter.Controller.Dap;
+using PlusPim.Adapter.Logging;
 using PlusPim.Terminal;
+using PlusPim.Usecase;
 using System.CommandLine;
-using System.Net;
+using System.Diagnostics;
 using System.Reflection;
 namespace PlusPim;
 
@@ -21,50 +19,45 @@ internal class Program {
 
     private static async Task<int> RunDebugAsync(DebugArgs args, string version, CancellationToken ct) {
         CommonArgs common = args.Common;
-        LogLevel minLevel = common.Verbose ? LogLevel.Debug : LogLevel.Info;
-        Logger logger = new(minLevel);
-        // stderrはデバッギーのものなので，verboseモードのときだけログを出す
+        Logger logger = new(common.Verbose ? LogLevel.Debug : LogLevel.Info);
+        // stderrはデバッギのものなので, verboseのときだけログを出す
         if(common.Verbose) {
-            logger.AddSink((LogLevel level, string source, string msg) => Console.Error.WriteLine($"[{level}][{source}] {msg}"));
+            logger.AddSink((level, source, message) => Console.Error.WriteLine($"[{level}][{source}] {message}"));
         }
-        logger.Debug("Program", "Verbose mode enabled");
-        logger.Info("Program", $"PlusPim version {version}");
+        logger.Log(LogLevel.Info, nameof(Program), $"PlusPim version {version}");
 
         if(common.Attach) {
-            _ = System.Diagnostics.Debugger.Launch();
+            _ = Debugger.Launch();
         }
-
-        logger.Debug("Program", "Debug Launch");
-
-        IDapTransport transport = args.EstablishMethod switch {
-            (EstablishMethod.Connect, IPEndPoint endpoint) => new ConnectTransport(endpoint, logger),
-            (EstablishMethod.Listen, IPEndPoint endpoint) => new ListenTransport(endpoint, logger, Console.Error),
-        };
 
         // 端末の符号化を切り替える
         using TerminalUtf8Guard terminalGuard = TerminalUtf8Guard.Apply(TerminalUtf8Backends.Create(), common.ForceTerminalUtf8);
         AppDomain.CurrentDomain.ProcessExit += (_, _) => terminalGuard.Restore();
 
-        Application.Application app = new(common.Files, logger, StreamDebuggeeIO.OpenConsole(), common.Strict);
-
-        // stdin/stdoutはデバッギが使う
         Stream dap;
         try {
-            dap = await transport.OpenAsync(ct);
+            dap = await (args.Method switch {
+                Connect c => Transport.ConnectAsync(c.Endpoint, Transport.ConnectTimeout, ct),
+                Listen l => Transport.ListenAsync(l.Endpoint, Console.Error, ct),
+            });
         } catch(DapTransportException e) {
             Console.Error.WriteLine(e.Message);
             return 1;
         } catch(OperationCanceledException) {
-            logger.Info("Program", "Operation canceled.");
+            logger.Log(LogLevel.Info, nameof(Program), "Operation canceled.");
             return 130;
         }
         await using Stream dapStream = dap;
-        logger.Debug("Program", "DAP transport opened");
 
-        DebugAdapter adapter = new(dapStream, dapStream, app, logger);
-        await adapter.WaitForSessionEnd();
+        // stdin/stdoutはデバッギが使う
+        Stream input = Console.OpenStandardInput();
+        Stream output = Console.OpenStandardOutput();
+        DapConnection connection = new(dapStream, () => Session.Load(common.Files, FileSourceReader.Instance, common.Strict, input, output));
+        logger.AddSink(connection.PostLog);
+        logger.Log(LogLevel.Debug, nameof(Program), "DAP transport opened");
+        await connection.RunAsync();
 
-        logger.Info("Program", "Exit.");
+        logger.Log(LogLevel.Info, nameof(Program), "Exit.");
         return 0;
     }
 
