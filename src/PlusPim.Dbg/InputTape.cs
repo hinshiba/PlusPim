@@ -27,7 +27,7 @@ internal sealed class InputTape {
         this._bytes.AddRange(input);
     }
 
-    // TODO: 必要な理由
+    /// <summary>EOFを入力する</summary>
     public void Close() {
         this.Closed = true;
     }

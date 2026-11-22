@@ -39,6 +39,21 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 4. Press **F5** to start debugging the currently open file.
 
+### Using `syscall`
+
+PlusPim does not handle `syscall` by itself. A `syscall` raises an exception that jumps to the exception handler in the kernel text (`.ktext`), and `runtime_call!` in the handler performs the I/O. Without a handler, the program stops with the runtime error `NonInstructionExecution`.
+
+Copy [`samples/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/kseg.asm), a minimal handler, into your workspace and add it to `program`:
+
+```json
+{
+	"type": "pluspim",
+	"request": "launch",
+	"name": "Launch with kernel handler",
+	"program": ["${file}", "${workspaceFolder}/kseg.asm"]
+}
+```
+
 ## Launch Configuration
 
 | Property            | Type       | Default       | Description                                                                                                                                                                 |

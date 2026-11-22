@@ -119,10 +119,14 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
             } catch(IOException) {
                 state = Close(state);
             } catch(Exception e) {
-                if(input is Input.Received { Request: Request r }) {
-                    await this._writer.FailAsync(r.Seq, r.Command, e.Message);
-                }
                 this.PostLog(LogLevel.Error, nameof(DapConnection), e.ToString());
+                if(input is Input.Received { Request: Request r }) {
+                    try {
+                        await this._writer.FailAsync(r.Seq, r.Command, e.Message);
+                    } catch(IOException) {
+                        state = Close(state);
+                    }
+                }
             }
         }
         // 書き込みを待つ継続と受信タスクを解放する
@@ -190,7 +194,14 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
                 return Close(state);
             case (State.Executing x, Input.Executed):
                 // 送信の失敗で閉じるときに取り消せるよう, 次の状態へ移ってから解放する
-                State next = await this.FinishAsync(x);
+                State next;
+                try {
+                    next = await this.FinishAsync(x);
+                } catch(Exception e) when(e is not IOException) {
+                    // 実行はもう終わっていて次の Executed は来ないので, Executing に留まらず終える
+                    await this.OutputAsync(OutputCategory.Stderr, MessageCatalog.InternalError(e) + "\n");
+                    next = await this.TerminateAsync(x.Session);
+                }
                 x.Execution.Cancel.Dispose();
                 return next;
             default:

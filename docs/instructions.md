@@ -145,43 +145,43 @@
 
 ### 算術
 
-- [ ] `mul`: Multiply (rd = rs * rt) → `mult` + `mflo`
+- [x] `mul`: Multiply (rd = rs * rt) → `mult` + `mflo`
 - [-] `div`: (3オペランド) - Divide (rd = rs / rt)
 - [ ] `divi`: (3オペランド) - Divide (rd = rs / rt) → `div` + `mflo`
-- [ ] `rem`: Remainder (rd = rs % rt) → `div` + `mfhi`
+- [x] `rem`: Remainder (rd = rs % rt) → `div` + `mfhi`
 - [ ] `abs`: Absolute Value
-- [ ] `neg`: Negate (rd = -rs) → `sub rd, $zero, rs`
-- [ ] `negu`: Negate Unsigned → `subu rd, $zero, rs`
+- [x] `neg`: Negate (rd = -rs) → `sub rd, $zero, rs`
+- [x] `negu`: Negate Unsigned → `subu rd, $zero, rs`
 
 ### 論理
 
-- [ ] `not`: NOT (rd = ~rs) → `nor rd, rs, $zero`
+- [x] `not`: NOT (rd = ~rs) → `nor rd, rs, $zero`
 
 ### 分岐
 
-- [ ] `b`: Branch Unconditional → `beq $zero, $zero, label`
+- [x] `b`: Branch Unconditional → `beq $zero, $zero, label`
 - [ ] `bal`: Branch and Link → `bgezal $zero, label`
-- [ ] `beqz`: Branch if Equal Zero → `beq rs, $zero, label`
-- [ ] `bnez`: Branch if Not Equal Zero → `bne rs, $zero, label`
-- [ ] `bge`: Branch if Greater or Equal (符号付き)
-- [ ] `bgeu`: Branch if Greater or Equal Unsigned
-- [ ] `bgt`: Branch if Greater Than (符号付き)
-- [ ] `bgtu`: Branch if Greater Than Unsigned
-- [ ] `ble`: Branch if Less or Equal (符号付き)
-- [ ] `bleu`: Branch if Less or Equal Unsigned
-- [ ] `blt`: Branch if Less Than (符号付き)
-- [ ] `bltu`: Branch if Less Than Unsigned
+- [x] `beqz`: Branch if Equal Zero → `beq rs, $zero, label`
+- [x] `bnez`: Branch if Not Equal Zero → `bne rs, $zero, label`
+- [x] `bge`: Branch if Greater or Equal (符号付き)
+- [x] `bgeu`: Branch if Greater or Equal Unsigned
+- [x] `bgt`: Branch if Greater Than (符号付き)
+- [x] `bgtu`: Branch if Greater Than Unsigned
+- [x] `ble`: Branch if Less or Equal (符号付き)
+- [x] `bleu`: Branch if Less or Equal Unsigned
+- [x] `blt`: Branch if Less Than (符号付き)
+- [x] `bltu`: Branch if Less Than Unsigned
 
 ### 比較・セット
 
-- [ ] `seq`: Set if Equal
-- [ ] `sne`: Set if Not Equal
-- [ ] `sge`: Set if Greater or Equal (符号付き)
-- [ ] `sgeu`: Set if Greater or Equal Unsigned
-- [ ] `sgt`: Set if Greater Than (符号付き)
-- [ ] `sgtu`: Set if Greater Than Unsigned
-- [ ] `sle`: Set if Less or Equal (符号付き)
-- [ ] `sleu`: Set if Less or Equal Unsigned
+- [x] `seq`: Set if Equal
+- [x] `sne`: Set if Not Equal
+- [x] `sge`: Set if Greater or Equal (符号付き)
+- [x] `sgeu`: Set if Greater or Equal Unsigned
+- [x] `sgt`: Set if Greater Than (符号付き)
+- [x] `sgtu`: Set if Greater Than Unsigned
+- [x] `sle`: Set if Less or Equal (符号付き)
+- [x] `sleu`: Set if Less or Equal Unsigned
 
 ### ロード
 
@@ -193,4 +193,5 @@
 
 ### その他
 
+- [x] `clear`: Clear (rt = 0) → `addu rt, $zero, $zero`
 - [x] `nop`: No Operation → `sll $zero, $zero, 0`

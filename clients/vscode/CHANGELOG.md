@@ -2,11 +2,14 @@
 
 ## [Unreleased]
 
+## [0.4.0] - YYYY-MM-DD
+
 ### Changed
 
 - Launch PlusPim with the `debug` subcommand instead of the removed `-d` option
 - Follow the rename of the bundled binary from `PlusPim` to `pluspim`
 - Launch PlusPim with `debug connect` instead of the removed `--connect` option
+- Activate only when a PlusPim debug session starts, instead of on any debug session
 
 ## [0.3.0] - 2026-10-13
 

@@ -29,7 +29,7 @@ curl -fsSL https://github.com/hinshiba/PlusPim/releases/latest/download/install.
   - 例
     - `v0.6.0`
     - `v0.6.0-rc.1`
-- `<version>` は `PlusPim/PlusPim.csproj` の `<Version>` と一致させる
+- `<version>` は `src/PlusPim/PlusPim.csproj` の `<Version>` と一致させる
   - リリース CI において検証する
 - `<version>` に `-` を含むものはプレリリースとして作成する
 
