@@ -1,11 +1,12 @@
-import * as fs from "node:fs";
-import * as net from "node:net";
-import * as path from "node:path";
+import type * as net from "node:net";
 import * as vscode from "vscode";
+import { resolveBinary } from "./binaryLayout.js";
+import { establish } from "./connection.js";
 import {
 	DapExpansionSource,
 	PseudoExpansionHintsProvider,
 } from "./inlayHints.js";
+import { parseLaunchConfiguration } from "./launchConfig.js";
 import { SocketDebugAdapter } from "./pluspimAdapter.js";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -17,8 +18,6 @@ export function activate(context: vscode.ExtensionContext) {
 		log,
 		factory,
 		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory),
-	);
-	context.subscriptions.push(
 		vscode.debug.onDidTerminateDebugSession((session) => {
 			if (session.type === "pluspim") {
 				factory.endSession(session.id);
@@ -29,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 		),
 	);
 
-	// 疑似命令の展開先のインレイヒント．デバッグセッション中だけ表示する
+	// 疑似命令の展開先のインレイヒントをデバッグセッション中だけ表示
 	const expansions = new DapExpansionSource();
 	const hints = new PseudoExpansionHintsProvider(expansions);
 	context.subscriptions.push(
@@ -46,6 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 				hints.invalidate();
 			}
 		}),
+
 		// プログラムは launch でアセンブルされるため，その応答の後にヒントを取り直す
 		// trace の有無にかかわらず必要なので，trace 用のトラッカーとは別に登録する
 		vscode.debug.registerDebugAdapterTrackerFactory("pluspim", {
@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 						if (
 							message.type === "response" &&
 							message.command === "launch" &&
-							message.success
+							message.success === true
 						) {
 							expansions.markReady(session.id);
 							hints.invalidate();
@@ -67,16 +67,13 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	const output = vscode.window.createOutputChannel("PlusPim DAP Trace");
-	context.subscriptions.push(output);
 	context.subscriptions.push(
+		output,
 		vscode.debug.registerDebugAdapterTrackerFactory("pluspim", {
 			createDebugAdapterTracker(session) {
-				// trace有効時のみ
-				if (session.configuration.trace) {
-					output.show(true);
-					return new PlusPimTracker(output);
-				}
-				return undefined; // トラッキングしない
+				return session.configuration.trace === true
+					? new PlusPimTracker(output)
+					: undefined;
 			},
 		}),
 	);
@@ -84,59 +81,54 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-// Linux と macOS 向けに実行権限がなければ付与する
-// 失敗時は理由を文字列で返す．成功時は undefined
-function ensureExecutable(binPath: string): string | undefined {
-	if (process.platform === "win32") {
-		return undefined;
-	}
-	try {
-		fs.accessSync(binPath, fs.constants.X_OK);
-		return undefined;
-	} catch (e) {
-		if ((e as NodeJS.ErrnoException).code === "ENOENT") {
-			return `PlusPim binary not found: ${binPath}`;
-		}
-	}
-	try {
-		fs.chmodSync(binPath, 0o755);
-		return undefined;
-	} catch {
-		return `PlusPim binary is not executable and could not be fixed automatically. Run: chmod +x "${binPath}"`;
-	}
-}
-
-/** 1つのセッションが持つ資源 */
-interface SessionResources {
-	terminal: vscode.Terminal;
-	/** PlusPim の接続を待つサーバ．最初の接続を受けたら閉じる */
-	server?: net.Server | undefined;
-	/** PlusPim との接続 */
-	socket?: net.Socket | undefined;
-}
+/** PlusPim が接続してくるのを待つ時間 */
+const CONNECT_TIMEOUT_MS = 5000;
 
 class PlusPimDescriptorFactory
 	implements vscode.DebugAdapterDescriptorFactory, vscode.Disposable
 {
-	/** セッション ID ごとの資源 */
-	private readonly sessions = new Map<string, SessionResources>();
-	/** 閉じられていないターミナル．セッションが終わっても残し，拡張の終了時にだけ破棄する */
-	private readonly terminals = new Set<vscode.Terminal>();
+	/** 接続 ID ごとの，確立中なら中止の手段，確立後ならその接続 */
+	private readonly sessions = new Map<string, AbortController | net.Socket>();
+	/** 閉じられていないターミナルと，その終了を伝える関数．セッションが終わっても残し，拡張の終了時にだけ破棄する */
+	private readonly terminals = new Map<vscode.Terminal, () => void>();
 
 	constructor(
 		private readonly context: vscode.ExtensionContext,
 		private readonly log: vscode.LogOutputChannel,
 	) {}
 
-	/** 接続失敗を出力する */
 	async createDebugAdapterDescriptor(
 		session: vscode.DebugSession,
 	): Promise<vscode.DebugAdapterDescriptor> {
+		const abort = new AbortController();
+		this.sessions.set(session.id, abort);
 		try {
-			return await this.connect(session);
+			const config = parseLaunchConfiguration(session.configuration);
+			// 開発モードのときだけ開発ビルドを優先
+			const binary = resolveBinary(
+				this.context.extensionPath,
+				this.context.extensionMode === vscode.ExtensionMode.Development,
+			);
+			if (binary.fellBack) {
+				vscode.window.showWarningMessage(
+					"The extension was launched in development mode, but no debug build was found. Using the release build instead.",
+				);
+			}
+			const socket = await establish({
+				binPath: binary.path,
+				config,
+				spawn: (binPath, args, name) => this.spawn(binPath, args, name),
+				signal: abort.signal,
+				timeoutMs: CONNECT_TIMEOUT_MS,
+			});
+			// establish の解決からここまではマイクロタスクだけなので，その間に endSession は割り込まない
+			this.sessions.set(session.id, socket);
+			return new vscode.DebugAdapterInlineImplementation(
+				new SocketDebugAdapter(socket, () => this.endSession(session.id)),
+			);
 		} catch (e) {
-			// 記述子の作成に失敗すると，終了のイベントが来ないことがあるので，ここで片付ける
-			this.endSession(session.id);
+			// 記述子の作成に失敗すると終了のイベントが来ないことがある．通知の表示は VS Code に任せる
+			this.sessions.delete(session.id);
 			this.log.error(
 				`Failed to connect to PlusPim (${session.name}):`,
 				e instanceof Error ? e.message : String(e),
@@ -145,188 +137,51 @@ class PlusPimDescriptorFactory
 		}
 	}
 
-	private async connect(
-		session: vscode.DebugSession,
-	): Promise<vscode.DebugAdapterDescriptor> {
-		// vscode.DebugConfigurationの[key: string]: any
-		// Normalize program paths defensively
-		const programInput = session.configuration.program;
-		const programs: string[] = (
-			Array.isArray(programInput) ? programInput : [programInput]
-		)
-			.filter((p) => p !== null && p !== undefined)
-			.map((p) => String(p));
-
-		const extraArgsInput: unknown[] = session.configuration.args ?? [];
-		const extraArgs: string[] = extraArgsInput
-			.filter((a) => a !== null && a !== undefined)
-			.map((a) => String(a));
-
-		// 端末の符号化の切り替えは PlusPim が判断する．拡張は全 OS で既定で依頼する
-		const forceUtf8 = session.configuration.forceTerminalUtf8 !== false;
-		const utf8Args =
-			forceUtf8 && !extraArgs.includes("--force-terminal-utf8")
-				? ["--force-terminal-utf8"]
-				: [];
-
-		const rid =
-			process.platform === "win32"
-				? "win-x64"
-				: process.platform === "darwin"
-					? process.arch === "arm64"
-						? "osx-arm64"
-						: "osx-x64"
-					: "linux-x64";
-		const exe = process.platform === "win32" ? "pluspim.exe" : "pluspim";
-		// 開発モードのときだけ開発ビルドを優先
-		const preferDebug =
-			this.context.extensionMode === vscode.ExtensionMode.Development;
-		const debugBinPath = this.context.asAbsolutePath(`bin/debug/${exe}`);
-		const releaseBinPath = this.context.asAbsolutePath(`bin/${rid}/${exe}`);
-		const useDebug = preferDebug && fs.existsSync(debugBinPath);
-		if (preferDebug && !useDebug) {
-			vscode.window.showWarningMessage(
-				"The extension was launched in development mode, but no debug build was found. Using the release build instead.",
-			);
-		}
-		const binPath = useDebug ? debugBinPath : releaseBinPath;
-		const execError = ensureExecutable(binPath);
-		if (execError) {
-			vscode.window.showErrorMessage(execError);
-			throw new Error(execError);
-		}
-
-		// 先に待ち受けて，OS が決めたポートを PlusPim に渡す
-		const server = net.createServer();
-		const port = await listenOnLoopback(server);
-
-		// ターミナルで呼んでもらう
-		const name = `Debug: ${programs.length > 0 ? programs.map((p) => path.basename(p)).join(", ") : "PlusPim"}`;
-		const args = [
-			"debug",
-			"connect",
-			`127.0.0.1:${port}`,
-			...utf8Args,
-			...extraArgs,
-			...programs,
-		];
+	/** ターミナルで PlusPim を起動する */
+	private spawn(
+		binPath: string,
+		args: readonly string[],
+		name: string,
+	): Promise<void> {
 		this.log.info(`Launching: ${binPath} ${args.join(" ")}`);
 		const terminal = vscode.window.createTerminal({
 			name,
 			shellPath: binPath,
-			shellArgs: args,
+			shellArgs: [...args],
 		});
-		const resources: SessionResources = { terminal, server };
-		this.sessions.set(session.id, resources);
-		this.terminals.add(terminal);
+		const exited = new Promise<void>((resolve) => {
+			this.terminals.set(terminal, resolve);
+		});
 		terminal.show();
-
-		// 最初に来た接続を DAP の接続とする
-		const socket = await acceptFirstConnection(
-			server,
-			terminal,
-			name,
-			CONNECT_TIMEOUT_MS,
-		);
-		server.close();
-		resources.server = undefined;
-		resources.socket = socket;
-		return new vscode.DebugAdapterInlineImplementation(
-			new SocketDebugAdapter(socket, () => this.endSession(session.id)),
-		);
+		return exited;
 	}
 
-	/** セッションの待ち受けと接続を閉じる．ターミナルは出力を読めるように残す */
+	/** 確立中なら中止し，確立後なら接続を閉じる．ターミナルは出力を読めるように残す */
 	endSession(sessionId: string): void {
-		const resources = this.sessions.get(sessionId);
-		if (resources === undefined) {
-			return;
-		}
+		const entry = this.sessions.get(sessionId);
 		this.sessions.delete(sessionId);
-		resources.server?.close();
-		resources.socket?.destroy();
+		if (entry instanceof AbortController) {
+			entry.abort();
+		} else {
+			entry?.destroy();
+		}
 	}
 
 	onTerminalClosed(terminal: vscode.Terminal): void {
+		this.terminals.get(terminal)?.();
 		this.terminals.delete(terminal);
 	}
 
-	/** 拡張の終了時にだけ呼ばれる．すべての資源とターミナルを破棄する */
+	/** 拡張の終了時にだけ呼ばれる．すべての接続とターミナルを破棄する */
 	dispose(): void {
 		for (const sessionId of this.sessions.keys()) {
 			this.endSession(sessionId);
 		}
-		for (const terminal of this.terminals) {
+		for (const terminal of this.terminals.keys()) {
 			terminal.dispose();
 		}
 		this.terminals.clear();
 	}
-}
-
-/** PlusPim が接続してくるのを待つ時間 */
-const CONNECT_TIMEOUT_MS = 5000;
-
-/** ループバックの空きポートで待ち受け，そのポート番号を返す */
-function listenOnLoopback(server: net.Server): Promise<number> {
-	return new Promise((resolve, reject) => {
-		server.once("error", reject);
-		server.listen({ host: "127.0.0.1", port: 0 }, () => {
-			server.off("error", reject);
-			const address = server.address();
-			if (address === null || typeof address === "string") {
-				server.close();
-				reject(new Error("Failed to get the port to listen on"));
-				return;
-			}
-			resolve(address.port);
-		});
-	});
-}
-
-/**
- * 最初に来た接続を返す．PlusPim が時間内に接続しない場合と，接続前にターミナルが閉じた場合は失敗する．
- * 失敗は例外で伝え，通知の表示は VS Code に任せる
- */
-function acceptFirstConnection(
-	server: net.Server,
-	terminal: vscode.Terminal,
-	terminalName: string,
-	timeoutMs: number,
-): Promise<net.Socket> {
-	return new Promise((resolve, reject) => {
-		const cleanup = () => {
-			clearTimeout(timer);
-			closeListener.dispose();
-			server.off("connection", onConnection);
-			server.off("error", onError);
-		};
-		const onConnection = (socket: net.Socket) => {
-			cleanup();
-			// 受け取るまでの間に error が起きても拡張が落ちないようにする
-			socket.on("error", () => {});
-			resolve(socket);
-		};
-		const onError = (e: Error) => {
-			cleanup();
-			reject(e);
-		};
-		const timer = setTimeout(() => {
-			cleanup();
-			reject(
-				new Error(
-					`PlusPim did not connect within ${timeoutMs}ms. See the terminal "${terminalName}" for details.`,
-				),
-			);
-		}, timeoutMs);
-		const closeListener = vscode.window.onDidCloseTerminal((closed) => {
-			if (closed === terminal) {
-				cleanup();
-				reject(new Error("PlusPim exited before connecting."));
-			}
-		});
-		server.on("connection", onConnection);
-		server.on("error", onError);
-	});
 }
 
 /** トレース出力に必要な DAP メッセージの最小形 */
@@ -338,13 +193,15 @@ interface DapMessage {
 }
 
 class PlusPimTracker implements vscode.DebugAdapterTracker {
-	private output: vscode.OutputChannel;
+	private readonly output: vscode.OutputChannel;
 
+	/** trace を有効にした起動でだけ作る．作ると出力を表示する */
 	constructor(output: vscode.OutputChannel) {
 		this.output = output;
+		output.show(true);
 	}
 
-	// VSCode → DA
+	// VS Code -> DA
 	onWillReceiveMessage(message: DapMessage): void {
 		this.output.appendLine(
 			`>>> ${message.type}/${message.command ?? message.event ?? ""}`,
@@ -353,7 +210,7 @@ class PlusPimTracker implements vscode.DebugAdapterTracker {
 		this.output.appendLine("");
 	}
 
-	// DA → VSCode
+	// VS Code <- DA
 	onDidSendMessage(message: DapMessage): void {
 		this.output.appendLine(
 			`<<< ${message.type}/${message.command ?? message.event ?? ""}`,

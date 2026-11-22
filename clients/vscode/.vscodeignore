@@ -1,13 +1,14 @@
 .vscode/**
 src/**
 .gitignore
-**/tsconfig.json
+**/tsconfig*.json
 .oxfmtrc.json
 .oxlintrc.json
 **/*.ts
 node_modules/**
 bun.lock
 scripts/**
+test/**
 out/**
 !out/*.js
 # Debug builds (dotnet:debug:win) must never ship

@@ -1,4 +1,5 @@
-// PlusPim との TCP 接続を VS Code の DebugAdapter として見せる
+// PlusPimとのTCP接続をVS CodeのDebugAdapterとして見せる
+
 import type * as net from "node:net";
 import * as vscode from "vscode";
 import {
@@ -7,7 +8,7 @@ import {
 	encodeDapMessage,
 } from "./dapFraming.js";
 
-/** このアダプタが中身を見る DAP メッセージの最小形 */
+/** このアダプタが中身を見るDAPメッセージの最小形 */
 interface DapMessage {
 	seq?: number;
 	type?: string;
@@ -16,17 +17,17 @@ interface DapMessage {
 }
 
 /**
- * 接続済みのソケットを介して DAP を中継する．
- * 接続が予期せず切れたときは，VS Code がセッションを終えられるように terminated を自前で送る
+ * 接続済みのソケットを介してDAPを中継する．
+ * 接続が予期せず切れたときは，VS Codeがセッションを終えられるようにterminatedを自前で送る
  */
 export class SocketDebugAdapter implements vscode.DebugAdapter {
 	private readonly emitter =
 		new vscode.EventEmitter<vscode.DebugProtocolMessage>();
 	private readonly decoder: DapMessageDecoder;
-	/** disconnect の応答か terminated を VS Code に渡したら true．以後の切断は想定内 */
+	/** disconnectの応答かterminatedを VS Codeに渡したら true．以後の切断は想定内 */
 	private ended = false;
 	private closed = false;
-	/** 自前で送るメッセージの seq */
+	/** 自前で送るメッセージのseq */
 	private nextSeq = 1;
 
 	readonly onDidSendMessage: vscode.Event<vscode.DebugProtocolMessage> =
@@ -77,6 +78,7 @@ export class SocketDebugAdapter implements vscode.DebugAdapter {
 	}
 
 	private forward(message: unknown): void {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- PlusPimの送るメッセージを信頼する
 		const m = message as DapMessage;
 		if (
 			(m.type === "response" && m.command === "disconnect") ||
@@ -84,6 +86,7 @@ export class SocketDebugAdapter implements vscode.DebugAdapter {
 		) {
 			this.ended = true;
 		}
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- 同上
 		this.emitter.fire(message as vscode.DebugProtocolMessage);
 	}
 
@@ -107,7 +110,7 @@ export class SocketDebugAdapter implements vscode.DebugAdapter {
 		this.sendSynthetic({ type: "event", event: "terminated", body: {} });
 	}
 
-	/** 切断後に来た要求へ応える．disconnect は成功にして，セッションを終えられるようにする */
+	/** 切断後に来た要求へ応える．disconnectは成功にして，セッションを終えられるようにする */
 	private answerAfterClose(request: DapMessage): void {
 		if (request.type !== "request") {
 			return;
@@ -123,9 +126,6 @@ export class SocketDebugAdapter implements vscode.DebugAdapter {
 	}
 
 	private sendSynthetic(message: Record<string, unknown>): void {
-		this.emitter.fire({
-			seq: this.nextSeq++,
-			...message,
-		} as vscode.DebugProtocolMessage);
+		this.emitter.fire({ seq: this.nextSeq++, ...message });
 	}
 }

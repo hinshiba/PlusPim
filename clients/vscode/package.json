@@ -126,11 +126,12 @@
 		"dotnet:debug:win": "dotnet publish ../../src/PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
+		"test": "bun test ./test",
 		"lint": "oxlint",
 		"format": "oxfmt",
 		"check": "oxlint --fix && oxfmt",
 		"ci": "oxlint --deny-warnings && oxfmt --check",
-		"typecheck": "tsc -p ./ --noEmit && tsc -p scripts --noEmit"
+		"typecheck": "tsc -p ./ --noEmit && tsc -p test --noEmit && tsc -p scripts --noEmit"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.4.5",
