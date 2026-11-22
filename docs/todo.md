@@ -6,21 +6,20 @@
 
 #### MIPS準拠
 
-#### 履歴整合性
+
+
+#### 履歴
+
+
 
 #### ランタイム系
 
+
 ### 前処理系
 
-- 一時ラベルと数値ラベル参照
-- bgezal
-- リンカの実装のリファクタリング
 
 ### VS Code 拡張
-
-- [ ] セッション終了時にプログラムの出力がターミナルごと消える (#12)
-  - 実機で確認済み．`shellPath` で直接起動しているため，PlusPim の終了とともに VS Code がターミナルを閉じる
-  - 対応案: PlusPim に終了前の Enter 待ちオプション (`--wait-on-exit` など) を設け，拡張が付与する．または pwsh 等のシェルを経由して起動する
+る
 - [ ] launch 設定を検証する (`extension.ts:48-65`)
   - [ ] `session.configuration` は実質 `any`. 型付きの `PlusPimLaunchConfig` を定義し, `unknown` から検証する (`resolveDebugConfiguration` で行うのが筋)
   - [ ] `program` に配列と文字列以外が来たとき `String(p)` で `"[object Object]"` にならないようエラーにする
@@ -37,12 +36,6 @@
   - [ ] `showErrorMessage` の直後に `throw` している. VS Code は throw されたエラーを自分で通知するので, どちらかにする．
 - [ ] `ensureExecutable` の同期 I/O (`fs.accessSync`, `fs.chmodSync`) を `fs.promises` にそろえ, エラーを値で返す方式と throw が混在している点を整理する
 
-- 起動に時間がかかる
-  - ready to run
-  - プロファイリング
-
-- 構成を分割する
-
 ### ドキュメンテーション
 
 - [ ] README
@@ -50,8 +43,6 @@
   - [ ] syscall を使うにはカーネルハンドラ (`.ktext`) が必要なことを書き, `kseg.asm` を `program` に加えた launch.json の例を載せる
   - [ ] サンプルのカーネルハンドラ (`testfolder/kseg.asm`) の場所と内容を説明する
   - [ ] 未実装の一覧 (`README.md:29-31`) を更新する
-  - [ ] ステップ実行はソース行単位ではなく機械命令単位であることを書く. 擬似命令 (`la`, `li` など) は複数命令に展開されるため, 1行に複数回のステップが必要
-  - [ ] syscall を StepIn / StepOver するとカーネルハンドラに入ることを書く
 
 - [ ] `doc/おおまかな設計.puml` を現状に合わせる
   - [ ] d2言語に移行
@@ -67,20 +58,10 @@
 ### テストと CI
 
 - [ ] テストの追加
-  - [ ] アセンブラ
-    - [ ] パース
-    - [ ] 疑似命令展開
-    - [ ] マクロ
-    - [ ] アドレス配置
   - [ ] 結合テスト
     - [ ] テスト用アセンブリディレクトリの自動実行
 
-- [ ] xUnit.net v3への移行
 
 ## 低優先度
-
-- [ ] 命令実行のパフォーマンス改善 (#13)
-  - [ ] Debug ログが無効なときにログ文字列を組み立てない (`ITypeInstruction.cs:40` など)
-  - [ ] 計測用のベンチマークを用意する
 
 - [ ] Emacs, Vim, Neovim, Zed への拡張機能提供
