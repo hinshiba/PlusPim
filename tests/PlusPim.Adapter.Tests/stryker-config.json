@@ -1,0 +1,6 @@
+{
+  "stryker-config": {
+    "project": "PlusPim.Asm.csproj",
+    "test-runner": "mtp"
+  }
+}

@@ -26,6 +26,7 @@ coverage*.info
 *.coverage
 *.coveragexml
 BenchmarkDotNet.Artifacts/
+StrykerOutput/
 
 # Debug symbols, logs, temporary files
 *.pdb

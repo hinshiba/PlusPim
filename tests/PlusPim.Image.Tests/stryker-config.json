@@ -1,0 +1,6 @@
+{
+  "stryker-config": {
+    "project": "PlusPim.Image.csproj",
+    "test-runner": "mtp"
+  }
+}

@@ -11,5 +11,8 @@
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
     <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2057;IL2067;IL2075;IL2104;IL3050;IL3053;SYSLIB1220</WarningsAsErrors>
+
+    <!-- Strykerはunionをpreview機能としてのみ受け付ける -->
+    <LangVersion Condition="'$(PlusPimMutation)' == 'true'">preview</LangVersion>
   </PropertyGroup>
 </Project>
