@@ -13,8 +13,8 @@ updates:
 
   - package-ecosystem: nuget
     directories:
-      - /PlusPim
-      - /PlusPimTests
+      - /src/*
+      - /tests/*
     schedule:
       interval: weekly
     cooldown:
@@ -39,3 +39,7 @@ updates:
     groups:
       bun:
         update-types: [minor, patch]
+    ignore:
+      # 拡張はVS Code同梱のNodeで動くため合わせる
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
