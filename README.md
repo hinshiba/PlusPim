@@ -16,8 +16,8 @@ PlusPimは，Debug Adapter Protocolに対応したMIPSアセンブリコード�
 
 ## 機能
 
-- **ステップ実行**: MIPSコードを1命令ずつ実行します．
-- **バックステップ実行**: MIPSコードを1命令前の状態に戻します．逆方向の継続実行 (Reverse Continue) はブレークポイントで停止します．
+- **ステップ実行**: MIPSコードを1行(または1命令)ずつ実行します．
+- **バックステップ実行**: MIPSコードを1行前の状態に戻します．
 - **一時停止**: 実行中のプログラムを一時停止できます．
 - **レジスタ表示**: 実行中に32本すべてのMIPSレジスタの状態を表示します．
 - **ブレークポイント**: ブレークポイントを設定可能にします．
@@ -33,10 +33,10 @@ PlusPimは，Debug Adapter Protocolに対応したMIPSアセンブリコード�
 | -------------------------------------------------------------- | -------------------------------------------------------------------- |
 | [命令の対応状況](docs/instructions.md)                         | 疑似命令を含む命令の対応状況                                         |
 | [アセンブラ指令の対応状況と仕様](docs/assembler_directives.md) | `.data` や `.utf-8z` などのアセンブラ指令の対応状況と仕様            |
-| [DAP クライアントとの接続](docs/connection.md)                 | `--connect` と `--listen` による接続方式，ターミナルの符号化         |
+| [DAP クライアントとの接続](docs/connection.md)                 | `debug connect` と `debug listen` による接続方式，ターミナルの符号化 |
 | [アセンブラ](docs/assembler.md)                                | セグメント，ラベル，解析失敗時の挙動などアセンブラの仕様             |
 | [ランタイム](docs/runtime.md)                                  | レジスタの初期値，ランタイムコール (syscall) など PlusPim 固有の仕様 |
-| [VS Code 拡張機能](clients/vscode/README.md)                   | 拡張機能の機能，起動構成，既知の制限 (英語)                          |
+| [VS Code 拡張機能](clients/vscode/README.md)                   | 拡張機能の機能，起動構成，既知の制限                                 |
 | [変更履歴](CHANGELOG.md)                                       | PlusPim 本体の変更履歴                                               |
 | [VS Code 拡張機能の変更履歴](clients/vscode/CHANGELOG.md)      | 拡張機能の変更履歴                                                   |
 
@@ -68,14 +68,14 @@ DAP の通信には標準入出力ではなく TCP を使います．プログ�
     [開発環境のセットアップ](#開発環境のセットアップ)に従ってビルドするか，Releases にある実行ファイルを取り出します．
 
 2. **PlusPim をデバッグモードで起動する**:
-    クライアントが接続しに来る場合は `--listen` を使います．ポートに 0 を指定すると空きポートが割り当てられ，実際のアドレスが標準エラー出力に通知されます．
+    クライアントが接続しに来る場合は `debug listen` を使います．ポートに 0 を指定すると空きポートが割り当てられ，実際のアドレスが標準エラー出力に通知されます．
 
     ```sh
-    pluspim debug --listen 127.0.0.1:0 main.asm sub.asm
+    pluspim debug listen 127.0.0.1:0 main.asm sub.asm
     # 標準エラー出力: DAP server listening at: 127.0.0.1:<実ポート>
     ```
 
-    クライアントが先に待ち受ける場合は `--connect 127.0.0.1:<ポート>` を使います．
+    クライアントが先に待ち受ける場合は `debug connect 127.0.0.1:<ポート>` を使います．
 
 3. **クライアントから接続する**:
     通知されたアドレスへ接続し，`launch` 要求を送ります．アセンブリファイルはコマンドライン引数で指定するため，`launch` の引数で指定できるのは `stopOnEntry` (既定値 `true`) だけです．
@@ -90,14 +90,13 @@ DAP の通信には標準入出力ではなく TCP を使います．プログ�
 
 このプロジェクトは，関心の分離を明確にした設計になっており，コンポーネントを疎結合にするために依存性逆転の原則を使用しています．主要なアーキテクチャの流れは以下の通りです:
 
-`エディタUI (VS Code) -> DebugAdapter -> IApplication <- Application -> IDebugger <- PlusPimDbg`
+`エディタUI (VS Code) -> Adapter/EditorController/DAP -> Usecase -> Asm / Dbg -> Image -> Instruction`
 
-- **EditorController (`DebugAdapter`)**: DAPを実装し，VS Codeクライアントと通信します．DAPリクエストを`IApplication`インターフェースへの呼び出しに変換します．
-- **EditorController (`Transport`)**: DAPの通信路を確立します．`--connect`でクライアントへ接続するか，`--listen`でクライアントの接続を待ちます．デバッギの標準入出力とは別の通信路を使います．詳細は[docs/connection.md](docs/connection.md)を参照してください．
-- **Application (`IApplication`)**: アプリケーションのコアロジックを定義し，エディタ向けコンポーネントとデバッガバックエンドの間の橋渡しをします．
-- **Debugger (`IDebugger`)**: デバッグエンジンのインターフェースで，異なるデバッガバックエンドを交換可能にします．
-- **PlusPimDbg**: `IDebugger`インターフェースの現在の実装で，MIPS命令パーサーと実行エンジンを含みます．
-- **Terminal**: `--force-terminal-utf8` によるターミナルの符号化の切り替えと復元を担います．
+- **EditorController**: 各種エディタとの通信を行います．現在はDAPのみ実装されています．
+- **Usecase**: 確立したセッションの間でアセンブラやデバッガを呼び出し制御します．
+- **Asm**: アセンブリを実行できる内部の形式に変換します．
+- **Dbg**: デバッグ対象の実行と履歴を管理します．
+- **Instruction**: 命令の定義を配置しています．
 
 ## 開発環境のセットアップ
 
@@ -138,6 +137,17 @@ dotnet test --project tests/PlusPim.Instructions.Tests
 ```
 
 テストの仕様は [docs/tests](docs/tests) にあります．
+
+ミューテーションテストは [Stryker.NET](https://github.com/stryker-mutator/stryker-net) で行います．
+設定は各テストプロジェクトの `stryker-config.json` にあり，そのディレクトリで実行します:
+
+```sh
+cd tests/PlusPim.Asm.Tests
+dotnet run --file ../stryker.cs
+```
+
+Stryker.NET 5.1.0 の Roslyn は `union` を解釈できないため，[tests/stryker.cs](tests/stryker.cs) が Roslyn を SDK のものに差し替えたコピーを `artifacts/stryker/` に作って実行します．
+`--` の後の引数は Stryker に渡され，レポートは `StrykerOutput/` に出力されます．
 
 単体の実行ファイルを作る場合は `dotnet publish` を使います (`<rid>` は `win-x64`，`linux-x64`，`osx-x64`，`osx-arm64` など):
 
