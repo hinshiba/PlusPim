@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   lint-typecheck:
-    name: Biome, Typecheck
+    name: Lint, Format, Typecheck
     runs-on: ubuntu-latest
 
     defaults:
@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Biome
+      - name: Lint, Format
         run: bun run ci
 
       - name: Typecheck

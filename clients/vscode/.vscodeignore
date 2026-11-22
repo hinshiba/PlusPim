@@ -2,7 +2,8 @@
 src/**
 .gitignore
 **/tsconfig.json
-biome.json
+.oxfmtrc.json
+.oxlintrc.json
 **/*.ts
 node_modules/**
 bun.lock

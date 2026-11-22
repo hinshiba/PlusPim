@@ -70,7 +70,7 @@ if (published && !publishOnly) {
 			`[vsix] packaging ${target} (excluded: ${otherRids.map((r) => `bin/${r}`).join(", ")})`,
 		);
 
-		run(process.execPath, ["run", "compile"]) &&
+		if (run(process.execPath, ["run", "compile"])) {
 			run(process.execPath, [
 				"x",
 				"--no-install",
@@ -84,6 +84,7 @@ if (published && !publishOnly) {
 				"--ignoreFile",
 				ignoreFile,
 			]);
+		}
 	} finally {
 		rmSync(tempDir, { recursive: true, force: true });
 	}

@@ -253,7 +253,7 @@ class PlusPimDescriptorFactory
 
 	/** 拡張の終了時にだけ呼ばれる．すべての資源とターミナルを破棄する */
 	dispose(): void {
-		for (const sessionId of [...this.sessions.keys()]) {
+		for (const sessionId of this.sessions.keys()) {
 			this.endSession(sessionId);
 		}
 		for (const terminal of this.terminals) {
