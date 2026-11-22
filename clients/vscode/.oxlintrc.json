@@ -9,18 +9,37 @@
 		"node",
 		"promise"
 	],
+	"env": {
+		"node": true,
+		"es2022": true
+	},
 	"categories": {
 		"correctness": "error",
 		"suspicious": "error",
 		"pedantic": "error",
-		"perf": "error",
-		"style": "error",
-		"restriction": "error",
-		"nursery": "error"
+		"perf": "error"
 	},
 	"options": {
 		"typeAware": true,
 		"reportUnusedDisableDirectives": "error"
 	},
-	"rules": {}
+	"rules": {
+		// vscodeとnodeの型はreadonlyでないため満たせない
+		"typescript/prefer-readonly-parameter-types": "off",
+		// 行数やクラス数のための分割は局所性を下げる
+		"eslint/max-lines-per-function": "off",
+		"eslint/max-classes-per-file": "off",
+		// 波括弧を足すだけでコード量が増える
+		"typescript/no-confusing-void-expression": "off",
+		"typescript/prefer-readonly": "error"
+	},
+	"overrides": [
+		{
+			// bunの型ではexpect(...).rejectsの戻り値がvoidになるので
+			"files": ["test/**/*.ts"],
+			"rules": {
+				"typescript/await-thenable": "off"
+			}
+		}
+	]
 }
