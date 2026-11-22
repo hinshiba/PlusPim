@@ -22,4 +22,9 @@
     <Project Path="tests/PlusPim.TestValues/PlusPim.TestValues.csproj" />
     <Project Path="tests/PlusPim.Usecase.Tests/PlusPim.Usecase.Tests.csproj" />
   </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/PlusPim.Benchmarks/PlusPim.Benchmarks.csproj" />
+    <Project Path="benchmarks/PlusPim.Asm.Benchmarks/PlusPim.Asm.Benchmarks.csproj" />
+    <Project Path="benchmarks/PlusPim.Dbg.Benchmarks/PlusPim.Dbg.Benchmarks.csproj" />
+  </Folder>
 </Solution>
