@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+
+    <!-- 現時点ではAOTで配布はしないが対応可能な状態を維持する -->
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+    <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2057;IL2067;IL2075;IL2104;IL3050;IL3053;SYSLIB1220</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

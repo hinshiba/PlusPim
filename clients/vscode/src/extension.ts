@@ -11,9 +11,10 @@ import { SocketDebugAdapter } from "./pluspimAdapter.js";
 export function activate(context: vscode.ExtensionContext) {
 	console.log("PlusPim Extension was loaded.");
 
-	// 情報を設定
-	const factory = new PlusPimDescriptorFactory(context);
+	const log = vscode.window.createOutputChannel("PlusPim", { log: true });
+	const factory = new PlusPimDescriptorFactory(context, log);
 	context.subscriptions.push(
+		log,
 		factory,
 		vscode.debug.registerDebugAdapterDescriptorFactory("pluspim", factory),
 	);
@@ -122,9 +123,29 @@ class PlusPimDescriptorFactory
 	/** 閉じられていないターミナル．セッションが終わっても残し，拡張の終了時にだけ破棄する */
 	private readonly terminals = new Set<vscode.Terminal>();
 
-	constructor(private readonly context: vscode.ExtensionContext) {}
+	constructor(
+		private readonly context: vscode.ExtensionContext,
+		private readonly log: vscode.LogOutputChannel,
+	) {}
 
+	/** 接続失敗を出力する */
 	async createDebugAdapterDescriptor(
+		session: vscode.DebugSession,
+	): Promise<vscode.DebugAdapterDescriptor> {
+		try {
+			return await this.connect(session);
+		} catch (e) {
+			// 記述子の作成に失敗すると，終了のイベントが来ないことがあるので，ここで片付ける
+			this.endSession(session.id);
+			this.log.error(
+				`Failed to connect to PlusPim (${session.name}):`,
+				e instanceof Error ? e.message : String(e),
+			);
+			throw e;
+		}
+	}
+
+	private async connect(
 		session: vscode.DebugSession,
 	): Promise<vscode.DebugAdapterDescriptor> {
 		// vscode.DebugConfigurationの[key: string]: any
@@ -183,12 +204,13 @@ class PlusPimDescriptorFactory
 		const name = `Debug: ${programs.length > 0 ? programs.map((p) => path.basename(p)).join(", ") : "PlusPim"}`;
 		const args = [
 			"debug",
-			"--connect",
+			"connect",
 			`127.0.0.1:${port}`,
 			...utf8Args,
 			...extraArgs,
 			...programs,
 		];
+		this.log.info(`Launching: ${binPath} ${args.join(" ")}`);
 		const terminal = vscode.window.createTerminal({
 			name,
 			shellPath: binPath,
@@ -199,25 +221,19 @@ class PlusPimDescriptorFactory
 		this.terminals.add(terminal);
 		terminal.show();
 
-		try {
-			// 最初に来た接続を DAP の接続とする
-			const socket = await acceptFirstConnection(
-				server,
-				terminal,
-				name,
-				CONNECT_TIMEOUT_MS,
-			);
-			server.close();
-			resources.server = undefined;
-			resources.socket = socket;
-			return new vscode.DebugAdapterInlineImplementation(
-				new SocketDebugAdapter(socket, () => this.endSession(session.id)),
-			);
-		} catch (e) {
-			// 記述子の作成に失敗すると，終了のイベントが来ないことがあるので，ここで片付ける
-			this.endSession(session.id);
-			throw e;
-		}
+		// 最初に来た接続を DAP の接続とする
+		const socket = await acceptFirstConnection(
+			server,
+			terminal,
+			name,
+			CONNECT_TIMEOUT_MS,
+		);
+		server.close();
+		resources.server = undefined;
+		resources.socket = socket;
+		return new vscode.DebugAdapterInlineImplementation(
+			new SocketDebugAdapter(socket, () => this.endSession(session.id)),
+		);
 	}
 
 	/** セッションの待ち受けと接続を閉じる．ターミナルは出力を読めるように残す */

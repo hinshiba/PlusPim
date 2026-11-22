@@ -73,6 +73,7 @@ read_int:
     jr      $ra
 
     # ================================ MARK: main
+    .globl main
 main:
     # 10の階乗を計算する
     # -- 退避 --

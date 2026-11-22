@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlusPim.Instructions\PlusPim.Instructions.csproj" />
+  </ItemGroup>
+
+</Project>

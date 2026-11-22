@@ -6,6 +6,7 @@
 
 - Launch PlusPim with the `debug` subcommand instead of the removed `-d` option
 - Follow the rename of the bundled binary from `PlusPim` to `pluspim`
+- Launch PlusPim with `debug connect` instead of the removed `--connect` option
 
 ## [0.3.0] - 2026-10-13
 

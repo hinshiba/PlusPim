@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Version>0.5.0</Version>
+    <AssemblyName>pluspim</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Ready To Run は RID を指定した Release の publish のときだけ有効にする -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' And '$(Configuration)' == 'Release'">
+    <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlusPim.Adapter\PlusPim.Adapter.csproj" />
+  </ItemGroup>
+
+</Project>
