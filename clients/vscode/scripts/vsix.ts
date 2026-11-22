@@ -33,6 +33,9 @@ if (positional.length !== 1 || target === undefined) {
 }
 const rid = RIDS[target];
 
+// 以前のビルドの残骸を同梱しない
+rmSync(join(root, releaseDir(rid)), { recursive: true, force: true });
+
 const published = run("dotnet", [
 	"publish",
 	"../../src/PlusPim/PlusPim.csproj",
@@ -48,20 +51,16 @@ const published = run("dotnet", [
 ]);
 
 if (published && !publishOnly) {
-	const otherRids = Object.values(RIDS).filter((r) => r !== rid);
+	// vsceの否定パターンは他の除外より優先されるので，対象ディレクトリはpublish前に空にしてある
 	const ignore =
 		readFileSync(join(root, ".vscodeignore"), "utf8").trimEnd() +
-		"\n" +
-		"# Other platforms' binaries\n" +
-		otherRids.map((r) => `bin/${r}/**\n`).join("");
+		`\n!${releaseDir(rid)}/**\n`;
 
 	const tempDir = mkdtempSync(join(tmpdir(), "pluspim-vsix-"));
 	try {
 		const ignoreFile = join(tempDir, ".vscodeignore");
 		writeFileSync(ignoreFile, ignore);
-		console.log(
-			`[vsix] packaging ${target} (excluded: ${otherRids.map((r) => releaseDir(r)).join(", ")})`,
-		);
+		console.log(`[vsix] packaging ${target} (included: ${releaseDir(rid)})`);
 
 		if (run(process.execPath, ["run", "compile"])) {
 			run(process.execPath, [

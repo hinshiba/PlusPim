@@ -11,7 +11,7 @@ scripts/**
 test/**
 out/**
 !out/*.js
-# Debug builds (dotnet:debug:win) must never ship
-bin/debug/**
+# Binaries ship only via scripts/vsix.ts, which re-includes the target's release dir
+bin/**
 # Debug symbols for any platform
 **/*.pdb
