@@ -1,4 +1,5 @@
-// 疑似命令 (la，li など) の展開先の機械命令をインレイヒントで表示する
+// 疑似命令をインレイヒントで表示する
+
 import * as vscode from "vscode";
 
 /** DAP のカスタム要求の名前 */
@@ -34,7 +35,7 @@ export interface ExpansionSource {
 	fetch(fsPath: string): Promise<PseudoExpansion[] | undefined>;
 }
 
-/** 実行中の pluspim セッションにカスタム要求を送る */
+/** 実行中のpluspimセッションにカスタム要求を送る */
 export class DapExpansionSource implements ExpansionSource {
 	// launch に成功して要求に答えられるセッション
 	private readonly ready = new Set<string>();
@@ -63,6 +64,7 @@ export class DapExpansionSource implements ExpansionSource {
 		}
 		try {
 			const args: PseudoExpansionsArguments = { source: { path: fsPath } };
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- PlusPim の応答を信頼する．解析への置き換えは hinshiba/PlusPim-experimental#22
 			const body = (await session.customRequest(EXPANSIONS_REQUEST, args)) as
 				| PseudoExpansionsResponseBody
 				| undefined;

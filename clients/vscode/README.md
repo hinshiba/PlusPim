@@ -9,7 +9,7 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 - **Register view** — Inspect all 32 MIPS registers, `HI`, `LO`, and `PC` during a debug session.
 - **Label resolution** — Jump targets and branch labels are resolved automatically.
 - **Pseudo-instruction hints** — During a debug session, lines with a pseudo-instruction (`la`, `li`, `move`, ...) show the machine instructions they expand to as inlay hints, e.g. `=> lui $a0, 0x1000; ori $a0, $a0, 0x0000`. Stepping is per machine instruction, so such a line takes several steps. The hints are hidden while the file has unsaved or post-launch edits, and can be turned off with `pluspim.inlayHints.pseudoInstructions` (VS Code's `editor.inlayHints.enabled` also applies).
-- **DAP trace** — Optional DAP communication logging to the *PlusPim DAP Trace* output channel.
+- **DAP trace** — Optional DAP communication logging to the _PlusPim DAP Trace_ output channel.
 
 ## Requirements
 
@@ -25,15 +25,15 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "pluspim",
-            "request": "launch",
-            "name": "Minimal Launch",
-            "program": "${file}"
-        }
-    ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "pluspim",
+			"request": "launch",
+			"name": "Minimal Launch",
+			"program": "${file}"
+		}
+	]
 }
 ```
 

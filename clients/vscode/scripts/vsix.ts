@@ -1,17 +1,10 @@
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { RIDS, parseTarget, releaseDir } from "../src/binaryLayout.js";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-
-const ridMap: Record<string, string> = {
-	"win32-x64": "win-x64",
-	"linux-x64": "linux-x64",
-	"darwin-x64": "osx-x64",
-	"darwin-arm64": "osx-arm64",
-};
+const root = join(import.meta.dirname, "..");
 
 function run(command: string, args: string[]): boolean {
 	console.log(`[vsix] ${command} ${args.join(" ")}`);
@@ -31,14 +24,17 @@ function run(command: string, args: string[]): boolean {
 const args = process.argv.slice(2);
 const publishOnly = args.includes("--publish-only");
 const positional = args.filter((a) => a !== "--publish-only");
-const target = positional[0];
-const rid = target === undefined ? undefined : ridMap[target];
-if (positional.length !== 1 || target === undefined || rid === undefined) {
+const target = parseTarget(positional[0] ?? "");
+if (positional.length !== 1 || target === undefined) {
 	console.error(
-		`Usage: bun scripts/vsix.ts [--publish-only] <${Object.keys(ridMap).join("|")}>`,
+		`Usage: bun scripts/vsix.ts [--publish-only] <${Object.keys(RIDS).join("|")}>`,
 	);
 	process.exit(1);
 }
+const rid = RIDS[target];
+
+// 以前のビルドの残骸を同梱しない
+rmSync(join(root, releaseDir(rid)), { recursive: true, force: true });
 
 const published = run("dotnet", [
 	"publish",
@@ -49,28 +45,24 @@ const published = run("dotnet", [
 	rid,
 	"--self-contained",
 	"-o",
-	`./bin/${rid}`,
+	`./${releaseDir(rid)}`,
 	"-p:DebugType=none",
 	"-p:DebugSymbols=false",
 ]);
 
 if (published && !publishOnly) {
-	const otherRids = Object.values(ridMap).filter((r) => r !== rid);
+	// vsceの否定パターンは他の除外より優先されるので，対象ディレクトリはpublish前に空にしてある
 	const ignore =
 		readFileSync(join(root, ".vscodeignore"), "utf8").trimEnd() +
-		"\n" +
-		"# Other platforms' binaries\n" +
-		otherRids.map((r) => `bin/${r}/**\n`).join("");
+		`\n!${releaseDir(rid)}/**\n`;
 
 	const tempDir = mkdtempSync(join(tmpdir(), "pluspim-vsix-"));
 	try {
 		const ignoreFile = join(tempDir, ".vscodeignore");
 		writeFileSync(ignoreFile, ignore);
-		console.log(
-			`[vsix] packaging ${target} (excluded: ${otherRids.map((r) => `bin/${r}`).join(", ")})`,
-		);
+		console.log(`[vsix] packaging ${target} (included: ${releaseDir(rid)})`);
 
-		run(process.execPath, ["run", "compile"]) &&
+		if (run(process.execPath, ["run", "compile"])) {
 			run(process.execPath, [
 				"x",
 				"--no-install",
@@ -84,6 +76,7 @@ if (published && !publishOnly) {
 				"--ignoreFile",
 				ignoreFile,
 			]);
+		}
 	} finally {
 		rmSync(tempDir, { recursive: true, force: true });
 	}

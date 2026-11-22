@@ -1,16 +1,17 @@
-// DAP の基本プロトコル (Content-Length 付きの JSON) の符号化と復号．vscode には依存しない
+// DAP基本プロトコルの符号化と復号
+// vscodeに依存しないものとする
 
-/** ヘッダ部の上限．これを超えて区切りが現れなければ壊れた入力とみなす */
+/** ヘッダ部の上限 */
 const MAX_HEADER_BYTES = 1024;
 /** 本文の上限 */
 const MAX_BODY_BYTES = 64 * 1024 * 1024;
 
 const HEADER_END = Buffer.from("\r\n\r\n", "ascii");
 
-/** 入力が DAP の形式に従っていないときに投げる */
+/** 入力がDAPの形式に従っていない場合のエラー */
 export class DapFramingError extends Error {}
 
-/** メッセージを Content-Length 付きのバイト列にする．長さは UTF-8 のバイト数で数える */
+/** メッセージをContent-Length付きのバイト列にする．長さはUTF-8のバイト数で数える */
 export function encodeDapMessage(message: unknown): Buffer {
 	const body = Buffer.from(JSON.stringify(message), "utf8");
 	const header = Buffer.from(`Content-Length: ${body.length}\r\n\r\n`, "ascii");
@@ -18,8 +19,8 @@ export function encodeDapMessage(message: unknown): Buffer {
 }
 
 /**
- * ストリームから来たバイト列を DAP のメッセージに切り出す．
- * チャンクの区切りはメッセージの区切りと一致しないので，足りない分は次の push まで貯める
+ * ストリームから来たバイト列をDAPのメッセージに切り出す．
+ * チャンクの区切りはメッセージの区切りと一致しないので，足りない分は次のpushまで貯める
  */
 export class DapMessageDecoder {
 	private buffer: Buffer = Buffer.alloc(0);
@@ -69,12 +70,12 @@ export class DapMessageDecoder {
 
 function parseContentLength(header: string): number {
 	for (const line of header.split("\r\n")) {
-		const match = /^content-length:\s*(.*?)\s*$/i.exec(line);
+		const match = /^content-length:\s*(.*?)\s*$/iu.exec(line);
 		if (match === null) {
 			continue;
 		}
 		const value = match[1] ?? "";
-		if (!/^\d+$/.test(value)) {
+		if (!/^\d+$/u.test(value)) {
 			throw new DapFramingError(`Invalid Content-Length: ${value}`);
 		}
 		const length = Number(value);
