@@ -42,7 +42,7 @@ if (positional.length !== 1 || target === undefined || rid === undefined) {
 
 const published = run("dotnet", [
 	"publish",
-	"../../PlusPim/PlusPim.csproj",
+	"../../src/PlusPim/PlusPim.csproj",
 	"-c",
 	"Release",
 	"-r",

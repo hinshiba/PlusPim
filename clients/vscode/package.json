@@ -123,7 +123,7 @@
 		"dotnet:publish:linux": "bun scripts/vsix.ts --publish-only linux-x64",
 		"dotnet:publish:mac-x64": "bun scripts/vsix.ts --publish-only darwin-x64",
 		"dotnet:publish:mac-arm64": "bun scripts/vsix.ts --publish-only darwin-arm64",
-		"dotnet:debug:win": "dotnet publish ../../PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
+		"dotnet:debug:win": "dotnet publish ../../src/PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"lint": "biome lint .",
