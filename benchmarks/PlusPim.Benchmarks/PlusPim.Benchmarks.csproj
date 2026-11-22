@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,4 +11,9 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PlusPim.Usecase\PlusPim.Usecase.csproj" />
+  </ItemGroup>
+
 </Project>
