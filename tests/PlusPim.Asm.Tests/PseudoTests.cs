@@ -81,7 +81,7 @@ public class PseudoTests {
     }
 
     [Fact]
-    public void Move_CopiesWithoutOverflowTrap() {
+    public void Move_CopiesWithoutOverflowException() {
         AssemblyResult r = Assemble(Head + "move $t0, $t1");
         r.AssertCodes();
         Assert.Equal(1, Span(r).Count);

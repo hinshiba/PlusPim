@@ -62,7 +62,7 @@ public static class BinOpModel {
     }
 
     /// <summary>正確な結果が符号付き32bitに収まらなければ <see cref="ExcCode.Ov"/></summary>
-    public static Outcome Trap(long exact) {
+    public static Outcome Checked(long exact) {
         return exact is >= int.MinValue and <= int.MaxValue ? W(exact) : new Raised(ExcCode.Ov, Touched: false);
     }
 }

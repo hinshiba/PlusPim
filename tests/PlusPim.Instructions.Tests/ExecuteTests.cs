@@ -25,6 +25,11 @@ public class ExecuteTests {
         return (inst.Eval(src, dest).Value, dest is [uint d] ? d : null);
     }
 
+    /// <summary>命令表から <paramref name="mnemonic"/> の命令を作る</summary>
+    private static IExecute? Asm(string mnemonic, ReadOnlySpan<Operand> operands) {
+        return InstructionSet.ByMnemonic[mnemonic](operands);
+    }
+
     private static void AssertRegs(IExecute? inst, RegisterName[] src, RegisterName[] dest) {
         Assert.NotNull(inst);
         Assert.Equal(src, inst.Src.ToArray());
@@ -132,7 +137,7 @@ public class ExecuteTests {
     }
 
     [Fact]
-    public void Trap_RaisesWithoutTouchingRegisters() {
+    public void SyscallAndBreak_RaiseWithoutTouchingRegisters() {
         (IExecute? Inst, ExcCode Code)[] cases = [
             (Syscall.FromOperands([]), ExcCode.Sys),
             (Break.FromOperands([]), ExcCode.Bp),
@@ -177,17 +182,17 @@ public class ExecuteTests {
 
     [Fact]
     public void Cp0Move_ResolvesSupportedNumbersOnly() {
-        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)13]), [RName.Status, RName.Cause], [GprId.K0]);
-        AssertRegs(Mtc0.FromOperands([GprId.K0, (GprId)14]), [RName.Status, GprId.K0], [RName.Epc]);
-        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)8]), [RName.Status, RName.BadVAddr], [GprId.K0]);
-        AssertRegs(Mfc0.FromOperands([GprId.K0, (GprId)12]), [RName.Status, RName.Status], [GprId.K0]);
-        Assert.Null(Mfc0.FromOperands([GprId.K0, (GprId)9]));
-        Assert.Null(Mtc0.FromOperands([GprId.K0, (GprId)0]));
+        AssertRegs(Asm("mfc0", [GprId.K0, (GprId)13]), [RName.Status, RName.Cause], [GprId.K0]);
+        AssertRegs(Asm("mtc0", [GprId.K0, (GprId)14]), [RName.Status, GprId.K0], [RName.Epc]);
+        AssertRegs(Asm("mfc0", [GprId.K0, (GprId)8]), [RName.Status, RName.BadVAddr], [GprId.K0]);
+        AssertRegs(Asm("mfc0", [GprId.K0, (GprId)12]), [RName.Status, RName.Status], [GprId.K0]);
+        Assert.Null(Asm("mfc0", [GprId.K0, (GprId)9]));
+        Assert.Null(Asm("mtc0", [GprId.K0, (GprId)0]));
     }
 
     [Fact]
     public void Cp0Move_RaisesCpUOutsideKernel() {
-        foreach(IExecute? inst in new[] { Mfc0.FromOperands([GprId.K0, (GprId)13]), Mtc0.FromOperands([GprId.K0, (GprId)14]) }) {
+        foreach(IExecute? inst in new[] { Asm("mfc0", [GprId.K0, (GprId)13]), Asm("mtc0", [GprId.K0, (GprId)14]) }) {
             Assert.Equal((new Next(), (uint?)42u), Run(inst, Kernel, 42));
             Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(inst, User, 42));
         }
@@ -195,21 +200,21 @@ public class ExecuteTests {
 
     [Fact]
     public void Eret_ClearsOnlyExlAndReturnsToEpc() {
-        IExecute? eret = Eret.FromOperands([]);
-        AssertRegs(eret, [RName.Status, RName.Epc], [RName.Status]);
-        Assert.Equal((new ExceptionReturn(Target), (uint?)User), Run(eret, Kernel, Target.Addr));
-        Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(eret, User, Target.Addr));
+        IExecute? eret = Asm("eret", []);
+        AssertRegs(eret, [RName.Status, RName.Status, RName.Epc], [RName.Status]);
+        Assert.Equal((new ExceptionReturn(Target), (uint?)User), Run(eret, Kernel, Kernel, Target.Addr));
+        Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(eret, User, User, Target.Addr));
     }
 
     [Fact]
     public void RuntimeCall_ReadsArgumentsAndWritesV0() {
-        AssertRegs(RuntimeCall.FromOperands([]), [RName.Status, GprId.V0, GprId.A0, GprId.A1], [GprId.V0]);
-        Assert.Null(RuntimeCall.FromOperands([GprId.V0]));
+        AssertRegs(Asm("runtime_call!", []), [RName.Status, GprId.V0, GprId.A0, GprId.A1], [GprId.V0]);
+        Assert.Null(Asm("runtime_call!", [GprId.V0]));
     }
 
     [Fact]
     public void RuntimeCall_RequestsKnownKindWithRawArguments() {
-        IExecute? inst = RuntimeCall.FromOperands([]);
+        IExecute? inst = Asm("runtime_call!", []);
         foreach(RuntimeRequestKind kind in Enum.GetValues<RuntimeRequestKind>()) {
             Assert.Equal((new RuntimeRequest(kind, 0x80000000, 0xffffffff), (uint?)(uint)kind), Run(inst, Kernel, (uint)kind, 0x80000000, 0xffffffff));
         }
@@ -222,13 +227,13 @@ public class ExecuteTests {
     [InlineData(0x101u)] // byte へ切り詰めると print_int になる
     [InlineData(0xffffffffu)]
     public void RuntimeCall_FailsOnUnknownKind(uint v0) {
-        Assert.Equal((new Fail(RuntimeErrorKind.UnknownRuntimeCall), (uint?)Sentinel), Run(RuntimeCall.FromOperands([]), Kernel, v0, 0, 0));
+        Assert.Equal((new RaiseRuntimeError(RuntimeErrorKind.UnknownRuntimeCall), (uint?)Sentinel), Run(Asm("runtime_call!", []), Kernel, v0, 0, 0));
     }
 
     [Theory]
     [InlineData(1u)]
     [InlineData(13u)]
     public void RuntimeCall_RaisesCpUOutsideKernelBeforeCheckingKind(uint v0) {
-        Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(RuntimeCall.FromOperands([]), User, v0, 0, 0));
+        Assert.Equal((new Raise(ExcCode.CpU), (uint?)Sentinel), Run(Asm("runtime_call!", []), User, v0, 0, 0));
     }
 }

@@ -16,7 +16,7 @@ public readonly record struct AddressError(Address BadVAddr, bool Store) {
 }
 
 /// <summary>ランタイムエラーを発生させる. レジスタへの書き込みを行っていないことを保証する.</summary>
-public readonly record struct Fail(RuntimeErrorKind Kind);
+public readonly record struct RaiseRuntimeError(RuntimeErrorKind Kind);
 
 /// <summary>PCを<paramref name="Target"/>にする.</summary>
 public readonly record struct Jump(Address Target);
@@ -104,7 +104,7 @@ public readonly struct Effect: IUnion {
         Next,
         Raise,
         AddressError,
-        Fail,
+        RaiseRuntimeError,
         Jump,
         Call,
         ExceptionReturn,
@@ -128,7 +128,7 @@ public readonly struct Effect: IUnion {
     public Effect(Next _) { }
     public Effect(Raise r) : this(Kind.Raise, (byte)r.Code, default) { }
     public Effect(AddressError e) : this(Kind.AddressError, (byte)e.Code, e.BadVAddr) { }
-    public Effect(Fail f) : this(Kind.Fail, (byte)f.Kind, default) { }
+    public Effect(RaiseRuntimeError f) : this(Kind.RaiseRuntimeError, (byte)f.Kind, default) { }
     public Effect(Jump j) : this(Kind.Jump, 0, j.Target) { }
     public Effect(Call c) : this(Kind.Call, 0, c.Target) { }
     public Effect(ExceptionReturn e) : this(Kind.ExceptionReturn, 0, e.Target) { }
@@ -138,7 +138,7 @@ public readonly struct Effect: IUnion {
 
     private Raise AsRaise => new((ExcCode)this._small);
     private AddressError AsAddressError => new(this._addr, (ExcCode)this._small == ExcCode.AdES);
-    private Fail AsFail => new((RuntimeErrorKind)this._small);
+    private RaiseRuntimeError AsRaiseRuntimeError => new((RuntimeErrorKind)this._small);
     private Jump AsJump => new(this._addr);
     private Call AsCall => new(this._addr);
     private ExceptionReturn AsExceptionReturn => new(this._addr);
@@ -150,7 +150,7 @@ public readonly struct Effect: IUnion {
     public bool TryGetValue(out Next v) { v = default; return this._kind == Kind.Next; }
     public bool TryGetValue(out Raise v) { v = this.AsRaise; return this._kind == Kind.Raise; }
     public bool TryGetValue(out AddressError v) { v = this.AsAddressError; return this._kind == Kind.AddressError; }
-    public bool TryGetValue(out Fail v) { v = this.AsFail; return this._kind == Kind.Fail; }
+    public bool TryGetValue(out RaiseRuntimeError v) { v = this.AsRaiseRuntimeError; return this._kind == Kind.RaiseRuntimeError; }
     public bool TryGetValue(out Jump v) { v = this.AsJump; return this._kind == Kind.Jump; }
     public bool TryGetValue(out Call v) { v = this.AsCall; return this._kind == Kind.Call; }
     public bool TryGetValue(out ExceptionReturn v) { v = this.AsExceptionReturn; return this._kind == Kind.ExceptionReturn; }
@@ -162,7 +162,7 @@ public readonly struct Effect: IUnion {
         Kind.Next => new Next(),
         Kind.Raise => this.AsRaise,
         Kind.AddressError => this.AsAddressError,
-        Kind.Fail => this.AsFail,
+        Kind.RaiseRuntimeError => this.AsRaiseRuntimeError,
         Kind.Jump => this.AsJump,
         Kind.Call => this.AsCall,
         Kind.ExceptionReturn => this.AsExceptionReturn,

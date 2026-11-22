@@ -23,7 +23,7 @@ public class ImmBinOpsTests {
     private static readonly IReadOnlySet<ushort> Shamts = ShiftAmounts.Immediate.Select(v => (ushort)v).Union<ushort>([32, 0xffff]).ToFrozenSet();
 
     private static readonly Dictionary<string, Spec> Specs = new() {
-        ["addi"] = new(Addi.Kind, Addi.Apply, Signed32.All, Signed16.All, (a, i) => Trap(S(a) + S(i))),
+        ["addi"] = new(Addi.Kind, Addi.Apply, Signed32.All, Signed16.All, (a, i) => Checked(S(a) + S(i))),
         ["addiu"] = new(Addiu.Kind, Addiu.Apply, Signed32.All, Signed16.All, (a, i) => W(a + S(i))),
         ["andi"] = new(Andi.Kind, Andi.Apply, BitPatterns.All, Unsigned16.All, (a, i) => W(a & i)),
         ["ori"] = new(Ori.Kind, Ori.Apply, BitPatterns.All, Unsigned16.All, (a, i) => W(a | i)),

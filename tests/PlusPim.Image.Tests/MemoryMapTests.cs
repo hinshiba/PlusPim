@@ -4,22 +4,29 @@ namespace PlusPim.Image.Tests;
 
 public class MemoryMapTests {
     [Theory]
-    [InlineData(0x003FFFFFu, null)]
-    [InlineData(0x00400000u, SegmentKind.Text)]
-    [InlineData(0x0FFFFFFFu, SegmentKind.Text)]
-    [InlineData(0x10000000u, SegmentKind.Data)]
-    [InlineData(0x7FFFFFFFu, SegmentKind.Data)]
-    [InlineData(0x80000000u, SegmentKind.KText)]
-    [InlineData(0x8FFFFFFFu, SegmentKind.KText)]
-    [InlineData(0x90000000u, null)]
-    public void KindOf_FollowsBoundaries(uint addr, SegmentKind? kind) {
-        Assert.Equal(kind, MemoryMap.KindOf(new Address(addr)));
+    [InlineData(SegmentKind.Text, 0x003FFFFFu, false)]
+    [InlineData(SegmentKind.Text, 0x00400000u, true)]
+    [InlineData(SegmentKind.Text, 0x0FFFFFFFu, true)]
+    [InlineData(SegmentKind.Data, 0x10000000u, true)]
+    [InlineData(SegmentKind.Data, 0x7FFFFFFFu, true)]
+    [InlineData(SegmentKind.Data, 0x80000000u, false)]
+    [InlineData(SegmentKind.KText, 0x80000000u, true)]
+    [InlineData(SegmentKind.KText, 0x8FFFFFFFu, true)]
+    [InlineData(SegmentKind.KText, 0x90000000u, false)]
+    public void Contains_FollowsBoundaries(SegmentKind kind, uint addr, bool inside) {
+        Assert.Equal(inside, MemoryMap.Of(kind).Contains(new Address(addr), 1));
     }
 
     [Fact]
     public void Of_ReturnsSegmentContainingItsBase() {
         foreach(SegmentKind kind in Enum.GetValues<SegmentKind>()) {
-            Assert.Equal(kind, MemoryMap.KindOf(MemoryMap.Of(kind).Base));
+            Segment s = MemoryMap.Of(kind);
+            Assert.True(s.Contains(s.Base, 1));
         }
+    }
+
+    [Fact]
+    public void ExceptionVector_IsInKText() {
+        Assert.True(MemoryMap.KText.Contains(MemoryMap.ExceptionVector, 4));
     }
 }

@@ -21,9 +21,9 @@ public class RBinOpsTests {
     internal static readonly IReadOnlySet<uint> ShiftSources = BitPatterns.All.Union(Signed32.All).ToFrozenSet();
 
     private static readonly Dictionary<string, Spec> Specs = new() {
-        ["add"] = new(Add.Apply, Signed32.All, Signed32.All, (a, b) => Trap(S(a) + S(b))),
+        ["add"] = new(Add.Apply, Signed32.All, Signed32.All, (a, b) => Checked(S(a) + S(b))),
         ["addu"] = new(Addu.Apply, Unsigned32.All, Unsigned32.All, (a, b) => W((long)a + b)),
-        ["sub"] = new(Sub.Apply, Signed32.All, Signed32.All, (a, b) => Trap(S(a) - S(b))),
+        ["sub"] = new(Sub.Apply, Signed32.All, Signed32.All, (a, b) => Checked(S(a) - S(b))),
         ["subu"] = new(Subu.Apply, Unsigned32.All, Unsigned32.All, (a, b) => W((long)a - b)),
         ["and"] = new(And.Apply, BitPatterns.All, BitPatterns.All, (a, b) => W(a & b)),
         ["or"] = new(Or.Apply, BitPatterns.All, BitPatterns.All, (a, b) => W(a | b)),

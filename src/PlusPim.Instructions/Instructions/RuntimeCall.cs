@@ -22,7 +22,7 @@ internal sealed class RuntimeCall: IAssemblerable, IExecute {
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
         // byteへの切り詰めで未知の番号が既知の機能にならないように検査する
         if(byte.MaxValue < src[0] || !Enum.IsDefined((RuntimeRequestKind)src[0])) {
-            return new Effect(new Fail(RuntimeErrorKind.UnknownRuntimeCall));
+            return new Effect(new RaiseRuntimeError(RuntimeErrorKind.UnknownRuntimeCall));
         }
         dest[0] = src[0];
         return new Effect(new RuntimeRequest((RuntimeRequestKind)src[0], src[1], src[2]));

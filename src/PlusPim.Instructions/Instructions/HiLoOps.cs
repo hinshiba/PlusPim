@@ -32,7 +32,7 @@ public readonly struct Div: IHiLoOp {
 
     public static Effect Apply(uint lhs, uint rhs, ref uint hi, ref uint lo) {
         if(rhs == 0) {
-            return new Effect(new Fail(RuntimeErrorKind.DivisionByZero));
+            return new Effect(new RaiseRuntimeError(RuntimeErrorKind.DivisionByZero));
         }
         // 0x80000000 / -1 はMIPSで定義されているが, C#ではOverflowExceptionになる
         if(lhs == 0x80000000 && rhs == 0xffffffff) {
@@ -52,7 +52,7 @@ public readonly struct Divu: IHiLoOp {
 
     public static Effect Apply(uint lhs, uint rhs, ref uint hi, ref uint lo) {
         if(rhs == 0) {
-            return new Effect(new Fail(RuntimeErrorKind.DivisionByZero));
+            return new Effect(new RaiseRuntimeError(RuntimeErrorKind.DivisionByZero));
         }
         (lo, hi) = Math.DivRem(lhs, rhs);
         return new Effect(new Next());

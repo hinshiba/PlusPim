@@ -28,6 +28,15 @@ public class SourceMapTests {
     }
 
     [Fact]
+    public void StartsLine_OnlyFirstInstructionOfEachLine() {
+        Assert.True(Map.StartsLine(T));
+        Assert.True(Map.StartsLine(T + 4u));
+        Assert.False(Map.StartsLine(T + 8u));
+        Assert.False(Map.StartsLine(T + 12u));
+        Assert.False(Map.StartsLine(T - 4u));
+    }
+
+    [Fact]
     public void AddressOf_ReturnsFirstInstructionOfLine() {
         Assert.Equal(T + 4u, Map.AddressOf(La.Location));
         Assert.Null(Map.AddressOf(new(A, 5)));

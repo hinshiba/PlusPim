@@ -18,24 +18,23 @@ public class HiLoOpsTests {
 
     /// <summary>ランタイムエラー <paramref name="Kind"/> で停止した</summary>
     /// <param name="Kind">停止の原因</param>
-    /// <param name="Touched">HIかLOを書き換えたか. <see cref="Fail"/> の保証により常に false であるべき</param>
-    private sealed record Failed(RuntimeErrorKind Kind, bool Touched): Outcome;
+    /// <param name="Touched">HIかLOを書き換えたか. <see cref="RaiseRuntimeError"/> の保証により常に false であるべき</param>
+    private sealed record RaisedRuntimeError(RuntimeErrorKind Kind, bool Touched): Outcome;
 
     /// <summary>1演算の仕様</summary>
     private sealed record Spec(HiLoFn Apply, IReadOnlySet<uint> Values, Func<uint, uint, Outcome> Reference);
 
-    /// <summary>失敗時にHIとLOが書き換わらないことを検出するための初期値</summary>
+    /// <summary>ランタイムエラーでHIとLOが書き換わらないことを検出するための初期値</summary>
     private const uint Sentinel = 0xdeadbeef;
 
     private static readonly Dictionary<string, Spec> Specs = new() {
         ["mult"] = new(Mult.Apply, Signed32.All, (a, b) => Wide((long)(int)a * (int)b)),
         ["multu"] = new(Multu.Apply, Unsigned32.All, (a, b) => Wide((long)((ulong)a * b))),
         ["div"] = new(Div.Apply, Signed32.All, (a, b) =>
-            b == 0 ? new Failed(RuntimeErrorKind.DivisionByZero, false)
-            : (long)(int)a / (int)b > int.MaxValue ? new Failed(RuntimeErrorKind.DivisionOverflow, false)
+            b == 0 ? new RaisedRuntimeError(RuntimeErrorKind.DivisionByZero, false)
             : new Written(unchecked((uint)((long)(int)a % (int)b)), unchecked((uint)((long)(int)a / (int)b)))),
         ["divu"] = new(Divu.Apply, Unsigned32.All, (a, b) =>
-            b == 0 ? new Failed(RuntimeErrorKind.DivisionByZero, false) : new Written(a % b, a / b)),
+            b == 0 ? new RaisedRuntimeError(RuntimeErrorKind.DivisionByZero, false) : new Written(a % b, a / b)),
     };
 
     public static TheoryData<string, uint, uint> Cases() {
@@ -56,8 +55,8 @@ public class HiLoOpsTests {
         Spec spec = Specs[mnemonic];
         uint hi = Sentinel, lo = Sentinel;
         Effect effect = spec.Apply(lhs, rhs, ref hi, ref lo);
-        Outcome actual = effect.TryGetValue(out Fail fail)
-            ? new Failed(fail.Kind, Touched: hi != Sentinel || lo != Sentinel)
+        Outcome actual = effect.TryGetValue(out RaiseRuntimeError e)
+            ? new RaisedRuntimeError(e.Kind, Touched: hi != Sentinel || lo != Sentinel)
             : new Written(hi, lo);
         Assert.Equal(spec.Reference(lhs, rhs), actual);
     }

@@ -20,7 +20,7 @@ internal static class Executor {
         switch(s.Status) {
             case Running:
                 break;
-            case Trapped t:
+            case ExceptionRaised t:
                 s.Push(new Frame(MemoryMap.ExceptionVector, t.Epc, s.Registers, t.Code));
                 s.Registers.Pc = MemoryMap.ExceptionVector;
                 s.Status = new Running();
@@ -59,8 +59,8 @@ internal static class Executor {
             case AddressError e:
                 Raise(s, e.Code, e.BadVAddr);
                 return StepResult.Stepped;
-            case Fail f:
-                s.Status = new Faulted(f.Kind, pc);
+            case RaiseRuntimeError f:
+                s.Status = new RuntimeErrorRaised(f.Kind, pc);
                 return StepResult.Stepped;
             case Jump j:
                 next = j.Target;
@@ -102,7 +102,7 @@ internal static class Executor {
         ref Registers regs = ref s.Registers;
         Address pc = regs.Pc;
         if(Cp0.IsKernel(regs[RName.Status])) {
-            s.Status = new DoubleFaulted(code, pc);
+            s.Status = new RuntimeErrorRaised(new DoubleException(code), pc);
             return;
         }
         regs[RName.Epc] = pc.Addr;
@@ -111,7 +111,7 @@ internal static class Executor {
         if(badVAddr is Address bad) {
             regs[RName.BadVAddr] = bad.Addr;
         }
-        s.Status = new Trapped(code, pc);
+        s.Status = new ExceptionRaised(code, pc);
     }
 
     /// <summary>
