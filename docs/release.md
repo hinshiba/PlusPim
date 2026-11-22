@@ -62,6 +62,8 @@ curl -fsSL https://github.com/hinshiba/PlusPim/releases/latest/download/install.
 
 winget のマニフェスト等のため Windows 向けはzipとします．
 
+musl 向けの実行ファイルは `libstdc++` と `libgcc` を動的リンクするため，Alpine では `apk add libstdc++ libgcc` が必要です．
+
 ### アーカイブの構成
 
 アーカイブはトップレベルのディレクトリを持たず，次のファイルを直接含みます．

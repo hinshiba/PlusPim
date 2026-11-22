@@ -75,7 +75,8 @@ jobs:
           # 2回目は上書きによる更新を確かめる
           script='for i in 1 2; do $FETCH "$URL" | sh; done; "$HOME/.local/bin/pluspim" --version'
           if [ "$IN_ALPINE" = true ]; then
-            actual="$(docker run --rm -e URL -e PLUSPIM_VERSION -e FETCH='wget -qO-' "$ALPINE_IMAGE" sh -c "$script")"
+            actual="$(docker run --rm -e URL -e PLUSPIM_VERSION -e FETCH='wget -qO-' "$ALPINE_IMAGE" \
+              sh -c "apk add --no-cache -q libstdc++ libgcc && $script")"
           else
             actual="$(FETCH='curl -fsSL' sh -c "$script")"
           fi

@@ -133,7 +133,9 @@ jobs:
             *) tar -xzf "$name" -C x ;;
           esac
           if [ "$IN_ALPINE" = true ]; then
-            actual="$(docker run --rm -v "$PWD/x:/x:ro" "$ALPINE_IMAGE" /x/pluspim --version)"
+            # singlefilehost が動的リンクする依存を入れ，利用者と同じ前提で確かめる
+            actual="$(docker run --rm -v "$PWD/x:/x:ro" "$ALPINE_IMAGE" \
+              sh -c 'apk add --no-cache -q libstdc++ libgcc && /x/pluspim --version')"
           else
             actual="$("$exe" --version | tr -d '\r')"
           fi

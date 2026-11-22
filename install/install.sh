@@ -138,8 +138,12 @@ main() {
     mv -f "$staged" "$dir/pluspim"
     staged=""
 
-    "$dir/pluspim" --version > /dev/null 2>&1 ||
-        die "$dir/pluspim does not run; set PLUSPIM_TARGET if '$target' is wrong"
+    if ! "$dir/pluspim" --version > /dev/null 2>&1; then
+        case "$target" in
+            linux-musl-*) die "$dir/pluspim does not run; install libstdc++ and libgcc (e.g. 'apk add libstdc++ libgcc')" ;;
+            *) die "$dir/pluspim does not run; set PLUSPIM_TARGET if '$target' is wrong" ;;
+        esac
+    fi
     say "installed $("$dir/pluspim" --version) to $dir/pluspim"
 
     case ":$PATH:" in
