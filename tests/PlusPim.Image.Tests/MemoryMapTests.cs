@@ -17,6 +17,19 @@ public class MemoryMapTests {
         Assert.Equal(inside, MemoryMap.Of(kind).Contains(new Address(addr), 1));
     }
 
+    [Theory]
+    [InlineData(0x003FFFFFu, false)]
+    [InlineData(0x00400000u, true)]
+    [InlineData(0x0FFFFFFFu, true)]
+    [InlineData(0x10000000u, false)]
+    [InlineData(0x7FFFFFFFu, false)]
+    [InlineData(0x80000000u, true)]
+    [InlineData(0x8FFFFFFFu, true)]
+    [InlineData(0x90000000u, false)]
+    public void IsText_CoversTextAndKText(uint addr, bool text) {
+        Assert.Equal(text, MemoryMap.IsText(new Address(addr)));
+    }
+
     [Fact]
     public void Of_ReturnsSegmentContainingItsBase() {
         foreach(SegmentKind kind in Enum.GetValues<SegmentKind>()) {

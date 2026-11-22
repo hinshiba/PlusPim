@@ -32,7 +32,12 @@ internal static class Executor {
         ref Registers regs = ref s.Registers;
         Address pc = regs.Pc;
         bool kernel = Cp0.IsKernel(regs[RName.Status]);
-        if((kernel || !MemoryMap.KText.Contains(pc, 4) ? image.Fetch(pc) : null) is not IExecute inst) {
+        bool fetchable = kernel || !MemoryMap.KText.Contains(pc, 4);
+        if((fetchable ? image.Fetch(pc) : null) is not IExecute inst) {
+            // セグメント内の整列した番地はMIPSでは実行できるが, PlusPimは命令しか実行できない
+            if(fetchable && pc % 4 == 0 && (MemoryMap.IsText(pc) || MemoryMap.Data.Contains(pc, 4))) {
+                return Fail(s, RuntimeErrorKind.NonInstructionExecution, pc);
+            }
             Raise(s, ExcCode.AdEL, pc);
             return StepResult.Stepped;
         }
@@ -60,8 +65,11 @@ internal static class Executor {
                 Raise(s, e.Code, e.BadVAddr);
                 return StepResult.Stepped;
             case RaiseRuntimeError f:
-                s.Status = new RuntimeErrorRaised(f.Kind, pc);
-                return StepResult.Stepped;
+                return Fail(s, f.Kind, pc);
+            // テキストの命令はメモリに置かないので, 読み書きすると実行される命令と食い違う
+            case Load l when MemoryMap.IsText(l.Addr):
+            case Store st when MemoryMap.IsText(st.Addr):
+                return Fail(s, RuntimeErrorKind.TextAccess, pc);
             case Jump j:
                 next = j.Target;
                 if(j.Target == Loader.Sentinel) {
@@ -88,6 +96,9 @@ internal static class Executor {
                 if(!RuntimeCalls.TryRun(s, rq, dest, input, output)) {
                     return StepResult.NeedInput;
                 }
+                if(s.Status is RuntimeErrorRaised) {
+                    return StepResult.Stepped;
+                }
                 break;
         }
 
@@ -95,6 +106,11 @@ internal static class Executor {
             regs[destNames[i]] = dest[i];
         }
         regs.Pc = next;
+        return StepResult.Stepped;
+    }
+
+    private static StepResult Fail(State s, RuntimeErrorKind kind, Address pc) {
+        s.Status = new RuntimeErrorRaised(kind, pc);
         return StepResult.Stepped;
     }
 

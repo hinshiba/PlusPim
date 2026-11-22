@@ -1,3 +1,4 @@
+using PlusPim.Image;
 using PlusPim.Instructions;
 using System.Buffers;
 using System.Globalization;
@@ -19,7 +20,10 @@ internal static class RuntimeCalls {
     /// <param name="dest">Dest[0] は <c>$v0</c>. read_int と read_char の結果を書く</param>
     /// <param name="input">デバッギへの入力</param>
     /// <param name="output">デバッギの出力の書き込み先</param>
-    /// <returns>入力が足りなければ状態を変えずに <see langword="false"/></returns>
+    /// <returns>
+    /// 入力が足りなければ状態を変えずに <see langword="false"/>.
+    /// テキストのメモリに触れる場合はランタイムエラー.
+    /// </returns>
     public static bool TryRun(State s, RuntimeRequest rq, Span<uint> dest, InputTape input, IBufferWriter<byte> output) {
         ReadOnlySpan<byte> pending = input.From(s.InputCursor);
         ReadOnlySpan<byte> line;
@@ -30,10 +34,19 @@ internal static class RuntimeCalls {
                 break;
 
             case RuntimeRequestKind.PrintString:
-                for(Address a = new(rq.A0); s.Memory.Read(a) is byte b and not 0; a++) {
-                    output.GetSpan(1)[0] = b;
-                    output.Advance(1);
+                // 出力は戻せないので, NULまでを検査してから出力する
+                Address start = new(rq.A0);
+                Address end = start;
+                while(!MemoryMap.IsText(end) && s.Memory.Read(end) is not 0) {
+                    end++;
                 }
+                if(MemoryMap.IsText(end)) {
+                    FailTextAccess(s);
+                    return true;
+                }
+                int length = (int)(end - start);
+                s.Memory.Read(start, output.GetSpan(length)[..length]);
+                output.Advance(length);
                 break;
 
             case RuntimeRequestKind.PrintChar:
@@ -72,6 +85,12 @@ internal static class RuntimeCalls {
                 // 最大 $a1 - 1 バイトとNULを読み込む.
                 int written = (int)Math.Min((uint)line.Length, rq.A1 - 1);
                 Address at = new(rq.A0);
+                for(uint i = 0; i <= (uint)written; i++) {
+                    if(MemoryMap.IsText(at + i)) {
+                        FailTextAccess(s);
+                        return true;
+                    }
+                }
                 for(int i = 0; i < written; i++) {
                     s.Memory.Write(at + (uint)i, line[i]);
                 }
@@ -84,6 +103,10 @@ internal static class RuntimeCalls {
                 break;
         }
         return true;
+    }
+
+    private static void FailTextAccess(State s) {
+        s.Status = new RuntimeErrorRaised(RuntimeErrorKind.TextAccess, s.Registers.Pc);
     }
 
     /// <summary>

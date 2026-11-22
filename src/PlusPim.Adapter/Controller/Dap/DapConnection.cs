@@ -20,8 +20,8 @@ internal abstract record Input {
     /// <summary>クライアントからの要求</summary>
     internal sealed record Received(Request Request): Input;
 
-    /// <summary>実行の操作が終わった. 完了したタスクを持つ</summary>
-    internal sealed record Executed(Task<Stop> Run): Input;
+    /// <summary>実行の操作が終わった. 結果は状態の <see cref="Execution"/> が持つ</summary>
+    internal sealed record Executed: Input;
 
     /// <summary>クライアントへ転送するログ</summary>
     internal sealed record Log(OutputCategory Category, string Text): Input;
@@ -29,6 +29,14 @@ internal abstract record Input {
     /// <summary>接続が終わったか, 枠組みの違反があった</summary>
     internal sealed record Closed(string Reason): Input;
 }
+
+/// <summary>
+/// 実行の操作. 終わるまでセッションの検査も破棄もできない
+/// </summary>
+/// <param name="Session">実行しているセッション</param>
+/// <param name="Run">実行の操作のタスク</param>
+/// <param name="Cancel">取り消すと <see cref="Paused"/> で止まる</param>
+internal sealed record Execution(Session Session, Task<Stop> Run, CancellationTokenSource Cancel);
 
 /// <summary>
 /// 接続の状態. 各状態は必要なデータだけを持つ
@@ -53,16 +61,19 @@ internal abstract record State {
     internal sealed record Terminated(Session Session): Loaded(Session);
 
     /// <summary>実行の操作の最中. セッションの検査は呼べない</summary>
-    /// <param name="Cancel">取り消すと <see cref="Paused"/> で止まる</param>
-    internal abstract record Executing(Session Session, CancellationTokenSource Cancel): Loaded(Session);
-    internal sealed record Running(Session Session, CancellationTokenSource Cancel): Executing(Session, Cancel);
+    internal abstract record Executing(Execution Execution): Loaded(Execution.Session);
+    internal sealed record Running(Execution Execution): Executing(Execution);
 
     /// <summary>ブレークポイントと例外フィルタを適用せずに実行している</summary>
-    internal sealed record RunningNoDebug(Session Session, CancellationTokenSource Cancel): Executing(Session, Cancel);
+    internal sealed record RunningNoDebug(Execution Execution): Executing(Execution);
 
     /// <summary>実行の操作の終わりを待って <c>disconnect</c> に応答する</summary>
-    internal sealed record Disconnecting(Seq Request, Session Session, CancellationToken Deadline): State;
-    internal sealed record Closed: State;
+    /// <param name="Deadline">取り消されると終わりを待たずに応答する</param>
+    internal sealed record Disconnecting(Seq Request, Execution Execution, CancellationTokenSource Deadline): State;
+
+    /// <summary>接続が閉じた. ループを抜ける</summary>
+    /// <param name="Pending">閉じた時点で終わっていない実行. 終わってからセッションを破棄する</param>
+    internal sealed record Closed(Execution? Pending): State;
 }
 
 /// <summary>
@@ -117,6 +128,11 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
         // 書き込みを待つ継続と受信タスクを解放する
         _ = this._inbox.Writer.TryComplete();
         await receiving.CancelAsync();
+        if(state is State.Closed { Pending: Execution p }) {
+            await ((Task)p.Run).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            p.Session.Dispose();
+            p.Cancel.Dispose();
+        }
     }
 
     private async ValueTask<Input> NextAsync(State state) {
@@ -124,7 +140,7 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
             return await this._inbox.Reader.ReadAsync();
         }
         try {
-            return await this._inbox.Reader.ReadAsync(d.Deadline);
+            return await this._inbox.Reader.ReadAsync(d.Deadline.Token);
         } catch(OperationCanceledException) {
             return new Input.Closed("The debuggee did not stop in time.");
         }
@@ -168,26 +184,35 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
                 await this.OutputAsync(log.Category, log.Text);
                 return state;
             case (State.Disconnecting d, Input.Executed or Input.Closed):
-                if(input is Input.Executed) {
-                    d.Session.Dispose();
-                }
                 await this._writer.RespondAsync(d.Request, Names.Commands.Name(Command.Disconnect), Empty.Value, DapJson.Default.Empty);
-                return new State.Closed();
+                return Close(state);
             case (_, Input.Closed):
                 return Close(state);
-            case (State.Executing x, Input.Executed { Run.IsCompletedSuccessfully: false } e):
-                await this.OutputAsync(OutputCategory.Stderr, MessageCatalog.InternalError(e.Run.Exception) + "\n");
-                return await this.TerminateAsync(x.Session);
-            case (State.Running x, Input.Executed e):
-                return await this.StopAsync(x.Session, e.Run.Result);
-            case (State.RunningNoDebug x, Input.Executed e):
-                // 状態を調べられないので, 止まった理由を出して終える
-                if(e.Run.Result is not Exited) {
-                    await this.OutputAsync(OutputCategory.Stderr, MessageCatalog.Describe(e.Run.Result) + "\n");
-                }
-                return await this.TerminateAsync(x.Session);
+            case (State.Executing x, Input.Executed):
+                // 送信の失敗で閉じるときに取り消せるよう, 次の状態へ移ってから解放する
+                State next = await this.FinishAsync(x);
+                x.Execution.Cancel.Dispose();
+                return next;
             default:
                 return state;
+        }
+    }
+
+    /// <summary>終わった実行の操作の結果を伝える</summary>
+    private async ValueTask<State> FinishAsync(State.Executing x) {
+        Task<Stop> run = x.Execution.Run;
+        switch(x, run) {
+            case (_, { IsCompletedSuccessfully: false }):
+                await this.OutputAsync(OutputCategory.Stderr, MessageCatalog.InternalError(run.Exception) + "\n");
+                return await this.TerminateAsync(x.Session);
+            case (State.Running, _):
+                return await this.StopAsync(x.Session, run.Result);
+            default:
+                // 状態を調べられないので, 止まった理由を出して終える
+                if(run.Result is not Exited) {
+                    await this.OutputAsync(OutputCategory.Stderr, MessageCatalog.Describe(run.Result) + "\n");
+                }
+                return await this.TerminateAsync(x.Session);
         }
     }
 
@@ -222,8 +247,14 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
                 ScopeView[] views = Mapping.Scopes(s.Frames[frame], frame == 0);
                 await this.RespondAsync(request, new ScopesBody([.. views.Select((v, i) => new Scope(v.Name, VariablesReference.Of(frame, i), false))]), DapJson.Default.ScopesBody);
                 return state;
-            case (State.Stopped s, Request.Variables variables):
-                await this.RespondAsync(request, new VariablesBody(Variables(s.Frames, variables.Reference)), DapJson.Default.VariablesBody);
+            case (State.Stopped, Request.Scopes scopes):
+                await this._writer.FailAsync(request.Seq, request.Command, MessageCatalog.UnknownFrame(scopes.Frame.Value));
+                return state;
+            case (State.Stopped s, Request.Variables variables) when Variables(s.Frames, variables.Reference) is Variable[] found:
+                await this.RespondAsync(request, new VariablesBody(found), DapJson.Default.VariablesBody);
+                return state;
+            case (State.Stopped, Request.Variables variables):
+                await this._writer.FailAsync(request.Seq, request.Command, $"Unknown variables reference {variables.Reference.Value}.");
                 return state;
             case (State.Stopped s, Request.ReadMemory memory):
                 await this.ReadMemoryAsync(s.Session, request, memory.Window);
@@ -231,17 +262,20 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
             case (State.Stopped { Exception: ExceptionText x }, Request.Simple { Kind: Command.ExceptionInfo }):
                 await this.RespondAsync(request, new ExceptionInfoBody(x.Id, x.Description, "always"), DapJson.Default.ExceptionInfoBody);
                 return state;
+            case (State.Stopped, Request.Simple { Kind: Command.ExceptionInfo }):
+                await this._writer.FailAsync(request.Seq, request.Command, MessageCatalog.NoException());
+                return state;
             case (State.Stopped, Request.Simple { Kind: Command.Pause }):
                 // 自然な停止と競合しても観測できないよう, 停止中のpauseは成功の無操作にする
                 await this.RespondAsync(request, Empty.Value, DapJson.Default.Empty);
                 return state;
             case (State.Running x, Request.Simple { Kind: Command.Pause }):
-                await x.Cancel.CancelAsync();
+                await x.Execution.Cancel.CancelAsync();
                 await this.RespondAsync(request, Empty.Value, DapJson.Default.Empty);
                 return state;
             case (State.Executing x, Request.Simple { Kind: Command.Disconnect }):
-                await x.Cancel.CancelAsync();
-                return new State.Disconnecting(request.Seq, x.Session, new CancellationTokenSource(DisconnectTimeout).Token);
+                await x.Execution.Cancel.CancelAsync();
+                return new State.Disconnecting(request.Seq, x.Execution, new CancellationTokenSource(DisconnectTimeout));
             case (not State.Disconnecting, Request.Simple { Kind: Command.Disconnect }):
                 await this.RespondAsync(request, Empty.Value, DapJson.Default.Empty);
                 return Close(state);
@@ -293,14 +327,15 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
     /// </summary>
     private State Start(Session s, Motion motion, bool noDebug) {
         CancellationTokenSource cancel = new();
-        _ = this.ForwardAsync(s.RunAsync(motion, cancel.Token));
-        return noDebug ? new State.RunningNoDebug(s, cancel) : new State.Running(s, cancel);
+        Execution e = new(s, s.RunAsync(motion, cancel.Token), cancel);
+        _ = this.ForwardAsync(e.Run);
+        return noDebug ? new State.RunningNoDebug(e) : new State.Running(e);
     }
 
     private async Task ForwardAsync(Task<Stop> run) {
-        // 失敗はループがInput.Executedから読む
+        // 失敗はループが状態の実行から読む
         await ((Task)run).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        _ = await this.TryWriteAsync(new Input.Executed(run));
+        _ = await this.TryWriteAsync(new Input.Executed());
     }
 
     private async ValueTask<State> StopAsync(Session s, Stop stop) {
@@ -317,17 +352,22 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
         return new State.Terminated(s);
     }
 
-    /// <summary>実行中なら取り消し, そうでなければセッションを閉じる</summary>
+    /// <summary>
+    /// 停止中ならセッションを閉じる. 実行中なら取り消し, 実行の終わりを待って閉じるよう <see cref="State.Closed"/> に引き継ぐ
+    /// </summary>
     private static State.Closed Close(State state) {
         switch(state) {
             case State.Executing x:
-                x.Cancel.Cancel();
-                break;
+                x.Execution.Cancel.Cancel();
+                return new State.Closed(x.Execution);
+            case State.Disconnecting d:
+                d.Deadline.Dispose();
+                return new State.Closed(d.Execution);
             case State.Loaded l:
                 l.Session.Dispose();
                 break;
         }
-        return new State.Closed();
+        return new State.Closed(null);
     }
 
     private async ValueTask ReadMemoryAsync(Session s, Request request, MemoryWindow window) {
@@ -363,12 +403,13 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
     }
 
     /// <summary>参照先のフレームのスコープを作り直して変数を返す</summary>
-    private static Variable[] Variables(ImmutableArray<Frame> frames, VariablesReference reference) {
+    /// <returns>参照先のフレームかスコープがなければ <see langword="null"/></returns>
+    private static Variable[]? Variables(ImmutableArray<Frame> frames, VariablesReference reference) {
         if(reference.Target is not (int frame, int scope) || frames.Length <= frame) {
-            return [];
+            return null;
         }
         ScopeView[] scopes = Mapping.Scopes(frames[frame], frame == 0);
-        return scope < scopes.Length ? scopes[scope].Variables : [];
+        return scope < scopes.Length ? scopes[scope].Variables : null;
     }
 
     private static PseudoExpansionsBody PseudoExpansions(ImmutableArray<PseudoExpansion> pseudos) {

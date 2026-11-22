@@ -8,4 +8,8 @@ public enum RuntimeErrorKind: byte {
     DivisionByZero,
     /// <summary><c>runtime_call!</c> で未知の機能番号</summary>
     UnknownRuntimeCall,
+    /// <summary>命令の無いセグメント内の番地を実行した. データを命令として解釈することに未対応</summary>
+    NonInstructionExecution,
+    /// <summary>テキストのメモリを読み書きした. 命令とメモリの同期に未対応</summary>
+    TextAccess,
 }

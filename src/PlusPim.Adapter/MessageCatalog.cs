@@ -106,6 +106,8 @@ public static class MessageCatalog {
         return k switch {
             RuntimeErrorKind.DivisionByZero => new(nameof(RuntimeErrorKind.DivisionByZero), "Division by zero"),
             RuntimeErrorKind.UnknownRuntimeCall => new(nameof(RuntimeErrorKind.UnknownRuntimeCall), "Unknown runtime call number"),
+            RuntimeErrorKind.NonInstructionExecution => new(nameof(RuntimeErrorKind.NonInstructionExecution), "Executing memory without an assembled instruction is not supported yet"),
+            RuntimeErrorKind.TextAccess => new(nameof(RuntimeErrorKind.TextAccess), "Loading from or storing to text memory is not supported yet"),
             _ => throw new ArgumentOutOfRangeException(nameof(k)),
         };
     }
@@ -116,6 +118,21 @@ public static class MessageCatalog {
     /// <param name="e">失敗の原因. 取り消されたなら <see langword="null"/></param>
     public static string InternalError(Exception? e) {
         return $"[PlusPim internal error] {e}";
+    }
+
+    /// <summary>
+    /// 停止中のフレーム表にないフレームを指した
+    /// </summary>
+    /// <param name="index">要求されたフレームの添字</param>
+    public static string UnknownFrame(int index) {
+        return $"Unknown frame {index}.";
+    }
+
+    /// <summary>
+    /// 例外でもランタイムエラーでもない停止で例外の情報を求められた
+    /// </summary>
+    public static string NoException() {
+        return "The debuggee did not stop on an exception.";
     }
 
     /// <summary>

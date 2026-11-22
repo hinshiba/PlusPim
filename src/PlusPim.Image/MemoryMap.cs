@@ -45,6 +45,14 @@ public static class MemoryMap {
     public static readonly Address ExceptionVector = new(0x80000180);
 
     /// <summary>
+    /// アドレスがテキスト領域に含まれるか
+    /// </summary>
+    /// <remarks>これらの命令はデコード済みで保持し, メモリに置かない</remarks>
+    public static bool IsText(Address addr) {
+        return Text.Contains(addr, 1) || KText.Contains(addr, 1);
+    }
+
+    /// <summary>
     /// <paramref name="kind"/> のセグメント
     /// </summary>
     public static Segment Of(SegmentKind kind) {
