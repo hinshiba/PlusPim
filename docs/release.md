@@ -74,7 +74,7 @@ winget のマニフェスト等のため Windows 向けはzipとします．
 次の設定で `dotnet publish` します．
 
 ```sh
-dotnet publish PlusPim/PlusPim.csproj -c Release -r <rid> --self-contained \
+dotnet publish src/PlusPim/PlusPim.csproj -c Release -r <rid> --self-contained \
   -p:PublishSingleFile=true \
   -p:PublishReadyToRun=true \
   -p:IncludeNativeLibrariesForSelfExtract=true \

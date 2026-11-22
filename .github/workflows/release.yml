@@ -35,7 +35,7 @@ jobs:
         id: version
         run: |
           version="${GITHUB_REF_NAME#v}"
-          project="$(dotnet msbuild PlusPim/PlusPim.csproj -getProperty:Version)"
+          project="$(dotnet msbuild src/PlusPim/PlusPim.csproj -getProperty:Version)"
           if [ "$version" != "$project" ]; then
             echo "::error::tag $GITHUB_REF_NAME does not match <Version>$project</Version>"
             exit 1
@@ -61,7 +61,7 @@ jobs:
           do
             IFS=: read -r target rid ext <<< "$spec"
             out="publish/$target"
-            dotnet publish PlusPim/PlusPim.csproj -c Release -r "$rid" --self-contained \
+            dotnet publish src/PlusPim/PlusPim.csproj -c Release -r "$rid" --self-contained \
               -p:PublishSingleFile=true \
               -p:PublishReadyToRun=true \
               -p:IncludeNativeLibrariesForSelfExtract=true \
@@ -107,7 +107,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: dist
           path: dist
