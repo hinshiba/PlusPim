@@ -18,7 +18,7 @@ internal sealed record ScopeView(string Name, Variable[] Variables);
 /// Usecaseの値からDAPの値への対応. どれも純粋な関数である
 /// </summary>
 internal static class Mapping {
-    private static readonly ExcCode[] Fatal = [ExcCode.AdEL, ExcCode.AdES, ExcCode.RI, ExcCode.CpU, ExcCode.Ov];
+    private static readonly ExcCode[] Fatal = [ExcCode.AdEL, ExcCode.AdES, ExcCode.RI, ExcCode.CpU, ExcCode.Ov, ExcCode.Tr];
 
     /// <summary><c>initialize</c> で見せる例外フィルタ</summary>
     public static ExceptionBreakpointsFilter[] Filters { get; } = [

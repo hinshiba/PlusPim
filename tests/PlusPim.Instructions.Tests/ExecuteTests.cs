@@ -64,6 +64,19 @@ public class ExecuteTests {
         }
     }
 
+    public static TheoryData<uint> Values() => [.. Signed32.All];
+
+    [Theory]
+    [MemberData(nameof(Values))]
+    public void BranchLink_AlwaysLinksAndCallsOnlyWhenTaken(uint rs) {
+        (string Mnemonic, bool Taken)[] cases = [("bgezal", 0 <= (int)rs), ("bltzal", (int)rs < 0)];
+        foreach((string m, bool taken) in cases) {
+            IExecute? inst = Asm(m, [GprId.T0, Target]);
+            AssertRegs(inst, [GprId.T0, RName.Pc], [GprId.Ra]);
+            Assert.Equal((taken ? new Call(Target) : (object)new Next(), (uint?)Pc + 4), Run(inst, rs, Pc));
+        }
+    }
+
     [Fact]
     public void Branch_DeclaresRegisters() {
         AssertRegs(BranchOp<Beq>.FromOperands([GprId.T0, GprId.T1, Target]), [GprId.T0, GprId.T1], []);
@@ -123,6 +136,56 @@ public class ExecuteTests {
             AssertRegs(inst, [GprId.T0, GprId.T1], []);
             Assert.Equal((addr.Addr & mask) != 0 ? new AddressError(addr, Store: true) : new Store(addr, kind, value), Run(inst, value, baseValue).Effect);
         }
+    }
+
+    [Theory]
+    [MemberData(nameof(Pairs))]
+    public void Trap_RaisesOnlyWhenTaken(uint rs, uint rt) {
+        foreach((string m, bool taken) in TrapCases(rs, rt, imm: false)) {
+            IExecute? inst = Asm(m, [GprId.T0, GprId.T1]);
+            AssertRegs(inst, [GprId.T0, GprId.T1], []);
+            Assert.Equal((taken ? new Raise(ExcCode.Tr) : (object)new Next(), (uint?)null), Run(inst, rs, rt));
+        }
+    }
+
+    public static TheoryData<uint, ushort> ImmPairs() {
+        TheoryData<uint, ushort> data = new();
+        foreach(uint a in Signed32.All) {
+            foreach(ushort b in Signed16.All) {
+                data.Add(a, b);
+            }
+        }
+        return data;
+    }
+
+    /// <summary>符号なしで比べる<c>tgeiu</c>, <c>tltiu</c>も即値を符号拡張する</summary>
+    [Theory]
+    [MemberData(nameof(ImmPairs))]
+    public void TrapImm_ComparesWithSignExtendedImmediate(uint rs, ushort imm) {
+        foreach((string m, bool taken) in TrapCases(rs, unchecked((uint)(short)imm), imm: true)) {
+            IExecute? inst = Asm(m, [GprId.T0, new Immediate(imm)]);
+            AssertRegs(inst, [GprId.T0], []);
+            Assert.Equal((taken ? new Raise(ExcCode.Tr) : (object)new Next(), (uint?)null), Run(inst, rs));
+        }
+    }
+
+    private static (string Mnemonic, bool Taken)[] TrapCases(uint rs, uint rt, bool imm) {
+        string i = imm ? "i" : "";
+        return [
+            ("teq" + i, rs == rt),
+            ("tne" + i, rs != rt),
+            ("tge" + i, (int)rt <= (int)rs),
+            ("tge" + i + "u", rt <= rs),
+            ("tlt" + i, (int)rs < (int)rt),
+            ("tlt" + i + "u", rs < rt),
+        ];
+    }
+
+    [Fact]
+    public void Trap_RejectsOtherForm() {
+        Assert.Null(Asm("teq", [GprId.T0, new Immediate(1)]));
+        Assert.Null(Asm("teqi", [GprId.T0, GprId.T1]));
+        Assert.Equal("tltiu $t0, -1", Asm("tltiu", [GprId.T0, new Immediate(0xffff)])?.Text);
     }
 
     public static TheoryData<ushort> Immediates() => [.. Unsigned16.All];

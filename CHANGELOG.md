@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- 命令`bgezal`, `bltzal`, `teq`, `tne`, `tge`, `tgeu`, `tlt`, `tltu`, `teqi`, `tnei`, `tgei`, `tgeiu`, `tlti`, `tltiu`と疑似命令`bal`, `abs`, `divi`, `ulw`, `ulh`, `ulhu`, `usw`, `ush`に対応
+
 ## [0.6.1] - 2026-11-22
 
 ### Fixed

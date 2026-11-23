@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\PlusPim.Asm\PlusPim.Asm.csproj" />
+    <ProjectReference Include="..\..\src\PlusPim.Dbg\PlusPim.Dbg.csproj" />
     <ProjectReference Include="..\PlusPim.TestValues\PlusPim.TestValues.csproj" />
   </ItemGroup>
 

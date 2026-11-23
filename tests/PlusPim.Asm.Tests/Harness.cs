@@ -1,5 +1,7 @@
+using PlusPim.Dbg;
 using PlusPim.Image;
 using PlusPim.Instructions;
+using System.Buffers;
 
 namespace PlusPim.Asm.Tests;
 
@@ -105,6 +107,21 @@ internal static class Harness {
             }
         }
         return gpr;
+    }
+
+    /// <summary>
+    /// エントリからランタイムで実行し, 命令のない番地に達した状態を返す
+    /// </summary>
+    /// <remarks>メモリ, PC, Hi/Loを読み書きする疑似命令の展開を確かめるためのもの</remarks>
+    public static StateView Exec(this AssemblyResult r) {
+        ProgramImage image = r.Prog().Image;
+        Debuggee d = Debuggee.Load(image, new ArrayBufferWriter<byte>());
+        for(int i = 0; image.Fetch(d.View.Pc) is not null; i++) {
+            Assert.True(i < 64, "Execution did not reach the end of the text.");
+            Assert.Equal(StepResult.Stepped, d.Step());
+            Assert.True(d.View.Status is Running, $"Stopped by {d.View.Status}.");
+        }
+        return d.View;
     }
 
     /// <summary><c>la $t0, label</c> を末尾に足して評価し, ラベルのアドレスを得る</summary>

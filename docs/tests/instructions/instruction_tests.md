@@ -87,12 +87,15 @@
 
 ### トラップ
 
-- [ ] `tge`
-- [ ] `tgeu`
-- [ ] `tlt`
-- [ ] `tltu`
-- [ ] `teq`
-- [ ] `tne`
+- `tge $rs $rt`
+- `tgeu $rs $rt`
+- `tlt $rs $rt`
+- `tltu $rs $rt`
+- `teq $rs $rt`
+- `tne $rs $rt`
+
+異常系: `Tr`
+条件が成立した場合．レジスタは変化しない
 
 ---
 
@@ -132,10 +135,13 @@
 - `bgtz $rs offset`
 - `blez $rs offset`
 - `bltz $rs offset`
-- [ ] `bgezal $rs offset`
-- [ ] `bltzal $rs offset`
+- `bgezal $rs offset`
+- `bltzal $rs offset`
 
 `beq`，`bne`は代表値をすべて用いない(バグ混入が低リスクより)
+
+`bgezal`，`bltzal`は成否によらず`$ra`に`PC + 4`を書く．成立時はサブルーチンの呼び出しとしてコールスタックに積む．
+[ジャンプの振る舞いモデル](jump_model.md)を追加で参照せよ．
 
 ### ロード
 
@@ -173,12 +179,17 @@
 
 ### トラップ (即値)
 
-- [ ] `tgei`
-- [ ] `tgeiu`
-- [ ] `tlti`
-- [ ] `tltiu`
-- [ ] `teqi`
-- [ ] `tnei`
+- `tgei $rs imm`
+- `tgeiu $rs imm`
+- `tlti $rs imm`
+- `tltiu $rs imm`
+- `teqi $rs imm`
+- `tnei $rs imm`
+
+即値は常に符号拡張する．`tgeiu`，`tltiu`は符号拡張した即値と符号なしで比べる
+
+異常系: `Tr`
+条件が成立した場合．レジスタは変化しない
 
 ---
 

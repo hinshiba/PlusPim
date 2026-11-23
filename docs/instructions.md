@@ -48,7 +48,7 @@
 #### ジャンプ (レジスタ)
 
 - [x] `jr`: Jump Register (PC = rs)
-- [x] `jalr`: Jump and Link Register (rd = PC+4, PC = rs. 遅延スロットなし. `jalr rs` は rd = `$ra`)
+- [x] `jalr`: Jump and Link Register (rd = PC+4, PC = rs. `jalr rs` は rd = `$ra`)
 
 #### システム
 
@@ -63,12 +63,12 @@
 
 #### トラップ
 
-- [-] `tge`: Trap if Greater or Equal (符号付き)
-- [-] `tgeu`: Trap if Greater or Equal Unsigned
-- [-] `tlt`: Trap if Less Than (符号付き)
-- [-] `tltu`: Trap if Less Than Unsigned
-- [-] `teq`: Trap if Equal
-- [-] `tne`: Trap if Not Equal
+- [x] `tge`: Trap if Greater or Equal (符号付き)
+- [x] `tgeu`: Trap if Greater or Equal Unsigned
+- [x] `tlt`: Trap if Less Than (符号付き)
+- [x] `tltu`: Trap if Less Than Unsigned
+- [x] `teq`: Trap if Equal
+- [x] `tne`: Trap if Not Equal
 
 ---
 
@@ -92,12 +92,12 @@
 
 - [x] `beq`: Branch on Equal (if rs == rt)
 - [x] `bne`: Branch on Not Equal (if rs != rt)
-- [x] `bgez`: Branch on Greater or Equal Zero (if rs >= 0, 符号付き比較, 遅延スロットなし)
-- [x] `bgtz`: Branch on Greater Than Zero (if rs > 0, 符号付き比較, 遅延スロットなし)
-- [x] `blez`: Branch on Less or Equal Zero (if rs <= 0, 符号付き比較, 遅延スロットなし)
-- [x] `bltz`: Branch on Less Than Zero (if rs < 0, 符号付き比較, 遅延スロットなし)
-- [ ] `bgezal`: Branch on >= Zero and Link
-- [ ] `bltzal`: Branch on < Zero and Link
+- [x] `bgez`: Branch on Greater or Equal Zero (if rs >= 0, 符号付き)
+- [x] `bgtz`: Branch on Greater Than Zero (if rs > 0, 符号付き)
+- [x] `blez`: Branch on Less or Equal Zero (if rs <= 0, 符号付き)
+- [x] `bltz`: Branch on Less Than Zero (if rs < 0, 符号付き)
+- [x] `bgezal`: Branch on >= Zero and Link (ra = PC+4, if rs >= 0. 不成立でもraを書く)
+- [x] `bltzal`: Branch on < Zero and Link (ra = PC+4, if rs < 0. 不成立でもraを書く)
 
 #### ロード
 
@@ -119,12 +119,12 @@
 
 #### トラップ
 
-- [-] `tgei`: Trap if Greater or Equal Immediate
-- [-] `tgeiu`: Trap if Greater or Equal Immediate Unsigned
-- [-] `tlti`: Trap if Less Than Immediate
-- [-] `tltiu`: Trap if Less Than Immediate Unsigned
-- [-] `teqi`: Trap if Equal Immediate
-- [-] `tnei`: Trap if Not Equal Immediate
+- [x] `tgei`: Trap if Greater or Equal Immediate
+- [x] `tgeiu`: Trap if Greater or Equal Immediate Unsigned
+- [x] `tlti`: Trap if Less Than Immediate
+- [x] `tltiu`: Trap if Less Than Immediate Unsigned
+- [x] `teqi`: Trap if Equal Immediate
+- [x] `tnei`: Trap if Not Equal Immediate
 
 ---
 
@@ -147,9 +147,9 @@
 
 - [x] `mul`: Multiply (rd = rs * rt) → `mult` + `mflo`
 - [-] `div`: (3オペランド) - Divide (rd = rs / rt)
-- [ ] `divi`: (3オペランド) - Divide (rd = rs / rt) → `div` + `mflo`
+- [x] `divi`: (3オペランド) - Divide (rd = rs / rt) → `div` + `mflo`
 - [x] `rem`: Remainder (rd = rs % rt) → `div` + `mfhi`
-- [ ] `abs`: Absolute Value
+- [x] `abs`: Absolute Value → `sra $at, rs, 31` + `xor rd, rs, $at` + `subu rd, rd, $at` (INT_MINはINT_MINのまま. 例外なし)
 - [x] `neg`: Negate (rd = -rs) → `sub rd, $zero, rs`
 - [x] `negu`: Negate Unsigned → `subu rd, $zero, rs`
 
@@ -160,7 +160,7 @@
 ### 分岐
 
 - [x] `b`: Branch Unconditional → `beq $zero, $zero, label`
-- [ ] `bal`: Branch and Link → `bgezal $zero, label`
+- [x] `bal`: Branch and Link → `bgezal $zero, label`
 - [x] `beqz`: Branch if Equal Zero → `beq rs, $zero, label`
 - [x] `bnez`: Branch if Not Equal Zero → `bne rs, $zero, label`
 - [x] `bge`: Branch if Greater or Equal (符号付き)
@@ -185,11 +185,13 @@
 
 ### ロード
 
-- [ ] `ulh`: Unaligned Load Halfword
-- [ ] `ulhu`: Unaligned Load Halfword Unsigned
-- [ ] `ulw`: Unaligned Load Word
-- [ ] `ush`: Unaligned Store Halfword
-- [ ] `usw`: Unaligned Store Word
+- [x] `ulh`: Unaligned Load Halfword → `lbu $at, off(base)` + `lb rt, off+1(base)` + `sll rt, rt, 8` + `or rt, rt, $at`
+- [x] `ulhu`: Unaligned Load Halfword Unsigned → `ulh`の`lb`を`lbu`にしたもの
+- [x] `ulw`: Unaligned Load Word → `lwl rt, off+3(base)` + `lwr rt, off(base)`. rtがbaseと同じなら`$at`に読んで`addu rt, $at, $zero`
+- [x] `ush`: Unaligned Store Halfword → `sb rt, off(base)` + `srl $at, rt, 8` + `sb $at, off+1(base)`
+- [x] `usw`: Unaligned Store Word → `swl rt, off+3(base)` + `swr rt, off(base)`
+
+`ulh`，`ulhu`，`ulw`，`ush`，`usw`のオフセットは，展開で足す値を含めて符号付き16bitに収まらなければならない．
 
 ### その他
 

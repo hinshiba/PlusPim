@@ -88,6 +88,7 @@ public static class MessageCatalog {
             ExcCode.RI => new(nameof(ExcCode.RI), "Reserved instruction"),
             ExcCode.CpU => new(nameof(ExcCode.CpU), "Coprocessor unusable"),
             ExcCode.Ov => new(nameof(ExcCode.Ov), "Arithmetic overflow"),
+            ExcCode.Tr => new(nameof(ExcCode.Tr), "Trap"),
             _ => throw new ArgumentOutOfRangeException(nameof(c)),
         };
     }
