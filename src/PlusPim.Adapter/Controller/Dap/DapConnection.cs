@@ -81,8 +81,8 @@ internal abstract record State {
 /// </summary>
 /// <remarks>状態はループの中だけで読み書きし, 送信もループだけが行うのでロックは要らない</remarks>
 /// <param name="stream">DAPの接続</param>
-/// <param name="load"><c>launch</c> でプログラムを読み込む. <c>launch</c> の <c>program</c> は使わない</param>
-public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
+/// <param name="load"><c>launch</c> の <c>program</c> を読み込む</param>
+public sealed class DapConnection(Stream stream, Func<ImmutableArray<SourcePath>, LoadResult> load) {
     private const int InboxCapacity = 64;
     private const int MaxFrames = 1000;
     private static readonly TimeSpan DisconnectTimeout = TimeSpan.FromSeconds(1);
@@ -316,7 +316,7 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
     }
 
     private async ValueTask<State> LaunchAsync(State state, Request.Launch launch) {
-        LoadResult r = load();
+        LoadResult r = load(launch.Program);
         string diagnostics = string.Concat(r.Diagnostics.Select(d => MessageCatalog.Format(d) + "\n"));
         if(r.Session is not Session session) {
             // 読み込みの失敗には必ず診断が伴う

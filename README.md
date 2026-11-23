@@ -96,14 +96,23 @@ DAP の通信には標準入出力ではなく TCP を使います．プログ�
     クライアントが接続しに来る場合は `debug listen` を使います．ポートに 0 を指定すると空きポートが割り当てられ，実際のアドレスが標準エラー出力に通知されます．
 
     ```sh
-    pluspim debug listen 127.0.0.1:0 main.asm sub.asm
+    pluspim debug listen 127.0.0.1:0
     # 標準エラー出力: DAP server listening at: 127.0.0.1:<実ポート>
     ```
 
     クライアントが先に待ち受ける場合は `debug connect 127.0.0.1:<ポート>` を使います．
 
 3. **クライアントから接続する**:
-    通知されたアドレスへ接続し，`launch` 要求を送ります．アセンブリファイルはコマンドライン引数で指定するため，`launch` の引数で指定できるのは `stopOnEntry` (既定値 `true`) だけです．
+    通知されたアドレスへ接続し，`launch` 要求を送ります．`launch` の引数には次を指定できます．
+
+    - `program` (必須): アセンブリファイルのパスの文字列，またはその配列．
+    - `cwd`: `program` の相対パスの基準にする絶対パスのディレクトリ．省略したときは `program` に絶対パスだけを指定できます．
+    - `stopOnEntry` (既定値 `true`): 読み込み直後に最初の命令で止まるか．
+    - `noDebug` (既定値 `false`): ブレークポイントと例外フィルタを使わずに実行するか．
+
+    ```json
+    { "program": ["main.asm", "kseg.asm"], "cwd": "/path/to/project", "stopOnEntry": true }
+    ```
 
 接続方式の詳細と検証規則は [DAP クライアントとの接続](docs/connection.md) を参照してください．
 

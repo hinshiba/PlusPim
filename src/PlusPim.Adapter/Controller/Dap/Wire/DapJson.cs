@@ -1,6 +1,7 @@
 using PlusPim.Adapter.Controller.Dap.Protocol;
 using PlusPim.Image;
 using PlusPim.Instructions;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json;
@@ -98,13 +99,42 @@ internal sealed class WordConverter(): HexConverter<Word>(v => new Word(v), w =>
 internal sealed class SourcePathConverter: JsonConverter<SourcePath> {
     /// <inheritdoc/>
     public override SourcePath Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-        string raw = reader.GetString()!;
-        return Path.IsPathFullyQualified(raw) && SourcePath.TryResolve(raw, AppContext.BaseDirectory, out SourcePath path) ? path : WireError.Throw<SourcePath>("Invalid path.");
+        return reader.GetString() is string raw && Path.IsPathFullyQualified(raw) && SourcePath.TryResolve(raw, AppContext.BaseDirectory, out SourcePath path) ? path : WireError.Throw<SourcePath>("Invalid path.");
     }
 
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, SourcePath value, JsonSerializerOptions options) {
         writer.WriteStringValue(value.Value);
+    }
+}
+
+/// <summary>
+/// <c>launch</c> の <c>program</c> を空でないパスの文字列の列として読む
+/// </summary>
+/// <remarks>
+/// VS Codeの起動構成に合わせ, 1つのパスの文字列とパスの配列のどちらも受け付ける.
+/// 相対パスの解決には <c>cwd</c> が要るので, ここでは <see cref="SourcePath"/> にしない
+/// </remarks>
+internal sealed class ProgramConverter: JsonConverter<ImmutableArray<string>> {
+    /// <inheritdoc/>
+    public override ImmutableArray<string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+        if(reader.TokenType != JsonTokenType.StartArray) {
+            return [Element(ref reader)];
+        }
+        ImmutableArray<string>.Builder paths = ImmutableArray.CreateBuilder<string>();
+        while(reader.Read() && reader.TokenType != JsonTokenType.EndArray) {
+            paths.Add(Element(ref reader));
+        }
+        return paths.Count == 0 ? WireError.Throw<ImmutableArray<string>>("The program must not be empty.") : paths.DrainToImmutable();
+    }
+
+    /// <remarks>引数は書かない</remarks>
+    public override void Write(Utf8JsonWriter writer, ImmutableArray<string> value, JsonSerializerOptions options) {
+        throw new NotSupportedException();
+    }
+
+    private static string Element(ref Utf8JsonReader reader) {
+        return reader.GetString() ?? WireError.Throw<string>("A program path must be a string.");
     }
 }
 

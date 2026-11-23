@@ -2,18 +2,22 @@ using PlusPim.Adapter.Controller.Dap;
 using PlusPim.Asm;
 using PlusPim.Image;
 using PlusPim.Usecase;
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Channels;
 
 namespace PlusPim.Adapter.Tests;
 
 /// <summary>
-/// 送信の失敗の後も接続が終われることを, クライアントから観測する
+/// <c>launch</c> の解釈と, 送信の失敗の後も接続が終われることを, クライアントから観測する
 /// </summary>
 public class DapConnectionTests {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
     private const string Initialize = """{"linesStartAt1":true,"columnsStartAt1":true,"pathFormat":"path"}""";
+    private static readonly string Main = Path.Combine(AppContext.BaseDirectory, "main.asm");
+    private static readonly string Sub = Path.Combine(AppContext.BaseDirectory, "sub.asm");
 
     /// <summary>
     /// 接続のクライアント側の端
@@ -90,10 +94,20 @@ public class DapConnectionTests {
         }
     }
 
-    /// <summary><c>main</c> からすぐに戻って終わるプログラムを読み込む</summary>
-    private static LoadResult LoadExiting() {
-        SourcePath path = SourcePath.TryResolve("main.asm", AppContext.BaseDirectory, out SourcePath p) ? p : throw new InvalidOperationException();
-        return Session.Load([path], new Reader(path, ".text\n.globl main\nmain:\njr $ra\n"), false, Stream.Null, Stream.Null);
+    /// <summary>先頭のソースを, <c>main</c> からすぐに戻って終わるプログラムとして読み込む</summary>
+    private static LoadResult LoadExiting(ImmutableArray<SourcePath> paths) {
+        return Session.Load(paths, new Reader(paths[0], ".text\n.globl main\nmain:\njr $ra\n"), false, Stream.Null, Stream.Null);
+    }
+
+    /// <summary><c>launch</c> の引数を作る</summary>
+    /// <param name="program">パスの文字列か配列</param>
+    /// <param name="cwd">省略するなら <see langword="null"/></param>
+    private static string Launch(JsonNode program, bool stopOnEntry = true, string? cwd = null) {
+        JsonObject arguments = new() { ["program"] = program, ["stopOnEntry"] = stopOnEntry };
+        if(cwd is not null) {
+            arguments["cwd"] = cwd;
+        }
+        return arguments.ToJsonString();
     }
 
     private static bool IsEvent(JsonElement m, string name) {
@@ -107,10 +121,10 @@ public class DapConnectionTests {
     [Fact]
     public async Task FailureResponseNotSent_ConnectionCloses() {
         Client client = new(body => body.Contains("\"success\":false", StringComparison.Ordinal) ? new IOException("broken pipe") : null);
-        DapConnection connection = new(client, () => throw new InvalidOperationException("load failed"));
+        DapConnection connection = new(client, _ => throw new InvalidOperationException("load failed"));
         Task run = connection.RunAsync();
         client.Send("initialize", Initialize);
-        client.Send("launch");
+        client.Send("launch", Launch(Main));
         await run.WaitAsync(Timeout);
     }
 
@@ -120,13 +134,59 @@ public class DapConnectionTests {
         DapConnection connection = new(client, LoadExiting);
         Task run = connection.RunAsync();
         client.Send("initialize", Initialize);
-        client.Send("launch", """{"stopOnEntry":false}""");
+        client.Send("launch", Launch(Main, stopOnEntry: false));
         _ = await client.ExpectAsync(m => IsEvent(m, "initialized"));
         client.Send("configurationDone");
         _ = await client.ExpectAsync(m => IsEvent(m, "output") && m.GetProperty("body").GetProperty("output").GetString()!.StartsWith("[PlusPim internal error]", StringComparison.Ordinal));
         _ = await client.ExpectAsync(m => IsEvent(m, "terminated"));
         client.Send("disconnect");
         _ = await client.ExpectAsync(m => IsResponse(m, "disconnect"));
+        await run.WaitAsync(Timeout);
+    }
+
+    public static TheoryData<string> Programs => new() {
+        Launch(new JsonArray(Main, Sub)),
+        Launch(new JsonArray("main.asm", Sub), cwd: AppContext.BaseDirectory),
+        Launch(new JsonArray(Path.Combine("dir", "..", "main.asm"), "sub.asm"), cwd: AppContext.BaseDirectory),
+    };
+
+    [Theory]
+    [MemberData(nameof(Programs))]
+    public async Task Program_ResolvedAgainstCwdAndLoadedInListedOrder(string arguments) {
+        Client client = new(_ => null);
+        ImmutableArray<SourcePath> loaded = [];
+        DapConnection connection = new(client, p => {
+            loaded = p;
+            return LoadExiting(p);
+        });
+        Task run = connection.RunAsync();
+        client.Send("initialize", Initialize);
+        client.Send("launch", arguments);
+        _ = await client.ExpectAsync(m => IsResponse(m, "launch"));
+        Assert.Equal([Main, Sub], loaded.Select(p => p.Value));
+        client.Send("disconnect");
+        await run.WaitAsync(Timeout);
+    }
+
+    [Theory]
+    [InlineData("""{"program":"main.asm"}""")]
+    [InlineData("""{"program":[]}""")]
+    [InlineData("""{"program":null}""")]
+    [InlineData("""{"program":[1]}""")]
+    [InlineData("""{"program":"main.asm","cwd":"dir"}""")]
+    [InlineData("""{"program":"main.asm","cwd":""}""")]
+    [InlineData("""{"program":"main.asm","cwd":1}""")]
+    [InlineData("{}")]
+    public async Task InvalidProgram_LaunchRejectedWithoutLoading(string arguments) {
+        Client client = new(_ => null);
+        DapConnection connection = new(client, _ => throw new InvalidOperationException("must not load"));
+        Task run = connection.RunAsync();
+        client.Send("initialize", Initialize);
+        client.Send("launch", arguments);
+        JsonElement response = await client.ExpectAsync(m => IsResponse(m, "launch"));
+        Assert.False(response.GetProperty("success").GetBoolean());
+        Assert.StartsWith("Invalid arguments", response.GetProperty("message").GetString(), StringComparison.Ordinal);
+        client.Send("disconnect");
         await run.WaitAsync(Timeout);
     }
 }

@@ -34,12 +34,11 @@ internal readonly union EstablishMethod(
 /// <summary>
 /// 共通する引数
 /// </summary>
-/// <param name="Files">読み込むアセンブリファイル．1つ以上</param>
 /// <param name="Verbose">ログを標準エラー出力へ出すか</param>
 /// <param name="Strict">解析できない行や未対応の指令をエラーにするか</param>
 /// <param name="ForceTerminalUtf8">ターミナルを UTF-8 に切り替えるか</param>
 /// <param name="Attach">起動時に .NET デバッガをアタッチするか</param>
-internal sealed record CommonArgs(SourcePath[] Files, bool Verbose, bool Strict, bool ForceTerminalUtf8, bool Attach);
+internal sealed record CommonArgs(bool Verbose, bool Strict, bool ForceTerminalUtf8, bool Attach);
 
 /// <summary>
 /// <c>debug</c> サブコマンドの引数
@@ -47,6 +46,13 @@ internal sealed record CommonArgs(SourcePath[] Files, bool Verbose, bool Strict,
 /// <param name="Common">共通の引数</param>
 /// <param name="Method">接続方法</param>
 internal sealed record DebugArgs(CommonArgs Common, EstablishMethod Method);
+
+/// <summary>
+/// <c>runtime</c> サブコマンドの引数
+/// </summary>
+/// <param name="Common">共通の引数</param>
+/// <param name="Files">読み込むアセンブリファイル．1つ以上</param>
+internal sealed record RuntimeArgs(CommonArgs Common, SourcePath[] Files);
 
 /// <summary>
 /// PlusPim のコマンドラインの定義
@@ -58,7 +64,7 @@ internal static class PlusPimCommand {
     /// <param name="version">表示するバージョン</param>
     /// <param name="debug">サブコマンド <c>debug</c> のアクション</param>
     /// <param name="runtime">サブコマンド <c>runtime</c> のアクション</param>
-    public static RootCommand Create(string version, Func<DebugArgs, CancellationToken, Task<int>> debug, Func<CommonArgs, int> runtime) {
+    public static RootCommand Create(string version, Func<DebugArgs, CancellationToken, Task<int>> debug, Func<RuntimeArgs, int> runtime) {
         RootCommand root = new("PlusPim - A MIPS runtime and debugger");
         string versionLine = $"PlusPim {version}";
 
@@ -109,7 +115,7 @@ internal static class PlusPimCommand {
         };
 
         CommonArgs ReadCommon(ParseResult r) {
-            return new(r.GetRequiredValue(files), r.GetValue(verbose), r.GetValue(strict), r.GetValue(forceTerminalUtf8), r.GetValue(attach));
+            return new(r.GetValue(verbose), r.GetValue(strict), r.GetValue(forceTerminalUtf8), r.GetValue(attach));
         }
 
         Command Mode(string name, ushort minPort, string description, Func<IPEndPoint, EstablishMethod> make) {
@@ -125,7 +131,7 @@ internal static class PlusPimCommand {
                     return parsed;
                 }
             };
-            Command command = new(name, description) { endpoint, files };
+            Command command = new(name, description) { endpoint };
             command.SetAction((r, ct) => debug(new DebugArgs(ReadCommon(r), make(r.GetRequiredValue(endpoint))), ct));
             return command;
         }
@@ -138,7 +144,7 @@ internal static class PlusPimCommand {
         Command runtimeCommand = new("runtime", "Run the program to the end without the debugger (not implemented)") {
             files
         };
-        runtimeCommand.SetAction(r => runtime(ReadCommon(r)));
+        runtimeCommand.SetAction(r => runtime(new RuntimeArgs(ReadCommon(r), r.GetRequiredValue(files))));
 
         root.Subcommands.Add(debugCommand);
         root.Subcommands.Add(runtimeCommand);

@@ -47,14 +47,13 @@ describe("pluspimArgs", () => {
 		forceTerminalUtf8: true,
 	};
 
-	test("接続先，UTF-8 の依頼，追加の引数，プログラムの順に並べる", () => {
+	test("接続先，UTF-8 の依頼，追加の引数の順に並べる", () => {
 		expect(pluspimArgs(base, "127.0.0.1:1234")).toEqual([
 			"debug",
 			"connect",
 			"127.0.0.1:1234",
 			"--force-terminal-utf8",
 			"--verbose",
-			"dir/a.asm",
 		]);
 	});
 

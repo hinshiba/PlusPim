@@ -46,14 +46,7 @@ export function pluspimArgs(
 		config.forceTerminalUtf8 && !config.args.includes("--force-terminal-utf8")
 			? ["--force-terminal-utf8"]
 			: [];
-	return [
-		"debug",
-		"connect",
-		address,
-		...utf8,
-		...config.args,
-		...config.programs,
-	];
+	return ["debug", "connect", address, ...utf8, ...config.args];
 }
 
 export function terminalName(config: PlusPimLaunchConfig): string {

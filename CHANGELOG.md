@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- ファイル指定はDAPの`launch`要求の`program`を用いるように変更
+- 相対パスは`launch`の`cwd`を基準に解決するように変更
+
 ### Added
 
 - 命令`bgezal`, `bltzal`, `teq`, `tne`, `tge`, `tgeu`, `tlt`, `tltu`, `teqi`, `tnei`, `tgei`, `tgeiu`, `tlti`, `tltiu`と疑似命令`bal`, `abs`, `divi`, `ulw`, `ulh`, `ulhu`, `usw`, `ush`に対応

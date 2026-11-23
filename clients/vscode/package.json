@@ -70,10 +70,15 @@
 								"items": {
 									"type": "string"
 								},
-								"description": "Path to the MIPS assembly file (string) or an array of paths. The runtime will normalize either form.",
+								"description": "Path to the MIPS assembly file (string) or an array of paths. A relative path is resolved against cwd.",
 								"default": [
 									"${file}"
 								]
+							},
+							"cwd": {
+								"type": "string",
+								"description": "Absolute directory that relative paths in program are resolved against. Without it, every path in program must be absolute.",
+								"default": "${workspaceFolder}"
 							},
 							"stopOnEntry": {
 								"type": "boolean",

@@ -25,6 +25,5 @@
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/PlusPim.Benchmarks/PlusPim.Benchmarks.csproj" />
     <Project Path="benchmarks/PlusPim.Asm.Benchmarks/PlusPim.Asm.Benchmarks.csproj" />
-    <Project Path="benchmarks/PlusPim.Dbg.Benchmarks/PlusPim.Dbg.Benchmarks.csproj" />
   </Folder>
 </Solution>

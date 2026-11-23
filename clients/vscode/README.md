@@ -56,12 +56,13 @@ Copy [`samples/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/
 
 ## Launch Configuration
 
-| Property            | Type       | Default       | Description                                                                                                                                                                 |
-| ------------------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `program`           | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                                                                                    |
-| `stopOnEntry`       | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                                  |
-| `forceTerminalUtf8` | `boolean`  | `true`        | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
-| `args`              | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                                         |
+| Property            | Type       | Default              | Description                                                                                                                                                                 |
+| ------------------- | ---------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `program`           | `string[]` | `["${file}"]`        | Path to the MIPS assembly file(s). A single string or an array of paths, placed in that order. A relative path is resolved against `cwd`.                                   |
+| `cwd`               | `string`   | `${workspaceFolder}` | Absolute directory that relative paths in `program` are resolved against. Without it, every path in `program` must be absolute.                                             |
+| `stopOnEntry`       | `boolean`  | `true`               | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                                  |
+| `forceTerminalUtf8` | `boolean`  | `true`               | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
+| `args`              | `string[]` | `[]`                 | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                                         |
 | `trace`             | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                                                                                           |
 
 ## How It Works
@@ -69,8 +70,8 @@ Copy [`samples/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/
 When a debug session starts, the extension:
 
 1. Starts listening on a free loopback port chosen by the OS.
-2. Spawns the bundled `pluspim` binary in a VS Code terminal with `debug connect 127.0.0.1:<port>`, passing the target file and options.
-3. Takes the first connection from PlusPim as the debug session. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
+2. Spawns the bundled `pluspim` binary in a VS Code terminal with `debug connect 127.0.0.1:<port>` and the options.
+3. Takes the first connection from PlusPim as the debug session, and PlusPim loads `program` on the `launch` request. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
 
 The program's standard input and output are the terminal itself, so you type input there and the output is written there as raw bytes. Non-ASCII output is shown correctly only if the terminal decodes it as UTF-8. By default the extension asks PlusPim to switch the terminal to UTF-8 while it runs (`forceTerminalUtf8`); if you turn that off, the terminal itself must decode UTF-8.
 

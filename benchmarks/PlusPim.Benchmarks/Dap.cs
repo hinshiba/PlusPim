@@ -71,7 +71,7 @@ public sealed class DapClient: IDisposable {
     /// <summary>
     /// 起動して <c>launch</c> と <c>configurationDone</c> を済ませ，入口の <c>stopped</c> を待つ
     /// </summary>
-    /// <param name="version"><c>v0.5.0</c> か <c>current</c>．引数の形が異なる</param>
+    /// <param name="version"><c>v0.5.0</c> か <c>current</c>．ファイルの渡し方が異なる</param>
     /// <param name="files">読み込ませるファイル</param>
     public static DapClient Launch(string version, string[] files) {
         using TcpListener listener = new(IPAddress.Loopback, 0);
@@ -79,7 +79,7 @@ public sealed class DapClient: IDisposable {
         string endpoint = $"127.0.0.1:{((IPEndPoint)listener.LocalEndpoint).Port}";
         ProcessStartInfo psi = version == "v0.5.0"
             ? new(Environment.GetEnvironmentVariable("PLUSPIM_V050")!, [.. files, "--debug", "--connect", endpoint])
-            : new(Environment.GetEnvironmentVariable("PLUSPIM_CURRENT")!, ["debug", "connect", endpoint, .. files]);
+            : new(Environment.GetEnvironmentVariable("PLUSPIM_CURRENT")!, ["debug", "connect", endpoint]);
         psi.RedirectStandardInput = true;
         psi.RedirectStandardOutput = true;
         psi.RedirectStandardError = true;
@@ -93,7 +93,8 @@ public sealed class DapClient: IDisposable {
 
         DapClient c = new(p, listener.AcceptTcpClient());
         c.Request("initialize", new JsonObject { ["adapterID"] = "pluspim", ["linesStartAt1"] = true, ["columnsStartAt1"] = true, ["pathFormat"] = "path" });
-        c.Request("launch", new JsonObject { ["program"] = files[0],["stopOnEntry"] = true });
+        // v0.5.0 は program を読まず，コマンドラインのファイルを使う
+        c.Request("launch", new JsonObject { ["program"] = new JsonArray([.. files.Select(f => JsonValue.Create(f))]), ["stopOnEntry"] = true });
         c.WaitEvent("initialized");
         c.Request("configurationDone", null);
         c.WaitEvent("stopped");

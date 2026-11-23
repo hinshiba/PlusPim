@@ -1,5 +1,7 @@
 using PlusPim.Adapter.Controller.Dap.Protocol;
+using PlusPim.Image;
 using PlusPim.Usecase;
+using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
@@ -94,7 +96,7 @@ internal static class RequestDecoder {
                     : new Request.Rejected(seq, Names.Commands.Name(command), "Only 1-based lines and columns and path sources are supported.");
             case Command.Launch:
                 LaunchArguments launch = Read(arguments, DapJson.Default.LaunchArguments);
-                return new Request.Launch(seq, launch.NoDebug ? StartAction.NoDebug : launch.StopOnEntry ? StartAction.StopAtEntry : StartAction.Run);
+                return new Request.Launch(seq, launch.NoDebug ? StartAction.NoDebug : launch.StopOnEntry ? StartAction.StopAtEntry : StartAction.Run, Resolve(launch.Program, launch.Cwd));
             case Command.SetBreakpoints:
                 SetBreakpointsArguments breakpoints = Read(arguments, DapJson.Default.SetBreakpointsArguments);
                 return new Request.SetBreakpoints(seq, breakpoints.Source.Path, [.. (breakpoints.Breakpoints ?? []).Select(b => b.Line)]);
@@ -128,6 +130,20 @@ internal static class RequestDecoder {
             default:
                 return new Request.Simple(seq, command);
         }
+    }
+
+    /// <summary>
+    /// <c>program</c> の各パスを, 相対パスなら <c>cwd</c> を基準に解決する
+    /// </summary>
+    /// <param name="program">パスの文字列</param>
+    /// <param name="cwd">絶対パスのディレクトリ. 省略されたなら相対パスを拒否する</param>
+    private static ImmutableArray<SourcePath> Resolve(ImmutableArray<string> program, string? cwd) {
+        if(cwd is not null && !Path.IsPathFullyQualified(cwd)) {
+            return WireError.Throw<ImmutableArray<SourcePath>>($"The cwd '{cwd}' must be an absolute path.");
+        }
+        return [.. program.Select(raw => (cwd is not null || Path.IsPathFullyQualified(raw)) && SourcePath.TryResolve(raw, cwd ?? AppContext.BaseDirectory, out SourcePath path)
+            ? path
+            : WireError.Throw<SourcePath>($"Invalid program path '{raw}'. A relative path requires cwd."))];
     }
 
     private static Request.Execute Execute(Seq seq, Command command, Motion motion) {
