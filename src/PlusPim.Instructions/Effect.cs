@@ -22,8 +22,12 @@ public readonly record struct RaiseRuntimeError(RuntimeErrorKind Kind);
 public readonly record struct Jump(Address Target);
 
 /// <summary>サブルーチンを呼び出す. PCを<paramref name="Target"/>にする.</summary>
-/// <remarks>戻りアドレスはDestへ書かれる</remarks>
+/// <remarks>Dest[0]が存在する場合は戻りアドレスを書き込む必要がある</remarks>
 public readonly record struct Call(Address Target);
+
+/// <summary>分岐が成立しなかった</summary>
+/// <remarks>Dest[0]が存在する場合は戻りアドレスを書き込む必要がある</remarks>
+public readonly record struct NotTaken;
 
 /// <summary>例外ハンドラから復帰する. PCを<paramref name="Target"/>にする.</summary>
 public readonly record struct ExceptionReturn(Address Target);
@@ -107,6 +111,7 @@ public readonly struct Effect: IUnion {
         RaiseRuntimeError,
         Jump,
         Call,
+        NotTaken,
         ExceptionReturn,
         Load,
         Store,
@@ -131,6 +136,7 @@ public readonly struct Effect: IUnion {
     public Effect(RaiseRuntimeError f) : this(Kind.RaiseRuntimeError, (byte)f.Kind, default) { }
     public Effect(Jump j) : this(Kind.Jump, 0, j.Target) { }
     public Effect(Call c) : this(Kind.Call, 0, c.Target) { }
+    public Effect(NotTaken _) : this(Kind.NotTaken, 0, default) { }
     public Effect(ExceptionReturn e) : this(Kind.ExceptionReturn, 0, e.Target) { }
     public Effect(Load l) : this(Kind.Load, (byte)l.Kind, l.Addr) { }
     public Effect(Store s) : this(Kind.Store, (byte)s.Kind, s.Addr, s.Value) { }
@@ -153,6 +159,7 @@ public readonly struct Effect: IUnion {
     public bool TryGetValue(out RaiseRuntimeError v) { v = this.AsRaiseRuntimeError; return this._kind == Kind.RaiseRuntimeError; }
     public bool TryGetValue(out Jump v) { v = this.AsJump; return this._kind == Kind.Jump; }
     public bool TryGetValue(out Call v) { v = this.AsCall; return this._kind == Kind.Call; }
+    public bool TryGetValue(out NotTaken v) { v = default; return this._kind == Kind.NotTaken; }
     public bool TryGetValue(out ExceptionReturn v) { v = this.AsExceptionReturn; return this._kind == Kind.ExceptionReturn; }
     public bool TryGetValue(out Load v) { v = this.AsLoad; return this._kind == Kind.Load; }
     public bool TryGetValue(out Store v) { v = this.AsStore; return this._kind == Kind.Store; }
@@ -165,6 +172,7 @@ public readonly struct Effect: IUnion {
         Kind.RaiseRuntimeError => this.AsRaiseRuntimeError,
         Kind.Jump => this.AsJump,
         Kind.Call => this.AsCall,
+        Kind.NotTaken => new NotTaken(),
         Kind.ExceptionReturn => this.AsExceptionReturn,
         Kind.Load => this.AsLoad,
         Kind.Store => this.AsStore,
