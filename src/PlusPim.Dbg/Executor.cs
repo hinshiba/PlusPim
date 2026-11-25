@@ -14,31 +14,33 @@ internal static class Executor {
     /// </summary>
     /// <param name="s">進める状態</param>
     /// <param name="image">命令を取り出すプログラム</param>
+    /// <param name="slots">有効な遅延スロットの種類</param>
     /// <param name="input">デバッギへの入力</param>
     /// <param name="output">デバッギの出力の書き込み先</param>
-    public static StepResult Step(State s, ProgramImage image, InputTape input, IBufferWriter<byte> output) {
-        switch(s.Status) {
+    public static StepResult Step(State s, ProgramImage image, DelaySlotsType slots, InputTape input, IBufferWriter<byte> output) {
+        switch(s.Core.Status) {
             case Running:
                 break;
             case ExceptionRaised t:
-                s.Push(new Frame(MemoryMap.ExceptionVector, t.Epc, s.Registers, t.Code));
-                s.Registers.Pc = MemoryMap.ExceptionVector;
-                s.Status = new Running();
+                s.Core.Push(new Frame(MemoryMap.ExceptionVector, t.Epc, s.Core.Registers, t.Code));
+                s.Core.Registers.Pc = MemoryMap.ExceptionVector;
+                s.Core.Status = new Running();
                 return StepResult.Stepped;
             default:
                 return StepResult.Halted;
         }
 
-        ref Registers regs = ref s.Registers;
+        ref Registers regs = ref s.Core.Registers;
         Address pc = regs.Pc;
         bool kernel = Cp0.IsKernel(regs[RName.Status]);
         bool fetchable = kernel || !MemoryMap.KText.Contains(pc, 4);
         if((fetchable ? image.Fetch(pc) : null) is not IExecute inst) {
+            Branch? fetchSlot = s.Core.Retire();
             // セグメント内の整列した番地はMIPSでは実行できるが, PlusPimは命令しか実行できない
             if(fetchable && pc % 4 == 0 && (MemoryMap.IsText(pc) || MemoryMap.Data.Contains(pc, 4))) {
                 return Fail(s, RuntimeErrorKind.NonInstructionExecution, pc);
             }
-            Raise(s, ExcCode.AdEL, pc);
+            Raise(s, ExcCode.AdEL, pc, fetchSlot);
             return StepResult.Stepped;
         }
 

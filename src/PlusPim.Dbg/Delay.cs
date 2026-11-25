@@ -6,7 +6,7 @@ namespace PlusPim.Dbg;
 /// 有効にする遅延スロット
 /// </summary>
 [Flags]
-public enum DelaySlots: byte {
+public enum DelaySlotsType: byte {
     /// <summary>遅延スロットは存在しない</summary>
     None = 0,
     /// <summary>1命令分の分岐遅延スロットが配置される</summary>

@@ -25,7 +25,7 @@ internal static class RuntimeCalls {
     /// テキストのメモリに触れる場合はランタイムエラー.
     /// </returns>
     public static bool TryRun(State s, RuntimeRequest rq, Span<uint> dest, InputTape input, IBufferWriter<byte> output) {
-        ReadOnlySpan<byte> pending = input.From(s.InputCursor);
+        ReadOnlySpan<byte> pending = input.From(s.Core.InputCursor);
         ReadOnlySpan<byte> line;
         switch(rq.Kind) {
             case RuntimeRequestKind.PrintInt:
@@ -60,13 +60,13 @@ internal static class RuntimeCalls {
                 }
                 // 前後の空白, 改行をを許す. 解釈できなければ0とし, 行を消費する.
                 dest[0] = int.TryParse(line, NumberStyles.Integer, CultureInfo.InvariantCulture, out int v) ? unchecked((uint)v) : 0;
-                s.InputCursor += line.Length;
+                s.Core.InputCursor += line.Length;
                 break;
 
             case RuntimeRequestKind.ReadChar:
                 if(!pending.IsEmpty) {
                     dest[0] = pending[0];
-                    s.InputCursor++;
+                    s.Core.InputCursor++;
                 } else if(input.Closed) {
                     dest[0] = uint.MaxValue;
                 } else {
@@ -95,18 +95,18 @@ internal static class RuntimeCalls {
                     s.Memory.Write(at + (uint)i, line[i]);
                 }
                 s.Memory.Write(at + (uint)written, 0);
-                s.InputCursor += written;
+                s.Core.InputCursor += written;
                 break;
 
             case RuntimeRequestKind.Exit:
-                s.Status = new Exited(ExitCause.ExitCall);
+                s.Core.Status = new Exited(ExitCause.ExitCall);
                 break;
         }
         return true;
     }
 
     private static void FailTextAccess(State s) {
-        s.Status = new RuntimeErrorRaised(RuntimeErrorKind.TextAccess, s.Registers.Pc);
+        s.Core.Status = new RuntimeErrorRaised(RuntimeErrorKind.TextAccess, s.Core.Registers.Pc);
     }
 
     /// <summary>
