@@ -1,5 +1,4 @@
 using PlusPim.Instructions;
-using System.Collections.Immutable;
 
 namespace PlusPim.Dbg;
 
@@ -13,17 +12,8 @@ public readonly struct StateView {
         this._s = s;
     }
 
-    public Status Status => this._s.Status;
-
-    public ref readonly Registers Registers => ref this._s.Registers;
-
-    public Address Pc => this._s.Registers.Pc;
-
-    /// <summary>ライブフレームを含まないコールスタック</summary>
-    public ImmutableStack<Frame> CallStack => this._s.CallStack;
-
-    /// <summary><see cref="CallStack"/> のフレームの数</summary>
-    public int Depth => this._s.Depth;
+    /// <summary>メモリを除く状態</summary>
+    public ref readonly Core Core => ref this._s.Core;
 
     /// <summary>
     /// <paramref name="destination"/> のすべてのバイトを書く. 書き込まれていないメモリは未定義.
