@@ -62,8 +62,9 @@ internal static class Pseudos {
         ["divi"] = Regs3((rd, rs, rt) => [HiLo<Div>(rs, rt), Move<Mflo>(rd)]),
 
         // rtがbaseと同じだとlwlの書き込みでlwrの番地が変わるので, $atに組み立ててから移す
+        // `IType<Sll>(Zero, Zero, 0)`はlwrのロード遅延スロットを埋めるため
         ["ulw"] = RegMem(3, (rt, m) => rt == m.Base
-            ? [Load<Lwl>(At, m, 3), Load<Lwr>(At, m, 0), RType<Addu>(rt, At, Zero)]
+            ? [Load<Lwl>(At, m, 3), Load<Lwr>(At, m, 0), IType<Sll>(Zero, Zero, 0), RType<Addu>(rt, At, Zero)]
             : [Load<Lwl>(rt, m, 3), Load<Lwr>(rt, m, 0)]),
         ["ulh"] = Ulh<Lb>(),
         ["ulhu"] = Ulh<Lbu>(),
@@ -118,11 +119,10 @@ internal static class Pseudos {
     }
 
     /// <summary>
-    /// 下位バイトを<c>lbu $at</c>で, 上位バイトを<typeparamref name="THigh"/>で読んで合成する
+    /// 上位バイトを<typeparamref name="THigh"/>で<c>$at</c>へ, 下位バイトを<c>lbu</c>で読んで合成する
     /// </summary>
-    /// <remarks>baseを書き換える前に両方のバイトを読むのでrtがbaseと同じでもよい</remarks>
     private static Expand Ulh<THigh>() where THigh : struct, ILoadOp {
-        return RegMem(1, (rt, m) => [Load<Lbu>(At, m, 0), Load<THigh>(rt, m, 1), IType<Sll>(rt, rt, 8), RType<Or>(rt, rt, At)]);
+        return RegMem(1, (rt, m) => [Load<THigh>(At, m, 1), Load<Lbu>(rt, m, 0), IType<Sll>(At, At, 8), RType<Or>(rt, rt, At)]);
     }
 
     /// <summary>
