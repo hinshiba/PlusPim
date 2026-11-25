@@ -3,19 +3,19 @@ using PlusPim.Instructions.Formats;
 namespace PlusPim.Instructions.Instructions;
 
 /// <summary>
-/// 次の命令のアドレスをrdに保存して, レジスタの値をアドレスとしてジャンプする
+/// 戻りアドレスをrdに保存して, レジスタの値をアドレスとしてジャンプする
 /// </summary>
 /// <param name="rd">戻りアドレスを書くレジスタ番号. 省略時は$ra</param>
 /// <param name="rs">呼び出し先を持つレジスタ番号</param>
-/// <remarks>遅延スロットを持たないとしたときの戻りアドレスである</remarks>
+/// <remarks>遅延スロットの有無が必要であるため戻りアドレスはランタイムが書き込む</remarks>
 public sealed class Jalr(GprId rd, GprId rs): IAssemblerable, IExecute {
     public static string Mnemonic => "jalr";
-    private readonly RegIds3 _regs = RegIds3.Of(rd, RName.Pc, rs);
+    private readonly RegIds2 _regs = RegIds2.Of(rd, rs);
 
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
     public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
 
-    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), this._regs[2].AsmName());
+    public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), this._regs[1].AsmName());
 
     public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
         return operands switch {
@@ -26,8 +26,6 @@ public sealed class Jalr(GprId rd, GprId rs): IAssemblerable, IExecute {
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
-        Address target = new(src[1]);
-        dest[0] = unchecked(src[0] + 4);
-        return new Effect(new Call(target));
+        return new Effect(new Call(new Address(src[0])));
     }
 }
