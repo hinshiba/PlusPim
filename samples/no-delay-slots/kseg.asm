@@ -4,19 +4,13 @@ __exception_handler:
     srl  $k0, $k0, 2
     andi $k0, $k0, 0x1F  # ExcCode 抽出
 
-    # ExcCode == 8 (Syscall) ?
+    # ExcCode == 8 (Syscall) なら runtime_call! を呼ぶ
+    # どの例外も EPC+4 にスキップして復帰する
     addiu $k1, $zero, 8
-    beq  $k0, $k1, __handle_syscall
-    nop
-
-    # その他の例外: EPC+4 にスキップして復帰
-    mfc0 $k0, $14        # EPC
-    addiu $k0, $k0, 4
-    mtc0 $k0, $14        # EPC ← EPC+4
-    eret
-
-__handle_syscall:
+    bne  $k0, $k1, __skip
     runtime_call!
+
+__skip:
     mfc0 $k0, $14        # EPC
     addiu $k0, $k0, 4
     mtc0 $k0, $14        # EPC ← EPC+4

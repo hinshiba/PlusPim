@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using PlusPim.Asm;
+using PlusPim.Dbg;
 using PlusPim.Image;
 using PlusPim.Usecase;
 
@@ -65,7 +66,7 @@ public class History {
 
     private Session Load() {
         _ = SourcePath.TryResolve(this._path, Environment.CurrentDirectory, out SourcePath path);
-        Session s = Session.Load([path], new FileReader(), false, Stream.Null, Stream.Null).Session!;
+        Session s = Session.Load([path], new FileReader(), false, DelaySlotsConfig.All, Stream.Null, Stream.Null).Session!;
         _ = s.SetBreakpoints(path, [this._doneLine]);
         return s;
     }

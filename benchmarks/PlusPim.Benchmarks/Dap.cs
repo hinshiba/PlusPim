@@ -22,7 +22,7 @@ public class Dap {
 
     [GlobalSetup]
     public void Setup() {
-        this._fact = [Workload.Locate("samples/fact.asm"), Workload.Locate("samples/kseg.asm")];
+        this._fact = [Workload.Locate("samples/delay-slots/fact.asm"), Workload.Locate("samples/delay-slots/kseg.asm")];
     }
 
     /// <summary>起動から stopOnEntry で止まり Step を受け付けるまで</summary>
