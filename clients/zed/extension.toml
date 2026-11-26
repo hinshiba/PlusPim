@@ -1,0 +1,13 @@
+id = "pluspim"
+name = "PlusPim"
+version = "0.3.0"
+schema_version = 1
+authors = ["hinshiba"]
+description = "MIPS assembly time-travel debugger"
+repository = "https://github.com/hinshiba/PlusPim"
+
+[grammars.mips]
+repository = "https://github.com/omeyenburg/tree-sitter-mips"
+rev = "f84b43877f3053d1cf658fc58320beb13b23b2f1"
+
+[debug_adapters.pluspim]

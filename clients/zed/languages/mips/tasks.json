@@ -1,0 +1,11 @@
+[
+  {
+    "label": "PlusPim: debug server (127.0.0.1:4711)",
+    "command": "pluspim",
+    "args": ["debug", "listen", "127.0.0.1:4711", "--force-terminal-utf8"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  }
+]

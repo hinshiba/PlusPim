@@ -1,0 +1,12 @@
+[package]
+name = "pluspim-zed"
+version = "0.3.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.7.0"

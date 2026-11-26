@@ -1,0 +1,5 @@
+name = "MIPS"
+grammar = "mips"
+path_suffixes = ["asm", "s"]
+line_comments = ["# "]
+debuggers = ["pluspim"]

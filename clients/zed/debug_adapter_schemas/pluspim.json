@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "request": {
+      "type": "string",
+      "enum": ["launch"],
+      "description": "PlusPim supports only launch. It loads the program on launch even when it was started outside Zed."
+    },
+    "program": {
+      "type": ["string", "array"],
+      "items": { "type": "string" },
+      "description": "MIPS assembly file, or a list of files, that PlusPim loads on launch. A relative path is resolved against cwd."
+    },
+    "args": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Extra command line arguments for a spawned PlusPim (e.g. [\"--strict\"]). Ignored when tcp_connection is set."
+    },
+    "cwd": {
+      "type": "string",
+      "description": "Absolute directory that a relative program is resolved against, and the working directory of a spawned PlusPim. Defaults to the worktree root."
+    },
+    "stopOnEntry": {
+      "type": "boolean",
+      "default": true,
+      "description": "Stop at the first instruction after the program is loaded."
+    }
+  }
+}
