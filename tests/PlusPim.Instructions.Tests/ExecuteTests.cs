@@ -12,7 +12,6 @@ public class ExecuteTests {
     private const uint Sentinel = 0xdeadbeef;
 
     private static readonly Address Target = new(0x00400040);
-    private const uint Pc = 0x00400010;
     private const uint Kernel = 0xff13;
     private const uint User = Kernel & ~Cp0.Exl;
 
@@ -60,7 +59,21 @@ public class ExecuteTests {
             (BranchZOp<Bltz>.FromOperands(one), (int)rs < 0, [rs]),
         ];
         foreach((IExecute? inst, bool taken, uint[] src) in cases) {
-            Assert.Equal(taken ? new Jump(Target) : new Next(), Run(inst, src).Effect);
+            Assert.Equal(taken ? new Jump(Target) : new NotTaken(), Run(inst, src).Effect);
+        }
+    }
+
+    public static TheoryData<uint> Values() => [.. Signed32.All];
+
+    [Theory]
+    [MemberData(nameof(Values))]
+    public void BranchLink_DeclaresRaAndCallsOnlyWhenTaken(uint rs) {
+        (string Mnemonic, bool Taken)[] cases = [("bgezal", 0 <= (int)rs), ("bltzal", (int)rs < 0)];
+        foreach((string m, bool taken) in cases) {
+            IExecute? inst = Asm(m, [GprId.T0, Target]);
+            AssertRegs(inst, [GprId.T0], [GprId.Ra]);
+            // 戻りアドレスは遅延スロットの有無で変わるのでランタイムが書く
+            Assert.Equal((taken ? new Call(Target) : (object)new NotTaken(), (uint?)Sentinel), Run(inst, rs));
         }
     }
 
@@ -99,10 +112,9 @@ public class ExecuteTests {
             (LoadOp<Lwr>.FromOperands(ops), LoadKind.Right, 0),
         ];
         foreach((IExecute? inst, LoadKind kind, uint mask) in cases) {
-            AssertRegs(inst, [GprId.T1], [GprId.T0]);
-            (object? effect, uint? dest) = Run(inst, baseValue);
-            Assert.Equal((addr.Addr & mask) != 0 ? new AddressError(addr, Store: false) : new Load(addr, kind), effect);
-            Assert.Equal(Sentinel, dest);
+            AssertRegs(inst, [GprId.T1], []);
+            (object? effect, _) = Run(inst, baseValue);
+            Assert.Equal((addr.Addr & mask) != 0 ? new AddressError(addr, Store: false) : new Load(addr, kind, GprId.T0), effect);
         }
     }
 
@@ -123,6 +135,56 @@ public class ExecuteTests {
             AssertRegs(inst, [GprId.T0, GprId.T1], []);
             Assert.Equal((addr.Addr & mask) != 0 ? new AddressError(addr, Store: true) : new Store(addr, kind, value), Run(inst, value, baseValue).Effect);
         }
+    }
+
+    [Theory]
+    [MemberData(nameof(Pairs))]
+    public void Trap_RaisesOnlyWhenTaken(uint rs, uint rt) {
+        foreach((string m, bool taken) in TrapCases(rs, rt, imm: false)) {
+            IExecute? inst = Asm(m, [GprId.T0, GprId.T1]);
+            AssertRegs(inst, [GprId.T0, GprId.T1], []);
+            Assert.Equal((taken ? new Raise(ExcCode.Tr) : (object)new Next(), (uint?)null), Run(inst, rs, rt));
+        }
+    }
+
+    public static TheoryData<uint, ushort> ImmPairs() {
+        TheoryData<uint, ushort> data = new();
+        foreach(uint a in Signed32.All) {
+            foreach(ushort b in Signed16.All) {
+                data.Add(a, b);
+            }
+        }
+        return data;
+    }
+
+    /// <summary>符号なしで比べる<c>tgeiu</c>, <c>tltiu</c>も即値を符号拡張する</summary>
+    [Theory]
+    [MemberData(nameof(ImmPairs))]
+    public void TrapImm_ComparesWithSignExtendedImmediate(uint rs, ushort imm) {
+        foreach((string m, bool taken) in TrapCases(rs, unchecked((uint)(short)imm), imm: true)) {
+            IExecute? inst = Asm(m, [GprId.T0, new Immediate(imm)]);
+            AssertRegs(inst, [GprId.T0], []);
+            Assert.Equal((taken ? new Raise(ExcCode.Tr) : (object)new Next(), (uint?)null), Run(inst, rs));
+        }
+    }
+
+    private static (string Mnemonic, bool Taken)[] TrapCases(uint rs, uint rt, bool imm) {
+        string i = imm ? "i" : "";
+        return [
+            ("teq" + i, rs == rt),
+            ("tne" + i, rs != rt),
+            ("tge" + i, (int)rt <= (int)rs),
+            ("tge" + i + "u", rt <= rs),
+            ("tlt" + i, (int)rs < (int)rt),
+            ("tlt" + i + "u", rs < rt),
+        ];
+    }
+
+    [Fact]
+    public void Trap_RejectsOtherForm() {
+        Assert.Null(Asm("teq", [GprId.T0, new Immediate(1)]));
+        Assert.Null(Asm("teqi", [GprId.T0, GprId.T1]));
+        Assert.Equal("tltiu $t0, -1", Asm("tltiu", [GprId.T0, new Immediate(0xffff)])?.Text);
     }
 
     public static TheoryData<ushort> Immediates() => [.. Unsigned16.All];
@@ -159,15 +221,15 @@ public class ExecuteTests {
     }
 
     [Fact]
-    public void Call_WritesReturnAddress() {
+    public void Call_DeclaresLinkRegister() {
         IExecute? jal = Jal.FromOperands([Target]);
-        AssertRegs(jal, [RName.Pc], [GprId.Ra]);
-        Assert.Equal((new Call(Target), (uint?)Pc + 4), Run(jal, Pc));
+        AssertRegs(jal, [], [GprId.Ra]);
+        Assert.Equal((new Call(Target), (uint?)Sentinel), Run(jal));
 
-        AssertRegs(Jalr.FromOperands([GprId.T9]), [RName.Pc, GprId.T9], [GprId.Ra]);
+        AssertRegs(Jalr.FromOperands([GprId.T9]), [GprId.T9], [GprId.Ra]);
         IExecute? jalr = Jalr.FromOperands([GprId.T0, GprId.T0]);
-        AssertRegs(jalr, [RName.Pc, GprId.T0], [GprId.T0]);
-        Assert.Equal((new Call(Target), (uint?)Pc + 4), Run(jalr, Pc, Target.Addr));
+        AssertRegs(jalr, [GprId.T0], [GprId.T0]);
+        Assert.Equal((new Call(Target), (uint?)Sentinel), Run(jalr, Target.Addr));
     }
 
     [Fact]

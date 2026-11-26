@@ -14,7 +14,7 @@ public readonly record struct Running;
 /// 例外が発生し, まだ例外ベクタへ移っていない.
 /// </summary>
 /// <param name="Code">例外の種類</param>
-/// <param name="Epc">例外を起こした命令のアドレス</param>
+/// <param name="Epc">例外を起こした命令のアドレス. 分岐遅延スロットの命令なら分岐の命令のアドレス</param>
 public readonly record struct ExceptionRaised(ExcCode Code, Address Epc);
 
 /// <summary>デバッギが終了した</summary>

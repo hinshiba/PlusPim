@@ -70,10 +70,15 @@
 								"items": {
 									"type": "string"
 								},
-								"description": "Path to the MIPS assembly file (string) or an array of paths. The runtime will normalize either form.",
+								"description": "Path to the MIPS assembly file (string) or an array of paths. A relative path is resolved against cwd.",
 								"default": [
 									"${file}"
 								]
+							},
+							"cwd": {
+								"type": "string",
+								"description": "Absolute directory that relative paths in program are resolved against. Without it, every path in program must be absolute.",
+								"default": "${workspaceFolder}"
 							},
 							"stopOnEntry": {
 								"type": "boolean",
@@ -123,7 +128,7 @@
 		"dotnet:publish:linux": "bun scripts/vsix.ts --publish-only linux-x64",
 		"dotnet:publish:mac-x64": "bun scripts/vsix.ts --publish-only darwin-x64",
 		"dotnet:publish:mac-arm64": "bun scripts/vsix.ts --publish-only darwin-arm64",
-		"dotnet:debug:win": "dotnet publish ../../src/PlusPim/PlusPim.csproj -c Debug -r win-x64 --self-contained -o ./bin/debug",
+		"dotnet:debug:win": "dotnet publish ../../src/PlusPim/PlusPim.csproj -c Debug -r win-x64 -o ./bin/debug",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"test": "bun test ./test",

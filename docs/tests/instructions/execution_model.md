@@ -12,7 +12,8 @@
 
 ## 共通
 
-- PC の変更は `Jump`，`Call`，`ExceptionReturn` で表し，PC を `Dest` に宣言しない
+- PC の変更は `Jump`，`Call`，`NotTaken`，`ExceptionReturn` で表し，PC を `Dest` に宣言しない
+- 戻りアドレスはランタイムが `Dest[0]` に書く．リンクする命令は PC を `Src` に宣言しない
 - 書いてあること以外は返さず，書き込まないことを原則とする
 
 ## 正常系(例外を起こさない系)

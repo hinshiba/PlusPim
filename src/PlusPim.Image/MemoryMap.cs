@@ -1,4 +1,5 @@
 using PlusPim.Instructions;
+using System.Diagnostics;
 
 namespace PlusPim.Image;
 
@@ -60,7 +61,7 @@ public static class MemoryMap {
             SegmentKind.Text => Text,
             SegmentKind.KText => KText,
             SegmentKind.Data => Data,
-            _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+            _ => throw new UnreachableException(),
         };
     }
 }

@@ -28,7 +28,7 @@ public class MnemonicTests {
         Add(["sll", "srl", "sra"], "$t0, $t1, 4", T0, T1, Imm(4));
         Add(["lui"], "$t0, 0x1000", T0, Imm(0x1000));
         Add(["beq", "bne"], "$t0, $t1, label", T0, T1, T);
-        Add(["bgez", "bgtz", "blez", "bltz"], "$t0, label", T0, T);
+        Add(["bgez", "bgtz", "blez", "bltz", "bgezal", "bltzal"], "$t0, label", T0, T);
         Add(["j", "jal"], "label", T);
         Add(["jr"], "$ra", Ra);
         Add(["jalr"], "$t0", T0);
@@ -39,6 +39,8 @@ public class MnemonicTests {
         Add(["sb", "sh", "sw", "swl", "swr"], "$t0, 4($sp)", T0, Sp4);
         Add(["mfc0", "mtc0"], "$t0, $12", T0, (GprId)12);
         Add(["syscall", "break", "eret", "runtime_call!"], "");
+        Add(["teq", "tne", "tge", "tgeu", "tlt", "tltu"], "$t0, $t1", T0, T1);
+        Add(["teqi", "tnei", "tgei", "tgeiu", "tlti", "tltiu"], "$t0, -1", T0, Imm(-1));
         return d;
     }
 

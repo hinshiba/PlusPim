@@ -1,4 +1,7 @@
+using PlusPim.Dbg;
 using PlusPim.Image;
+using PlusPim.Instructions;
+using System.Buffers.Binary;
 using static PlusPim.Asm.Tests.Harness;
 using static PlusPim.Instructions.GprId;
 
@@ -47,6 +50,7 @@ public class PseudoTests {
     [InlineData("move $t0")]
     [InlineData("move $t0, 1")]
     [InlineData("nop $t0")]
+    [InlineData("divi $t0, $t1, 2")]
     public void WrongOperands_LineIsDropped(string line) {
         AssemblyResult r = Assemble(Head + line);
         r.AssertCodes(WarningCode.OperandMismatch);
@@ -163,6 +167,106 @@ public class PseudoTests {
         AssertSame(I("mflo", T0), r.Fetch(1));
         AssertSame(I("div", T1, T2), r.Fetch(2));
         AssertSame(I("mfhi", T3), r.Fetch(3));
+    }
+
+    [Theory]
+    [InlineData(5u, 5u)]
+    [InlineData(0xfffffffbu, 5u)]
+    [InlineData(0u, 0u)]
+    [InlineData(0x7fffffffu, 0x7fffffffu)]
+    [InlineData(0x80000001u, 0x7fffffffu)]
+    [InlineData(0x80000000u, 0x80000000u)]
+    public void Abs_ComputesWithoutOverflowException(uint src, uint expected) {
+        foreach((string line, GprId rd) in new[] { ("abs $t0, $t1", T0), ("abs $t1, $t1", T1) }) {
+            AssemblyResult r = Assemble(Head + line);
+            r.AssertCodes();
+            Assert.Equal(3, Span(r).Count);
+            Assert.Equal(expected, r.Run(3, (T1, src), (T0, 0xdeadbeef))[(int)rd]);
+        }
+    }
+
+    [Fact]
+    public void Divi_WritesQuotient() {
+        AssemblyResult r = Assemble(Head + "li $t1, -7\nli $t2, -2\ndivi $t0, $t1, $t2");
+        r.AssertCodes();
+        Assert.Equal(2, r.Prog().DebugInfo.SourceMap.PseudosIn(PathOf(0)).Last().Count);
+        Assert.Equal(3u, r.Exec().Core.Registers[T0]);
+    }
+
+    /// <summary>分岐の遅延スロットが有効なら <c>li</c> は遅延スロットで実行され, 戻りアドレスはその次になる</summary>
+    [Theory]
+    [InlineData(DelaySlotsConfig.All, 8u, 1u)]
+    [InlineData(DelaySlotsConfig.Load, 4u, 0u)]
+    public void Bal_CallsLabelAndLinksRa(DelaySlotsConfig slots, uint link, uint t0) {
+        AssemblyResult r = Assemble(Head + "bal f\nli $t0, 1\nf: nop");
+        r.AssertCodes();
+        AssertSame(I("bgezal", Zero, T + 8), r.Fetch(0));
+        StateView s = r.Exec(slots);
+        Assert.Equal((T + link).Addr, s.Core.Registers[Ra]);
+        Assert.Equal(t0, s.Core.Registers[T0]);
+        Assert.Equal(1, s.Core.Depth);
+    }
+
+    /// <summary>上位バイトの符号ビットが交互に立つ8バイト. <c>x</c>が先頭, <c>y</c>が4バイト目を指す</summary>
+    private static readonly byte[] Bytes = [0x81, 0x92, 0x13, 0xa4, 0x35, 0x46, 0xd7, 0x68];
+    private static readonly string Data = "\n.data\nx: .byte 0x81, 0x92, 0x13, 0xa4\ny: .byte 0x35, 0x46, 0xd7, 0x68";
+
+    public static TheoryData<int> Alignments() => [0, 1, 2, 3];
+
+    [Theory]
+    [MemberData(nameof(Alignments))]
+    public void UnalignedLoad_ReadsLittleEndian(int k) {
+        ReadOnlySpan<byte> b = Bytes.AsSpan(k);
+        uint w = BinaryPrimitives.ReadUInt32LittleEndian(b);
+        uint h = unchecked((uint)BinaryPrimitives.ReadInt16LittleEndian(b));
+        uint hu = BinaryPrimitives.ReadUInt16LittleEndian(b);
+        (string Line, GprId Rt, uint Expected)[] cases = [
+            ($"ulw $t0, {k}($t1)", T0, w), ($"ulw $t1, {k}($t1)", T1, w), ($"ulw $t0, {k - 4}($t2)", T0, w),
+            ($"ulh $t0, {k}($t1)", T0, h), ($"ulh $t1, {k}($t1)", T1, h), ($"ulh $t0, {k - 4}($t2)", T0, h),
+            ($"ulhu $t0, {k}($t1)", T0, hu), ($"ulhu $t1, {k}($t1)", T1, hu), ($"ulhu $t0, {k - 4}($t2)", T0, hu),
+        ];
+        // 展開はロード遅延スロットの有無によらない. 末尾のnopは展開の最後のロードの遅延スロットである
+        foreach((string line, GprId rt, uint expected) in cases) {
+            AssemblyResult r = Assemble(Head + "li $t0, 0xdeadbeef\nla $t1, x\nla $t2, y\n" + line + "\nnop" + Data);
+            r.AssertCodes();
+            foreach(DelaySlotsConfig slots in new[] { DelaySlotsConfig.All, DelaySlotsConfig.None }) {
+                Assert.Equal(expected, r.Exec(slots).Core.Registers[rt]);
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Alignments))]
+    public void UnalignedStore_WritesLittleEndian(int k) {
+        foreach((string m, int n) in new[] { ("usw", 4), ("ush", 2) }) {
+            AssemblyResult r = Assemble(Head + $"li $t0, 0x8899aabb\nla $t1, x\n{m} $t0, {k}($t1)" + Data);
+            r.AssertCodes();
+            byte[] expected = [.. Bytes];
+            BitConverter.GetBytes(0x8899aabbu).AsSpan(0, n).CopyTo(expected.AsSpan(k));
+            byte[] actual = new byte[8];
+            r.Exec().ReadMemory(D, actual);
+            Assert.Equal(expected, actual);
+        }
+    }
+
+    /// <summary>展開で足すオフセット(<c>ulw</c>, <c>usw</c>は3, 半語は1)まで符号付き16bitに収まる</summary>
+    [Theory]
+    [InlineData("ulw $t0, 32764($t1)", true)]
+    [InlineData("ulw $t0, 32765($t1)", false)]
+    [InlineData("usw $t0, 32767($t1)", false)]
+    [InlineData("ulh $t0, 32766($t1)", true)]
+    [InlineData("ulhu $t0, 32767($t1)", false)]
+    [InlineData("ush $t0, 32767($t1)", false)]
+    [InlineData("ulw $t0, -32768($t1)", true)]
+    [InlineData("ulw $t0, -32769($t1)", false)]
+    [InlineData("ulw $t0, 0xffff($t1)", false)]
+    public void Unaligned_OffsetRange(string line, bool ok) {
+        AssemblyResult r = Assemble(Head + line);
+        if(ok) {
+            r.AssertCodes();
+        } else {
+            r.AssertFails(ErrorCode.ValueOutOfRange);
+        }
     }
 
     [Theory]

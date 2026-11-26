@@ -1,4 +1,4 @@
-name: C# CI Formatting
+name: C# CI
 
 on:
   pull_request:
@@ -10,8 +10,30 @@ permissions:
   contents: read
 
 jobs:
-  build-format:
-    name: Build, Format Check
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # scripts/lint/ の規約は scripts/lint/README.md を参照
+      - name: Run scripts/lint
+        run: |
+          shellcheck -s sh scripts/lint/*.sh scripts/build/*.sh scripts/test/*.sh
+          status=0
+          for check in scripts/lint/*.sh; do
+            echo "::group::$check"
+            sh "$check" || { echo "::error file=$check::failed"; status=1; }
+            echo "::endgroup::"
+          done
+          exit $status
+
+  build-test:
+    name: Build, Format, Test
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +50,47 @@ jobs:
       # フォーマット違反がある場合はエラー
       - name: Check Formatting
         run: dotnet format --verify-no-changes --verbosity diagnostic PlusPim.slnx
+
+      - name: Build
+        run: dotnet build PlusPim.slnx
+
+      # SstTestsはデータがなければスキップするので，CIでは必ず取得する
+      - name: Fetch SingleStepTests
+        run: sh scripts/test/fetch-sst.sh
+
+      - name: Test
+        run: dotnet test --solution PlusPim.slnx --no-build
+
+  # トリミングとAOTの問題を防ぐ
+  publish:
+    name: Publish ${{ matrix.rid }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64, runner: windows-latest, exe: pluspim.exe }
+          - { rid: linux-x64, runner: ubuntu-latest, exe: pluspim }
+          - { rid: linux-arm64, runner: ubuntu-24.04-arm, exe: pluspim }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73
+        with:
+          global-json-file: global.json
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d
+
+      - name: Publish
+        shell: bash
+        run: sh scripts/build/publish.sh "${{ matrix.rid }}" publish
+
+      - name: DAP smoke test
+        shell: bash
+        run: uv run tests/smoke/dap_smoke.py "publish/${{ matrix.exe }}"

@@ -36,19 +36,24 @@ const rid = RIDS[target];
 // 以前のビルドの残骸を同梱しない
 rmSync(join(root, releaseDir(rid)), { recursive: true, force: true });
 
-const published = run("dotnet", [
-	"publish",
-	"../../src/PlusPim/PlusPim.csproj",
-	"-c",
-	"Release",
-	"-r",
-	rid,
-	"--self-contained",
-	"-o",
-	`./${releaseDir(rid)}`,
-	"-p:DebugType=none",
-	"-p:DebugSymbols=false",
-]);
+// linux-x64はリリースと同じglibcの下限にするため, コンテナでビルドするスクリプトに任せる
+const published =
+	rid === "linux-x64"
+		? run("sh", [
+				"../../scripts/build/publish.sh",
+				rid,
+				`clients/vscode/${releaseDir(rid)}`,
+			])
+		: run("dotnet", [
+				"publish",
+				"../../src/PlusPim/PlusPim.csproj",
+				"-c",
+				"Release",
+				"-r",
+				rid,
+				"-o",
+				`./${releaseDir(rid)}`,
+			]);
 
 if (published && !publishOnly) {
 	// vsceの否定パターンは他の除外より優先されるので，対象ディレクトリはpublish前に空にしてある

@@ -39,7 +39,7 @@ public sealed class BranchOp<TOp>(GprId rs, GprId rt, Address target): IAssemble
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
-        return TOp.Taken(src[0], src[1]) ? new Effect(new Jump(target)) : new Effect(new Next());
+        return TOp.Taken(src[0], src[1]) ? new Effect(new Jump(target)) : new Effect(new NotTaken());
     }
 }
 
@@ -65,6 +65,34 @@ public sealed class BranchZOp<TOp>(GprId rs, Address target): IAssemblerable, IE
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
-        return TOp.Taken(unchecked((int)src[0])) ? new Effect(new Jump(target)) : new Effect(new Next());
+        return TOp.Taken(unchecked((int)src[0])) ? new Effect(new Jump(target)) : new Effect(new NotTaken());
+    }
+}
+
+/// <summary>
+/// ゼロと比べる条件分岐で, 成否によらず戻りアドレスを$raに保存する
+/// </summary>
+/// <typeparam name="TOp">条件</typeparam>
+/// <param name="rs">rsレジスタ番号</param>
+/// <param name="target">成立時の呼び出し先</param>
+/// <remarks>成立時はサブルーチンの呼び出しになる. 戻りアドレスはランタイムが書く</remarks>
+public sealed class BranchZLinkOp<TOp>(GprId rs, Address target): IAssemblerable, IExecute
+    where TOp : struct, IBranchZOp {
+
+    public static string Mnemonic { get; } = TOp.Mnemonic + "al";
+    private static readonly RegisterName Ra = GprId.Ra;
+    private readonly RegisterName _rs = rs;
+
+    public ReadOnlySpan<RegisterName> Src => new(in this._rs);
+    public ReadOnlySpan<RegisterName> Dest => new(in Ra);
+
+    public string Text => Syntax.Of(Mnemonic, this._rs.AsmName(), target.ToString());
+
+    public static IExecute? FromOperands(ReadOnlySpan<Operand> operands) {
+        return operands is [GprId s, Address a] ? new BranchZLinkOp<TOp>(s, a) : null;
+    }
+
+    public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
+        return TOp.Taken(unchecked((int)src[0])) ? new Effect(new Call(target)) : new Effect(new NotTaken());
     }
 }

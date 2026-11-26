@@ -39,4 +39,9 @@ public enum ExcCode: byte {
     /// 算術オーバーフロー
     /// </summary>
     Ov = 12,
+
+    /// <summary>
+    /// トラップ
+    /// </summary>
+    Tr = 13,
 }

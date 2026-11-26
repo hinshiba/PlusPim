@@ -20,8 +20,8 @@ internal readonly record struct Goal(Granularity? Granularity, int MaxDepth) {
     }
 
     /// <summary>実行中で, 目標の深さ以下の単位の境界にいる</summary>
-    public bool Reached(StateView v, Rules r) {
-        return this.Granularity is Granularity g && v.Depth <= this.MaxDepth && r.OnBoundary(g, v);
+    public bool Reached(in Core c, Rules r) {
+        return this.Granularity is Granularity g && c.Depth <= this.MaxDepth && r.OnBoundary(g, c);
     }
 }
 
@@ -37,27 +37,27 @@ internal readonly record struct Rules(FrozenSet<Address> Breakpoints, uint Filte
     }
 
     /// <summary>実行中で, ブレークポイントの位置にいる</summary>
-    public bool OnBreakpoint(StateView v) {
-        return v.Status is Running && this.Breakpoints.Contains(v.Pc);
+    public bool OnBreakpoint(in Core c) {
+        return c.Status is Running && this.Breakpoints.Contains(c.Pc);
     }
 
     /// <summary>実行中で, <paramref name="g"/> の単位の境界にいる</summary>
-    public bool OnBoundary(Granularity g, StateView v) {
-        return v.Status is Running && (g == Granularity.Instruction || this.Lines.StartsLine(v.Pc));
+    public bool OnBoundary(Granularity g, in Core c) {
+        return c.Status is Running && (g == Granularity.Instruction || this.Lines.StartsLine(c.Pc));
     }
 }
 
 /// <summary>
-/// 1ステップごとに止まるかを決める
+/// 位置ごとに止まるかを決める. 判定はその位置の状態だけで決まり, 前後の位置によらない
 /// </summary>
 internal static class Judge {
     /// <summary>
     /// 1ステップ進めた, または進めなかった後の判定
     /// </summary>
     /// <returns>止まらないなら <see langword="null"/></returns>
-    public static Stop? Forward(Goal g, StateView v, Rules r) {
-        return v.Status switch {
-            Running => Arrived(g, v, r),
+    public static Stop? Forward(Goal g, in Core c, Rules r) {
+        return c.Status switch {
+            Running => Arrived(g, c, r),
             ExceptionRaised t => r.Catches(t.Code) ? t : null,
             Exited e => e,
             RuntimeErrorRaised f => f,
@@ -65,20 +65,13 @@ internal static class Judge {
     }
 
     /// <summary>
-    /// 1ステップ戻った後の判定. 実行していないので例外では止まらない
-    /// </summary>
-    /// <param name="moved">戻れたか</param>
-    public static Stop? Backward(bool moved, Goal g, StateView v, Rules r) {
-        return moved ? Arrived(g, v, r) : new HistoryStart();
-    }
-
-    /// <summary>
-    /// 移った先の位置による判定. 両方向で共通で, ブレークポイントを目標より優先する
+    /// 移った先の位置による判定. 両方向で共通で, ブレークポイントを目標より優先する.
+    /// 戻るときは実行していないので例外では止まらず, これだけを使う
     /// </summary>
     /// <returns>止まらないなら <see langword="null"/></returns>
-    private static Stop? Arrived(Goal g, StateView v, Rules r) {
-        return r.OnBreakpoint(v) ? new Breakpoint()
-            : g.Reached(v, r) ? new Stepped()
+    public static Stop? Arrived(Goal g, in Core c, Rules r) {
+        return r.OnBreakpoint(c) ? new Breakpoint()
+            : g.Reached(c, r) ? new Stepped()
             : null;
     }
 }

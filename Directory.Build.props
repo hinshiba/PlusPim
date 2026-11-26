@@ -4,12 +4,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
     <UseArtifactsOutput>true</UseArtifactsOutput>
 
-    <!-- 現時点ではAOTで配布はしないが対応可能な状態を維持する -->
+    <!-- AOT対応可能な状態を維持する -->
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
     <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2057;IL2067;IL2075;IL2104;IL3050;IL3053;SYSLIB1220</WarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 </Project>

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Pass the programs to PlusPim through the `program` of the `launch` request instead of command-line arguments.
+  A relative path in `program` is resolved against the new `cwd` launch option; without `cwd`, every path must be absolute
+
 ## [0.4.0] - YYYY-MM-DD
 
 ### Changed

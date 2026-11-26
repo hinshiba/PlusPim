@@ -1,16 +1,15 @@
 namespace PlusPim.Instructions.Instructions;
 
 /// <summary>
-/// 次の命令のアドレスを$raに保存してジャンプする
+/// 戻りアドレスを$raに保存してジャンプする
 /// </summary>
 /// <param name="target">呼び出し先</param>
-/// <remarks>遅延スロットを持たないとしたときの戻りアドレスである</remarks>
+/// <remarks>遅延スロットの有無が必要であるため戻りアドレスはランタイムが書き込む</remarks>
 public sealed class Jal(Address target): IAssemblerable, IExecute {
     public static string Mnemonic => "jal";
-    private static readonly RegisterName Pc = RName.Pc;
     private static readonly RegisterName Ra = GprId.Ra;
 
-    public ReadOnlySpan<RegisterName> Src => new(in Pc);
+    public ReadOnlySpan<RegisterName> Src => [];
     public ReadOnlySpan<RegisterName> Dest => new(in Ra);
 
     public string Text => Syntax.Of(Mnemonic, target.ToString());
@@ -20,7 +19,6 @@ public sealed class Jal(Address target): IAssemblerable, IExecute {
     }
 
     public Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest) {
-        dest[0] = unchecked(src[0] + 4);
         return new Effect(new Call(target));
     }
 }

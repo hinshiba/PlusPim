@@ -19,6 +19,7 @@ public static class InstructionSet {
         Of<Lui>(),
         Of<BranchOp<Beq>>(), Of<BranchOp<Bne>>(),
         Of<BranchZOp<Bgez>>(), Of<BranchZOp<Bgtz>>(), Of<BranchZOp<Blez>>(), Of<BranchZOp<Bltz>>(),
+        Of<BranchZLinkOp<Bgez>>(), Of<BranchZLinkOp<Bltz>>(),
         Of<J>(), Of<Jal>(), Of<Jr>(), Of<Jalr>(),
         Of<HiLoOp<Mult>>(), Of<HiLoOp<Multu>>(), Of<HiLoOp<Div>>(), Of<HiLoOp<Divu>>(),
         Of<MoveOp<Mfhi>>(), Of<MoveOp<Mflo>>(), Of<MoveOp<Mthi>>(), Of<MoveOp<Mtlo>>(),
@@ -26,6 +27,8 @@ public static class InstructionSet {
         Of<LoadOp<Lwl>>(), Of<LoadOp<Lwr>>(),
         Of<StoreOp<Sb>>(), Of<StoreOp<Sh>>(), Of<StoreOp<Sw>>(), Of<StoreOp<Swl>>(), Of<StoreOp<Swr>>(),
         Of<Syscall>(), Of<Break>(),
+        Of<TrapOp<Teq>>(), Of<TrapOp<Tne>>(), Of<TrapOp<Tge>>(), Of<TrapOp<Tgeu>>(), Of<TrapOp<Tlt>>(), Of<TrapOp<Tltu>>(),
+        Of<TrapImmOp<Teq>>(), Of<TrapImmOp<Tne>>(), Of<TrapImmOp<Tge>>(), Of<TrapImmOp<Tgeu>>(), Of<TrapImmOp<Tlt>>(), Of<TrapImmOp<Tltu>>(),
         Of<Privileged<RuntimeCall>>(), Of<Privileged<Eret>>(), Of<Privileged<Mfc0>>(), Of<Privileged<Mtc0>>(),
     }.ToFrozenDictionary(StringComparer.Ordinal);
 

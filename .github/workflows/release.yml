@@ -9,12 +9,13 @@ permissions:
   contents: read
 
 env:
-  # WARN: Dependabot の対象外
+  # WARN: Dependabot の対象外．ほかのファイルと同じdigestにすること(CI検査あり)
   ALPINE_IMAGE: alpine:3.22@sha256:2e0b81d60597f449baa56dc25d355367869d2dca4cd57e866f1e2b52af3eb55f
+  GLIBC_IMAGE: docker.io/library/almalinux:8@sha256:768bedc30fe0a536adb0a65d2eddb7caad364e514fbddd0ae9e026975f590342
 
 jobs:
-  build:
-    name: Build
+  version:
+    name: Check version
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -42,42 +43,85 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Publish and archive
+  build:
+    name: Build ${{ matrix.target }}
+    needs: version
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        # AOTのRIDはターゲットと同じOSでしかビルドできない
+        include:
+          - { target: win-x64, rid: win-x64, runner: windows-latest }
+          - { target: win-arm64, rid: win-arm64, runner: ubuntu-latest }
+          - { target: linux-glibc-x64, rid: linux-x64, runner: ubuntu-latest }
+          - { target: linux-glibc-arm64, rid: linux-arm64, runner: ubuntu-latest }
+          - { target: linux-musl-x64, rid: linux-musl-x64, runner: ubuntu-latest }
+          - { target: linux-musl-arm64, rid: linux-musl-arm64, runner: ubuntu-latest }
+          - { target: osx-x64, rid: osx-x64, runner: ubuntu-latest }
+          - { target: osx-arm64, rid: osx-arm64, runner: ubuntu-latest }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73
+        with:
+          global-json-file: global.json
+
+      - name: Publish
+        shell: bash
+        run: sh scripts/build/publish.sh "${{ matrix.rid }}" "publish/${{ matrix.target }}"
+
+      - name: Upload binary
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bin-${{ matrix.target }}
+          path: publish/${{ matrix.target }}/
+          if-no-files-found: error
+
+  package:
+    name: Package
+    needs: [version, build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Download binaries
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: bin-*
+          path: bin
+
+      - name: Archive
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
           set -eu
           mkdir dist
-          # target:RID:拡張子
-          for spec in \
-            win-x64:win-x64:zip \
-            win-arm64:win-arm64:zip \
-            linux-glibc-x64:linux-x64:tar.gz \
-            linux-glibc-arm64:linux-arm64:tar.gz \
-            linux-musl-x64:linux-musl-x64:tar.gz \
-            linux-musl-arm64:linux-musl-arm64:tar.gz \
-            osx-x64:osx-x64:tar.gz \
-            osx-arm64:osx-arm64:tar.gz
-          do
-            IFS=: read -r target rid ext <<< "$spec"
-            out="publish/$target"
-            dotnet publish src/PlusPim/PlusPim.csproj -c Release -r "$rid" --self-contained \
-              -p:PublishSingleFile=true \
-              -p:PublishReadyToRun=true \
-              -p:IncludeNativeLibrariesForSelfExtract=true \
-              -p:GenerateDocumentationFile=false \
-              -o "$out"
-            cp LICENSE README.md "$out/"
-            name="pluspim-$VERSION-$target.$ext"
-            case "$ext" in
-              zip) (cd "$out" && zip -X -q "$GITHUB_WORKSPACE/dist/$name" pluspim.exe LICENSE README.md) ;;
-              tar.gz)
-                chmod 755 "$out/pluspim"
-                tar -czf "dist/$name" --owner=0 --group=0 -C "$out" pluspim LICENSE README.md
+          for dir in bin/bin-*; do
+            target="${dir#bin/bin-}"
+            cp LICENSE README.md "$dir/"
+            case "$target" in
+              win-*)
+                name="pluspim-$VERSION-$target.zip"
+                (cd "$dir" && zip -X -q "$GITHUB_WORKSPACE/dist/$name" pluspim.exe LICENSE README.md)
+                ;;
+              *)
+                name="pluspim-$VERSION-$target.tar.gz"
+                # アーティファクトは実行権限を保たない
+                chmod 755 "$dir/pluspim"
+                tar -czf "dist/$name" --owner=0 --group=0 -C "$dir" pluspim LICENSE README.md
                 ;;
             esac
           done
-          cp install/install.sh install/install.ps1 dist/
+          cp scripts/install/install.sh scripts/install/install.ps1 dist/
           (cd dist && sha256sum --text -- * > SHA256SUMS)
           cat dist/SHA256SUMS
 
@@ -89,8 +133,8 @@ jobs:
           if-no-files-found: error
 
   verify:
-    name: Verify ${{ matrix.target }}
-    needs: build
+    name: Verify ${{ matrix.target }}${{ matrix.image && format(' ({0})', matrix.image) || '' }}
+    needs: [version, package]
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -99,9 +143,11 @@ jobs:
           - { target: win-x64, runner: windows-latest }
           - { target: win-arm64, runner: windows-11-arm }
           - { target: linux-glibc-x64, runner: ubuntu-latest }
+          # 公称するglibcの下限で動くことを確かめる
+          - { target: linux-glibc-x64, runner: ubuntu-latest, image: glibc }
           - { target: linux-glibc-arm64, runner: ubuntu-24.04-arm }
-          - { target: linux-musl-x64, runner: ubuntu-latest, alpine: true }
-          - { target: linux-musl-arm64, runner: ubuntu-24.04-arm, alpine: true }
+          - { target: linux-musl-x64, runner: ubuntu-latest, image: alpine }
+          - { target: linux-musl-arm64, runner: ubuntu-24.04-arm, image: alpine }
           - { target: osx-x64, runner: macos-15-intel }
           - { target: osx-arm64, runner: macos-latest }
 
@@ -115,9 +161,9 @@ jobs:
       - name: Check --version
         shell: bash
         env:
-          VERSION: ${{ needs.build.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
           TARGET: ${{ matrix.target }}
-          IN_ALPINE: ${{ matrix.alpine || false }}
+          IMAGE: ${{ matrix.image || '' }}
         run: |
           set -eu
           cd dist
@@ -132,13 +178,15 @@ jobs:
             *.zip) unzip -q "$name" -d x ;;
             *) tar -xzf "$name" -C x ;;
           esac
-          if [ "$IN_ALPINE" = true ]; then
+          case "$IMAGE" in
             # singlefilehost が動的リンクする依存を入れ，利用者と同じ前提で確かめる
-            actual="$(docker run --rm -v "$PWD/x:/x:ro" "$ALPINE_IMAGE" \
-              sh -c 'apk add --no-cache -q libstdc++ libgcc && /x/pluspim --version')"
-          else
-            actual="$("$exe" --version | tr -d '\r')"
-          fi
+            alpine)
+              actual="$(docker run --rm -v "$PWD/x:/x:ro" "$ALPINE_IMAGE" \
+                sh -c 'apk add --no-cache -q libstdc++ libgcc && /x/pluspim --version')"
+              ;;
+            glibc) actual="$(docker run --rm -v "$PWD/x:/x:ro" "$GLIBC_IMAGE" /x/pluspim --version)" ;;
+            *) actual="$("$exe" --version | tr -d '\r')" ;;
+          esac
           echo "$actual"
           case "$actual" in
             "PlusPim $VERSION" | "PlusPim $VERSION+"*) ;;
@@ -147,7 +195,7 @@ jobs:
 
   release:
     name: Draft release
-    needs: [build, verify]
+    needs: [version, verify]
     runs-on: ubuntu-latest
     # 要レビュワー環境で実施する
     # 書き込み権限のトークンはここのみとする
@@ -182,7 +230,7 @@ jobs:
       - name: Create draft release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ needs.build.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
           set -eu
           prerelease=""

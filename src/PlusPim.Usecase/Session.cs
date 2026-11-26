@@ -48,11 +48,8 @@ public readonly record struct PseudoExpansion(int Line, string Mnemonic, Immutab
 /// 違反は <see cref="InvalidOperationException"/> とする.
 /// </remarks>
 public sealed class Session: IDisposable {
-    /// <summary>取り消しの確認と出力の書き出しをするステップ数</summary>
-    private const int BatchSize = 4096;
-
-    private readonly Debuggee _debuggee;
-    /// <summary><see cref="_debuggee"/> の出力のうち書き出していないもの</summary>
+    private readonly Timeline _timeline;
+    /// <summary><see cref="_timeline"/> の出力のうち書き出していないもの</summary>
     private readonly ArrayBufferWriter<byte> _pending;
     private readonly Stream _output;
     private readonly ChannelReader<byte[]> _input;
@@ -69,10 +66,10 @@ public sealed class Session: IDisposable {
     /// <summary>不変なので実行中も読める</summary>
     private readonly AssembledProgram _program;
 
-    private Session(AssembledProgram program, ArrayBufferWriter<byte> pending, Stream output, ChannelReader<byte[]> input, CancellationTokenSource pump) {
+    private Session(AssembledProgram program, DelaySlotsConfig slots, ArrayBufferWriter<byte> pending, Stream output, ChannelReader<byte[]> input, CancellationTokenSource pump) {
         this._program = program;
         this._pending = pending;
-        this._debuggee = Debuggee.Load(program.Image, pending);
+        this._timeline = Timeline.Load(program.Image, slots, pending);
         this._output = output;
         this._input = input;
         this._pump = pump;
@@ -84,9 +81,10 @@ public sealed class Session: IDisposable {
     /// <param name="paths">配置する順のソース</param>
     /// <param name="reader">ソースを読む方法</param>
     /// <param name="strict">警告があれば失敗にする</param>
+    /// <param name="slots">有効にする遅延スロット</param>
     /// <param name="input">デバッギの入力. 0バイトの読み込みを EOF とする</param>
     /// <param name="output">デバッギの出力</param>
-    public static LoadResult Load(IEnumerable<SourcePath> paths, ISourceReader reader, bool strict, Stream input, Stream output) {
+    public static LoadResult Load(IEnumerable<SourcePath> paths, ISourceReader reader, bool strict, DelaySlotsConfig slots, Stream input, Stream output) {
         AssemblyResult r = Assembler.Assemble(paths, reader);
         if(r.Program is not AssembledProgram p || (strict && !r.Diagnostics.IsEmpty)) {
             return new LoadResult(null, r.Diagnostics);
@@ -95,7 +93,7 @@ public sealed class Session: IDisposable {
         CancellationTokenSource pump = new();
         // stdin の ReadAsync は取り消しに従わないことがあるので, 別のタスクで読んで待ちを取り消せるようにする
         _ = Task.Run(() => PumpAsync(input, channel.Writer, pump));
-        return new LoadResult(new Session(p, new(), output, channel.Reader, pump), r.Diagnostics);
+        return new LoadResult(new Session(p, slots, new(), output, channel.Reader, pump), r.Diagnostics);
     }
 
     /// <summary>入力を読み終わるまで <paramref name="w"/> へ移す</summary>
@@ -121,7 +119,7 @@ public sealed class Session: IDisposable {
     /// <param name="ct">取り消すと <see cref="Paused"/> で止まる</param>
     public Task<Stop> RunAsync(Motion motion, CancellationToken ct = default) {
         return this.ExclusiveAsync(() => {
-            int depth = this._debuggee.View.Depth;
+            int depth = this._timeline.View.Core.Depth;
             return motion switch {
                 StepIn m => this.ForwardAsync(Goal.Any(m.Granularity), ct),
                 StepOver m => this.ForwardAsync(new(m.Granularity, depth), ct),
@@ -187,7 +185,7 @@ public sealed class Session: IDisposable {
     /// ライブフレームを先頭とするフレームの列. 停止中のみ
     /// </summary>
     public ImmutableArray<StackFrame> Frames() {
-        StateView v = this.Idle;
+        Core v = this.Idle.Core;
         DebugInfo info = this._program.DebugInfo;
         ImmutableArray<StackFrame>.Builder frames = ImmutableArray.CreateBuilder<StackFrame>(v.Depth + 1);
         Address pc = v.Pc;
@@ -218,7 +216,7 @@ public sealed class Session: IDisposable {
     private StateView Idle {
         get {
             this.EnsureIdle();
-            return this._debuggee.View;
+            return this._timeline.View;
         }
     }
 
@@ -248,16 +246,15 @@ public sealed class Session: IDisposable {
         try {
             while(!ct.IsCancellationRequested) {
                 Rules rules = this.Rules;
-                for(int i = 0; i < BatchSize; i++) {
-                    if(this._debuggee.Step() == StepResult.NeedInput) {
-                        await this.FlushAsync();
-                        await this.FeedAsync(ct);
-                    } else if(Judge.Forward(g, this._debuggee.View, rules) is { } s) {
-                        return s;
-                    }
+                Scan r = this._timeline.Forward((in Core c) => Judge.Forward(g, c, rules), out Stop s);
+                if(r == Scan.Hit) {
+                    return s;
                 }
                 // 終わらないループの出力も見えるようにする
                 await this.FlushAsync();
+                if(r == Scan.NeedInput) {
+                    await this.FeedAsync(ct);
+                }
             }
         } catch(OperationCanceledException) when(ct.IsCancellationRequested) {
             // 入力待ちの取り消し
@@ -268,10 +265,11 @@ public sealed class Session: IDisposable {
     private Stop Backward(Goal g, CancellationToken ct) {
         while(!ct.IsCancellationRequested) {
             Rules rules = this.Rules;
-            for(int i = 0; i < BatchSize; i++) {
-                if(Judge.Backward(this._debuggee.Back(), g, this._debuggee.View, rules) is { } s) {
+            switch(this._timeline.Backward((in Core c) => Judge.Arrived(g, c, rules), out Stop s)) {
+                case Scan.Hit:
                     return s;
-                }
+                case Scan.Start:
+                    return new HistoryStart();
             }
         }
         return new Paused();
@@ -280,11 +278,11 @@ public sealed class Session: IDisposable {
     /// <summary>入力が届くまで待って与える. 入力が終わっていれば EOF を与える</summary>
     private async ValueTask FeedAsync(CancellationToken ct) {
         if(!await this._input.WaitToReadAsync(ct)) {
-            this._debuggee.CloseInput();
+            this._timeline.CloseInput();
             return;
         }
         while(this._input.TryRead(out byte[]? b)) {
-            this._debuggee.Feed(b);
+            this._timeline.Feed(b);
         }
     }
 

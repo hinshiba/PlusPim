@@ -26,6 +26,6 @@ public interface IExecute {
     /// </summary>
     /// <param name="src"><see cref="Src"/> の各レジスタの値</param>
     /// <param name="dest"><see cref="Dest"/> の各レジスタへ書く値</param>
-    /// <remarks><see cref="Load"/> と <see cref="RuntimeRequest"/> の結果はランタイムが <c>dest[0]</c> へ書く</remarks>
+    /// <remarks><see cref="RuntimeRequest"/> の結果はランタイムが <c>dest[0]</c> へ書く</remarks>
     Effect Eval(ReadOnlySpan<uint> src, Span<uint> dest);
 }

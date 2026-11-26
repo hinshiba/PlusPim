@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "install/**"
+      - "scripts/install/**"
       - ".github/workflows/installer-ci.yml"
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
 
       - name: ShellCheck
-        run: shellcheck -s sh install/install.sh
+        run: shellcheck -s sh scripts/install/install.sh
 
   psscriptanalyzer:
     name: PSScriptAnalyzer
@@ -38,13 +38,13 @@ jobs:
       - name: PSScriptAnalyzer
         shell: pwsh
         run: |
-          $issues = Invoke-ScriptAnalyzer -Path install/install.ps1 -ExcludeRule PSAvoidUsingWriteHost
+          $issues = Invoke-ScriptAnalyzer -Path scripts/install/install.ps1 -ExcludeRule PSAvoidUsingWriteHost
           $issues | Format-List
           if ($issues) { exit 1 }
 
       - name: Check ASCII
         shell: pwsh
         run: |
-          if ([IO.File]::ReadAllBytes("install/install.ps1") | Where-Object { $_ -gt 0x7F }) {
-            Write-Error "install/install.ps1 must be ASCII"
+          if ([IO.File]::ReadAllBytes("scripts/install/install.ps1") | Where-Object { $_ -gt 0x7F }) {
+            Write-Error "scripts/install/install.ps1 must be ASCII"
           }

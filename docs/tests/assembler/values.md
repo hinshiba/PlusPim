@@ -44,7 +44,7 @@
 | `sll`，`srl`，`sra` (シフト量)                                  | `sll $t0, $t1, 4`         |
 | `lui`                                                           | `lui $t0, 0x1000`         |
 | `beq`，`bne`                                                    | `beq $t0, $t1, label`     |
-| `bgez`，`bgtz`，`blez`，`bltz`                                  | `bgez $t0, label`         |
+| `bgez`，`bgtz`，`blez`，`bltz`，`bgezal`，`bltzal`              | `bgez $t0, label`         |
 | `j`，`jal`                                                      | `j label`                 |
 | `jr`                                                            | `jr $ra`                  |
 | `jalr`                                                          | `jalr $t0`，`jalr $t1, $t0` |
@@ -54,6 +54,8 @@
 | `sb`，`sh`，`sw`，`swl`，`swr`                                  | `sw $t0, 4($sp)`          |
 | `mfc0`，`mtc0`                                                  | `mfc0 $t0, $12`           |
 | `syscall`，`break`，`eret`，`runtime_call!`                     | `syscall`                 |
+| `teq`，`tne`，`tge`，`tgeu`，`tlt`，`tltu`                      | `teq $t0, $t1`            |
+| `teqi`，`tnei`，`tgei`，`tgeiu`，`tlti`，`tltiu` (符号拡張)     | `teqi $t0, -1`            |
 | `nop`                                                           | `nop`                     |
 | `move`                                                          | `move $t0, $t1`           |
 | `li`                                                            | `li $t0, 0x000cafe0`      |

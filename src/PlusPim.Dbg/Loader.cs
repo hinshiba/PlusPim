@@ -29,10 +29,10 @@ internal static class Loader {
             }
         }
         State s = new(memory);
-        s.Registers[GprId.Sp] = StackPointer;
-        s.Registers[GprId.Gp] = GlobalPointer;
-        s.Registers[GprId.Ra] = Sentinel.Addr;
-        s.Registers.Pc = image.Entry;
+        s.Core.Registers[GprId.Sp] = StackPointer;
+        s.Core.Registers[GprId.Gp] = GlobalPointer;
+        s.Core.Registers[GprId.Ra] = Sentinel.Addr;
+        s.Core.Registers.Pc = image.Entry;
         return s;
     }
 }

@@ -13,7 +13,7 @@ namespace PlusPim.Dbg;
 public struct Registers: IEquatable<Registers> {
     /// <summary>汎用レジスタ32本と, <see cref="RName"/> の7本</summary>
     private const int Count = 32 + 7;
-    private const uint CauseMask = 0x1Fu << 2;
+    private const uint CauseMask = Cp0.Bd | (0x1Fu << 2);
     private uint _e0;
 
     public uint this[RegisterName r] {

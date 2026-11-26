@@ -3,11 +3,14 @@ using System.Collections.Frozen;
 namespace PlusPim.Instructions;
 
 /// <summary>
-/// CP0レジスタの番号とStatus のビットの解釈
+/// CP0レジスタの番号とStatusのビットの解釈
 /// </summary>
 public static class Cp0 {
-    /// <summary>Status のEXLビット. 立っている間はカーネルモード</summary>
+    /// <summary>StatusのEXLビット. 立っている間はカーネルモード</summary>
     public const uint Exl = 1u << 1;
+
+    /// <summary>CauseのBDビット. 分岐遅延スロットにある命令で例外が起きたことを表す</summary>
+    public const uint Bd = 1u << 31;
 
     /// <summary>Statusの値がカーネルモードを表すか</summary>
     public static bool IsKernel(uint status) {

@@ -23,7 +23,7 @@ public interface IStoreOp {
 /// <param name="rt">書き込むレジスタ番号</param>
 /// <param name="mem">実効アドレスのベースとオフセット</param>
 /// <remarks>
-/// <see cref="LoadKind.Left"/> と <see cref="LoadKind.Right"/> の rt の旧値との合成はランタイムが行うため, rt は Src に含めない
+/// rtへの書き込みと, <see cref="LoadKind.Left"/> と <see cref="LoadKind.Right"/> の rt の旧値との合成はランタイムが行うため, rt は Src にも Dest にも含めない
 /// </remarks>
 public sealed class LoadOp<TOp>(GprId rt, Memory mem): IAssemblerable, IExecute
     where TOp : struct, ILoadOp {
@@ -40,7 +40,7 @@ public sealed class LoadOp<TOp>(GprId rt, Memory mem): IAssemblerable, IExecute
     };
 
     public ReadOnlySpan<RegisterName> Src => this._regs[1..];
-    public ReadOnlySpan<RegisterName> Dest => this._regs[..1];
+    public ReadOnlySpan<RegisterName> Dest => [];
 
     public string Text => Syntax.Of(Mnemonic, this._regs[0].AsmName(), Syntax.Mem(this._regs[1], this._offset));
 
@@ -52,7 +52,7 @@ public sealed class LoadOp<TOp>(GprId rt, Memory mem): IAssemblerable, IExecute
         Address addr = new(unchecked(src[0] + this._offset));
         return (addr.Addr & AlignMask) != 0
             ? new Effect(new AddressError(addr, Store: false))
-            : new Effect(new Load(addr, TOp.Kind));
+            : new Effect(new Load(addr, TOp.Kind, rt));
     }
 }
 

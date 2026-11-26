@@ -87,12 +87,15 @@
 
 ### トラップ
 
-- [ ] `tge`
-- [ ] `tgeu`
-- [ ] `tlt`
-- [ ] `tltu`
-- [ ] `teq`
-- [ ] `tne`
+- `tge $rs $rt`
+- `tgeu $rs $rt`
+- `tlt $rs $rt`
+- `tltu $rs $rt`
+- `teq $rs $rt`
+- `tne $rs $rt`
+
+異常系: `Tr`
+条件が成立した場合．レジスタは変化しない
 
 ---
 
@@ -132,10 +135,14 @@
 - `bgtz $rs offset`
 - `blez $rs offset`
 - `bltz $rs offset`
-- [ ] `bgezal $rs offset`
-- [ ] `bltzal $rs offset`
+- `bgezal $rs offset`
+- `bltzal $rs offset`
 
 `beq`，`bne`は代表値をすべて用いない(バグ混入が低リスクより)
+
+分岐は成立時に`Jump`，不成立時に`NotTaken`を返す．
+`bgezal`，`bltzal`は成否によらず`$ra`を`Dest`に宣言し，成立時は`Call`を返す．戻りアドレスは遅延スロットの有無で変わるので，`Eval`では書かない．
+[ジャンプの振る舞いモデル](jump_model.md)を追加で参照せよ．
 
 ### ロード
 
@@ -173,12 +180,17 @@
 
 ### トラップ (即値)
 
-- [ ] `tgei`
-- [ ] `tgeiu`
-- [ ] `tlti`
-- [ ] `tltiu`
-- [ ] `teqi`
-- [ ] `tnei`
+- `tgei $rs imm`
+- `tgeiu $rs imm`
+- `tlti $rs imm`
+- `tltiu $rs imm`
+- `teqi $rs imm`
+- `tnei $rs imm`
+
+即値は常に符号拡張する．`tgeiu`，`tltiu`は符号拡張した即値と符号なしで比べる
+
+異常系: `Tr`
+条件が成立した場合．レジスタは変化しない
 
 ---
 

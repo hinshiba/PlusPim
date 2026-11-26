@@ -16,10 +16,15 @@
   <Folder Name="/tests/">
     <Project Path="tests/PlusPim.Adapter.Tests/PlusPim.Adapter.Tests.csproj" />
     <Project Path="tests/PlusPim.Asm.Tests/PlusPim.Asm.Tests.csproj" />
+    <Project Path="tests/PlusPim.Conformance.Tests/PlusPim.Conformance.Tests.csproj" />
     <Project Path="tests/PlusPim.Dbg.Tests/PlusPim.Dbg.Tests.csproj" />
     <Project Path="tests/PlusPim.Image.Tests/PlusPim.Image.Tests.csproj" />
     <Project Path="tests/PlusPim.Instructions.Tests/PlusPim.Instructions.Tests.csproj" />
     <Project Path="tests/PlusPim.TestValues/PlusPim.TestValues.csproj" />
     <Project Path="tests/PlusPim.Usecase.Tests/PlusPim.Usecase.Tests.csproj" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/PlusPim.Benchmarks/PlusPim.Benchmarks.csproj" />
+    <Project Path="benchmarks/PlusPim.Asm.Benchmarks/PlusPim.Asm.Benchmarks.csproj" />
   </Folder>
 </Solution>

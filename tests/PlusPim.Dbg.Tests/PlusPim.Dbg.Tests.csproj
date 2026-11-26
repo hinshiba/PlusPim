@@ -10,7 +10,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\PlusPim.Asm\PlusPim.Asm.csproj" />
     <ProjectReference Include="..\..\src\PlusPim.Dbg\PlusPim.Dbg.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\samples\*\*.asm" Link="samples\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

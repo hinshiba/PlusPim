@@ -64,7 +64,8 @@ VS Code 拡張機能 **PlusPim for VS Code** を使うのが最も簡単です�
 PlusPim は`syscall`を直接処理しません．`syscall`は例外としてカーネルテキスト (`.ktext`) の例外ハンドラへ飛び，ハンドラの中の`runtime_call!`が入出力などを処理します．
 ハンドラがないと，飛び先に命令がないためランタイムエラー`NonInstructionExecution`で止まります．
 
-[`samples/kseg.asm`](samples/kseg.asm) は，`syscall`なら`runtime_call!`を呼び，それ以外の例外なら例外を起こした命令を飛ばして復帰する最小のハンドラです．
+[`samples/delay-slots/kseg.asm`](samples/delay-slots/kseg.asm) は，`syscall`なら`runtime_call!`を呼び，例外を起こした命令を飛ばして復帰する最小のハンドラです．
+遅延スロットを無効にする場合は[`samples/no-delay-slots/kseg.asm`](samples/no-delay-slots/kseg.asm)を使います．
 これをワークスペースへコピーし，`program`に自分のファイルと並べて指定します．
 
 ```json
@@ -90,22 +91,55 @@ PlusPim は DAP を実装しているため，DAP に対応した任意のエデ
 DAP の通信には標準入出力ではなく TCP を使います．プログラムの標準入出力は PlusPim を起動したターミナルにそのままつながります．
 
 1. **PlusPim の実行ファイルを用意する**:
-    [開発環境のセットアップ](#開発環境のセットアップ)に従ってビルドするか，Releases にある実行ファイルを取り出します．
+    [インストールスクリプト](#インストールスクリプト)で最新のリリースを導入するか，[開発環境のセットアップ](#開発環境のセットアップ)に従ってビルドします．
 
 2. **PlusPim をデバッグモードで起動する**:
     クライアントが接続しに来る場合は `debug listen` を使います．ポートに 0 を指定すると空きポートが割り当てられ，実際のアドレスが標準エラー出力に通知されます．
 
     ```sh
-    pluspim debug listen 127.0.0.1:0 main.asm sub.asm
+    pluspim debug listen 127.0.0.1:0
     # 標準エラー出力: DAP server listening at: 127.0.0.1:<実ポート>
     ```
 
     クライアントが先に待ち受ける場合は `debug connect 127.0.0.1:<ポート>` を使います．
 
 3. **クライアントから接続する**:
-    通知されたアドレスへ接続し，`launch` 要求を送ります．アセンブリファイルはコマンドライン引数で指定するため，`launch` の引数で指定できるのは `stopOnEntry` (既定値 `true`) だけです．
+    通知されたアドレスへ接続し，`launch` 要求を送ります．`launch` の引数には次を指定できます．
+
+    - `program` (必須): アセンブリファイルのパスの文字列，またはその配列．
+    - `cwd`: `program` の相対パスの基準にする絶対パスのディレクトリ．省略したときは `program` に絶対パスだけを指定できます．
+    - `stopOnEntry` (既定値 `true`): 読み込み直後に最初の命令で止まるか．
+    - `noDebug` (既定値 `false`): ブレークポイントと例外フィルタを使わずに実行するか．
+
+    ```json
+    { "program": ["main.asm", "kseg.asm"], "cwd": "/path/to/project", "stopOnEntry": true }
+    ```
 
 接続方式の詳細と検証規則は [DAP クライアントとの接続](docs/connection.md) を参照してください．
+
+#### インストールスクリプト
+
+[`scripts/install/`](scripts/install) のスクリプトは，Releases から使っている環境に合った実行ファイルをダウンロードし，`SHA256SUMS` で検証してからユーザー単位でインストールします．
+
+Linux と macOS (`~/.local/bin` に導入):
+
+```sh
+curl -fsSL https://github.com/hinshiba/PlusPim/releases/latest/download/install.sh | sh
+```
+
+Windows (PowerShell．`%LOCALAPPDATA%\Programs\PlusPim` に導入し，ユーザーの `PATH` に追加):
+
+```powershell
+irm https://github.com/hinshiba/PlusPim/releases/latest/download/install.ps1 | iex
+```
+
+次の環境変数で挙動を変えられます．
+
+| 環境変数              | 内容                                                                   |
+| --------------------- | ---------------------------------------------------------------------- |
+| `PLUSPIM_VERSION`     | インストールするバージョン (既定値は最新のリリース．プレリリースは明示が必要) |
+| `PLUSPIM_TARGET`      | `linux-glibc-x64`，`osx-arm64`，`win-x64` などのターゲット (既定値は自動検出) |
+| `PLUSPIM_INSTALL_DIR` | インストール先のディレクトリ                                           |
 
 #### コマンドライン
 
@@ -141,7 +175,7 @@ DAP の通信には標準入出力ではなく TCP を使います．プログ�
 | `clients/vscode/` | VS Code 拡張機能 (TypeScript)                               |
 | `samples/`        | 動作確認用の MIPS アセンブリのサンプル                      |
 | `docs/`           | ドキュメント                                                |
-| `install/`        | インストールスクリプト                                      |
+| `scripts/`        | ビルド，検査，インストールのスクリプト                      |
 
 ### PlusPim のビルドとテスト
 
@@ -177,7 +211,7 @@ Stryker.NET 5.1.0 の Roslyn は `union` を解釈できないため，[tests/st
 単体の実行ファイルを作る場合は `dotnet publish` を使います (`<rid>` は `win-x64`，`linux-x64`，`osx-x64`，`osx-arm64` など):
 
 ```sh
-dotnet publish src/PlusPim/PlusPim.csproj -c Release -r <rid> --self-contained -o ./out
+dotnet publish src/PlusPim/PlusPim.csproj -c Release -r <rid> -o ./out
 ```
 
 ### VS Code 拡張機能の開発
@@ -191,7 +225,7 @@ bun run dotnet:debug:win
 ```
 
 `dotnet:debug:win` は PlusPim の Debug ビルドを `clients/vscode/bin/debug` に出力します．拡張機能を開発モードで起動したときは，このバイナリが使われます．
-Linux では `dotnet publish ../../src/PlusPim/PlusPim.csproj -c Debug -r linux-x64 --self-contained -o ./bin/debug` を実行してください．
+Linux では `dotnet publish ../../src/PlusPim/PlusPim.csproj -c Debug -r linux-x64 -o ./bin/debug` を実行してください．
 
 その後，`clients/vscode` を VS Code で開き，**Run and Debug** ビューから **"Run Extension"** の起動構成を選んで**F5**キーを押すと，拡張機能が読み込まれた拡張機能開発ホストが起動します．動作確認には `samples/` のファイルが使えます．
 

@@ -32,8 +32,11 @@ internal static class Pseudos {
         ["neg"] = Regs2((rd, rs) => [RType<Sub>(rd, Zero, rs)]),
         ["negu"] = Regs2((rd, rs) => [RType<Subu>(rd, Zero, rs)]),
         ["not"] = Regs2((rd, rs) => [RType<Nor>(rd, rs, Zero)]),
+        // $atはrsが負なら-1, そうでなければ0なので, xorとsubuで負のときだけ2の補数を取る
+        ["abs"] = Regs2((rd, rs) => [IType<Sra>(At, rs, 31), RType<Xor>(rd, rs, At), RType<Subu>(rd, rd, At)]),
 
         ["b"] = Label(l => [Branch<Beq>(Zero, Zero, l)]),
+        ["bal"] = Label(l => [new(BranchZLinkOp<Bgez>.FromOperands, [Zero, l])]),
         ["beqz"] = RegLabel((rs, l) => [Branch<Beq>(rs, Zero, l)]),
         ["bnez"] = RegLabel((rs, l) => [Branch<Bne>(rs, Zero, l)]),
         ["blt"] = CmpBranch<Slt, Bne>(swap: false),
@@ -56,6 +59,17 @@ internal static class Pseudos {
 
         ["mul"] = Regs3((rd, rs, rt) => [HiLo<Mult>(rs, rt), Move<Mflo>(rd)]),
         ["rem"] = Regs3((rd, rs, rt) => [HiLo<Div>(rs, rt), Move<Mfhi>(rd)]),
+        ["divi"] = Regs3((rd, rs, rt) => [HiLo<Div>(rs, rt), Move<Mflo>(rd)]),
+
+        // rtがbaseと同じだとlwlの書き込みでlwrの番地が変わるので, $atに組み立ててから移す
+        // `IType<Sll>(Zero, Zero, 0)`はlwrのロード遅延スロットを埋めるため
+        ["ulw"] = RegMem(3, (rt, m) => rt == m.Base
+            ? [Load<Lwl>(At, m, 3), Load<Lwr>(At, m, 0), IType<Sll>(Zero, Zero, 0), RType<Addu>(rt, At, Zero)]
+            : [Load<Lwl>(rt, m, 3), Load<Lwr>(rt, m, 0)]),
+        ["ulh"] = Ulh<Lb>(),
+        ["ulhu"] = Ulh<Lbu>(),
+        ["usw"] = RegMem(3, (rt, m) => [Store<Swl>(rt, m, 3), Store<Swr>(rt, m, 0)]),
+        ["ush"] = RegMem(1, (rt, m) => [Store<Sb>(rt, m, 0), IType<Srl>(At, rt, 8), Store<Sb>(At, m, 1)]),
 
         ["li"] = Li,
         ["la"] = La,
@@ -88,6 +102,30 @@ internal static class Pseudos {
     }
 
     /// <summary>
+    /// <c>rt, offset(base)</c>. <c>offset</c>から<c>offset + span</c>までが符号付き16bitに収まらなければ範囲の誤りを報告する
+    /// </summary>
+    /// <param name="span">展開でオフセットに足す最大の値</param>
+    private static Expand RegMem(int span, Func<GprId, Mem, Template[]> body) {
+        return (args, r) => {
+            if(args is not [GprId rt, Mem m]) {
+                return null;
+            }
+            if(m.Offset < short.MinValue || short.MaxValue < m.Offset + span) {
+                r.Report(ErrorCode.ValueOutOfRange, m.Offset.ToString(CultureInfo.InvariantCulture));
+                return [];
+            }
+            return body(rt, m);
+        };
+    }
+
+    /// <summary>
+    /// 上位バイトを<typeparamref name="THigh"/>で<c>$at</c>へ, 下位バイトを<c>lbu</c>で読んで合成する
+    /// </summary>
+    private static Expand Ulh<THigh>() where THigh : struct, ILoadOp {
+        return RegMem(1, (rt, m) => [Load<THigh>(At, m, 1), Load<Lbu>(rt, m, 0), IType<Sll>(At, At, 8), RType<Or>(rt, rt, At)]);
+    }
+
+    /// <summary>
     /// <c>TSet $at, a, b</c> で比べ, <c>TBr $at, $zero, label</c> で分岐する
     /// </summary>
     /// <param name="swap">比べる2つのレジスタを入れ替える</param>
@@ -117,6 +155,20 @@ internal static class Pseudos {
 
     private static Template Move<T>(GprId r) where T : struct, IMoveOp {
         return new(MoveOp<T>.FromOperands, [r]);
+    }
+
+    /// <param name="disp"><paramref name="m"/>のオフセットに足す値</param>
+    private static Template Load<T>(GprId rt, Mem m, int disp) where T : struct, ILoadOp {
+        return new(LoadOp<T>.FromOperands, [rt, Displace(m, disp)]);
+    }
+
+    /// <param name="disp"><paramref name="m"/>のオフセットに足す値</param>
+    private static Template Store<T>(GprId rt, Mem m, int disp) where T : struct, IStoreOp {
+        return new(StoreOp<T>.FromOperands, [rt, Displace(m, disp)]);
+    }
+
+    private static Memory Displace(Mem m, int disp) {
+        return new(m.Base, new Immediate(unchecked((ushort)(m.Offset + disp))));
     }
 
     // 形式に収まらない疑似命令

@@ -6,6 +6,7 @@ using PlusPim.Image;
 using PlusPim.Usecase;
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Channels;
 using Frame = PlusPim.Usecase.StackFrame;
@@ -81,8 +82,8 @@ internal abstract record State {
 /// </summary>
 /// <remarks>状態はループの中だけで読み書きし, 送信もループだけが行うのでロックは要らない</remarks>
 /// <param name="stream">DAPの接続</param>
-/// <param name="load"><c>launch</c> でプログラムを読み込む. <c>launch</c> の <c>program</c> は使わない</param>
-public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
+/// <param name="load"><c>launch</c> の <c>program</c> を読み込む</param>
+public sealed class DapConnection(Stream stream, Func<ImmutableArray<SourcePath>, LoadResult> load) {
     private const int InboxCapacity = 64;
     private const int MaxFrames = 1000;
     private static readonly TimeSpan DisconnectTimeout = TimeSpan.FromSeconds(1);
@@ -316,7 +317,7 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
     }
 
     private async ValueTask<State> LaunchAsync(State state, Request.Launch launch) {
-        LoadResult r = load();
+        LoadResult r = load(launch.Program);
         string diagnostics = string.Concat(r.Diagnostics.Select(d => MessageCatalog.Format(d) + "\n"));
         if(r.Session is not Session session) {
             // 読み込みの失敗には必ず診断が伴う
@@ -425,7 +426,7 @@ public sealed class DapConnection(Stream stream, Func<LoadResult> load) {
 
     private static PseudoExpansionsBody PseudoExpansions(ImmutableArray<PseudoExpansion> pseudos) {
         return new([.. pseudos.Select(p => new PseudoExpansionLine(
-            SourceLine.TryCreate(p.Line, out SourceLine line) ? line : throw new InvalidOperationException("A source line must be positive."),
+            SourceLine.TryCreate(p.Line, out SourceLine line) ? line : throw new UnreachableException(),
             p.Mnemonic,
             [.. p.Instructions.Select(e => new PseudoExpansionInstruction(e.Address, e.Text ?? "?"))]))]);
     }

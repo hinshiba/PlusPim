@@ -1,7 +1,10 @@
 using PlusPim.Image;
 using PlusPim.Instructions;
 using PlusPim.Usecase;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PlusPim.Adapter.Controller.Dap.Protocol;
 
@@ -26,7 +29,7 @@ internal sealed class NameTable<T>(params (T Value, string Name)[] table) where 
                 return name;
             }
         }
-        throw new ArgumentOutOfRangeException(nameof(value), value, null);
+        throw new UnreachableException();
     }
 
     /// <summary>読み取り位置の文字列を名前として引く</summary>
@@ -93,7 +96,7 @@ internal abstract record Request(Seq Seq, string Command) {
     internal sealed record Simple(Seq Seq, Protocol.Command Kind): Request(Seq, Names.Commands.Name(Kind));
 
     /// <summary><c>launch</c></summary>
-    internal sealed record Launch(Seq Seq, StartAction Action): Request(Seq, Names.Commands.Name(Protocol.Command.Launch));
+    internal sealed record Launch(Seq Seq, StartAction Action, ImmutableArray<SourcePath> Program): Request(Seq, Names.Commands.Name(Protocol.Command.Launch));
 
     /// <summary>実行の要求</summary>
     internal sealed record Execute(Seq Seq, string Command, Motion Motion): Request(Seq, Command);
@@ -126,7 +129,7 @@ internal abstract record Request(Seq Seq, string Command) {
 // 以下はDAPの仕様の定義名とプロパティ名にそろえた引数と本体
 
 internal sealed record InitializeArguments(bool LinesStartAt1 = true, bool ColumnsStartAt1 = true, string PathFormat = "path");
-internal sealed record LaunchArguments(bool NoDebug = false, bool StopOnEntry = true);
+internal sealed record LaunchArguments([property: JsonConverter(typeof(Wire.ProgramConverter))] ImmutableArray<string> Program, string? Cwd = null, bool NoDebug = false, bool StopOnEntry = true);
 internal sealed record Source(SourcePath Path);
 internal sealed record SourceBreakpoint(SourceLine Line);
 internal sealed record SetBreakpointsArguments(Source Source, SourceBreakpoint[]? Breakpoints = null);

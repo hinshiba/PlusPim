@@ -22,14 +22,18 @@ public readonly record struct RaiseRuntimeError(RuntimeErrorKind Kind);
 public readonly record struct Jump(Address Target);
 
 /// <summary>サブルーチンを呼び出す. PCを<paramref name="Target"/>にする.</summary>
-/// <remarks>戻りアドレスはDestへ書かれる</remarks>
+/// <remarks>Dest[0]が存在する場合は戻りアドレスを書き込む必要がある</remarks>
 public readonly record struct Call(Address Target);
+
+/// <summary>分岐が成立しなかった</summary>
+/// <remarks>Dest[0]が存在する場合は戻りアドレスを書き込む必要がある</remarks>
+public readonly record struct NotTaken;
 
 /// <summary>例外ハンドラから復帰する. PCを<paramref name="Target"/>にする.</summary>
 public readonly record struct ExceptionReturn(Address Target);
 
-/// <summary><paramref name="Addr"/>から<paramref name="Kind"/>に従ってDest[0]にロードする.</summary>
-public readonly record struct Load(Address Addr, LoadKind Kind);
+/// <summary><paramref name="Addr"/>から<paramref name="Kind"/>に従って<paramref name="Rt"/>にロードする.</summary>
+public readonly record struct Load(Address Addr, LoadKind Kind, GprId Rt);
 
 /// <summary><paramref name="Addr"/>へ<paramref name="Kind"/>に従って<paramref name="Value"/>を書き込む.</summary>
 public readonly record struct Store(Address Addr, StoreKind Kind, uint Value);
@@ -41,7 +45,7 @@ public readonly record struct Store(Address Addr, StoreKind Kind, uint Value);
 /// <remarks><see cref="RuntimeRequestKind.ReadInt"/> と <see cref="RuntimeRequestKind.ReadChar"/> の結果は Dest[0] へ書き込む.</remarks>
 public readonly record struct RuntimeRequest(RuntimeRequestKind Kind, uint A0, uint A1);
 
-/// <summary>ロードの範囲とDest[0] への書き込む手法.</summary>
+/// <summary>ロードの範囲とrtへの書き込む手法.</summary>
 public enum LoadKind: byte {
     /// <summary><c>lb</c>: 1バイトを符号拡張する</summary>
     B,
@@ -107,6 +111,7 @@ public readonly struct Effect: IUnion {
         RaiseRuntimeError,
         Jump,
         Call,
+        NotTaken,
         ExceptionReturn,
         Load,
         Store,
@@ -115,6 +120,7 @@ public readonly struct Effect: IUnion {
     private readonly Kind _kind;
     /// <summary><see cref="ExcCode"/>, <see cref="RuntimeErrorKind"/>, <see cref="LoadKind"/>, <see cref="StoreKind"/>, <see cref="RuntimeRequestKind"/> のいずれか</summary>
     private readonly byte _small;
+    private readonly GprId _rt;
     private readonly Address _addr;
     private readonly uint _value;
 
@@ -131,8 +137,9 @@ public readonly struct Effect: IUnion {
     public Effect(RaiseRuntimeError f) : this(Kind.RaiseRuntimeError, (byte)f.Kind, default) { }
     public Effect(Jump j) : this(Kind.Jump, 0, j.Target) { }
     public Effect(Call c) : this(Kind.Call, 0, c.Target) { }
+    public Effect(NotTaken _) : this(Kind.NotTaken, 0, default) { }
     public Effect(ExceptionReturn e) : this(Kind.ExceptionReturn, 0, e.Target) { }
-    public Effect(Load l) : this(Kind.Load, (byte)l.Kind, l.Addr) { }
+    public Effect(Load l) : this(Kind.Load, (byte)l.Kind, l.Addr) { this._rt = l.Rt; }
     public Effect(Store s) : this(Kind.Store, (byte)s.Kind, s.Addr, s.Value) { }
     public Effect(RuntimeRequest r) : this(Kind.RuntimeRequest, (byte)r.Kind, new Address(r.A0), r.A1) { }
 
@@ -142,7 +149,7 @@ public readonly struct Effect: IUnion {
     private Jump AsJump => new(this._addr);
     private Call AsCall => new(this._addr);
     private ExceptionReturn AsExceptionReturn => new(this._addr);
-    private Load AsLoad => new(this._addr, (LoadKind)this._small);
+    private Load AsLoad => new(this._addr, (LoadKind)this._small, this._rt);
     private Store AsStore => new(this._addr, (StoreKind)this._small, this._value);
     private RuntimeRequest AsRuntimeRequest => new((RuntimeRequestKind)this._small, this._addr.Addr, this._value);
 
@@ -153,6 +160,7 @@ public readonly struct Effect: IUnion {
     public bool TryGetValue(out RaiseRuntimeError v) { v = this.AsRaiseRuntimeError; return this._kind == Kind.RaiseRuntimeError; }
     public bool TryGetValue(out Jump v) { v = this.AsJump; return this._kind == Kind.Jump; }
     public bool TryGetValue(out Call v) { v = this.AsCall; return this._kind == Kind.Call; }
+    public bool TryGetValue(out NotTaken v) { v = default; return this._kind == Kind.NotTaken; }
     public bool TryGetValue(out ExceptionReturn v) { v = this.AsExceptionReturn; return this._kind == Kind.ExceptionReturn; }
     public bool TryGetValue(out Load v) { v = this.AsLoad; return this._kind == Kind.Load; }
     public bool TryGetValue(out Store v) { v = this.AsStore; return this._kind == Kind.Store; }
@@ -165,6 +173,7 @@ public readonly struct Effect: IUnion {
         Kind.RaiseRuntimeError => this.AsRaiseRuntimeError,
         Kind.Jump => this.AsJump,
         Kind.Call => this.AsCall,
+        Kind.NotTaken => new NotTaken(),
         Kind.ExceptionReturn => this.AsExceptionReturn,
         Kind.Load => this.AsLoad,
         Kind.Store => this.AsStore,

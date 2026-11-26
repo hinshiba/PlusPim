@@ -6,14 +6,21 @@
     <AssemblyName>pluspim</AssemblyName>
   </PropertyGroup>
 
-  <!-- Ready To Run は RID を指定した Release の publish のときだけ有効にする -->
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' And '$(Configuration)' == 'Release'">
-    <PublishReadyToRun>true</PublishReadyToRun>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' And '$(Configuration)' == 'Release'">
+    <PublishTrimmed>true</PublishTrimmed>
+    <!-- Native AOTはターゲットと同じOSでしかビルドできないので，提供するRIDを絞る -->
+    <PublishAot Condition="'$(RuntimeIdentifier)' == 'win-x64' Or '$(RuntimeIdentifier)' == 'linux-x64'">true</PublishAot>
+  </PropertyGroup>
+
+  <!-- SingleFileとR2Rの組み合わせは既定でComposite -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' And '$(Configuration)' == 'Release' And '$(PublishAot)' != 'true'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

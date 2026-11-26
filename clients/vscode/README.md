@@ -13,7 +13,7 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 ## Requirements
 
-- [.NET 10 Runtime](https://dotnet.microsoft.com/download) (bundled in the published extension)
+- No .NET runtime is needed; the published extension bundles a self-contained PlusPim binary
 - VS Code `^1.108.0`
 
 ## Getting Started
@@ -43,7 +43,7 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 PlusPim does not handle `syscall` by itself. A `syscall` raises an exception that jumps to the exception handler in the kernel text (`.ktext`), and `runtime_call!` in the handler performs the I/O. Without a handler, the program stops with the runtime error `NonInstructionExecution`.
 
-Copy [`samples/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/kseg.asm), a minimal handler, into your workspace and add it to `program`:
+Copy [`samples/delay-slots/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/delay-slots/kseg.asm), a minimal handler (or [`samples/no-delay-slots/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/no-delay-slots/kseg.asm) when delay slots are disabled), into your workspace and add it to `program`:
 
 ```json
 {
@@ -56,21 +56,22 @@ Copy [`samples/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/main/samples/
 
 ## Launch Configuration
 
-| Property            | Type       | Default       | Description                                                                                                                                                                 |
-| ------------------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `program`           | `string[]` | `["${file}"]` | Path to the MIPS assembly file(s). A single string or an array of paths.                                                                                                    |
-| `stopOnEntry`       | `boolean`  | `true`        | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                                  |
-| `forceTerminalUtf8` | `boolean`  | `true`        | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
-| `args`              | `string[]` | `[]`          | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                                         |
-| `trace`             | `boolean`  | `false`       | Show DAP protocol messages in the output channel.                                                                                                                           |
+| Property            | Type       | Default              | Description                                                                                                                                                                 |
+| ------------------- | ---------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `program`           | `string[]` | `["${file}"]`        | Path to the MIPS assembly file(s). A single string or an array of paths, placed in that order. A relative path is resolved against `cwd`.                                   |
+| `cwd`               | `string`   | `${workspaceFolder}` | Absolute directory that relative paths in `program` are resolved against. Without it, every path in `program` must be absolute.                                             |
+| `stopOnEntry`       | `boolean`  | `true`               | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                                  |
+| `forceTerminalUtf8` | `boolean`  | `true`               | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
+| `args`              | `string[]` | `[]`                 | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                                         |
+| `trace`             | `boolean`  | `false`              | Show DAP protocol messages in the output channel.                                                                                                                           |
 
 ## How It Works
 
 When a debug session starts, the extension:
 
 1. Starts listening on a free loopback port chosen by the OS.
-2. Spawns the bundled `pluspim` binary in a VS Code terminal with `debug connect 127.0.0.1:<port>`, passing the target file and options.
-3. Takes the first connection from PlusPim as the debug session. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
+2. Spawns the bundled `pluspim` binary in a VS Code terminal with `debug connect 127.0.0.1:<port>` and the options.
+3. Takes the first connection from PlusPim as the debug session, and PlusPim loads `program` on the `launch` request. If PlusPim does not connect within 5 seconds, or exits before connecting, the session fails; see the terminal for details.
 
 The program's standard input and output are the terminal itself, so you type input there and the output is written there as raw bytes. Non-ASCII output is shown correctly only if the terminal decodes it as UTF-8. By default the extension asks PlusPim to switch the terminal to UTF-8 while it runs (`forceTerminalUtf8`); if you turn that off, the terminal itself must decode UTF-8.
 
@@ -106,7 +107,7 @@ bun run compile
 | `bun run dotnet:publish:mac-arm64` | Publish the `osx-arm64` binary to `bin/osx-arm64` only (no VSIX).            |
 | `bun run dotnet:debug:win`         | Build a Debug binary to `bin/debug` (never included in a VSIX).              |
 
-Release publishes are compiled with ReadyToRun. Cross-publishing from another OS works, but the binaries are unsigned, so macOS may require `xattr -d com.apple.quarantine` on first run.
+The publish settings live in `src/PlusPim/PlusPim.csproj`. `win32-x64` and `linux-x64` are compiled with Native AOT, which can only be published on the same OS, so publish them on Windows and Linux respectively. The macOS targets are single-file, trimmed and ReadyToRun, and can be cross-published from another OS. The binaries are unsigned, so macOS may require `xattr -d com.apple.quarantine` on first run.
 
 ## License
 

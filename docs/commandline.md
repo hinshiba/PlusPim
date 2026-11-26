@@ -4,7 +4,7 @@ PlusPim のコマンドラインの使い方を説明します．
 
 ```
 pluspim [-h | --help] [-V | --version]
-pluspim debug <connect | listen> <ip:port> [options] <file>...
+pluspim debug <connect | listen> <ip:port> [options]
 pluspim runtime [options] <file>...
 ```
 
@@ -17,8 +17,8 @@ pluspim runtime [options] <file>...
 DAP クライアントからの操作を受け付けるデバッガモードで起動します．
 
 ```
-pluspim debug connect <ip:port> [options] <file>...
-pluspim debug listen <ip:port> [options] <file>...
+pluspim debug connect <ip:port> [options]
+pluspim debug listen <ip:port> [options]
 ```
 
 接続方法をサブコマンド `connect` か `listen` で必ず指定してください．
@@ -30,7 +30,7 @@ pluspim debug listen <ip:port> [options] <file>...
 それぞれの動作については[DAP クライアントとの接続](connection.md)を参照してください．
 
 ```
-pluspim debug listen 127.0.0.1:0 main.asm sub.asm
+pluspim debug listen 127.0.0.1:0
 ```
 
 ### `runtime`
@@ -51,9 +51,12 @@ pluspim runtime [options] <file>...
 `debug`，`runtime`サブコマンドで有効なオプション
 - `--verbose`, `-v`: ログを標準エラー出力へ出力します
 - `--strict`: アセンブラの警告をすべてエラーとして扱います．詳細は[アセンブラ](assembler.md)を参照してください
+- `--no-delayed-branches`: 分岐とジャンプの遅延スロットを無効にします．詳細は[遅延スロット](runtime.md#遅延スロット)を参照してください
+- `--no-delayed-loads`: ロードの遅延スロットを無効にします
 - `--force-terminal-utf8`: ターミナルを UTF-8 に切り替えます
 - `--attach`: PlusPim 自体のデバッグのために .NET デバッガをアタッチします
 
 ## ファイル
 
+`runtime` サブコマンドのファイルの指定について，
 `-` で始まる名前のファイルはオプションと区別できないため，`./-main.asm` のようにパスを付けて指定してください．

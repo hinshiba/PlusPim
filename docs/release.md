@@ -63,6 +63,7 @@ curl -fsSL https://github.com/hinshiba/PlusPim/releases/latest/download/install.
 winget のマニフェスト等のため Windows 向けはzipとします．
 
 musl 向けの実行ファイルは `libstdc++` と `libgcc` を動的リンクするため，Alpine では `apk add libstdc++ libgcc` が必要です．
+`linux-glibc-x64` は glibc 2.28 以降が必要です．
 
 ### アーカイブの構成
 
@@ -73,18 +74,20 @@ musl 向けの実行ファイルは `libstdc++` と `libgcc` を動的リンク�
 - `README.md`
 
 `pluspim` は .NET ランタイムを含む単一ファイルの実行ファイルで，ほかのファイルなしで動きます．
-次の設定で `dotnet publish` します．
+[scripts/build/publish.sh](../scripts/build/publish.sh) で publish します．
+publish の設定は [src/PlusPim/PlusPim.csproj](../src/PlusPim/PlusPim.csproj) にだけ置き，コマンドラインでは渡しません．
+[scripts/lint/msbuild-props.sh](../scripts/lint/msbuild-props.sh) がこれを検査します．
 
-```sh
-dotnet publish src/PlusPim/PlusPim.csproj -c Release -r <rid> --self-contained \
-  -p:PublishSingleFile=true \
-  -p:PublishReadyToRun=true \
-  -p:IncludeNativeLibrariesForSelfExtract=true \
-  -p:GenerateDocumentationFile=false
-```
+| target                             | 形式                                        |
+| ---------------------------------- | ------------------------------------------- |
+| `win-x64`, `linux-glibc-x64`       | Native AOT                                  |
+| 上記以外                           | 単一ファイル，トリミング，ReadyToRun        |
 
+- Native AOT はターゲットと同じ OS でしかビルドできないので，Release ワークフローはそれぞれの OS の runner でビルドします
+- `linux-glibc-x64` はビルドしたホストの glibc にリンクされるので，AlmaLinux 8 のコンテナでビルドし，glibc 2.28 以降で動くことを verify で確かめます
+- 単一ファイルと ReadyToRun の組み合わせは，SDK の既定で Composite になります
 - `InvariantGlobalization` が有効なので，ICU は不要です
-- SDK は `global.json` でで固定します
+- SDK は `global.json` で固定します
 
 ### `SHA256SUMS`
 
