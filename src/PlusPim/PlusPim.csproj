@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>0.6.1</Version>
+    <Version>0.7.0</Version>
     <AssemblyName>pluspim</AssemblyName>
   </PropertyGroup>
 

@@ -1,0 +1,73 @@
+@startuml architecture
+allowmixing
+left to right direction
+hide members
+skinparam shadowing false
+skinparam defaultFontName "Noto Sans JP"
+skinparam component {
+  BackgroundColor transparent
+  BorderColor #555555
+}
+skinparam class {
+  BackgroundColor white
+  BorderColor #555555
+}
+skinparam ArrowColor #555555
+
+title PlusPim アーキテクチャ
+
+component "PlusPim\n<size:11>CLI</size>" as Cli #FDF2E9 {
+  class Program
+  class PlusPimCommand
+}
+component "PlusPim.Adapter\n<size:11>DAPサーバ</size>" as Adapter #FEF9E7 {
+  class DapConnection
+  class Transport
+  class Mapping
+}
+component "PlusPim.Usecase\n<size:11>デバッグセッション</size>" as Usecase #EAF7EA {
+  class Session
+  class Judge
+}
+component "PlusPim.Asm\n<size:11>アセンブラ</size>" as Asm #E8F4FB {
+  class Assembler
+  class Lexer
+  class Parser
+  class Pseudos
+  class Linker
+}
+component "PlusPim.Dbg\n<size:11>実行と履歴</size>" as Dbg #F1ECF8 {
+  class Timeline
+  class Debuggee
+  class Executor
+}
+component "PlusPim.Image\n<size:11>プログラムイメージ</size>" as Image #FBEFF4 {
+  class ProgramImage
+}
+component "PlusPim.Instructions\n<size:11>命令セット</size>" as Instructions #F2F2F2 {
+  class InstructionSet
+  interface IExecute
+  class Effect
+}
+
+Program --> PlusPimCommand
+Program --> DapConnection
+Program --> Transport
+Program --> Session
+DapConnection --> Mapping
+DapConnection --> Session
+Session --> Judge
+Session --> Assembler
+Session --> Timeline
+Assembler --> Lexer
+Assembler --> Parser
+Assembler --> Linker
+Parser --> Pseudos
+Parser --> InstructionSet
+Linker --> ProgramImage
+Timeline --> Debuggee
+Debuggee --> Executor
+Executor --> ProgramImage
+ProgramImage --> IExecute
+IExecute --> Effect
+@enduml

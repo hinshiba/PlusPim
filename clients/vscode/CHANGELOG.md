@@ -2,19 +2,39 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-26
+
+### Added
+
+- `cwd` launch option (default `${workspaceFolder}`) that relative paths in `program` are resolved against
+- Run Without Debugging (`Ctrl+F5`)
+- VSIX for `win32-arm64`, `linux-arm64`, `alpine-x64` and `alpine-arm64`
+- Publishing to the Visual Studio Marketplace from `vscode-v<version>` tags
+- `--package-only` option of `scripts/vsix.ts`, which builds a VSIX from the binary already in `bin/release`
+- Emulation of branch, jump and load delay slots.
+  Disable them with `"args": ["--no-delayed-branches"]` or `"args": ["--no-delayed-loads"]`
+- Instructions `jalr`, `bgezal`, `bltzal` and the trap instructions, and many pseudo-instructions
+  (`b`, `beqz`, `blt`, `bal`, `mul`, `rem`, `not`, `abs`, `ulw`, `usw`, ...)
+- `$gp` in the _Memory_ scope
+- The exception handler is shown as a call stack frame until `eret`
+
 ### Changed
 
-- Pass the programs to PlusPim through the `program` of the `launch` request instead of command-line arguments.
-  A relative path in `program` is resolved against the new `cwd` launch option; without `cwd`, every path must be absolute
-
-## [0.4.0] - YYYY-MM-DD
-
-### Changed
-
-- Launch PlusPim with the `debug` subcommand instead of the removed `-d` option
-- Follow the rename of the bundled binary from `PlusPim` to `pluspim`
+- Bundle PlusPim 0.7.0 instead of 0.5.0. See its changelog for the other changes
+- Steps are now per source line instead of per machine instruction, so a pseudo-instruction takes one step
+- Scopes are renamed to _General_, _Special_, _CP0_ and _Memory_, and variables to `$zero`, `pc`, `hi`, `lo`, `BadVAddr`, ...
+- Runtime errors always stop, regardless of the exception filters
+- Assembly warnings are written to the Debug Console after launch, with codes such as `PPW0001`
 - Launch PlusPim with `debug connect` instead of the removed `--connect` option
+- Follow the rename of the bundled binary from `PlusPim` to `pluspim`
+- Pass the programs to PlusPim through the `program` of the `launch` request instead of command-line arguments.
+  Without `cwd`, every path in `program` must be absolute
 - Activate only when a PlusPim debug session starts, instead of on any debug session
+- The bundled binary is compiled with Native AOT on `win32-x64` and `linux-x64`, and trimmed on the other targets,
+  which makes it about a quarter of its former size
+- The `linux-x64` VSIX requires glibc 2.28 or later
+- The bundled binary is placed in `bin/release` whatever the target.
+  The extension no longer checks the platform, since the Marketplace installs the VSIX for it
 
 ## [0.3.0] - 2026-10-13
 
@@ -36,7 +56,6 @@
 ### Changed
 
 - The bundled PlusPim binary is now compiled with ReadyToRun
-
 - `.ascii` and `.asciiz` now reject non-ASCII characters with an assembly error
   (always, regardless of `--strict`). Use `.utf-8z` for UTF-8 strings
 - Display name is now "PlusPim for VS Code"

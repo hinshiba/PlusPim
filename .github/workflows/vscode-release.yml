@@ -1,0 +1,178 @@
+name: VS Code Extension Release
+
+# vscode-v<version>タグからpublish
+on:
+  push:
+    tags:
+      - "vscode-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Check version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # タグとpackage.jsonの不整合を弾く
+      - name: Check version
+        run: |
+          version="${GITHUB_REF_NAME#vscode-v}"
+          manifest="$(jq -r .version clients/vscode/package.json)"
+          if [ "$version" != "$manifest" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match clients/vscode/package.json version $manifest"
+            exit 1
+          fi
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: version
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        # targetはVS Codeのターゲット．AOTのRIDはターゲットと同じOSでしかビルドできない
+        include:
+          - { target: win32-x64, rid: win-x64, runner: windows-latest }
+          - { target: win32-arm64, rid: win-arm64, runner: ubuntu-latest }
+          - { target: linux-x64, rid: linux-x64, runner: ubuntu-latest }
+          - { target: linux-arm64, rid: linux-arm64, runner: ubuntu-latest }
+          - { target: alpine-x64, rid: linux-musl-x64, runner: ubuntu-latest }
+          - { target: alpine-arm64, rid: linux-musl-arm64, runner: ubuntu-latest }
+          - { target: darwin-x64, rid: osx-x64, runner: ubuntu-latest }
+          - { target: darwin-arm64, rid: osx-arm64, runner: ubuntu-latest }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73
+        with:
+          global-json-file: global.json
+
+      - name: Publish
+        shell: bash
+        run: sh scripts/build/publish.sh "${{ matrix.rid }}" "publish/${{ matrix.target }}"
+
+      - name: Upload binary
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bin-${{ matrix.target }}
+          path: publish/${{ matrix.target }}/
+          if-no-files-found: error
+
+  package:
+    name: Package ${{ matrix.target }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - win32-x64
+          - win32-arm64
+          - linux-x64
+          - linux-arm64
+          - alpine-x64
+          - alpine-arm64
+          - darwin-x64
+          - darwin-arm64
+
+    defaults:
+      run:
+        working-directory: clients/vscode
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download binary
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: bin-${{ matrix.target }}
+          path: clients/vscode/bin/release
+
+      # アーティファクトは実行権限を保たない
+      - name: Package
+        run: |
+          chmod 755 bin/release/*
+          bun scripts/vsix.ts --package-only "${{ matrix.target }}"
+
+      - name: Upload VSIX
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: vsix-${{ matrix.target }}
+          path: clients/vscode/*.vsix
+          if-no-files-found: error
+
+  publish:
+    name: Publish to Marketplace
+    needs: package
+    runs-on: ubuntu-latest
+    # 要レビュワー環境で実施する
+    # MarketplaceのTrusted Publishingポリシーはこのワークフローとenvironmentに限ってトークンを交換する
+    environment: marketplace
+    permissions:
+      contents: read
+      id-token: write
+
+    defaults:
+      run:
+        working-directory: clients/vscode
+
+    steps:
+      # ビルド後のタグの付け替えや，mainにないコミットからのpublishを防ぐ
+      - name: Check tagged commit
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tagged="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_REF_NAME" -q .sha)"
+          if [ "$tagged" != "$GITHUB_SHA" ]; then
+            echo "::error::$GITHUB_REF_NAME now points to $tagged, but $GITHUB_SHA was built"
+            exit 1
+          fi
+          status="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$GITHUB_SHA" -q .status)"
+          case "$status" in
+            identical | behind) ;;
+            *) echo "::error::$GITHUB_SHA is not on main ($status)"; exit 1 ;;
+          esac
+
+      # vsceをlockfile のバージョンにそろえる
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download VSIX
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: vsix-*
+          path: clients/vscode/dist
+          merge-multiple: true
+
+      # OIDCトークンは1回しか交換できず，得た資格情報は15分で失効するので，全ターゲットを1回でpublishする
+      - name: Publish
+        run: bun x --no-install -p @vscode/vsce vsce publish --oidc --packagePath dist/*.vsix
