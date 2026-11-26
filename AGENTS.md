@@ -6,6 +6,10 @@ MIPSのエミュレータ兼デバッガ
 
 一切コミットしない
 
+## 規約の検査
+
+機械的に検査できる規約は積極的に`scripts/lint/`にスクリプトとして表現する．
+
 ## Agent skills
 
 ### Issue tracker

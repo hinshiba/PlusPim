@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ファイル指定はDAPの`launch`要求の`program`を用いるように変更
 - 疑似命令`ulh`, `ulhu`の展開順を変更し，`ulw`のrtがbaseと同じ場合に`nop`を挟むように変更
 - 相対パスは`launch`の`cwd`を基準に解決するように変更
+- `win-x64`, `linux-glibc-x64`の配布物をNative AOTに変更．`linux-glibc-x64`はglibc 2.28以降が必要
+- そのほかの配布物をトリミングし，サイズを約1/4に削減
 
 ### Added
 

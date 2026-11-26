@@ -9,5 +9,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="PlusPim.Dbg.Benchmarks" />
+    <InternalsVisibleTo Include="PlusPim.Conformance.Tests" />
   </ItemGroup>
 </Project>
