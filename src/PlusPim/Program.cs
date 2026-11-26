@@ -52,7 +52,7 @@ internal class Program {
         // stdin/stdoutはデバッギが使う
         Stream input = Console.OpenStandardInput();
         Stream output = Console.OpenStandardOutput();
-        DapConnection connection = new(dapStream, files => Session.Load(files, FileSourceReader.Instance, common.Strict, input, output));
+        DapConnection connection = new(dapStream, files => Session.Load(files, FileSourceReader.Instance, common.Strict, common.Slots, input, output));
         logger.AddSink(connection.PostLog);
         logger.Log(LogLevel.Debug, nameof(Program), "DAP transport opened");
         await connection.RunAsync();

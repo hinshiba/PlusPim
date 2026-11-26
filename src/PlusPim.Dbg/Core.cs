@@ -34,20 +34,6 @@ public struct Core {
 
     public readonly Address Pc => this.Registers.Pc;
 
-    /// <summary>
-    /// ロードを完了させる
-    /// </summary>
-    /// <returns>抜けた遅延スロットの分岐. 遅延スロットでなければ <see langword="null"/></returns>
-    internal Branch? Retire() {
-        if(this.Load is DelayedLoad l) {
-            this.Registers[l.Reg] = l.Value;
-            this.Load = null;
-        }
-        Branch? b = this.Branch;
-        this.Branch = null;
-        return b;
-    }
-
     internal void Push(Frame frame) {
         this.CallStack = this.CallStack.Push(frame);
         this.Depth++;
