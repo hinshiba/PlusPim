@@ -51,6 +51,8 @@ pluspim runtime [options] <file>...
 `debug`，`runtime`サブコマンドで有効なオプション
 - `--verbose`, `-v`: ログを標準エラー出力へ出力します
 - `--strict`: アセンブラの警告をすべてエラーとして扱います．詳細は[アセンブラ](assembler.md)を参照してください
+- `--no-delayed-branches`: 分岐とジャンプの遅延スロットを無効にします．詳細は[遅延スロット](runtime.md#遅延スロット)を参照してください
+- `--no-delayed-loads`: ロードの遅延スロットを無効にします
 - `--force-terminal-utf8`: ターミナルを UTF-8 に切り替えます
 - `--attach`: PlusPim 自体のデバッグのために .NET デバッガをアタッチします
 

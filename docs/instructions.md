@@ -2,6 +2,10 @@
 
 ハイフンの入ったチェックリストは実装予定がないことを示します．
 
+分岐，ジャンプ，ロードには遅延スロットがあります．
+戻りアドレスの`PC+8`は分岐の遅延スロットが有効な場合で，無効なら`PC+4`です．
+詳細は[遅延スロット](runtime.md#遅延スロット)を参照してください．
+
 ## 実命令
 
 ### R形式命令
@@ -48,7 +52,7 @@
 #### ジャンプ (レジスタ)
 
 - [x] `jr`: Jump Register (PC = rs)
-- [x] `jalr`: Jump and Link Register (rd = PC+4, PC = rs. `jalr rs` は rd = `$ra`)
+- [x] `jalr`: Jump and Link Register (rd = 次の命令アドレス, PC = rs. `jalr rs` は rd = `$ra`)
 
 #### システム
 
@@ -96,8 +100,8 @@
 - [x] `bgtz`: Branch on Greater Than Zero (if rs > 0, 符号付き)
 - [x] `blez`: Branch on Less or Equal Zero (if rs <= 0, 符号付き)
 - [x] `bltz`: Branch on Less Than Zero (if rs < 0, 符号付き)
-- [x] `bgezal`: Branch on >= Zero and Link (ra = PC+4, if rs >= 0. 不成立でもraを書く)
-- [x] `bltzal`: Branch on < Zero and Link (ra = PC+4, if rs < 0. 不成立でもraを書く)
+- [x] `bgezal`: Branch on >= Zero and Link (ra = 次の命令アドレス, if rs >= 0. 不成立でもraを上書きする)
+- [x] `bltzal`: Branch on < Zero and Link (ra = 次の命令アドレス, if rs < 0. 不成立でもraを上書きする)
 
 #### ロード
 
@@ -131,7 +135,7 @@
 ### J形式命令
 
 - [x] `j`: Jump (PC = target)
-- [x] `jal`: Jump and Link (ra = PC+4, PC = target. 遅延スロットなし)
+- [x] `jal`: Jump and Link (ra = 次の命令アドレス, PC = target)
 
 ---
 
@@ -185,9 +189,9 @@
 
 ### ロード
 
-- [x] `ulh`: Unaligned Load Halfword → `lbu $at, off(base)` + `lb rt, off+1(base)` + `sll rt, rt, 8` + `or rt, rt, $at`
+- [x] `ulh`: Unaligned Load Halfword → `lb $at, off+1(base)` + `lbu rt, off(base)` + `sll $at, $at, 8` + `or rt, rt, $at`
 - [x] `ulhu`: Unaligned Load Halfword Unsigned → `ulh`の`lb`を`lbu`にしたもの
-- [x] `ulw`: Unaligned Load Word → `lwl rt, off+3(base)` + `lwr rt, off(base)`. rtがbaseと同じなら`$at`に読んで`addu rt, $at, $zero`
+- [x] `ulw`: Unaligned Load Word → `lwl rt, off+3(base)` + `lwr rt, off(base)`. rtがbaseと同じなら`$at`に読んで`nop` + `addu rt, $at, $zero`
 - [x] `ush`: Unaligned Store Halfword → `sb rt, off(base)` + `srl $at, rt, 8` + `sb $at, off+1(base)`
 - [x] `usw`: Unaligned Store Word → `swl rt, off+3(base)` + `swr rt, off(base)`
 

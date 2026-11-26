@@ -64,7 +64,8 @@ VS Code 拡張機能 **PlusPim for VS Code** を使うのが最も簡単です�
 PlusPim は`syscall`を直接処理しません．`syscall`は例外としてカーネルテキスト (`.ktext`) の例外ハンドラへ飛び，ハンドラの中の`runtime_call!`が入出力などを処理します．
 ハンドラがないと，飛び先に命令がないためランタイムエラー`NonInstructionExecution`で止まります．
 
-[`samples/kseg.asm`](samples/kseg.asm) は，`syscall`なら`runtime_call!`を呼び，それ以外の例外なら例外を起こした命令を飛ばして復帰する最小のハンドラです．
+[`samples/delay-slots/kseg.asm`](samples/delay-slots/kseg.asm) は，`syscall`なら`runtime_call!`を呼び，例外を起こした命令を飛ばして復帰する最小のハンドラです．
+遅延スロットを無効にする場合は[`samples/no-delay-slots/kseg.asm`](samples/no-delay-slots/kseg.asm)を使います．
 これをワークスペースへコピーし，`program`に自分のファイルと並べて指定します．
 
 ```json

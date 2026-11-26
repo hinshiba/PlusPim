@@ -12,10 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - ファイル指定はDAPの`launch`要求の`program`を用いるように変更
+- 疑似命令`ulh`, `ulhu`の展開順を変更し，`ulw`のrtがbaseと同じ場合に`nop`を挟むように変更
 - 相対パスは`launch`の`cwd`を基準に解決するように変更
 
 ### Added
 
+- 分岐遅延スロットとロード遅延スロットのエミュレーションに対応
+- 遅延スロットのエミュレーションを無効化する`--no-delayed-branches`, `--no-delayed-loads`オプションの追加
 - 命令`bgezal`, `bltzal`, `teq`, `tne`, `tge`, `tgeu`, `tlt`, `tltu`, `teqi`, `tnei`, `tgei`, `tgeiu`, `tlti`, `tltiu`と疑似命令`bal`, `abs`, `divi`, `ulw`, `ulh`, `ulhu`, `usw`, `ush`に対応
 
 ## [0.6.1] - 2026-11-22

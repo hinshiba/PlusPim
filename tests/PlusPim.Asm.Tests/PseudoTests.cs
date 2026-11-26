@@ -190,18 +190,21 @@ public class PseudoTests {
         AssemblyResult r = Assemble(Head + "li $t1, -7\nli $t2, -2\ndivi $t0, $t1, $t2");
         r.AssertCodes();
         Assert.Equal(2, r.Prog().DebugInfo.SourceMap.PseudosIn(PathOf(0)).Last().Count);
-        Assert.Equal(3u, r.Exec().Registers[T0]);
+        Assert.Equal(3u, r.Exec().Core.Registers[T0]);
     }
 
-    [Fact]
-    public void Bal_CallsLabelAndLinksRa() {
+    /// <summary>分岐の遅延スロットが有効なら <c>li</c> は遅延スロットで実行され, 戻りアドレスはその次になる</summary>
+    [Theory]
+    [InlineData(DelaySlotsConfig.All, 8u, 1u)]
+    [InlineData(DelaySlotsConfig.Load, 4u, 0u)]
+    public void Bal_CallsLabelAndLinksRa(DelaySlotsConfig slots, uint link, uint t0) {
         AssemblyResult r = Assemble(Head + "bal f\nli $t0, 1\nf: nop");
         r.AssertCodes();
         AssertSame(I("bgezal", Zero, T + 8), r.Fetch(0));
-        StateView s = r.Exec();
-        Assert.Equal((T + 4).Addr, s.Registers[Ra]);
-        Assert.Equal(0u, s.Registers[T0]);
-        Assert.Equal(1, s.Depth);
+        StateView s = r.Exec(slots);
+        Assert.Equal((T + link).Addr, s.Core.Registers[Ra]);
+        Assert.Equal(t0, s.Core.Registers[T0]);
+        Assert.Equal(1, s.Core.Depth);
     }
 
     /// <summary>上位バイトの符号ビットが交互に立つ8バイト. <c>x</c>が先頭, <c>y</c>が4バイト目を指す</summary>
@@ -222,10 +225,13 @@ public class PseudoTests {
             ($"ulh $t0, {k}($t1)", T0, h), ($"ulh $t1, {k}($t1)", T1, h), ($"ulh $t0, {k - 4}($t2)", T0, h),
             ($"ulhu $t0, {k}($t1)", T0, hu), ($"ulhu $t1, {k}($t1)", T1, hu), ($"ulhu $t0, {k - 4}($t2)", T0, hu),
         ];
+        // 展開はロード遅延スロットの有無によらない. 末尾のnopは展開の最後のロードの遅延スロットである
         foreach((string line, GprId rt, uint expected) in cases) {
-            AssemblyResult r = Assemble(Head + "li $t0, 0xdeadbeef\nla $t1, x\nla $t2, y\n" + line + Data);
+            AssemblyResult r = Assemble(Head + "li $t0, 0xdeadbeef\nla $t1, x\nla $t2, y\n" + line + "\nnop" + Data);
             r.AssertCodes();
-            Assert.Equal(expected, r.Exec().Registers[rt]);
+            foreach(DelaySlotsConfig slots in new[] { DelaySlotsConfig.All, DelaySlotsConfig.None }) {
+                Assert.Equal(expected, r.Exec(slots).Core.Registers[rt]);
+            }
         }
     }
 

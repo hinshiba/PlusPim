@@ -1,5 +1,6 @@
 using PlusPim.Adapter.Controller.Dap;
 using PlusPim.Asm;
+using PlusPim.Dbg;
 using PlusPim.Image;
 using PlusPim.Usecase;
 using System.Collections.Immutable;
@@ -96,7 +97,7 @@ public class DapConnectionTests {
 
     /// <summary>先頭のソースを, <c>main</c> からすぐに戻って終わるプログラムとして読み込む</summary>
     private static LoadResult LoadExiting(ImmutableArray<SourcePath> paths) {
-        return Session.Load(paths, new Reader(paths[0], ".text\n.globl main\nmain:\njr $ra\n"), false, Stream.Null, Stream.Null);
+        return Session.Load(paths, new Reader(paths[0], ".text\n.globl main\nmain:\njr $ra\nnop\n"), false, DelaySlotsConfig.All, Stream.Null, Stream.Null);
     }
 
     /// <summary><c>launch</c> の引数を作る</summary>

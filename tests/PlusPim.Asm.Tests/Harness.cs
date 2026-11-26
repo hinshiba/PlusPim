@@ -112,14 +112,17 @@ internal static class Harness {
     /// <summary>
     /// エントリからランタイムで実行し, 命令のない番地に達した状態を返す
     /// </summary>
+    /// <param name="r">実行するプログラム</param>
+    /// <param name="slots">有効にする遅延スロット</param>
     /// <remarks>メモリ, PC, Hi/Loを読み書きする疑似命令の展開を確かめるためのもの</remarks>
-    public static StateView Exec(this AssemblyResult r) {
+    public static StateView Exec(this AssemblyResult r, DelaySlotsConfig slots = DelaySlotsConfig.All) {
         ProgramImage image = r.Prog().Image;
-        Debuggee d = Debuggee.Load(image, new ArrayBufferWriter<byte>());
-        for(int i = 0; image.Fetch(d.View.Pc) is not null; i++) {
+        Debuggee d = Debuggee.Load(image, slots);
+        ArrayBufferWriter<byte> output = new();
+        for(int i = 0; image.Fetch(d.View.Core.Pc) is not null; i++) {
             Assert.True(i < 64, "Execution did not reach the end of the text.");
-            Assert.Equal(StepResult.Stepped, d.Step());
-            Assert.True(d.View.Status is Running, $"Stopped by {d.View.Status}.");
+            Assert.Equal(StepResult.Stepped, d.Step(output));
+            Assert.True(d.View.Core.Status is Running, $"Stopped by {d.View.Core.Status}.");
         }
         return d.View;
     }

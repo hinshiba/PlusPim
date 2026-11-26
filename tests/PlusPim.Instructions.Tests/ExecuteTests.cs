@@ -12,7 +12,6 @@ public class ExecuteTests {
     private const uint Sentinel = 0xdeadbeef;
 
     private static readonly Address Target = new(0x00400040);
-    private const uint Pc = 0x00400010;
     private const uint Kernel = 0xff13;
     private const uint User = Kernel & ~Cp0.Exl;
 
@@ -60,7 +59,7 @@ public class ExecuteTests {
             (BranchZOp<Bltz>.FromOperands(one), (int)rs < 0, [rs]),
         ];
         foreach((IExecute? inst, bool taken, uint[] src) in cases) {
-            Assert.Equal(taken ? new Jump(Target) : new Next(), Run(inst, src).Effect);
+            Assert.Equal(taken ? new Jump(Target) : new NotTaken(), Run(inst, src).Effect);
         }
     }
 
@@ -68,12 +67,13 @@ public class ExecuteTests {
 
     [Theory]
     [MemberData(nameof(Values))]
-    public void BranchLink_AlwaysLinksAndCallsOnlyWhenTaken(uint rs) {
+    public void BranchLink_DeclaresRaAndCallsOnlyWhenTaken(uint rs) {
         (string Mnemonic, bool Taken)[] cases = [("bgezal", 0 <= (int)rs), ("bltzal", (int)rs < 0)];
         foreach((string m, bool taken) in cases) {
             IExecute? inst = Asm(m, [GprId.T0, Target]);
-            AssertRegs(inst, [GprId.T0, RName.Pc], [GprId.Ra]);
-            Assert.Equal((taken ? new Call(Target) : (object)new Next(), (uint?)Pc + 4), Run(inst, rs, Pc));
+            AssertRegs(inst, [GprId.T0], [GprId.Ra]);
+            // 戻りアドレスは遅延スロットの有無で変わるのでランタイムが書く
+            Assert.Equal((taken ? new Call(Target) : (object)new NotTaken(), (uint?)Sentinel), Run(inst, rs));
         }
     }
 
@@ -112,10 +112,9 @@ public class ExecuteTests {
             (LoadOp<Lwr>.FromOperands(ops), LoadKind.Right, 0),
         ];
         foreach((IExecute? inst, LoadKind kind, uint mask) in cases) {
-            AssertRegs(inst, [GprId.T1], [GprId.T0]);
-            (object? effect, uint? dest) = Run(inst, baseValue);
-            Assert.Equal((addr.Addr & mask) != 0 ? new AddressError(addr, Store: false) : new Load(addr, kind), effect);
-            Assert.Equal(Sentinel, dest);
+            AssertRegs(inst, [GprId.T1], []);
+            (object? effect, _) = Run(inst, baseValue);
+            Assert.Equal((addr.Addr & mask) != 0 ? new AddressError(addr, Store: false) : new Load(addr, kind, GprId.T0), effect);
         }
     }
 
@@ -222,15 +221,15 @@ public class ExecuteTests {
     }
 
     [Fact]
-    public void Call_WritesReturnAddress() {
+    public void Call_DeclaresLinkRegister() {
         IExecute? jal = Jal.FromOperands([Target]);
-        AssertRegs(jal, [RName.Pc], [GprId.Ra]);
-        Assert.Equal((new Call(Target), (uint?)Pc + 4), Run(jal, Pc));
+        AssertRegs(jal, [], [GprId.Ra]);
+        Assert.Equal((new Call(Target), (uint?)Sentinel), Run(jal));
 
-        AssertRegs(Jalr.FromOperands([GprId.T9]), [RName.Pc, GprId.T9], [GprId.Ra]);
+        AssertRegs(Jalr.FromOperands([GprId.T9]), [GprId.T9], [GprId.Ra]);
         IExecute? jalr = Jalr.FromOperands([GprId.T0, GprId.T0]);
-        AssertRegs(jalr, [RName.Pc, GprId.T0], [GprId.T0]);
-        Assert.Equal((new Call(Target), (uint?)Pc + 4), Run(jalr, Pc, Target.Addr));
+        AssertRegs(jalr, [GprId.T0], [GprId.T0]);
+        Assert.Equal((new Call(Target), (uint?)Sentinel), Run(jalr, Target.Addr));
     }
 
     [Fact]

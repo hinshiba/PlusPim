@@ -13,9 +13,10 @@ main:
     lw      $t0, 0($t1)
     la      $t1, buf
 loop:
-    sw      $t0, 0($t1)
     addiu   $t0, $t0, -1
     bne     $t0, $zero, loop
+    sw      $t0, 0($t1)         # 遅延スロット
 done:
     nop
     jr      $ra
+    nop
