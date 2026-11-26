@@ -3,6 +3,7 @@
 # 相対深さでは，スクリプトを移動したときに移動先がずれるため
 set -eu
 
+# shellcheck disable=SC2016 # 検出対象のリテラルなので展開しない
 if git grep --untracked -nF -- 'dirname "$0")/..' -- 'scripts/*.sh' ':!scripts/lint/' >&2; then
   exit 1
 fi
