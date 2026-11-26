@@ -8,7 +8,7 @@ GLIBC_IMAGE=docker.io/library/almalinux:8@sha256:768bedc30fe0a536adb0a65d2eddb7c
 
 rid=$1
 out=$2
-cd "$(dirname "$0")/.."
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 case "$rid" in
   linux-x64)
     dotnet_root=$(dirname "$(readlink -f "$(command -v dotnet)")")

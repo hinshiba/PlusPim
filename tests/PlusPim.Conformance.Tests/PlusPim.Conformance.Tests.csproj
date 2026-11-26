@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <None Include="..\..\third_party\spim\*.s" Link="spim\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\..\build\sst-r3000.sha256" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\scripts\test\sst-r3000.sha256" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\samples\*\kseg.asm" Link="kseg\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

@@ -5,7 +5,7 @@ set -eu
 
 COMMIT=51e227447d0b93882a8f13c87c6cee72819efdd3
 
-cd "$(dirname "$0")/.."
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 out=artifacts/sst/r3000
 mkdir -p "$out"
 while read -r sum name; do
