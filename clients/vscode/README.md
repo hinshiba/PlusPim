@@ -4,21 +4,41 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 
 ## Features
 
-- **Step execution** — Step through MIPS assembly one instruction at a time.
-- **Step back** — Rewind execution to the previous state (time-travel debugging).
-- **Register view** — Inspect all 32 MIPS registers, `HI`, `LO`, and `PC` during a debug session.
-- **Label resolution** — Jump targets and branch labels are resolved automatically.
-- **Pseudo-instruction hints** — During a debug session, lines with a pseudo-instruction (`la`, `li`, `move`, ...) show the machine instructions they expand to as inlay hints, e.g. `=> lui $a0, 0x1000; ori $a0, $a0, 0x0000`. Stepping is per machine instruction, so such a line takes several steps. The hints are hidden while the file has unsaved or post-launch edits, and can be turned off with `pluspim.inlayHints.pseudoInstructions` (VS Code's `editor.inlayHints.enabled` also applies).
+- **Step execution** — Step over, step into and step out, one source line at a time.
+- **Time-travel debugging** — Step back and reverse continue to rewind execution.
+- **Breakpoints** — Line breakpoints, continue and pause.
+- **Exception breakpoints** — Choose which MIPS exceptions stop execution. Runtime errors always stop.
+- **Variables view** — Inspect the general-purpose registers (_General_), `pc`, `hi` and `lo` (_Special_), and `BadVAddr`, `Status`, `Cause` and `EPC` (_CP0_).
+- **Memory view** — Open the memory at a register value, or at `.data`, `$sp` and `$gp` from the _Memory_ scope.
+- **Call stack** — Calls push a frame, and the exception handler is shown as a frame until `eret`.
+- **Delay slots** — Branch, jump and load delay slots are emulated. Pass `--no-delayed-branches` or `--no-delayed-loads` in `args` to disable them.
+- **Run Without Debugging** — `Ctrl+F5` runs the program ignoring breakpoints and exception filters.
+- **Pseudo-instruction hints** — During a debug session, lines with a pseudo-instruction (`la`, `li`, `move`, ...) show the machine instructions they expand to as inlay hints, e.g. `=> lui $a0, 0x1000; ori $a0, $a0, 0x0000`. A step runs the whole line, including all of its expanded instructions. The hints are hidden while the file has unsaved or post-launch edits, and can be turned off with `pluspim.inlayHints.pseudoInstructions` (VS Code's `editor.inlayHints.enabled` also applies).
 - **DAP trace** — Optional DAP communication logging to the _PlusPim DAP Trace_ output channel.
 
 ## Requirements
 
-- No .NET runtime is needed; the published extension bundles a self-contained PlusPim binary
 - VS Code `^1.108.0`
+- One of the following platforms. No .NET runtime is needed; each platform-specific VSIX bundles a self-contained PlusPim binary.
+
+| VS Code target | Notes                                                          |
+| -------------- | -------------------------------------------------------------- |
+| `win32-x64`    |                                                                |
+| `win32-arm64`  |                                                                |
+| `linux-x64`    | glibc 2.28 or later                                            |
+| `linux-arm64`  |                                                                |
+| `alpine-x64`   | Requires `libstdc++` and `libgcc` (`apk add libstdc++ libgcc`) |
+| `alpine-arm64` | Same as `alpine-x64`                                           |
+| `darwin-x64`   | Unsigned and not notarized                                     |
+| `darwin-arm64` | Same as `darwin-x64`                                           |
+
+## Installation
+
+Install **PlusPim for VS Code** from the Visual Studio Marketplace. The Marketplace picks the VSIX for your platform.
 
 ## Getting Started
 
-1. Open a MIPS assembly file (`.asm`).
+1. Open a MIPS assembly file (`.asm` or `.s`).
 2. Open the **Run and Debug** view (`Ctrl+Shift+D`).
 3. If no `launch.json` exists, VS Code will prompt you to create one — select **PlusPim Debugger**.
    The generated configuration looks like this:
@@ -31,13 +51,13 @@ A VS Code extension that integrates the PlusPim time-travel debugger for MIPS as
 			"type": "pluspim",
 			"request": "launch",
 			"name": "Minimal Launch",
-			"program": "${file}"
+			"program": ["${file}"]
 		}
 	]
 }
 ```
 
-4. Press **F5** to start debugging the currently open file.
+4. Press **F5** to start debugging the currently open file, or **Ctrl+F5** to run it without debugging.
 
 ### Using `syscall`
 
@@ -62,7 +82,7 @@ Copy [`samples/delay-slots/kseg.asm`](https://github.com/hinshiba/PlusPim/blob/m
 | `cwd`               | `string`   | `${workspaceFolder}` | Absolute directory that relative paths in `program` are resolved against. Without it, every path in `program` must be absolute.                                             |
 | `stopOnEntry`       | `boolean`  | `true`               | Stop at the first instruction. When `false`, the program runs until a breakpoint, an exception or the end.                                                                  |
 | `forceTerminalUtf8` | `boolean`  | `true`               | Ask PlusPim to switch the terminal to UTF-8 while it runs and restore it on exit (currently effective on Windows only). Set to `false` to keep the terminal's own encoding. |
-| `args`              | `string[]` | `[]`                 | Extra arguments passed to the debug adapter (e.g. `["--verbose"]`).                                                                                                         |
+| `args`              | `string[]` | `[]`                 | Extra arguments passed to PlusPim (e.g. `["--verbose"]`, `["--strict"]`, `["--no-delayed-branches"]`).                                                                      |
 | `trace`             | `boolean`  | `false`              | Show DAP protocol messages in the output channel.                                                                                                                           |
 
 ## How It Works
@@ -95,19 +115,29 @@ bun install
 bun run compile
 ```
 
+`bun run test` runs the unit tests, `bun run typecheck` type-checks the sources, tests and scripts, and `bun run ci` runs the lint and format checks that CI runs.
+
 | Command                            | Description                                                                  |
 | ---------------------------------- | ---------------------------------------------------------------------------- |
 | `bun run package:win32-x64`        | Publish the PlusPim binary for `win-x64` and build a platform-specific VSIX. |
 | `bun run package:linux-x64`        | Same for `linux-x64`.                                                        |
 | `bun run package:darwin-x64`       | Same for `osx-x64` (Intel Mac).                                              |
 | `bun run package:darwin-arm64`     | Same for `osx-arm64` (Apple Silicon).                                        |
-| `bun run dotnet:publish:win`       | Publish the `win-x64` binary to `bin/win-x64` only (no VSIX).                |
-| `bun run dotnet:publish:linux`     | Publish the `linux-x64` binary to `bin/linux-x64` only (no VSIX).            |
-| `bun run dotnet:publish:mac-x64`   | Publish the `osx-x64` binary to `bin/osx-x64` only (no VSIX).                |
-| `bun run dotnet:publish:mac-arm64` | Publish the `osx-arm64` binary to `bin/osx-arm64` only (no VSIX).            |
+| `bun run dotnet:publish:win`       | Publish the `win-x64` binary to `bin/release` only (no VSIX).                |
+| `bun run dotnet:publish:linux`     | Publish the `linux-x64` binary to `bin/release` only (no VSIX).              |
+| `bun run dotnet:publish:mac-x64`   | Publish the `osx-x64` binary to `bin/release` only (no VSIX).                |
+| `bun run dotnet:publish:mac-arm64` | Publish the `osx-arm64` binary to `bin/release` only (no VSIX).              |
 | `bun run dotnet:debug:win`         | Build a Debug binary to `bin/debug` (never included in a VSIX).              |
 
-The publish settings live in `src/PlusPim/PlusPim.csproj`. `win32-x64` and `linux-x64` are compiled with Native AOT, which can only be published on the same OS, so publish them on Windows and Linux respectively. The macOS targets are single-file, trimmed and ReadyToRun, and can be cross-published from another OS. The binaries are unsigned, so macOS may require `xattr -d com.apple.quarantine` on first run.
+The other targets (`win32-arm64`, `linux-arm64`, `alpine-x64`, `alpine-arm64`) have no script; run `bun scripts/vsix.ts <target>` directly. `bun scripts/vsix.ts --publish-only <target>` only publishes the binary, and `bun scripts/vsix.ts --package-only <target>` only builds the VSIX from the binary already in `bin/release`.
+
+A VSIX bundles a single binary in `bin/release`, whatever the target. When `bin/debug` holds a binary, the extension launches it instead while being debugged in an Extension Development Host.
+
+The publish settings live in `src/PlusPim/PlusPim.csproj`. `win32-x64` and `linux-x64` are compiled with Native AOT, which can only be published on the same OS, so publish them on Windows and Linux respectively. `linux-x64` is published in an AlmaLinux 8 container by `scripts/build/publish.sh` to keep the glibc 2.28 requirement, so it needs Docker. The other targets are single-file, trimmed and ReadyToRun, and can be cross-published from another OS. The binaries are unsigned, so macOS may require `xattr -d com.apple.quarantine` on first run.
+
+### Release
+
+Pushing a `vscode-v<version>` tag runs `.github/workflows/vscode-release.yml`, which builds the VSIX for every target and publishes them to the Marketplace after approval of the `marketplace` environment. `<version>` must match `version` in `package.json`, and the tagged commit must be on `main`.
 
 ## License
 
