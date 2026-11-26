@@ -32,8 +32,8 @@ public readonly record struct NotTaken;
 /// <summary>例外ハンドラから復帰する. PCを<paramref name="Target"/>にする.</summary>
 public readonly record struct ExceptionReturn(Address Target);
 
-/// <summary><paramref name="Addr"/>から<paramref name="Kind"/>に従ってDest[0]にロードする.</summary>
-public readonly record struct Load(Address Addr, LoadKind Kind);
+/// <summary><paramref name="Addr"/>から<paramref name="Kind"/>に従って<paramref name="Rt"/>にロードする.</summary>
+public readonly record struct Load(Address Addr, LoadKind Kind, GprId Rt);
 
 /// <summary><paramref name="Addr"/>へ<paramref name="Kind"/>に従って<paramref name="Value"/>を書き込む.</summary>
 public readonly record struct Store(Address Addr, StoreKind Kind, uint Value);
@@ -45,7 +45,7 @@ public readonly record struct Store(Address Addr, StoreKind Kind, uint Value);
 /// <remarks><see cref="RuntimeRequestKind.ReadInt"/> と <see cref="RuntimeRequestKind.ReadChar"/> の結果は Dest[0] へ書き込む.</remarks>
 public readonly record struct RuntimeRequest(RuntimeRequestKind Kind, uint A0, uint A1);
 
-/// <summary>ロードの範囲とDest[0] への書き込む手法.</summary>
+/// <summary>ロードの範囲とrtへの書き込む手法.</summary>
 public enum LoadKind: byte {
     /// <summary><c>lb</c>: 1バイトを符号拡張する</summary>
     B,
@@ -120,6 +120,7 @@ public readonly struct Effect: IUnion {
     private readonly Kind _kind;
     /// <summary><see cref="ExcCode"/>, <see cref="RuntimeErrorKind"/>, <see cref="LoadKind"/>, <see cref="StoreKind"/>, <see cref="RuntimeRequestKind"/> のいずれか</summary>
     private readonly byte _small;
+    private readonly GprId _rt;
     private readonly Address _addr;
     private readonly uint _value;
 
@@ -138,7 +139,7 @@ public readonly struct Effect: IUnion {
     public Effect(Call c) : this(Kind.Call, 0, c.Target) { }
     public Effect(NotTaken _) : this(Kind.NotTaken, 0, default) { }
     public Effect(ExceptionReturn e) : this(Kind.ExceptionReturn, 0, e.Target) { }
-    public Effect(Load l) : this(Kind.Load, (byte)l.Kind, l.Addr) { }
+    public Effect(Load l) : this(Kind.Load, (byte)l.Kind, l.Addr) { this._rt = l.Rt; }
     public Effect(Store s) : this(Kind.Store, (byte)s.Kind, s.Addr, s.Value) { }
     public Effect(RuntimeRequest r) : this(Kind.RuntimeRequest, (byte)r.Kind, new Address(r.A0), r.A1) { }
 
@@ -148,7 +149,7 @@ public readonly struct Effect: IUnion {
     private Jump AsJump => new(this._addr);
     private Call AsCall => new(this._addr);
     private ExceptionReturn AsExceptionReturn => new(this._addr);
-    private Load AsLoad => new(this._addr, (LoadKind)this._small);
+    private Load AsLoad => new(this._addr, (LoadKind)this._small, this._rt);
     private Store AsStore => new(this._addr, (StoreKind)this._small, this._value);
     private RuntimeRequest AsRuntimeRequest => new((RuntimeRequestKind)this._small, this._addr.Addr, this._value);
 
