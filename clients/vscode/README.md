@@ -135,10 +135,6 @@ A VSIX bundles a single binary in `bin/release`, whatever the target. When `bin/
 
 The publish settings live in `src/PlusPim/PlusPim.csproj`. `win32-x64` and `linux-x64` are compiled with Native AOT, which can only be published on the same OS, so publish them on Windows and Linux respectively. `linux-x64` is published in an AlmaLinux 8 container by `scripts/build/publish.sh` to keep the glibc 2.28 requirement, so it needs Docker. The other targets are single-file, trimmed and ReadyToRun, and can be cross-published from another OS. The binaries are unsigned, so macOS may require `xattr -d com.apple.quarantine` on first run.
 
-### Release
-
-Pushing a `vscode-v<version>` tag runs `.github/workflows/vscode-release.yml`, which builds the VSIX for every target and publishes them to the Marketplace after approval of the `marketplace` environment. `<version>` must match `version` in `package.json`, and the tagged commit must be on `main`.
-
 ## License
 
 MIT
