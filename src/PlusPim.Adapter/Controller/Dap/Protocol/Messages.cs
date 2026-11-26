@@ -2,6 +2,7 @@ using PlusPim.Image;
 using PlusPim.Instructions;
 using PlusPim.Usecase;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -28,7 +29,7 @@ internal sealed class NameTable<T>(params (T Value, string Name)[] table) where 
                 return name;
             }
         }
-        throw new ArgumentOutOfRangeException(nameof(value), value, null);
+        throw new UnreachableException();
     }
 
     /// <summary>読み取り位置の文字列を名前として引く</summary>

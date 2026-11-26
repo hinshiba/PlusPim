@@ -6,6 +6,7 @@ using PlusPim.Image;
 using PlusPim.Usecase;
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Channels;
 using Frame = PlusPim.Usecase.StackFrame;
@@ -425,7 +426,7 @@ public sealed class DapConnection(Stream stream, Func<ImmutableArray<SourcePath>
 
     private static PseudoExpansionsBody PseudoExpansions(ImmutableArray<PseudoExpansion> pseudos) {
         return new([.. pseudos.Select(p => new PseudoExpansionLine(
-            SourceLine.TryCreate(p.Line, out SourceLine line) ? line : throw new InvalidOperationException("A source line must be positive."),
+            SourceLine.TryCreate(p.Line, out SourceLine line) ? line : throw new UnreachableException(),
             p.Mnemonic,
             [.. p.Instructions.Select(e => new PseudoExpansionInstruction(e.Address, e.Text ?? "?"))]))]);
     }

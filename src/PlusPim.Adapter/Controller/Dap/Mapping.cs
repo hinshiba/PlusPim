@@ -3,6 +3,7 @@ using PlusPim.Dbg;
 using PlusPim.Image;
 using PlusPim.Instructions;
 using PlusPim.Usecase;
+using System.Diagnostics;
 using Frame = PlusPim.Usecase.StackFrame;
 
 namespace PlusPim.Adapter.Controller.Dap;
@@ -36,7 +37,7 @@ internal static class Mapping {
             ExceptionFilter.Fatal => Fatal,
             ExceptionFilter.Break => [ExcCode.Bp],
             ExceptionFilter.Syscall => [ExcCode.Sys],
-            _ => throw new ArgumentOutOfRangeException(nameof(f)),
+            _ => throw new UnreachableException(),
         };
     }
 

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace PlusPim.Dbg;
@@ -19,10 +20,9 @@ internal sealed class InputTape {
 
     /// <summary>末尾に入力を追記する</summary>
     /// <param name="input">追記するバイト列</param>
-    /// <exception cref="InvalidOperationException">終端の後</exception>
     public void Append(ReadOnlySpan<byte> input) {
         if(this.Closed) {
-            throw new InvalidOperationException("Input is already closed.");
+            throw new UnreachableException("Input is already closed.");
         }
         this._bytes.AddRange(input);
     }

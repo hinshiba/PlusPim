@@ -3,6 +3,7 @@ using PlusPim.Dbg;
 using PlusPim.Image;
 using PlusPim.Instructions;
 using PlusPim.Usecase;
+using System.Diagnostics;
 
 namespace PlusPim.Adapter;
 
@@ -60,7 +61,7 @@ public static class MessageCatalog {
             WarningCode.OperandMismatch => $"Operands do not match '{a[0]}'; line discarded",
             WarningCode.MisplacedInstruction => "Instruction in a data section; discarded",
             WarningCode.DuplicateSource => $"Source '{a[0]}' specified more than once; ignored",
-            _ => throw new ArgumentOutOfRangeException(nameof(c)),
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -72,7 +73,7 @@ public static class MessageCatalog {
             ErrorCode.MisalignedText => $"Text address {a[0]} is not a multiple of 4",
             ErrorCode.SectionOutOfRange => $"Section at {a[0]} ({a[1]} bytes) does not fit in its segment",
             ErrorCode.SectionOverlap => $"Section at {a[0]} overlaps the section at {Where(a[1], a[2])}",
-            _ => throw new ArgumentOutOfRangeException(nameof(c)),
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -89,7 +90,7 @@ public static class MessageCatalog {
             ExcCode.CpU => new(nameof(ExcCode.CpU), "Coprocessor unusable"),
             ExcCode.Ov => new(nameof(ExcCode.Ov), "Arithmetic overflow"),
             ExcCode.Tr => new(nameof(ExcCode.Tr), "Trap"),
-            _ => throw new ArgumentOutOfRangeException(nameof(c)),
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -109,7 +110,8 @@ public static class MessageCatalog {
             RuntimeErrorKind.UnknownRuntimeCall => new(nameof(RuntimeErrorKind.UnknownRuntimeCall), "Unknown runtime call number"),
             RuntimeErrorKind.NonInstructionExecution => new(nameof(RuntimeErrorKind.NonInstructionExecution), "Executing memory without an assembled instruction is not supported yet"),
             RuntimeErrorKind.TextAccess => new(nameof(RuntimeErrorKind.TextAccess), "Loading from or storing to text memory is not supported yet"),
-            _ => throw new ArgumentOutOfRangeException(nameof(k)),
+            RuntimeErrorKind.TransferInDelaySlot => new(nameof(RuntimeErrorKind.TransferInDelaySlot), "A branch, jump or eret in a delay slot is undefined in MIPS"),
+            _ => throw new UnreachableException(),
         };
     }
 
@@ -148,7 +150,7 @@ public static class MessageCatalog {
             Exited e => e.Cause switch {
                 ExitCause.Returned => "Program returned from main",
                 ExitCause.ExitCall => "Program exited by the exit runtime call",
-                _ => throw new ArgumentOutOfRangeException(nameof(s)),
+                _ => throw new UnreachableException(),
             },
             HistoryStart => "Reached the start of the execution history",
         };
